@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Brain, Settings, Stethoscope, Volume2, VolumeX } from 'lucide-react';
+import { Settings, Stethoscope, Volume2, VolumeX } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { soundService } from '../services/soundService';
 
@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="main-header">
       <button className="header-left" onClick={() => onNavigate('dashboard')} aria-label="NeuroIA, ir al inicio">
         <div className="header-logo-icon">
-          <Brain size={30} strokeWidth={1.4} />
+          <img src="/brand/neuroia-mark.svg" alt="" width="40" height="40" />
         </div>
         <div>
           <span className="header-title">Neuro<span className="brand-light">IA</span></span>

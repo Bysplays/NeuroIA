@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" role="img" aria-label="NeuroIA">
+
+  <path d="M39 10C24 3 8 15 8 34V52C8 70 24 78 39 69Z" fill="#9acbca"/>
+  <path d="M41 11C56 3 72 14 72 32V50C72 69 57 78 41 70Z" fill="#c9c3e7"/>
+  <path d="M25 55V28C25 25 28 24 30 28L49 53C52 57 55 55 55 52V25" stroke="#17343b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="25" cy="55" r="5" fill="#17343b"/>
+  <circle cx="55" cy="25" r="5" fill="#17343b"/>
+
+<text x="90" y="54" fill="#17343b" font-family="Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="-2">Neuro<tspan font-weight="400">IA</tspan></text>
+</svg>

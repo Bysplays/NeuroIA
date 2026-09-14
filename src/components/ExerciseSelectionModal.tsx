@@ -60,7 +60,7 @@ export const ExerciseSelectionModal: React.FC<ExerciseSelectionModalProps> = ({
         </div>
 
         <div className="exercise-choice-grid">
-          {exercises.map((ex: ExerciseDefinition, index) => (
+          {exercises.map((ex: ExerciseDefinition) => (
             <button
               key={ex.id}
               className="exercise-choice-card"
@@ -69,7 +69,7 @@ export const ExerciseSelectionModal: React.FC<ExerciseSelectionModalProps> = ({
                 onSelectExercise(ex.id);
               }}
             >
-              <span className="choice-art"><WellnessGlyph variant={index + ['attention', 'language', 'memory', 'executive', 'motor'].indexOf(domain)} /></span>
+              <span className="choice-art"><WellnessGlyph exercise={ex.id} /></span>
               <span className="choice-copy">
                 <span className="choice-card-title">{ex.title}</span>
                 <span className="choice-card-desc">{EXERCISE_SUMMARIES[ex.id]}</span>
