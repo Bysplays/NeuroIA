@@ -1,21 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Stethoscope,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle2,
-  Calendar,
-  Clock,
-  Printer,
-  PlusCircle,
-  Sparkles,
-  ArrowLeft,
-  User,
-  Target,
-  Check,
-  Award,
-  RotateCcw
-} from 'lucide-react';
+import { Calendar, Clock, Printer, PlusCircle, Check, RotateCcw } from 'lucide-react';
 import type { UserProfile, CognitiveDomain, ExerciseResult } from '../types';
 import { StorageService } from '../services/storageService';
 import { soundService } from '../services/soundService';
@@ -30,7 +14,6 @@ interface TherapistReportProps {
 export const TherapistReport: React.FC<TherapistReportProps> = ({
   profile,
   history,
-  onBack,
   onProfileUpdated,
 }) => {
   const [showNoteForm, setShowNoteForm] = useState(false);
@@ -47,16 +30,17 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
   const [prescribeSaved, setPrescribeSaved] = useState(false);
 
   const domainNames: Record<CognitiveDomain, { name: string; icon: string; color: string }> = {
-    attention: { name: 'Atención y Rastreo', icon: '👁️', color: 'var(--color-attention)' },
-    language: { name: 'Lenguaje y Afasia', icon: '🗣️', color: 'var(--color-language)' },
-    memory: { name: 'Memoria de Trabajo', icon: '🧠', color: 'var(--color-memory)' },
-    executive: { name: 'Funciones Ejecutivas', icon: '⚡', color: 'var(--color-executive)' },
-    motor: { name: 'Coordinación Motora', icon: '✋', color: 'var(--color-motor)' },
+    attention: { name: 'Atención', icon: '👁️', color: 'var(--color-attention)' },
+    language: { name: 'Lenguaje', icon: '🗣️', color: 'var(--color-language)' },
+    memory: { name: 'Memoria', icon: '🧠', color: 'var(--color-memory)' },
+    executive: { name: 'Organización', icon: '⚡', color: 'var(--color-executive)' },
+    motor: { name: 'Coordinación', icon: '✋', color: 'var(--color-motor)' },
   };
 
   // Conmutar selección de dominio prioritario (permite elegir múltiples)
   const togglePrescribedDomain = (dom: CognitiveDomain) => {
     soundService.playTap();
+    setPrescribeSaved(false);
     setPrescribedDomains(prev => {
       if (prev.includes(dom)) {
         return prev.filter(d => d !== dom);
@@ -94,332 +78,78 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
 
   const domains = Object.entries(profile.domainProgress) as [CognitiveDomain, typeof profile.domainProgress[CognitiveDomain]][];
 
+  const strokeDate = profile.strokeDate
+    ? new Date(profile.strokeDate + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+    : 'Sin especificar';
+  const affectedSide = { izquierda: 'Izquierdo', derecha: 'Derecho', bilateral: 'Bilateral', ninguno: 'Ninguno' };
+  const resetProgress = () => {
+    if (!window.confirm('¿Reiniciar el progreso y el historial del paciente? Esta acción no se puede deshacer.')) return;
+    const fresh = StorageService.resetProgress();
+    onProfileUpdated(fresh);
+    setPrescribedDomains(fresh.prescribedDomains);
+    setGuidanceText(fresh.therapistGuidanceNote || '');
+    setPrescribeSaved(false);
+  };
+
   return (
-    <div className="therapist-container">
-      <div className="therapist-header-bar">
-        <button
-          className="touch-btn touch-btn-secondary"
-          onClick={() => {
-            soundService.playTap();
-            onBack();
-          }}
-        >
-          <ArrowLeft size={22} />
-          <span>Volver a Ejercicios</span>
-        </button>
+    <div className="therapist-container clinical-dashboard">
+      <header className="clinical-heading">
+        <div><span className="clinical-eyebrow">Espacio profesional</span><h1>El progreso de {profile.name}</h1><p>Una mirada a su actividad y al siguiente paso.</p></div>
+        <button className="touch-btn touch-btn-secondary" onClick={() => window.print()}><Printer size={18} /> Exportar informe</button>
+      </header>
 
-        <div className="therapist-badge-title">
-          <Stethoscope size={28} className="therapist-stethoscope-icon" />
-          <div>
-            <h2>Seguimiento clínico</h2>
-            <p>Evolución y pautas de entrenamiento de tu paciente.</p>
-          </div>
-        </div>
-
-        <div className="therapist-header-actions">
-          <button
-            className="touch-btn touch-btn-secondary"
-            onClick={() => {
-              if (window.confirm('¿Seguro que deseas reiniciar todos los datos, historial y estadísticas a 0?')) {
-                soundService.playTap();
-                const fresh = StorageService.resetProgress();
-                onProfileUpdated(fresh);
-              }
-            }}
-            title="Reiniciar todos los progresos a 0 para empezar como nuevo paciente"
-            style={{ borderColor: '#fca5a5', color: '#dc2626' }}
-          >
-            <RotateCcw size={20} />
-            <span>Reiniciar a 0</span>
-          </button>
-
-          <button
-            className="touch-btn touch-btn-primary"
-            onClick={() => {
-              soundService.playTap();
-              window.print();
-            }}
-            title="Imprimir informe clínico para historia médica"
-          >
-            <Printer size={22} />
-            <span>Exportar informe</span>
-          </button>
-        </div>
+      <div className="clinical-overview">
+        <section className="patient-summary">
+          <div className="patient-identity"><span className="patient-avatar" aria-hidden="true">{profile.name.slice(0, 1).toUpperCase()}</span><div><span>Paciente</span><h2>{profile.name}</h2></div></div>
+          <dl><div><dt>Fecha del ictus</dt><dd>{strokeDate}</dd></div><div><dt>Lado afectado</dt><dd>{profile.affectedSide ? affectedSide[profile.affectedSide] : 'Sin especificar'}</dd></div></dl>
+        </section>
+        <section className="clinical-stat stat-lilac"><span>Ejercicios completados</span><strong>{profile.totalSessions}</strong><small>Actividad acumulada</small></section>
+        <section className="clinical-stat stat-sage"><span>Tiempo de práctica</span><strong>{profile.totalMinutes}<small> min</small></strong><small>Tiempo acumulado</small></section>
+        <section className="clinical-stat stat-peach"><span>Constancia</span><strong>{profile.streakDays}<small> días</small></strong><small>Consecutivos</small></section>
       </div>
 
-      <div className="therapist-grid">
-        {/* Ficha Clínica y Puntos de Vitalidad */}
-        <div className="card therapist-patient-card">
-          <div className="card-header-icon">
-            <User size={24} />
-            <h3>Ficha del Paciente</h3>
-          </div>
-          <div className="patient-info-list">
-            <div className="patient-info-row">
-              <span className="label">Paciente:</span>
-              <strong className="val">{profile.name}</strong>
-            </div>
-            <div className="patient-info-row">
-              <span className="label">Ictus / ACV:</span>
-              <span className="val">{profile.strokeDate ? 'Abril 2026' : 'Reciente'}</span>
-            </div>
-            <div className="patient-info-row">
-              <span className="label">Lado afecto:</span>
-              <span className="val badge-mild">Hemiparesia derecha</span>
-            </div>
-            <div className="patient-info-row">
-              <span className="label">Racha de estimulación:</span>
-              <span className="val badge-green">{profile.streakDays} días consecutivos</span>
-            </div>
-            <div className="patient-info-row">
-              <span className="label">NeuroPuntos de Vitalidad:</span>
-              <span className="val badge-points">
-                <Award size={16} />
-                {profile.totalScore ?? 0} pts
-              </span>
-            </div>
-            <div className="patient-info-row">
-              <span className="label">Tiempo total acumulado:</span>
-              <span className="val">{profile.totalMinutes} minutos de neuroentrenamiento</span>
-            </div>
-            <div className="patient-info-row">
-              <span className="label">Sesiones registradas:</span>
-              <span className="val">{profile.totalSessions} ejercicios finalizados</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Prescripción Terapéutica con Selección Múltiple */}
-        <div className="card therapist-prescription-card">
-          <div className="card-header-icon">
-            <Target size={24} />
-            <div>
-              <h3>Prescripción y Pauta de Trabajo</h3>
-              <p className="prescription-desc">
-                Puedes marcar <strong>una o varias áreas prioritarias</strong> para el plan del paciente:
-              </p>
-            </div>
-          </div>
-
-          <div className="prescription-form">
-            <label className="prescription-label">
-              Áreas prioritarias para el Plan del Día (toca para seleccionar o deseleccionar):
-            </label>
+      <div className="clinical-workspace">
+        <section className="clinical-panel treatment-panel" aria-labelledby="treatment-title">
+          <div className="clinical-section-title"><span className="section-number">01</span><div><h2 id="treatment-title">Plan de entrenamiento</h2><p>Decide qué áreas priorizar en la sesión guiada.</p></div></div>
+          <fieldset className="treatment-areas"><legend>Áreas prioritarias</legend>
             <div className="priority-domain-selector">
-              {(['attention', 'language', 'memory', 'executive', 'motor'] as CognitiveDomain[]).map(dom => {
-                const isSelected = prescribedDomains.includes(dom);
-                return (
-                  <button
-                    key={dom}
-                    type="button"
-                    className={`priority-chip ${isSelected ? 'priority-chip-selected' : ''}`}
-                    onClick={() => togglePrescribedDomain(dom)}
-                    aria-pressed={isSelected}
-                  >
-                    {isSelected && <Check size={18} className="check-svg" />}
-                    <span>{domainNames[dom].icon}</span>
-                    <span>{domainNames[dom].name}</span>
-                  </button>
-                );
-              })}
+              {(Object.keys(domainNames) as CognitiveDomain[]).map(dom => (
+                <button key={dom} type="button" className={`priority-chip ${prescribedDomains.includes(dom) ? 'priority-chip-selected' : ''}`} onClick={() => togglePrescribedDomain(dom)} aria-pressed={prescribedDomains.includes(dom)}>
+                  <span className={`domain-dot marker-${dom}`} />
+                  {domainNames[dom].name}
+                  {prescribedDomains.includes(dom) && <Check size={16} />}
+                </button>
+              ))}
             </div>
+            <p className="treatment-help">{prescribedDomains.length ? `${prescribedDomains.length} áreas seleccionadas para el plan.` : 'Sin prioridades, la sesión combinará distintas áreas.'}</p>
+          </fieldset>
+          <label className="clinical-label" htmlFor="patient-guidance">Mensaje para {profile.name}</label>
+          <textarea id="patient-guidance" className="prescription-textarea" rows={3} value={guidanceText} onChange={e => { setGuidanceText(e.target.value); setPrescribeSaved(false); }} placeholder="Escribe una pauta breve para su próximo entrenamiento." />
+          <div className="treatment-footer"><span role="status">{prescribeSaved ? 'Cambios guardados' : 'La pauta aparecerá en el inicio del paciente.'}</span><button className="touch-btn touch-btn-primary" onClick={handleSavePrescription}>Guardar pauta</button></div>
+        </section>
 
-            <div className="prescription-status-hint">
-              {prescribedDomains.length === 0 ? (
-                <span className="text-amber">
-                  ℹ️ Sin áreas marcadas: El plan del día generará <strong>ejercicios aleatorios variados</strong> para entrenar un poco de todo.
-                </span>
-              ) : (
-                <span className="text-green">
-                  ✓ Se priorizarán {prescribedDomains.length} área(s) en el plan del día del paciente ({prescribedDomains.map(d => domainNames[d].name).join(', ')}).
-                </span>
-              )}
-            </div>
-
-            <label className="prescription-label" style={{ marginTop: '12px' }}>
-              Mensaje u orientación personalizada para el paciente:
-            </label>
-            <textarea
-              className="prescription-textarea"
-              rows={2}
-              value={guidanceText}
-              onChange={e => setGuidanceText(e.target.value)}
-              placeholder="Ej: Trabaja hoy con especial foco en atención visual y lenguaje expresivo."
-            />
-
-            <div className="prescription-actions">
-              <button
-                className="touch-btn touch-btn-primary"
-                type="button"
-                onClick={handleSavePrescription}
-              >
-                {prescribeSaved ? <CheckCircle2 size={20} /> : <Sparkles size={20} />}
-                <span>{prescribeSaved ? '¡Pauta Guardada con Éxito!' : 'Guardar Prioridades y Pauta'}</span>
-              </button>
-            </div>
+        <section className="clinical-panel performance-panel" aria-labelledby="performance-title">
+          <div className="clinical-section-title"><span className="section-number">02</span><div><h2 id="performance-title">Evolución por área</h2><p>Precisión media de los ejercicios completados.</p></div></div>
+          <div className="performance-list">
+            {domains.map(([key, data]) => (
+              <div className="performance-row" key={key}>
+                <div className="performance-label"><span>{domainNames[key].name}</span><strong>{data.totalCompleted ? `${data.avgAccuracy}%` : '—'}</strong></div>
+                <div className="performance-track" role="meter" aria-label={`Precisión en ${domainNames[key].name}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={data.totalCompleted ? data.avgAccuracy : 0} aria-valuetext={data.totalCompleted ? `${data.avgAccuracy}%` : 'Sin actividad'}>
+                  <span className={`marker-${key}`} style={{ width: `${data.totalCompleted ? Math.max(0, Math.min(100, data.avgAccuracy)) : 0}%` }} />
+                </div>
+                <small>{data.totalCompleted ? `${data.totalCompleted} ejercicios completados` : 'Aún sin actividad'}</small>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
-
-      {/* Diagnóstico de Mejoras y Carencias reactivo a datos reales */}
-      {(() => {
-        const completed = domains.filter(([_, d]) => d.totalCompleted > 0);
-        const strong = completed.filter(([_, d]) => d.avgAccuracy >= 80);
-        const weak = completed.filter(([_, d]) => d.avgAccuracy < 80);
-
-        return (
-          <div className="therapist-analysis-grid">
-            <div className="card analysis-card card-strengths">
-              <div className="analysis-card-header">
-                <div className="icon-circle icon-circle-green">
-                  <TrendingUp size={24} />
-                </div>
-                <div>
-                  <h3>Mejoras Observadas (Fortalezas)</h3>
-                  <p className="subtitle">Avances consolidados mediante neuroplasticidad</p>
-                </div>
-              </div>
-
-              <ul className="analysis-list">
-                {profile.totalSessions === 0 ? (
-                  <li className="analysis-item">
-                    <CheckCircle2 size={20} className="text-green" />
-                    <div>
-                      <strong>Evaluación inicial pendiente:</strong>
-                      <p>
-                        El paciente aún no ha realizado ejercicios. Sus mayores destrezas y progresos se identificarán y mostrarán aquí automáticamente conforme complete sesiones.
-                      </p>
-                    </div>
-                  </li>
-                ) : strong.length > 0 ? (
-                  <>
-                    {strong.map(([key, data]) => (
-                      <li key={key} className="analysis-item">
-                        <CheckCircle2 size={20} className="text-green" />
-                        <div>
-                          <strong>{domainNames[key].name}:</strong>
-                          <p>
-                            Precisión alta del {data.avgAccuracy}% tras {data.totalCompleted} ejercicio(s). Óptima respuesta al entrenamiento.
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                    <li className="analysis-item">
-                      <CheckCircle2 size={20} className="text-green" />
-                      <div>
-                        <strong>Constancia y adherencia:</strong>
-                        <p>
-                          {profile.streakDays} día(s) de entrenamiento consecutivo y {profile.totalScore ?? 0} NeuroPuntos acumulados.
-                        </p>
-                      </div>
-                    </li>
-                  </>
-                ) : (
-                  <li className="analysis-item">
-                    <CheckCircle2 size={20} className="text-green" />
-                    <div>
-                      <strong>Fase inicial de entrenamiento:</strong>
-                      <p>
-                        El paciente ha completado {profile.totalSessions} ejercicio(s). Con la práctica continua afianzará precisiones superiores al 80%.
-                      </p>
-                    </div>
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            <div className="card analysis-card card-weaknesses">
-              <div className="analysis-card-header">
-                <div className="icon-circle icon-circle-amber">
-                  <AlertCircle size={24} />
-                </div>
-                <div>
-                  <h3>Carencias Detectadas (A Reforzar)</h3>
-                  <p className="subtitle">Aspectos que requieren intervención y apoyo activo</p>
-                </div>
-              </div>
-
-              <ul className="analysis-list">
-                {profile.totalSessions === 0 ? (
-                  <li className="analysis-item">
-                    <AlertCircle size={20} className="text-amber" />
-                    <div>
-                      <strong>Línea base en proceso:</strong>
-                      <p>
-                        Sin carencias registradas. Las áreas cognitivas que presenten menor precisión o bloqueos se marcarán aquí para sugerir prescripciones prioritarias.
-                      </p>
-                    </div>
-                  </li>
-                ) : weak.length > 0 ? (
-                  weak.map(([key, data]) => (
-                    <li key={key} className="analysis-item">
-                      <AlertCircle size={20} className="text-amber" />
-                      <div>
-                        <strong>{domainNames[key].name}:</strong>
-                        <p>
-                          Precisión media del {data.avgAccuracy}% ({data.totalCompleted} sesiones). Se recomienda marcar como área prioritaria en la prescripción superior.
-                        </p>
-                      </div>
-                    </li>
-                  ))
-                ) : (
-                  <li className="analysis-item">
-                    <CheckCircle2 size={20} className="text-green" />
-                    <div>
-                      <strong>Sin carencias detectadas:</strong>
-                      <p>
-                        Todas las áreas completadas superan el 80% de acierto. Se recomienda elevar el nivel de dificultad a Medio o Desafío.
-                      </p>
-                    </div>
-                  </li>
-                )}
-              </ul>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Gráfico y Rendimiento por Dominios */}
-      <div className="card therapist-metrics-card">
-        <h3>Rendimiento por Área Cognitiva</h3>
-        <p className="subtitle">Porcentaje de precisión acumulada y volumen de trabajo realizado</p>
-
-        <div className="domains-metric-bars">
-          {domains.map(([key, data]) => {
-            const info = domainNames[key];
-            return (
-              <div key={key} className="domain-metric-row">
-                <div className="metric-info">
-                  <span className="metric-icon">{info.icon}</span>
-                  <span className="metric-name">{info.name}</span>
-                  <span className="metric-sessions">
-                    {data.totalCompleted === 0 ? '(0 sesiones)' : `(${data.totalCompleted} sesiones)`}
-                  </span>
-                </div>
-                <div className="metric-bar-wrapper">
-                  <div
-                    className="metric-bar-fill"
-                    style={{
-                      width: `${data.totalCompleted > 0 ? Math.max(5, data.avgAccuracy) : 0}%`,
-                      backgroundColor: info.color
-                    }}
-                  />
-                </div>
-                <div className="metric-percent">
-                  {data.totalCompleted > 0 ? `${data.avgAccuracy}%` : '0%'}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        </section>
       </div>
 
       {/* Sección de Notas del Terapeuta y Profesionales */}
       <div className="card therapist-notes-section">
         <div className="notes-header-row">
           <div>
-            <h3>Libro de Seguimiento y Notas Clínicas</h3>
-            <p className="subtitle">Anotaciones compartidas entre el terapeuta, logopeda y familiares</p>
+            <h3>Notas de seguimiento</h3>
+            <p className="subtitle">Observaciones y contexto para el próximo entrenamiento.</p>
           </div>
           <button
             className="touch-btn touch-btn-primary"
@@ -429,7 +159,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
             }}
           >
             <PlusCircle size={20} />
-            <span>{showNoteForm ? 'Cancelar' : 'Añadir Observación'}</span>
+            <span>{showNoteForm ? 'Cancelar' : 'Añadir nota'}</span>
           </button>
         </div>
 
@@ -437,8 +167,9 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
           <form onSubmit={handleSaveNote} className="new-note-form">
             <div className="form-group-row">
               <div className="form-field">
-                <label>Tu nombre / Especialidad:</label>
+                <label htmlFor="note-author">Nombre y especialidad</label>
                 <input
+                  id="note-author"
                   type="text"
                   required
                   placeholder="Ej: Marcos (Terapeuta Ocupacional)"
@@ -449,10 +180,10 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
               </div>
 
               <div className="form-field">
-                <label>Estado anímico del paciente:</label>
-                <select
+                <label htmlFor="note-mood">Estado de ánimo</label>
+                <select id="note-mood"
                   value={patientMood}
-                  onChange={e => setPatientMood(e.target.value as any)}
+                  onChange={e => setPatientMood(e.target.value as typeof patientMood)}
                   className="text-input"
                 >
                   <option value="energico">Con buena energía</option>
@@ -463,8 +194,8 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
               </div>
 
               <div className="form-field">
-                <label>Área sobre la que versa la nota:</label>
-                <select
+                <label htmlFor="note-domain">Área</label>
+                <select id="note-domain"
                   value={selectedDomain}
                   onChange={e => setSelectedDomain(e.target.value as CognitiveDomain)}
                   className="text-input"
@@ -479,8 +210,8 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
             </div>
 
             <div className="form-field full-width">
-              <label>Observación clínica y pautas:</label>
-              <textarea
+              <label htmlFor="note-text">Observación</label>
+              <textarea id="note-text"
                 required
                 rows={3}
                 placeholder="Anota la evolución, respuesta a estímulos, dificultades con la tablet, etc."
@@ -492,7 +223,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
 
             <div className="form-actions">
               <button type="submit" className="touch-btn touch-btn-primary">
-                Guardar Observación en Historial
+                Guardar nota
               </button>
             </div>
           </form>
@@ -532,8 +263,8 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
 
       {/* Historial Detallado de Ejercicios */}
       <div className="card therapist-history-card">
-        <h3>Registro Cronológico de Ejercicios</h3>
-        <p className="subtitle">Detalle de cada ejercicio realizado por el paciente</p>
+        <h3>Historial de actividad</h3>
+        <p className="subtitle">Resultados registrados, ejercicio a ejercicio.</p>
 
         <div className="history-table-container">
           <table className="history-table">
@@ -552,7 +283,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
               {history.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: 'center', padding: '24px' }}>
-                    No hay ejercicios registrados en esta sesión.
+                    Los ejercicios completados aparecerán aquí.
                   </td>
                 </tr>
               ) : (
@@ -568,14 +299,13 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
                       </td>
                       <td>
                         <div className="table-cell-with-icon">
-                          <span>{domainInfo.icon}</span>
                           <strong>{domainInfo.name}</strong>
                         </div>
                       </td>
                       <td>
                         <div className="table-cell-with-icon">
                           <Clock size={16} />
-                          <span>{Math.round(item.durationSeconds / 60) || 1} min</span>
+                          <span>{Math.floor(item.durationSeconds / 60)} min {Math.round(item.durationSeconds % 60)} s</span>
                         </div>
                       </td>
                       <td>
@@ -600,6 +330,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
           </table>
         </div>
       </div>
+      <footer className="clinical-footer"><span>NeuroIA · Seguimiento del entrenamiento</span><button className="reset-progress-link" onClick={resetProgress}><RotateCcw size={15} /> Reiniciar progreso</button></footer>
     </div>
   );
 };

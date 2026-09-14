@@ -171,7 +171,10 @@ export const App: React.FC = () => {
             profile={profile}
             history={history}
             onBack={handleBackToDashboard}
-            onProfileUpdated={updated => setProfile(updated)}
+            onProfileUpdated={updated => {
+              setProfile(updated);
+              setHistory(StorageService.getHistory());
+            }}
           />
         )}
 
