@@ -19,6 +19,7 @@ import {
 import type { UserProfile, CognitiveDomain, ExerciseId } from '../types';
 import { soundService } from '../services/soundService';
 import { ExerciseSelectionModal } from './ExerciseSelectionModal';
+import { getExercisesForDomain } from '../services/exerciseCatalog';
 
 interface DashboardProps {
   profile: UserProfile;
@@ -146,7 +147,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   setSelectedDomainForModal(domain.id);
                 }}>
                   <span className="practice-name">{['Atención', 'Lenguaje', 'Memoria', 'Organización', 'Coordinación'][index]}</span>
-                  <span className="practice-detail">2 ejercicios</span>
+                  <span className="practice-detail">{getExercisesForDomain(domain.id).length} {getExercisesForDomain(domain.id).length === 1 ? 'ejercicio' : 'ejercicios'}</span>
                   <span className="practice-symbol" aria-hidden="true">{domain.icon}</span>
                   <span className="practice-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
                 </button>
@@ -275,7 +276,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </section>
       )}
 
-      {/* Modal para elegir entre los 2 ejercicios del área */}
+      {/* Modal para elegir entre los ejercicios del área */}
       {selectedDomainForModal && (
         <ExerciseSelectionModal
           domain={selectedDomainForModal}

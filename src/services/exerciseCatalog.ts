@@ -10,14 +10,6 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
       description: 'Encuentra el elemento repetido en una cuadrícula con distractores. Esencial para la heminegligencia.',
       iconName: 'Search',
     },
-    {
-      id: 'attention-gonogo',
-      domain: 'attention',
-      title: 'Semáforo de Atención (Go / No-Go)',
-      subtitle: 'Atención Sostenida e Inhibición',
-      description: 'Toca rápido cuando veas la luz verde u objetivo, y frena el impulso ante las señales de alto.',
-      iconName: 'Zap',
-    },
   ],
   language: [
     {

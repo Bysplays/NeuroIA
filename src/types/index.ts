@@ -2,7 +2,6 @@ export type CognitiveDomain = 'attention' | 'language' | 'memory' | 'executive' 
 
 export type ExerciseId =
   | 'visual-scanning'
-  | 'attention-gonogo'
   | 'language-naming'
   | 'word-completion'
   | 'memory-path'

@@ -10,9 +10,8 @@ import { AccessibilityModal } from './components/AccessibilityModal';
 import { FatigueAlertModal } from './components/FatigueAlertModal';
 import { RestBreakModal } from './components/RestBreakModal';
 
-// Los 10 Juegos de neurorrehabilitación (2 por cada área)
+// Juegos disponibles de neurorrehabilitación
 import { VisualScanningGame } from './games/VisualScanningGame';
-import { AttentionGoNoGoGame } from './games/AttentionGoNoGoGame';
 import { LanguageNamingGame } from './games/LanguageNamingGame';
 import { WordCompletionGame } from './games/WordCompletionGame';
 import { MemoryPathGame } from './games/MemoryPathGame';
@@ -179,16 +178,6 @@ export const App: React.FC = () => {
         {/* 1. ATENCIÓN */}
         {(activeView === 'attention' || activeView === 'visual-scanning') && (
           <VisualScanningGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {activeView === 'attention-gonogo' && (
-          <AttentionGoNoGoGame
             profile={profile}
             onBack={handleBackToDashboard}
             onSaveResult={handleSaveExerciseResult}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Play, Sparkles, BookOpen, Type, Search, Zap, Grid, ListOrdered, Layers, Hand, Compass } from 'lucide-react';
+import { X, Play, Sparkles, BookOpen, Type, Search, Grid, ListOrdered, Layers, Hand, Compass } from 'lucide-react';
 import type { CognitiveDomain, ExerciseDefinition, ExerciseId } from '../types';
 import { getExercisesForDomain } from '../services/exerciseCatalog';
 import { soundService } from '../services/soundService';
@@ -15,7 +15,6 @@ interface ExerciseSelectionModalProps {
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   Search: <Search size={32} />,
-  Zap: <Zap size={32} />,
   BookOpen: <BookOpen size={32} />,
   Type: <Type size={32} />,
   Sparkles: <Sparkles size={32} />,
