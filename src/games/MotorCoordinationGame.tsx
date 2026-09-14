@@ -1,3 +1,4 @@
+import { PaperTarget } from '../components/PaperTarget';
 import React, { useState, useEffect } from 'react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -138,7 +139,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     <ExerciseWrapper
       title={`Toca la Diana (${targetIdx + 1}/${targets.length})`}
       domain="motor"
-      instructionText="Toca suavemente con tu dedo el centro de la diana iluminada. Tómate el tiempo que necesites para apoyar el dedo con calma."
+      instructionText="Toca el centro de la diana de papel. Sin prisa, una a una."
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}
@@ -164,7 +165,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
           <button
             className="motor-target-circle pulse-target"
             style={{
-              left: `${currentTarget.x}%`,
+              left: `clamp(${currentTarget.size / 2 + 8}px, ${currentTarget.x}%, calc(100% - ${currentTarget.size / 2 + 8}px))`,
               top: `${currentTarget.y}%`,
               width: `${currentTarget.size}px`,
               height: `${currentTarget.size}px`,
@@ -173,8 +174,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
             onTouchStart={handleTargetTouch}
             aria-label="Tocar diana de coordinación"
           >
-            <div className="target-inner-ring" />
-            <div className="target-bullseye" />
+            <PaperTarget variant="target" />
           </button>
         </div>
       </div>

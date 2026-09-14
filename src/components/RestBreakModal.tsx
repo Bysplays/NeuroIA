@@ -1,5 +1,6 @@
+import { ModalFrame } from './ModalFrame';
 import React, { useState, useEffect, useCallback } from 'react';
-import { Coffee, Sparkles, Play, Pause, CheckCircle2, Droplets, Eye, ArrowRight, Volume2 } from 'lucide-react';
+import { Play, Pause, CheckCircle2, ArrowRight, Volume2 } from 'lucide-react';
 import { soundService } from '../services/soundService';
 
 interface RestBreakModalProps {
@@ -35,7 +36,7 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
     setIsCompleted(true);
     setIsRunning(false);
     soundService.playSuccess();
-    soundService.speak('Descanso de cinco minutos completado. Tu cerebro ha recuperado energía y está listo para continuar.');
+    soundService.speak('Pausa completada. Vuelve a entrenar cuando te sientas preparado.');
   }, []);
 
   // Temporizador regresivo segundo a segundo
@@ -86,7 +87,7 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
   const handleReadTips = () => {
     soundService.playTap();
     soundService.speak(
-      'Pausa de descanso. Uno: Bebe un poco de agua para hidratar tu cerebro. Dos: Desvía la mirada de la pantalla y mira a lo lejos. Tres: Respira profundamente al compás del círculo.'
+      'Pausa de descanso. Uno: Bebe un poco de agua si te apetece. Dos: Desvía la mirada de la pantalla y mira a lo lejos. Tres: Respira profundamente al compás del círculo.'
     );
   };
 
@@ -96,17 +97,15 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
   };
 
   return (
-    <div className="modal-backdrop rest-modal-backdrop" role="dialog" aria-modal="true">
+    <ModalFrame onClose={onClose} labelledBy="rest-title" dismissOnBackdrop={false}>
       <div className="modal-container rest-modal-container card" onClick={e => e.stopPropagation()}>
         {/* Cabecera del descanso */}
         <div className="rest-modal-header">
-          <div className="rest-title-icon-wrap">
-            <Coffee size={32} className="text-primary" />
-          </div>
           <div>
-            <h2 className="rest-modal-title">Pausa Restauradora (5 Minutos)</h2>
+            <span className="modal-overline">Respira. No hay prisa.</span>
+            <h2 id="rest-title" className="rest-modal-title">Un momento para ti</h2>
             <p className="rest-modal-subtitle">
-              El reposo es fundamental en neurorrehabilitación para consolidar la plasticidad cerebral.
+              Cinco minutos para bajar el ritmo.
             </p>
           </div>
           <button
@@ -129,9 +128,9 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
                   <span className="rest-breathe-status">
                     {isRunning
                       ? breathePhase === 'inhale'
-                        ? '🌬️ Inhala suavemente...'
-                        : '💨 Exhala despacio...'
-                      : '⏸️ Pausado'}
+                        ? 'Inhala suavemente'
+                        : 'Exhala despacio'
+                      : 'En pausa'}
                   </span>
                 </div>
               </div>
@@ -143,9 +142,9 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
           ) : (
             <div className="rest-completed-notice card">
               <CheckCircle2 size={64} className="text-green" />
-              <h3>¡Pausa de 5 Minutos Completada!</h3>
+              <h3>Pausa completada</h3>
               <p>
-                Tus neurotransmisores y corteza cerebral han tenido tiempo para oxigenarse y reposar.
+                Vuelve a entrenar cuando te sientas preparado.
               </p>
             </div>
           )}
@@ -154,32 +153,26 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
         {/* Consejos clínicos activos durante el descanso */}
         <div className="rest-tips-grid">
           <div className="rest-tip-card">
-            <div className="rest-tip-icon-box">
-              <Droplets size={26} className="text-blue" />
-            </div>
+
             <div>
-              <strong>1. Hidrata tu cerebro</strong>
-              <p>Beber medio vaso de agua favorece el flujo sanguíneo cerebral y la concentración.</p>
+              <strong>Bebe agua</strong>
+              <p>Toma un poco de agua si te apetece.</p>
             </div>
           </div>
 
           <div className="rest-tip-card">
-            <div className="rest-tip-icon-box">
-              <Eye size={26} className="text-purple" />
-            </div>
+
             <div>
-              <strong>2. Relaja la vista</strong>
-              <p>Desvía los ojos de la tablet y mira hacia un punto lejano por la ventana.</p>
+              <strong>Descansa la vista</strong>
+              <p>Mira un momento lejos de la pantalla.</p>
             </div>
           </div>
 
           <div className="rest-tip-card">
-            <div className="rest-tip-icon-box">
-              <Sparkles size={26} className="text-amber" />
-            </div>
+
             <div>
-              <strong>3. Suelta hombros y cuello</strong>
-              <p>Deja caer los hombros suavemente para liberar la tensión postural o espasticidad.</p>
+              <strong>Ponte cómodo</strong>
+              <p>Busca una postura cómoda para descansar.</p>
             </div>
           </div>
         </div>
@@ -193,14 +186,14 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
                 onClick={handleTogglePlay}
               >
                 {isRunning ? <Pause size={22} /> : <Play size={22} />}
-                <span>{isRunning ? 'Pausar Reloj' : 'Continuar Reloj'}</span>
+                <span>{isRunning ? 'Pausar' : 'Reanudar'}</span>
               </button>
 
               <button
                 className="touch-btn touch-btn-primary touch-btn-large"
                 onClick={handleFinishEarly}
               >
-                <span>¡Ya me siento descansado! Continuar</span>
+                <span>Volver al entrenamiento</span>
                 <ArrowRight size={22} />
               </button>
             </>
@@ -210,7 +203,7 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
               onClick={handleFinishEarly}
             >
               <CheckCircle2 size={24} />
-              <span>Volver a Entrenar con Energía Renovada</span>
+              <span>Volver al entrenamiento</span>
             </button>
           )}
 
@@ -225,6 +218,6 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </ModalFrame>
   );
 };

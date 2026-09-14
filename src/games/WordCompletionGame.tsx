@@ -1,3 +1,4 @@
+import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, HelpCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
@@ -397,7 +398,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
     <ExerciseWrapper
       title={`Completar Palabras (${currentIdx + 1}/${sessionItems.length})`}
       domain="language"
-      instructionText="Observa la imagen y la palabra. Toca la letra que falta para completarla correctamente."
+      instructionText="Mira la imagen y toca la letra que falta."
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}
@@ -415,7 +416,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
         <div className="word-completion-card">
           {/* 1. Imagen / Emoji central */}
           <div className="completion-emoji-display">
-            <span className="large-object-emoji">{currentItem.emoji}</span>
+            <span className="large-object-emoji"><GameObject symbol={currentItem.emoji} /></span>
           </div>
 
           {/* 2. Palabra a completar (justo debajo de la imagen, más compacta y diferenciada) */}

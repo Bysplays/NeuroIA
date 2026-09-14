@@ -10,14 +10,6 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
       description: 'Encuentra el elemento repetido en una cuadrícula con distractores. Esencial para la heminegligencia.',
       iconName: 'Search',
     },
-    {
-      id: 'attention-gonogo',
-      domain: 'attention',
-      title: 'Semáforo de Atención (Go / No-Go)',
-      subtitle: 'Atención Sostenida e Inhibición',
-      description: 'Toca rápido cuando veas la luz verde u objetivo, y frena el impulso ante las señales de alto.',
-      iconName: 'Zap',
-    },
   ],
   language: [
     {
@@ -102,3 +94,15 @@ export function getExerciseById(id: ExerciseId): ExerciseDefinition | undefined 
 export function getExercisesForDomain(domain: CognitiveDomain): ExerciseDefinition[] {
   return EXERCISES_BY_DOMAIN[domain] || [];
 }
+
+export const EXERCISE_SUMMARIES: Record<ExerciseId, string> = {
+  'visual-scanning': 'Busca la figura repetida entre las demás.',
+  'language-naming': 'Mira el objeto y encuentra su nombre.',
+  'word-completion': 'Completa una palabra con las letras que faltan.',
+  'memory-path': 'Recuerda las luces y repite su orden.',
+  'memory-pairs': 'Descubre las cartas y encuentra sus parejas.',
+  'daily-sequencing': 'Ordena los pasos de una actividad cotidiana.',
+  'categorization': 'Agrupa los objetos por su categoría.',
+  'motor-target': 'Toca las dianas a tu ritmo.',
+  'motor-tracking': 'Sigue una diana que se mueve despacio.',
+};

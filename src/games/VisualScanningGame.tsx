@@ -1,3 +1,4 @@
+import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
@@ -42,7 +43,7 @@ const FRUITS_BANK: SymbolDef[] = [
   { symbol: '🍓', name: 'fresas' },
   { symbol: '🍒', name: 'cerezas' },
   { symbol: '🍋', name: 'limones' },
-  { symbol: '🍉', name: 'tajadas de sandía' },
+  { symbol: '🍉', name: 'sandías' },
   { symbol: '🍑', name: 'melocotones' },
   { symbol: '🍍', name: 'piñas' },
   { symbol: '🥝', name: 'kiwis' },
@@ -212,11 +213,11 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
     <ExerciseWrapper
       title={
         <span>
-          Busca {article} {currentTarget.name} <span className="title-target-emoji">{currentTarget.symbol}</span> ({foundCount}/{totalTargets})
+          Busca {article} {currentTarget.name} <span className="title-target-emoji"><GameObject symbol={currentTarget.symbol} /></span> ({foundCount}/{totalTargets})
         </span>
       }
       domain="attention"
-      instructionText={`Toca con tu dedo todas las ${currentTarget.name} que veas en la pantalla. Explora con calma desde la izquierda hasta la derecha.`}
+      instructionText={`Encuentra todas las ${currentTarget.name}. Mira con calma de izquierda a derecha.`}
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}
@@ -236,7 +237,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
               onClick={() => handleItemClick(item)}
               aria-label={item.found ? 'Elemento ya encontrado' : 'Posible objetivo'}
             >
-              <span className="cell-emoji">{item.symbol}</span>
+              <span className="cell-emoji"><GameObject symbol={item.symbol} /></span>
               {item.found && (
                 <div className="cell-check-overlay">
                   <Check size={36} className="check-svg" />

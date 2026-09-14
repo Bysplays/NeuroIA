@@ -1,5 +1,6 @@
+import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, CheckCircle2, Eye, Play } from 'lucide-react';
+import { CheckCircle2, Eye, Play } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -305,26 +306,26 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
           <div className="pairs-grid">
             {cards.map((card, idx) => (
-              <div
+              <button
                 key={card.id}
                 className={`card memory-card-tile ${!isPreviewPhase ? 'card-interactive' : 'tile-preview'} ${card.isFlipped ? 'tile-flipped' : ''} ${card.isMatched ? 'tile-matched' : ''}`}
                 onClick={() => handleCardClick(idx)}
-                role="button"
-                tabIndex={0}
+                disabled={isPreviewPhase || card.isMatched}
+                aria-label={card.isFlipped || card.isMatched ? card.label : `Carta ${idx + 1}. Descubrir`}
               >
                 {card.isFlipped || card.isMatched ? (
                   <div className="tile-front animate-fade-in">
-                    <span className="tile-emoji">{card.emoji}</span>
+                    <span className="tile-emoji"><GameObject symbol={card.emoji} /></span>
                     <strong className="tile-label">{card.label}</strong>
                     {card.isMatched && <CheckCircle2 size={24} className="tile-matched-badge" />}
                   </div>
                 ) : (
                   <div className="tile-back animate-fade-in">
-                    <Sparkles size={36} className="tile-back-icon" />
+                    <img src="/brand/neuroia-mark.svg" className="tile-back-mark" alt="" />
                     <span className="tile-back-hint">Toca</span>
                   </div>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         </div>

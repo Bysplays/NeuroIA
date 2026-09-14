@@ -1,0 +1,260 @@
+/* Shared calm playing space. Game state colors and target positions remain explicit. */
+.app-root-focus-mode { min-height: 100dvh; background: var(--color-bg); }
+.main-content-focus { width: 100%; margin: 0; padding: 0; }
+.exercise-container { max-width: 1180px; margin: 0 auto; padding: 24px 28px 40px; gap: 26px; }
+/* Same brand, spacing and pastel sections as the home. */
+.exercise-container { --game-paper: var(--panel-blue); --game-second: var(--panel-lilac); }
+.exercise-container[data-domain="language"] { --game-paper: var(--panel-pink); --game-second: var(--panel-peach); }
+.exercise-container[data-domain="memory"] { --game-paper: var(--panel-lilac); --game-second: var(--panel-blue); }
+.exercise-container[data-domain="executive"] { --game-paper: var(--panel-sage); --game-second: var(--panel-peach); }
+.exercise-container[data-domain="motor"] { --game-paper: var(--panel-peach); --game-second: var(--panel-pink); }
+.paper-game-nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 4px 0 6px; }
+.paper-game-brand { display: inline-flex; align-items: center; gap: 12px; border: 0; padding: 0; background: transparent; color: var(--color-text-main); font: inherit; font-size: 1.3rem; font-weight: 650; cursor: pointer; }
+.paper-game-tools { display: flex; align-items: center; gap: 10px; }
+.paper-nav-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 12px 18px; background: var(--color-surface); border: 0; border-radius: 99px; color: var(--color-text-main); font: inherit; font-size: .72rem; cursor: pointer; }
+.paper-voice-button { width: 46px; padding: 0; }
+.paper-game-welcome { display: grid; grid-template-columns: minmax(0, 1fr) 145px; gap: 24px; align-items: center; background: var(--game-paper); color: var(--panel-ink); border-radius: 32px; padding: 24px 32px; }
+.paper-game-label { display: flex; align-items: center; gap: 8px; font-size: .65rem; }
+.paper-game-label > span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.exercise-screen-title { font-size: clamp(1.35rem, 2.3vw, 1.9rem); font-weight: 550; line-height: 1.2; margin: 12px 0; color: inherit; }
+.paper-game-instruction { color: inherit; font-size: .78rem; line-height: 1.6; max-width: 650px; }
+.paper-game-companions { width: 145px; height: 145px; object-fit: contain; mix-blend-mode: darken; border-radius: 38%; }
+body:not([data-contrast="standard"]) .paper-game-companions { mix-blend-mode: normal; }
+.exercise-viewport { min-height: 0; }
+.exercise-container .card { box-shadow: none; }
+.exercise-container .touch-btn { box-shadow: none; border-radius: 99px; font-size: .8rem; min-height: 48px; }
+.exercise-container .touch-btn-primary { border: 0; background: var(--color-action-bg); color: var(--color-action-text); }
+.exercise-container .touch-btn-secondary { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-main); }
+.exercise-container .gentle-bounce { animation: none; }
+.exercise-instruction-banner { border: 0; background: var(--color-surface); border-radius: 20px; box-shadow: none; }
+.instruction-text { font-size: .85rem; line-height: 1.6; }
+.game-object { display: inline-block; width: 1em; height: 1em; flex-shrink: 0; background-size: 909.0909% 568.1818%; background-repeat: no-repeat; mix-blend-mode: multiply; vertical-align: middle; pointer-events: none; }
+body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; border-radius: 16%; }
+
+/* Attention: stable square board with the same target image as the prompt. */
+.scanning-game-container { overflow: visible; padding: 20px; border-radius: 30px; background: var(--game-second); }
+.scanning-grid { flex: none; height: auto; max-width: 860px; margin: 0 auto; grid-template-rows: repeat(4, auto); gap: 12px; }
+.scanning-cell { aspect-ratio: 1.7; height: auto; border: 2px solid transparent; border-radius: 22px; background: var(--color-surface); box-shadow: none; }
+.scanning-cell:hover { transform: none; border-color: var(--color-primary); }
+.cell-emoji { display: flex; font-size: clamp(48px, 7vw, 88px); }
+.title-target-emoji { display: inline-flex; font-size: 40px; vertical-align: middle; }
+.scanning-cell.cell-found { background: var(--panel-sage); border-color: #56816d; }
+.cell-check-overlay { background: transparent; inset: auto 6px 6px auto; }
+.cell-check-overlay svg { width: 24px; }
+
+/* Object and language games. */
+.naming-card, .word-completion-card, .categorization-card { height: auto; background: transparent; padding: 0; border-radius: 30px; gap: 20px; border: 0; box-shadow: none; }
+.naming-emoji-display, .completion-emoji-display { width: 200px; height: 200px; background: transparent; border: 0; border-radius: 36%; box-shadow: none; }
+.large-object-emoji { font-size: 170px; }
+.naming-options-grid { max-width: 780px; width: 100%; gap: 12px; }
+.exercise-container .naming-option-btn { background: var(--game-second); border: 2px solid transparent; min-height: 64px; color: var(--color-text-main); }
+.naming-audio-helpers, .completion-audio-helpers { flex-wrap: wrap; justify-content: center; gap: 10px; }
+.hint-banner { background: var(--panel-peach); border: 0; color: var(--panel-ink); border-radius: 16px; font-size: .8rem; }
+.word-letter-slots { flex-wrap: wrap; justify-content: center; gap: 8px; }
+.letter-options-grid { gap: 12px; }
+.category-object-card { background: var(--panel-sage); border: 0; box-shadow: none; border-radius: 24px; padding: 20px; }
+.category-object-card .large-object-emoji { font-size: 140px; }
+.object-name-title { font-size: 1.2rem; }
+.categorization-prompt { font-size: .9rem; }
+.category-bin-card { background: var(--color-bg); border: 2px solid transparent; border-radius: 24px; box-shadow: none; padding: 20px; }
+.bin-icon-circle { box-shadow: none; background: transparent !important; }
+.bin-emoji { font-size: 80px; display: flex; }
+.bin-title { font-size: 1rem; }
+
+/* Memory: quiet resting tiles; active state remains clearly visible. */
+.memory-compact-control-bar { gap: 20px; flex-wrap: wrap; padding: 8px 0 20px; }
+.memory-status-badge { font-size: .85rem; font-weight: 500; }
+.memory-tiles-grid { max-width: 860px; margin: 0 auto; height: auto; gap: 18px; }
+.memory-tile { height: 230px; min-height: 0; border-radius: 30px; box-shadow: none; border-width: 2px; }
+.memory-tile:nth-child(1):not(.tile-active) { background: var(--panel-blue) !important; }
+.memory-tile:nth-child(2):not(.tile-active) { background: var(--panel-sage) !important; }
+.memory-tile:nth-child(3):not(.tile-active) { background: var(--panel-peach) !important; }
+.memory-tile:nth-child(4):not(.tile-active) { background: var(--panel-lilac) !important; }
+.memory-tile .tile-emoji { font-size: 110px; }
+.tile-name { font-size: 1rem; font-weight: 500; }
+.memory-tile.tile-active { transform: none; box-shadow: inset 0 0 0 6px var(--color-surface); }
+.tile-glow-ring { display: none; }
+.pairs-board-card { padding: 0; }
+.pairs-preview-banner { background: var(--panel-lilac); color: var(--panel-ink); border: 0; box-shadow: none; border-radius: 22px; padding: 18px; }
+.preview-countdown-msg, .preview-countdown-msg strong { font-size: .8rem; color: inherit; }
+.preview-indicator-badge { background: transparent; color: inherit; font-size: .8rem; padding: 0; }
+.pairs-stat-pill, .pairs-stat-pill strong { font-size: .8rem; }
+.memory-card-tile { height: 200px; border-radius: 26px; background: var(--panel-lilac); border: 2px solid transparent; box-shadow: none; }
+.memory-card-tile.tile-preview { border-color: transparent !important; background: var(--game-second) !important; box-shadow: none; }
+.memory-card-tile.tile-matched { background: var(--panel-sage) !important; border-color: #56816d !important; box-shadow: none; }
+.memory-card-tile .tile-emoji { font-size: 100px; }
+.tile-label { font-size: .85rem; }
+.tile-back-icon { color: var(--panel-ink); }
+
+/* Everyday sequences. */
+.sequencing-cards-grid { height: auto; width: 100%; gap: 16px; }
+.sequencing-option-card { height: auto; min-height: 290px; border: 2px solid transparent; border-radius: 28px; box-shadow: none; background: var(--game-paper); }
+.seq-card-emoji-wrap { background: var(--panel-sage); border-radius: 26px; box-shadow: none; }
+.seq-card-emoji { font-size: 110px; display: flex; }
+.seq-card-text { font-size: .88rem; line-height: 1.6; }
+.sequencing-option-card.card-selected { border-color: var(--color-primary); background: var(--color-primary-light); box-shadow: none; }
+.seq-green-overlay { display: none; }
+.seq-order-badge { background: var(--color-primary); box-shadow: none; }
+.sequencing-bottom-bar { margin-top: 20px; }
+
+/* Motor targets: solid, high contrast centers without neon effects. */
+.motor-touch-arena, .motor-tracking-arena { flex: none; min-height: 400px; height: min(65dvh, 600px); border: 1px solid var(--color-border); border-radius: 30px; background: var(--game-second); box-shadow: none; }
+.motor-target-circle, .tracking-target { padding: 0; background: var(--color-surface); border: 2px solid var(--panel-ink); box-shadow: 0 4px 0 color-mix(in srgb, var(--panel-ink) 12%, transparent); overflow: hidden; }
+.motor-target-circle.pulse-target { animation: none; }
+.paper-target-art { display: block; width: 100%; height: 100%; border-radius: 50%; background-image: url('/images/paper-play-tokens.png'); background-repeat: no-repeat; background-size: 227.2727% 113.6364%; pointer-events: none; }
+.paper-target-target { background-position: 5.3571% 50%; }
+.paper-target-companion { background-position: 94.6429% 50%; }
+.tracking-target.target-contacted { background: var(--color-surface); border-color: #315d4c; box-shadow: 0 0 0 6px #bad7c3; }
+.tracking-progress-header { background: var(--panel-peach); border: 0; border-radius: 22px; padding: 18px 22px; box-shadow: none; }
+.tracking-label, .tracking-percent { font-size: .85rem; }
+.tracking-progress-fill { background: var(--color-primary); box-shadow: none; }
+.tracking-target-halo { display: none; }
+.game-completion-art { width: 150px; height: 150px; object-fit: contain; mix-blend-mode: multiply; }
+.completed-icon-wrapper { background: transparent; width: auto; height: auto; margin: 0; }
+.exercise-completed-card { border: 0; border-radius: 30px; padding: 28px; gap: 20px; }
+.completed-title { font-size: 1.6rem; }
+.completed-stats-row { gap: 12px; width: 100%; }
+.completed-stats-row .stat-box { background: var(--color-bg); border: 0; border-radius: 20px; padding: 16px; }
+.completed-stats-row .stat-number { font-size: 1.25rem; }
+.completed-feedback-box { background: var(--panel-sage); border: 0; border-radius: 20px; }
+@media (max-width: 700px) {
+  .exercise-container { padding: 16px; gap: 20px; }
+  .naming-card, .word-completion-card, .categorization-card { padding: 0; }
+  .memory-tile { height: 170px; border-radius: 22px; }
+  .memory-tile .tile-emoji { font-size: 85px; }
+  .memory-card-tile { height: 150px; }
+  .memory-card-tile .tile-emoji { font-size: 72px; }
+  .pairs-preview-banner { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .pairs-grid { gap: 10px; }
+  .scanning-grid { gap: 8px; }
+  .scanning-cell { border-radius: 16px; }
+  .sequencing-cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sequencing-option-card { min-height: 240px; }
+  .seq-card-emoji { font-size: 80px; }
+  .seq-card-text { font-size: .76rem; }
+  .category-bins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .category-bin-card { padding: 14px; }
+  .completed-stats-row { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exercise-container *, .exercise-container *::before, .exercise-container *::after { animation: none !important; transition: none !important; }
+}
+
+/* Quiet feedback, without losing success/error distinctions. */
+.exercise-container .option-correct,
+.exercise-container .bin-correct,
+.exercise-container .slot-correct,
+.exercise-container .btn-letter-correct { background: var(--panel-sage) !important; border-color: #56816d !important; color: #254f3d !important; box-shadow: none !important; }
+.exercise-container .option-incorrect,
+.exercise-container .bin-incorrect,
+.exercise-container .slot-incorrect,
+.exercise-container .btn-letter-incorrect { background: #f4d9d3 !important; border-color: #aa6156 !important; color: #7e342b !important; box-shadow: none !important; }
+.exercise-container .letter-option-btn { background: var(--panel-lilac); border: 2px solid transparent; box-shadow: none; }
+.exercise-container .letter-slot { box-shadow: none; background: var(--color-bg); font-weight: 550; }
+.exercise-container .large-object-emoji, .exercise-container .seq-card-emoji { filter: none; }
+.exercise-container .seq-card-emoji-wrap { background: transparent; padding: 14px; }
+.pairs-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.exercise-container .memory-card-tile { min-width: 0; padding: 8px; }
+.tile-front { max-width: 100%; }
+.tile-label { overflow-wrap: anywhere; }
+.tile-back-mark { width: 58px; height: 58px; }
+@media (max-width: 700px) {
+  .memory-card-tile .tile-label { font-size: .7rem; }
+  .tile-back-mark { width: 42px; height: 42px; }
+}
+.game-completion-art { border-radius: 32%; }
+.completed-stats-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.completed-stats-row .stat-box { min-width: 0; width: auto; }
+.completed-stats-row .stat-label { font-size: .7rem; }
+.completed-stats-row .stat-number { color: var(--color-text-main); }
+.completed-feedback-box p { font-size: .9rem; line-height: 1.6; }
+.completed-feedback-box svg { flex-shrink: 0; color: #466951; }
+.exercise-container .touch-btn-correction { background: var(--panel-lilac); color: var(--panel-ink); border: 0; }
+@media (max-width: 700px) {
+  .exercise-completed-card { padding: 24px 18px; }
+  .completed-stats-row { gap: 8px; }
+  .completed-stats-row .stat-box { padding: 14px 8px; }
+  .completed-stats-row .stat-label { font-size: .6rem; }
+  .completed-stats-row .stat-number { font-size: .9rem; }
+  .completed-stats-row .stat-number svg { display: none !important; }
+  .completed-title { font-size: 1.35rem; }
+}
+
+/* Paper cards instead of a single white clinical panel. */
+.naming-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 18px 24px; }
+.naming-target-block { grid-column: 1; grid-row: 1 / 3; background: var(--game-paper); border-radius: 32px; padding: 28px 20px; min-height: 345px; gap: 22px; }
+.naming-options-grid { display: grid; grid-column: 2; grid-template-columns: 1fr; align-self: end; }
+.exercise-container .naming-option-btn { max-width: none; width: 100%; justify-content: space-between; border-radius: 24px; min-height: 76px; padding: 20px 26px; font-size: 1.05rem; font-weight: 500; }
+.exercise-container .naming-option-btn:nth-child(2) { background: var(--panel-blue); }
+.exercise-container .naming-option-btn:nth-child(3) { background: var(--panel-sage); }
+.naming-next-bar { grid-column: 2; min-height: 48px; margin: 0; align-self: start; padding: 0; border: 0; }
+.naming-audio-helpers .touch-btn, .completion-audio-helpers .touch-btn { font-size: .67rem; padding: 12px 16px; border: 0; }
+.word-completion-card { background: var(--game-second); padding: 26px; }
+.word-letter-slots { background: transparent; border: 0; padding: 0; }
+.exercise-container .letter-slot { background: var(--color-surface); border-color: transparent; border-radius: 14px; }
+.exercise-container .letter-option-btn { background: var(--panel-pink); border-radius: 24px; }
+.completion-next-bar, .category-next-bar { border: 0; margin-top: 0; }
+.categorization-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px 24px; align-items: center; }
+.category-object-card { grid-column: 1; grid-row: 1 / 4; width: 100%; min-height: 340px; background: var(--game-paper); padding: 28px; }
+.category-object-card .large-object-emoji { font-size: 180px; }
+.categorization-prompt { grid-column: 2; margin: 0; font-size: .8rem; text-align: left; }
+.category-bins-grid { grid-column: 2; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.category-bin-card { background: var(--panel-peach); min-height: 180px; }
+.category-bin-card:nth-child(2) { background: var(--panel-lilac); }
+.category-bin-card:nth-child(3) { background: var(--panel-blue); }
+.category-next-bar { grid-column: 2; }
+.memory-compact-control-bar { padding: 0; }
+.memory-tile { height: 180px; border-color: transparent !important; }
+.memory-tile.tile-active { border-color: var(--panel-ink) !important; box-shadow: inset 0 0 0 6px var(--color-surface); }
+.memory-card-tile { background: var(--game-paper); }
+.memory-card-tile:nth-child(even) { background: var(--panel-pink); }
+.pairs-preview-banner { background: var(--color-surface); }
+.pairs-stat-pill { background: var(--color-surface); padding: 10px 16px; border-radius: 99px; }
+.pairs-status-bar { border: 0; padding: 0; }
+.sequencing-option-card { background: var(--game-paper); color: var(--panel-ink); padding: 24px 20px; }
+.sequencing-option-card:nth-child(2) { background: var(--panel-peach); }
+.sequencing-option-card:nth-child(3) { background: var(--panel-lilac); }
+.sequencing-option-card:nth-child(4) { background: var(--panel-blue); }
+.seq-card-text { color: inherit; font-weight: 500; }
+.motor-touch-arena, .motor-tracking-arena { height: min(52dvh, 480px); min-height: 340px; border: 0; }
+.tracking-progress-header { background: transparent; padding: 0 4px; }
+.tracking-progress-info { margin-bottom: 8px; }
+.tracking-progress-bar-bg { height: 10px; border: 0; background: var(--color-surface); }
+.exercise-completed-card { background: var(--game-paper); }
+@media (max-width: 700px) {
+  .paper-game-brand { font-size: 1.1rem; gap: 8px; }
+  .paper-game-brand img { width: 30px; height: 30px; }
+  .paper-game-tools { gap: 8px; }
+  .paper-nav-button { font-size: .62rem; padding: 10px 12px; min-height: 44px; }
+  .paper-voice-button { width: 44px; padding: 0; }
+  .paper-game-welcome { padding: 20px; grid-template-columns: minmax(0, 1fr) 80px; gap: 10px; border-radius: 26px; }
+  .paper-game-companions { width: 80px; height: 100px; }
+  .paper-game-label { font-size: .59rem; }
+  .paper-game-instruction { font-size: .7rem; }
+  .exercise-screen-title { font-size: 1.2rem; }
+  .paper-game-intro { min-width: 0; }
+  .paper-game-welcome:has(.title-target-emoji) { grid-template-columns: 1fr; }
+  .paper-game-welcome:has(.title-target-emoji) .paper-game-companions { display: none; }
+  .scanning-game-container { padding: 12px; border-radius: 24px; }
+  .scanning-cell { aspect-ratio: 1.1; }
+  .cell-emoji { font-size: clamp(40px, 11vw, 68px); }
+  .naming-card, .categorization-card { grid-template-columns: 1fr; gap: 16px; }
+  .naming-target-block, .category-object-card { grid-column: 1; grid-row: auto; min-height: 0; padding: 18px; border-radius: 26px; }
+  .naming-emoji-display, .completion-emoji-display { width: 150px; height: 150px; }
+  .large-object-emoji, .category-object-card .large-object-emoji { font-size: 140px; }
+  .naming-target-block { gap: 12px; }
+  .naming-options-grid, .naming-next-bar, .categorization-prompt, .category-bins-grid, .category-next-bar { grid-column: 1; }
+  .exercise-container .naming-option-btn { min-height: 60px; padding: 16px 22px; font-size: .86rem; border-radius: 22px; }
+  .word-completion-card { padding: 20px 14px; border-radius: 26px; }
+  .memory-tile { height: 155px; }
+  .category-bin-card { min-height: 150px; }
+  .pairs-stat-pill { font-size: .67rem; padding: 8px 12px; }
+  .motor-touch-arena, .motor-tracking-arena { height: 400px; min-height: 340px; border-radius: 26px; }
+}
+@media (max-width: 360px) {
+  .paper-game-brand span { display: none; }
+  .paper-game-welcome { grid-template-columns: 1fr; }
+  .paper-game-companions { display: none; }
+}
+.exercise-container .sequencing-option-card.card-success { background: var(--panel-sage); border-color: #56816d; }
+.exercise-container .sequencing-option-card.card-warning { background: #f4dfc9; border-color: #a17a40; }

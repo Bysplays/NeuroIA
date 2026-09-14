@@ -1,5 +1,6 @@
+import { ModalFrame } from './ModalFrame';
 import React from 'react';
-import { Sparkles, Coffee, HeartPulse, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { soundService } from '../services/soundService';
 
 interface FatigueAlertModalProps {
@@ -16,26 +17,23 @@ export const FatigueAlertModal: React.FC<FatigueAlertModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <ModalFrame onClose={onClose} labelledBy="fatigue-title">
       <div className="modal-container fatigue-modal" onClick={e => e.stopPropagation()}>
-        <div className="fatigue-icon-wrapper">
-          <HeartPulse size={48} className="fatigue-heart-icon" />
-        </div>
+        <div className="rest-character-art"><img src="/images/wellness-companions.png" alt="" /></div>
+        <span className="modal-overline">También está bien parar</span>
 
-        <h2 className="fatigue-title">Momento de Cuidar tu Energía</h2>
+        <h2 id="fatigue-title" className="fatigue-title">¿Hacemos una pausa?</h2>
         
         <p className="fatigue-text">
-          Llevas una sesión muy productiva. Tras un ictus, el cerebro realiza un esfuerzo intenso para reconectar nuevas neuronas (neuroplasticidad).
+          Puedes descansar unos minutos y retomar cuando te apetezca.
         </p>
 
         <div className="fatigue-tips">
           <div className="fatigue-tip-item">
-            <Coffee size={24} />
-            <span>Bebe un sorbo de agua para hidratar tus neuronas</span>
+            <span>Bebe un poco de agua.</span>
           </div>
           <div className="fatigue-tip-item">
-            <Sparkles size={24} />
-            <span>Mira a lo lejos unos segundos para relajar la vista</span>
+            <span>Aparta la mirada de la pantalla.</span>
           </div>
         </div>
 
@@ -48,8 +46,7 @@ export const FatigueAlertModal: React.FC<FatigueAlertModalProps> = ({
             }}
             title="Iniciar descanso guiado de 5 minutos con temporizador y respiración relajante"
           >
-            <Coffee size={24} />
-            <span>Iniciar Pausa Guiada de 5 Minutos</span>
+            <span>Descansar 5 minutos</span>
           </button>
 
           <button
@@ -59,11 +56,11 @@ export const FatigueAlertModal: React.FC<FatigueAlertModalProps> = ({
               onClose();
             }}
           >
-            Me siento bien, continuar un poco más
+            Seguir entrenando
             <ArrowRight size={22} />
           </button>
         </div>
       </div>
-    </div>
+    </ModalFrame>
   );
 };
