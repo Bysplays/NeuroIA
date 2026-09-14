@@ -172,7 +172,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <ExerciseCatalog
           profile={profile}
           onBack={() => setShowAreaSelection(false)}
-          onStartDailyPlan={onStartDailyPlan}
           onSelectExercise={exercise => {
             if (onSelectExercise) onSelectExercise(exercise.id);
             else onSelectDomain(exercise.domain);

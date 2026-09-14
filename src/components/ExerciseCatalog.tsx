@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Shuffle } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { CognitiveDomain, ExerciseDefinition, UserProfile } from '../types';
 import { ALL_EXERCISES, EXERCISE_SUMMARIES } from '../services/exerciseCatalog';
 import { soundService } from '../services/soundService';
@@ -13,11 +13,10 @@ const areas: { id: CognitiveDomain; label: string }[] = [
   { id: 'motor', label: 'Coordinación' },
 ];
 
-export function ExerciseCatalog({ profile, onBack, onSelectExercise, onStartDailyPlan }: {
+export function ExerciseCatalog({ profile, onBack, onSelectExercise }: {
   profile: UserProfile;
   onBack: () => void;
   onSelectExercise: (exercise: ExerciseDefinition) => void;
-  onStartDailyPlan: () => void;
 }) {
   const [filter, setFilter] = useState<CognitiveDomain | 'all'>('all');
   const heading = useRef<HTMLHeadingElement>(null);
@@ -32,11 +31,6 @@ export function ExerciseCatalog({ profile, onBack, onSelectExercise, onStartDail
           <h1 id="library-title" tabIndex={-1} ref={heading}>Encuentra tu próximo juego</h1>
           <p>Elige lo que te apetezca. Practica a tu ritmo.</p>
         </div>
-        <button className="library-guided" onClick={() => { soundService.playTap(); onStartDailyPlan(); }}>
-          <span className="library-guided-icon"><Shuffle size={22} /></span>
-          <span><strong>¿Prefieres que te guiemos?</strong><small>Una sesión con tres ejercicios</small></span>
-          <ArrowRight size={20} />
-        </button>
       </div>
       <div className="library-filters" role="group" aria-label="Filtrar juegos por área">
         <button aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>Todos <span>{ALL_EXERCISES.length}</span></button>
