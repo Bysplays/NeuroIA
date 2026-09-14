@@ -114,6 +114,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <span className="soft-label"><span className="status-dot" /> Tu sesión de hoy</span>
                 <h2>Un rato para ti.<br />Un paso más.</h2>
                 <p>Tres ejercicios para activar tu mente.<br />Sin prisas. A tu manera.</p>
+              </div>
+              <img className="wellness-characters" src="/images/wellness-companions.png" alt="" />
+              <div className="session-actions">
                 <button className="session-start" onClick={() => {
                   soundService.playTap();
                   onStartDailyPlan();
@@ -122,7 +125,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </button>
                 <span className="session-footnote">{profile.dailyPlanCompletedToday ? 'Ya has completado tu plan de hoy. Puedes volver a practicar.' : 'Atención, memoria y mucho más'}</span>
               </div>
-              <img className="wellness-characters" src="/images/wellness-companions.png" alt="" />
             </section>
 
             <section className="consistency-card" aria-labelledby="consistency-title">
