@@ -1,4 +1,3 @@
-import { AchievementShowcase } from './AchievementShowcase';
 import { getAchievements } from '../services/achievements';
 import React, { useState } from 'react';
 import {
@@ -28,6 +27,7 @@ interface DashboardProps {
   onSelectExercise?: (exerciseId: ExerciseId) => void;
   onStartDailyPlan: () => void;
   onOpenTherapistReport: () => void;
+  onOpenAchievements: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -36,6 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onSelectExercise,
   onStartDailyPlan,
   onOpenTherapistReport,
+  onOpenAchievements,
 }) => {
   const [showAreaSelection, setShowAreaSelection] = useState(false);
   const [selectedDomainForModal, setSelectedDomainForModal] = useState<CognitiveDomain | null>(null);
@@ -134,7 +135,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p>{profile.streakDays > 0 ? 'Sigue encontrando ese ratito para ti.' : 'Tu próximo pequeño logro empieza hoy.'}</p>
               <div className="consistency-stats">
                 <div><Clock3 size={20} /><strong>{profile.totalMinutes}</strong><span>minutos</span></div>
-                <a href="#achievements" onClick={() => document.getElementById('achievements')?.focus({ preventScroll: true })}><Medal size={20} /><strong>{earnedAchievements}</strong><span>Logros <span aria-hidden="true">↗</span></span></a>
+                <button onClick={onOpenAchievements}><Medal size={20} /><strong>{earnedAchievements}</strong><span>Logros <span aria-hidden="true">↗</span></span></button>
               </div>
             </section>
           </div>
@@ -159,7 +160,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </section>
 
-          <AchievementShowcase profile={profile} />
 
           <div className="home-bottom-grid">
             <section className="progress-summary">

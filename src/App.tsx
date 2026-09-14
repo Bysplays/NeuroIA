@@ -4,6 +4,7 @@ import { StorageService } from './services/storageService';
 import { soundService } from './services/soundService';
 import { getExercisesForDomain } from './services/exerciseCatalog';
 import { Header } from './components/Header';
+import { AchievementShowcase } from './components/AchievementShowcase';
 import { Dashboard } from './components/Dashboard';
 import { TherapistReport } from './components/TherapistReport';
 import { AccessibilityModal } from './components/AccessibilityModal';
@@ -24,7 +25,11 @@ import { MotorTrackingGame } from './games/MotorTrackingGame';
 export const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(() => StorageService.getProfile());
   const [history, setHistory] = useState<ExerciseResult[]>(() => StorageService.getHistory());
-  const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | CognitiveDomain | ExerciseId>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | 'achievements' | CognitiveDomain | ExerciseId>('dashboard');
+
+  useEffect(() => {
+    if (window.location.hash === '#achievements') window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  }, []);
 
   // Estado del Plan del Día (Secuencia guiada de 3 ejercicios)
   const [dailyPlanSession, setDailyPlanSession] = useState<DailyPlanSession | null>(null);
@@ -136,7 +141,7 @@ export const App: React.FC = () => {
     isLast: dailyPlanSession.currentIndex + 1 >= dailyPlanSession.queue.length,
   } : null;
 
-  const isPlayingGame = activeView !== 'dashboard' && activeView !== 'therapist';
+  const isPlayingGame = activeView !== 'dashboard' && activeView !== 'therapist' && activeView !== 'achievements';
 
   return (
     <div className={`app-root ${isPlayingGame ? 'app-root-focus-mode' : ''}`}>
@@ -162,9 +167,12 @@ export const App: React.FC = () => {
             onSelectDomain={handleSelectDomain}
             onSelectExercise={handleSelectExercise}
             onStartDailyPlan={handleStartDailyPlan}
+            onOpenAchievements={() => { setActiveView('achievements'); window.scrollTo(0, 0); }}
             onOpenTherapistReport={() => setActiveView('therapist')}
           />
         )}
+
+        {activeView === 'achievements' && <AchievementShowcase profile={profile} onBack={handleBackToDashboard} />}
 
         {activeView === 'therapist' && (
           <TherapistReport
