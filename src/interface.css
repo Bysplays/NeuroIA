@@ -219,9 +219,10 @@ body:has(.dashboard-area-selection-active),
   .main-header { padding: 20px; }
   .dashboard-container { padding: 20px; }
   .home-feature-grid { grid-template-columns: 1fr; }
-  .daily-session-card { min-height: 330px; padding: 28px; }
-  .daily-session-copy { width: 62%; }
-  .wellness-characters { width: 45%; right: 0; bottom: 5%; }
+  .daily-session-card { min-height: 0; padding: 28px; flex-direction: column; align-items: stretch; gap: 16px; }
+  .daily-session-copy { width: 100%; min-width: 0; }
+  .wellness-characters { position: static; width: min(45%, 180px); height: auto; align-self: center; flex-shrink: 0; }
+  .session-start { max-width: 100%; }
   .consistency-card { padding: 24px; }
   .streak-number { font-size: 3rem; margin: 15px 0; }
   .consistency-stats { gap: 14px; }
@@ -247,12 +248,11 @@ body:has(.dashboard-area-selection-active),
   .home-greeting { align-items: flex-start; gap: 12px; }
   .home-greeting h1 { gap: 8px; }
   .home-date { max-width: 90px; }
-  .daily-session-card { padding: 25px; min-height: 400px; align-items: flex-start; }
+  .daily-session-card { padding: 25px; }
   .daily-session-copy { width: 100%; }
   .daily-session-copy h2 { font-size: 1.95rem; }
-  .daily-session-copy p { max-width: 70%; }
-  .wellness-characters { width: 43%; bottom: 95px; right: 0; }
-  .session-start { margin-top: 45px; }
+  .daily-session-copy p { max-width: none; }
+  .session-start { margin-top: 24px; }
   .practice-heading { align-items: flex-start; gap: 12px; }
   .practice-heading h2 { font-size: 1.15rem; max-width: 210px; }
   .text-link { font-size: 0.65rem; min-width: 95px; }
