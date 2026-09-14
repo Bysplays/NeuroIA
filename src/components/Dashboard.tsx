@@ -26,7 +26,6 @@ interface DashboardProps {
   onSelectDomain: (domain: CognitiveDomain) => void;
   onSelectExercise?: (exerciseId: ExerciseId) => void;
   onStartDailyPlan: () => void;
-  onOpenTherapistReport: () => void;
   onOpenAchievements: () => void;
 }
 
@@ -35,7 +34,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onSelectDomain,
   onSelectExercise,
   onStartDailyPlan,
-  onOpenTherapistReport,
   onOpenAchievements,
 }) => {
   const [showAreaSelection, setShowAreaSelection] = useState(false);
@@ -161,7 +159,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </section>
 
 
-          <div className="home-bottom-grid">
             <section className="progress-summary">
               <div><h2>Tu recorrido</h2><p>{profile.totalSessions === 0 ? 'Aquí irás viendo todo lo que vas consiguiendo.' : `${profile.totalSessions} ejercicios completados. Cada intento cuenta.`}</p></div>
               <div className="progress-domains">
@@ -174,12 +171,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 ))}
               </div>
             </section>
-            <button className="guidance-card" onClick={onOpenTherapistReport}>
-              <span className="guidance-top"><Stethoscope size={22} /><span>Tu espacio de apoyo</span><ArrowRight size={19} /></span>
-              <strong>{profile.therapistGuidanceNote ? 'Una nota para ti' : 'Acompañamos tu progreso.'}</strong>
-              <span className="guidance-description">{profile.therapistGuidanceNote || 'Consulta tus pautas y comparte tus avances con tu terapeuta.'}</span>
-            </button>
-          </div>
         </div>
       ) : (
         <section className="area-selection-section card animate-fade-in">

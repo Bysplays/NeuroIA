@@ -208,11 +208,11 @@ body:has(.dashboard-area-selection-active),
 @media (max-width: 1050px) {
   .home-feature-grid { grid-template-columns: 1fr; }
   .daily-session-card { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
-  .consistency-card { display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; align-items: center; }
+  .consistency-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, .4fr); column-gap: 32px; align-items: center; }
   .consistency-heading { grid-column: 1; }
   .streak-number { grid-column: 1; margin: 16px 0 10px; }
   .consistency-card > p { grid-column: 1; margin-bottom: 0; }
-  .consistency-stats { grid-column: 2; grid-row: 1 / 4; margin: 0; padding: 12px 0 12px 28px; border-top: 0; border-left: 1px solid color-mix(in srgb, var(--panel-ink) 15%, transparent); }
+  .consistency-stats { grid-template-columns: 1fr; grid-column: 2; grid-row: 1 / 4; margin: 0; padding: 12px 0 12px 28px; border-top: 0; border-left: 1px solid color-mix(in srgb, var(--panel-ink) 15%, transparent); }
   .daily-session-card { padding: 26px; }
   .practice-cards { gap: 10px; }
   .practice-card { padding: 18px 14px; }
@@ -255,7 +255,7 @@ body:has(.dashboard-area-selection-active),
   .session-actions { gap: 16px; align-items: stretch; }
   .session-footnote { text-align: center; }
   .consistency-card { display: flex; }
-  .consistency-stats { width: 100%; border-left: 0; border-top: 1px solid color-mix(in srgb, var(--panel-ink) 15%, transparent); padding: 20px 0 0; margin-top: 20px; }
+  .consistency-stats { grid-template-columns: 1fr 1fr; width: 100%; border-left: 0; border-top: 1px solid color-mix(in srgb, var(--panel-ink) 15%, transparent); padding: 20px 0 0; margin-top: 20px; }
   .daily-session-copy h2 { font-size: 1.95rem; }
   .daily-session-copy p { max-width: none; }
   .practice-heading { align-items: flex-start; gap: 12px; }

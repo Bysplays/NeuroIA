@@ -168,7 +168,6 @@ export const App: React.FC = () => {
             onSelectExercise={handleSelectExercise}
             onStartDailyPlan={handleStartDailyPlan}
             onOpenAchievements={() => { setActiveView('achievements'); window.scrollTo(0, 0); }}
-            onOpenTherapistReport={() => setActiveView('therapist')}
           />
         )}
 
