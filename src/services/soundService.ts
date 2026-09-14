@@ -58,7 +58,7 @@ class SoundService {
     this.speechRate = Math.max(0.6, Math.min(1.4, rate));
   }
 
-  // Tono sutil al tocar un elemento interactivo
+  // Toque grave y breve, con entrada y salida suaves para evitar chasquidos.
   public playTap() {
     if (!this.soundEnabled) return;
     const ctx = this.getAudioContext();
@@ -67,19 +67,26 @@ class SoundService {
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
+      const now = ctx.currentTime;
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(580, ctx.currentTime + 0.05);
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.045);
 
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.025, now + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+      gain.gain.linearRampToValueAtTime(0, now + 0.045);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
 
-      osc.start();
-      osc.stop(ctx.currentTime + 0.06);
+      osc.start(now);
+      osc.stop(now + 0.05);
     } catch {
       // Ignorar errores de autoplay policy
     }
