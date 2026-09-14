@@ -3,7 +3,7 @@ import React from 'react';
 import { X, ArrowRight } from 'lucide-react';
 import { WellnessGlyph } from './WellnessGlyph';
 import type { CognitiveDomain, ExerciseDefinition, ExerciseId } from '../types';
-import { getExercisesForDomain } from '../services/exerciseCatalog';
+import { EXERCISE_SUMMARIES, getExercisesForDomain } from '../services/exerciseCatalog';
 import { soundService } from '../services/soundService';
 
 interface ExerciseSelectionModalProps {
@@ -13,17 +13,7 @@ interface ExerciseSelectionModalProps {
   onClose: () => void;
 }
 
-const EXERCISE_SUMMARIES: Record<ExerciseId, string> = {
-  'visual-scanning': 'Busca la figura repetida entre las demás.',
-  'language-naming': 'Mira el objeto y encuentra su nombre.',
-  'word-completion': 'Completa una palabra con las letras que faltan.',
-  'memory-path': 'Recuerda las luces y repite su orden.',
-  'memory-pairs': 'Descubre las cartas y encuentra sus parejas.',
-  'daily-sequencing': 'Ordena los pasos de una actividad cotidiana.',
-  'categorization': 'Agrupa los objetos por su categoría.',
-  'motor-target': 'Toca las dianas a tu ritmo.',
-  'motor-tracking': 'Sigue una diana que se mueve despacio.',
-};
+
 
 export const ExerciseSelectionModal: React.FC<ExerciseSelectionModalProps> = ({
   domain,

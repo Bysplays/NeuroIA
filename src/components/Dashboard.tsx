@@ -1,3 +1,4 @@
+import { ExerciseCatalog } from './ExerciseCatalog';
 import { getAchievements } from '../services/achievements';
 import React, { useState } from 'react';
 import {
@@ -6,13 +7,9 @@ import {
   Brain,
   ListOrdered,
   Hand,
-  Stethoscope,
-  Play,
   Sun,
   Clock3,
   Medal,
-  Shuffle,
-  ArrowLeft,
   ArrowRight
 } from 'lucide-react';
 import type { UserProfile, CognitiveDomain, ExerciseId } from '../types';
@@ -140,7 +137,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <section className="practice-section" aria-labelledby="practice-title">
             <div className="practice-heading">
               <h2 id="practice-title">¿Qué te apetece practicar?</h2>
-              <button className="text-link" onClick={() => setShowAreaSelection(true)}>Ver ejercicios <ArrowRight size={18} /></button>
+              <button className="text-link" onClick={() => { setShowAreaSelection(true); window.scrollTo(0, 0); }}>Ver ejercicios <ArrowRight size={18} /></button>
             </div>
             <div className="practice-cards">
               {domainCards.map((domain, index) => (
@@ -172,104 +169,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </section>
         </div>
       ) : (
-        <section className="area-selection-section card animate-fade-in">
-          <div className="section-header-row">
-            <div>
-              <h1 className="section-title">Encuentra tu entrenamiento</h1>
-              <p className="section-subtitle">Elige la capacidad que quieres practicar hoy.</p>
-            </div>
-
-            <div className="area-header-buttons">
-              <button
-                className="touch-btn touch-btn-primary"
-                onClick={() => {
-                  soundService.playSuccess();
-                  onStartDailyPlan();
-                }}
-                title="Sesión guiada que combina 3 ejercicios distintos"
-              >
-                <Shuffle size={20} />
-                <span>Sesión Guiada (3 Ejercicios)</span>
-              </button>
-
-              <button
-                className="touch-btn touch-btn-secondary"
-                onClick={() => {
-                  soundService.playTap();
-                  setShowAreaSelection(false);
-                }}
-              >
-                <ArrowLeft size={20} />
-                <span>Volver</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="domains-grid">
-            {domainCards.map(domain => {
-              const isPrescribed = profile.prescribedDomains && profile.prescribedDomains.includes(domain.id);
-              return (
-                <div
-                  key={domain.id}
-                  className={`card card-interactive domain-card ${isPrescribed ? 'card-prescribed' : ''}`}
-                  onClick={() => {
-                    soundService.playTap();
-                    setSelectedDomainForModal(domain.id);
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={e => {
-                    if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
-                      e.preventDefault();
-                      setSelectedDomainForModal(domain.id);
-                    }
-                  }}
-                >
-                  {isPrescribed && (
-                    <div className="prescribed-badge">
-                      <Stethoscope size={16} />
-                      <span>Prioridad Pautada</span>
-                    </div>
-                  )}
-
-                  <div className="domain-card-header">
-                    <div
-                      className="domain-icon-circle"
-                      style={{ backgroundColor: domain.bgColor, color: domain.color }}
-                    >
-                      {domain.icon}
-                    </div>
-                    <div className="domain-title-group">
-                      <h4 className="domain-card-title">{domain.title}</h4>
-                      <span className="domain-card-subtitle">{domain.subtitle}</span>
-                    </div>
-                  </div>
-
-                  <p className="domain-card-desc">{domain.desc}</p>
-
-                  <div className="domain-card-footer">
-                    <div className="domain-card-stat">
-                      <span className="stat-label">Precisión media</span>
-                      <strong className="stat-val">{domain.stats.avgAccuracy || 0}%</strong>
-                    </div>
-
-                    <button
-                      className="touch-btn touch-btn-primary domain-play-btn"
-                      onClick={e => {
-                        e.stopPropagation();
-                        soundService.playTap();
-                        setSelectedDomainForModal(domain.id);
-                      }}
-                    >
-                      <Play size={20} />
-                      <span>Practicar</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+        <ExerciseCatalog
+          profile={profile}
+          onBack={() => setShowAreaSelection(false)}
+          onStartDailyPlan={onStartDailyPlan}
+          onSelectExercise={exercise => {
+            if (onSelectExercise) onSelectExercise(exercise.id);
+            else onSelectDomain(exercise.domain);
+          }}
+        />
       )}
 
       {/* Modal para elegir entre los ejercicios del área */}
