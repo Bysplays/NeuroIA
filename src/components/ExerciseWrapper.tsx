@@ -1,6 +1,6 @@
 import { ModalFrame } from './ModalFrame';
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Volume2, VolumeX, Sparkles, CheckCircle2, RotateCcw, Home, ArrowRight, Award, ClipboardCheck, X } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, Sparkles, CheckCircle2, RotateCcw, Home, ArrowRight, Clock, ClipboardCheck, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { CognitiveDomain, ExerciseResult } from '../types';
 import { soundService } from '../services/soundService';
@@ -159,10 +159,10 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                 <strong className="stat-number">{result.accuracy}%</strong>
               </div>
               <div className="stat-box">
-                <span className="stat-label">Puntos Ganados</span>
+                <span className="stat-label">Tiempo de práctica</span>
                 <strong className="stat-number text-primary">
-                  <Award size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
-                  +{result.score} pts
+                  <Clock size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                  {Math.floor(result.durationSeconds / 60)}:{String(Math.round(result.durationSeconds % 60)).padStart(2, '0')}
                 </strong>
               </div>
             </div>

@@ -275,14 +275,13 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
                 <th>Duración</th>
                 <th>Aciertos</th>
                 <th>Precisión</th>
-                <th>Puntos</th>
                 <th>Evaluación</th>
               </tr>
             </thead>
             <tbody>
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '24px' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '24px' }}>
                     Los ejercicios completados aparecerán aquí.
                   </td>
                 </tr>
@@ -315,9 +314,6 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
                         <span className={`accuracy-badge ${item.accuracy >= 80 ? 'acc-high' : item.accuracy >= 60 ? 'acc-mid' : 'acc-low'}`}>
                           {item.accuracy}%
                         </span>
-                      </td>
-                      <td>
-                        <strong>+{item.score} pts</strong>
                       </td>
                       <td className="feedback-col">
                         <span>{item.feedbackMessage}</span>

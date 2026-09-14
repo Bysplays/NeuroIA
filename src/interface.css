@@ -577,3 +577,41 @@ body:not([data-contrast="standard"]) .points-total img { mix-blend-mode: normal;
   .clinical-workspace { grid-template-columns: 1fr; }
   .clinical-panel, .clinical-overview, .note-card { break-inside: avoid; }
 }
+
+/* Chapas de papel: una colección vinculada a la práctica real. */
+.consistency-stats a { text-decoration: none; }
+.achievement-showcase { background: var(--color-surface); border-radius: 30px; padding: 28px; scroll-margin-top: 24px; }
+.achievement-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.achievement-overline { font-size: .63rem; color: var(--color-text-muted); }
+.achievement-heading h2 { font-size: 1.35rem; font-weight: 500; margin-top: 7px; }
+.achievement-heading p { font-size: .73rem; margin-top: 8px; line-height: 1.6; }
+.achievement-count { font-size: .68rem; background: var(--panel-lilac); color: var(--panel-ink); padding: 10px 14px; border-radius: 99px; white-space: nowrap; }
+.badge-shelf { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
+.badge-display { display: flex; flex-direction: column; align-items: center; gap: 9px; border: 1px solid transparent; background: transparent; color: var(--color-text-main); cursor: pointer; border-radius: 22px; padding: 8px 4px 16px; text-align: center; min-width: 0; transition: background 160ms; }
+.badge-display:hover { background: var(--color-bg); }
+.badge-illustration { position: relative; width: 100%; max-width: 150px; display: block; }
+.achievement-art { display: block; width: 100%; aspect-ratio: 1; background-image: url('/images/achievement-badges.png'); background-size: 404.21% 269.47%; background-position: var(--badge-x) var(--badge-y); border-radius: 50%; mix-blend-mode: multiply; }
+.badge-pending .achievement-art { opacity: .55; filter: saturate(.6); }
+.badge-earned .badge-state { background: var(--panel-sage); }
+.badge-state { position: absolute; right: 10%; bottom: 7%; width: 26px; height: 26px; display: grid; place-items: center; border: 2px solid var(--color-surface); background: var(--color-bg); border-radius: 50%; }
+.badge-display strong { font-size: .73rem; font-weight: 500; }
+.badge-progress-text { font-size: .6rem; color: var(--color-text-muted); }
+.achievement-detail { display: flex; flex-direction: column; align-items: center; padding: 0 28px 24px; gap: 16px; text-align: center; }
+.achievement-detail .achievement-art { width: 210px; }
+.achievement-detail h2 { font-size: 1.45rem; font-weight: 500; }
+.achievement-detail p { font-size: .82rem; line-height: 1.7; max-width: 350px; }
+.achievement-detail > span:last-child { font-size: .73rem; }
+.achievement-detail progress { width: min(280px, 100%); height: 8px; appearance: none; border: 0; border-radius: 8px; overflow: hidden; background: var(--color-border); }
+.achievement-detail progress::-webkit-progress-bar { background: var(--color-border); border-radius: 8px; }
+.achievement-detail progress::-webkit-progress-value { background: var(--color-primary); border-radius: 8px; }
+.achievement-detail progress::-moz-progress-bar { background: var(--color-primary); }
+body:not([data-contrast="standard"]) .achievement-art { mix-blend-mode: normal; }
+@media (max-width: 900px) {
+  .badge-shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .achievement-showcase { padding: 24px 16px; }
+  .achievement-heading { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .badge-shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .badge-display strong { font-size: .77rem; }
+}

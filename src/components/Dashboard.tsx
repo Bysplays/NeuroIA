@@ -1,4 +1,5 @@
-import { ModalFrame } from './ModalFrame';
+import { AchievementShowcase } from './AchievementShowcase';
+import { getAchievements } from '../services/achievements';
 import React, { useState } from 'react';
 import {
   Eye,
@@ -11,8 +12,7 @@ import {
   Sun,
   Clock3,
   Flame,
-  Award,
-  X,
+  Medal,
   Shuffle,
   ArrowLeft,
   ArrowRight
@@ -37,9 +37,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onStartDailyPlan,
   onOpenTherapistReport,
 }) => {
-  const [showPointsModal, setShowPointsModal] = useState(false);
   const [showAreaSelection, setShowAreaSelection] = useState(false);
   const [selectedDomainForModal, setSelectedDomainForModal] = useState<CognitiveDomain | null>(null);
+
+  const earnedAchievements = getAchievements(profile).filter(achievement => achievement.unlocked).length;
 
   const domainCards = [
     {
@@ -133,7 +134,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p>{profile.streakDays > 0 ? 'Sigue encontrando ese ratito para ti.' : 'Tu próximo pequeño logro empieza hoy.'}</p>
               <div className="consistency-stats">
                 <div><Clock3 size={20} /><strong>{profile.totalMinutes}</strong><span>minutos</span></div>
-                <button onClick={() => setShowPointsModal(true)} aria-label={`${profile.totalScore ?? 0} NeuroPuntos. Ver información`}><Award size={20} /><strong>{profile.totalScore ?? 0}</strong><span>NeuroPuntos <span aria-hidden="true">↗</span></span></button>
+                <a href="#achievements" onClick={() => document.getElementById('achievements')?.focus({ preventScroll: true })}><Medal size={20} /><strong>{earnedAchievements}</strong><span>Logros <span aria-hidden="true">↗</span></span></a>
               </div>
             </section>
           </div>
@@ -157,6 +158,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               ))}
             </div>
           </section>
+
+          <AchievementShowcase profile={profile} />
 
           <div className="home-bottom-grid">
             <section className="progress-summary">
@@ -297,43 +300,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         />
       )}
 
-      {/* Modal explicativo: ¿Para qué sirven los puntos ganados? */}
-      {showPointsModal && (
-        <ModalFrame onClose={() => setShowPointsModal(false)} labelledBy="points-title">
-          <div className="modal-container points-dialog" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <Award size={32} className="text-primary" />
-                <div>
-                  <h2 id="points-title" className="modal-title">Tus pequeños logros</h2>
-                  <p className="modal-subtitle">Cada ejercicio cuenta.</p>
-                </div>
-              </div>
-              <button className="modal-close-btn" onClick={() => setShowPointsModal(false)} aria-label="Cerrar ventana">
-                <X size={28} />
-              </button>
-            </div>
 
-            <div className="modal-body points-modal-body">
-              <div className="points-total"><div><strong>{profile.totalScore ?? 0}</strong><span>NeuroPuntos acumulados</span></div><img src="/images/wellness-companions.png" alt="" /></div>
-              <p>Los puntos reconocen tu práctica. Puedes ver cómo avanzas a medida que completas ejercicios.</p>
-              <div className="points-note">Tu progreso también incluye el tiempo que dedicas y las actividades que vas completando.</div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="touch-btn touch-btn-primary touch-btn-large"
-                onClick={() => {
-                  soundService.playTap();
-                  setShowPointsModal(false);
-                }}
-              >
-                Entendido
-              </button>
-            </div>
-          </div>
-        </ModalFrame>
-      )}
     </div>
   );
 };
