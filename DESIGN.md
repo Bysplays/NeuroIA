@@ -28,15 +28,10 @@ Use the actual home screen and these repository assets as the visual references:
 
 - `public/images/wellness-companions.png`: the turquoise pear and lavender pebble
   companions; reference for character proportions, expression, and paper texture.
-- `public/images/headers/`: individual scenes for all nine exercise headers and
-  results, home, catalog, achievements, therapist view, and the fatigue dialog.
-  See `public/images/headers/README.md` for prompts and provenance.
 - `public/images/achievement-badges.png` and `achievement-badges-extended.png`:
   the collectible illustration family.
 - `public/images/paper-play-tokens.png`: the smiling paper target and companion
   used in the two motor games.
-- `public/images/organization-objects.png`: a shared 8 × 10 true-alpha atlas
-  for Organization stimuli, preserving object identities and original map order.
 - `public/images/game-objects-0.png` through `game-objects-2.png`: recognizable
   objects and action symbols for game stimuli.
 - `public/brand/neuroia-mark.svg` and `neuroia-logo.svg`: the brand identity.
@@ -125,18 +120,7 @@ The daily-plan entry remains on the home.
 
 The game is part of the home experience, not a separate clinical application.
 Use the shared `ExerciseWrapper`: brand navigation, a short pastel introduction,
-a scene specific to the exercise, the play area, and consistent completion/review
-actions. Each game keeps its own scene on completion. Header scenes alternate
-solo companions and shared activities; do not repeat the original walking pair
-across screens. Keep decoration separate from the actual exercise clues.
-
-Menu headings use their own scene, with restrained artwork in the professional
-view (omitted from printing). Keep the full illustration visible using contain,
-including on narrow phones. White-backed scenes blend into standard pastel panels
-with multiply; contrast themes display the artwork on a softly rounded white
-paper backing so dark ink limbs stay visible. The Organization scenes use a
-shared true-alpha sheet and remain transparent in every theme, with normal
-blending. Never crop limbs to hide a backdrop.
+paper companions, the play area, and consistent completion/review actions.
 
 - Put the task title and instructions together in the introduction. Keep return
   and voice controls easy to find. Daily-plan position must remain visible.
@@ -147,21 +131,14 @@ blending. Never crop limbs to hide a backdrop.
   matching board objects must use exactly the same illustration.
 - Keep memory tiles distinct at rest and clearly highlighted during a demo.
   Hidden cards must not reveal their object through text or accessible names.
-- Show sequence order as compact paper-style “Paso 1”, “Paso 2”, “Paso 3”
-  labels in the card corner; never cover an action illustration with a giant
-  numeral, glass circle, blur or neon glow. Show correctness explicitly. Decoration must not suggest an
+- Show sequence order and correctness explicitly. Decoration must not suggest an
   answer or interfere with selecting, dragging, or reviewing a step.
 - Use the illustrated paper target and companion for motor games. Their visible
   boundary should agree with the hit area. Keep the entire token inside the arena
   on phones as well as desktop, and show contact feedback without neon effects.
-- Results use one pastel surface with the exercise illustration beside a short
-  completion heading. Show correct answers, accuracy, and time in an unboxed
-  definition list separated from the heading/actions by quiet horizontal rules.
-  Give only one action a filled button: return home for a standalone exercise,
-  continue for a daily plan, or finish the last plan exercise. Review and repeat
-  remain text actions below it; home navigation remains available above. Avoid
-  nested cards, a separate feedback banner, repeated return buttons, and medical
-  efficacy claims. Do not bring back points as the visible reward system.
+- Results use the same palette, companions, and controls. Keep accuracy, practice
+  time, and next actions easy to scan. Do not bring back points as the visible
+  reward system.
 
 Avoid forced viewport-height layouts that clip controls. Some games may need
 vertical scrolling on smaller screens. Do not hide overflow to conceal broken
@@ -202,10 +179,7 @@ density into patient games.
    reference rather than describing a vaguely similar mascot from memory.
 2. For paper characters and objects, generate matching raster artwork. Extend
    existing SVG controls as vectors when that is the appropriate asset type.
-3. When creating multiple related images, try to generate the whole set in one
-   generation as a shared sheet to save tokens and maintain visual consistency.
-   Split into smaller sets only when legibility, output limits, or precise edits
-   require it. For a sprite sheet, specify row/column count, exact reading order, safe margins,
+3. For a sprite sheet, specify row/column count, exact reading order, safe margins,
    recognizable object identity, and no accidental labels or neighboring art.
 4. Save the final asset in `public/images/`. Record the final prompt, generation
    tool, reference asset, and grid layout in an adjacent Markdown file.
@@ -227,12 +201,6 @@ Use comfortable touch targets, generally at least 44–48 px for controls, with
 larger areas where the exercise requires them. Preserve keyboard operation,
 visible focus, meaningful accessible names, and dialog focus return. Keep labels
 outside decorative images when possible.
-
-Narration uses Spanish from Spain (`es-ES`) with a calm, conversational tone.
-Prefer natural/enhanced Spain voices and recognize accented voice names. Do not
-select a Latin American voice merely because it appears first. Keep pitch natural,
-preserve the user’s pace setting, and offer a short voice preview in accessibility
-settings. Browser speech quality still depends on the installed voices.
 
 Motion and sound should reassure, not startle. Reuse the gentle tap sound and
 separate sound-effect and narrator preferences. Respect reduced-motion settings;

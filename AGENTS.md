@@ -42,17 +42,16 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 | `src/components/Dashboard.tsx` | Home, entry points to areas and all exercises |
 | `src/components/ExerciseCatalog.tsx` | Nine-game catalog and area filters |
 | `src/services/exerciseCatalog.ts` | Canonical exercise definitions and short summaries |
-| `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/ExerciseWrapper.tsx` | Shared game navigation, introduction, results, and review |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
 | `src/services/storageService.ts` | Local persistence, progress, settings, notes, daily plan |
-| `src/services/soundService.ts` and `speechVoice.ts` | Shared audio, narrator controls, and Spain-voice selection |
+| `src/services/soundService.ts` | Shared sound effects and speech controls |
 | `src/services/achievements.ts` | Cumulative achievement conditions |
 | `src/components/AchievementShowcase.tsx` | Standalone badge collection and details |
 | `src/components/TherapistReport.tsx` | Professional guidance, notes, history, and print view |
 | `src/components/WellnessGlyph.tsx` | Distinct catalog illustrations for each game |
-| `src/components/GameObject.tsx` and `src/services/gameArtwork.json` | Sprite rendering and mapping of game stimuli; Organization opts into the transparent atlas with measured crops in `organizationArtwork.json` |
+| `src/components/GameObject.tsx` and `src/services/gameArtwork.json` | Sprite rendering and mapping of game stimuli |
 | `src/components/PaperTarget.tsx` | Illustrated motor-game tokens |
 | `public/brand/` and `public/images/` | Brand marks, paper illustrations, and asset provenance |
 
@@ -89,22 +88,11 @@ Install dependencies when needed, not on every turn. Vite normally serves on por
 available. `npm run build` runs TypeScript and the production build.
 `npm run lint` runs Oxlint.
 
-### GitHub Pages
-
-`.github/workflows/deploy.yml` builds and deploys every push to `main` using Node
-22 and `npm ci`. Set the repository's Pages source to **GitHub Actions** before
-its first run. The workflow passes the Pages base path to Vite, supporting both
-repository subpaths and custom domains. Runtime references to public assets must
-use `import.meta.env.BASE_URL`; Vite handles URLs in CSS and HTML during build.
-To verify a repository deployment locally, run
-`npm run build -- --base /app-ictus/` and
-`npm run preview -- --base /app-ictus/`, then open `/app-ictus/`.
-
 ### Known tooling gap
 
 As of 2026-09-14, `package.json` does not define `check`, `check:test`,
 `check:types`, `check:lint`, `check:format`, or `check:deadcode`, although
-CONTRIBUTING.md lists them. Voice selection has focused coverage via `node --experimental-strip-types --test tests/speechVoice.test.ts` (Node 22+); there is no aggregate repository test script. Existing game
+CONTRIBUTING.md lists them. There is no repository test script. Existing game
 code also produces React-related lint warnings. Report actual command results;
 do not claim that missing checks ran or that a zero exit code means zero warnings.
 This documents the gap, not an exemption from the merge requirements. Reconcile

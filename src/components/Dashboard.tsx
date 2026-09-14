@@ -1,4 +1,3 @@
-import { HeaderIllustration } from './HeaderIllustration';
 import { ExerciseCatalog } from './ExerciseCatalog';
 import { getAchievements } from '../services/achievements';
 import React, { useState } from 'react';
@@ -112,7 +111,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <h2>Un rato para ti.<br />Un paso más.</h2>
                 <p>Tres ejercicios para activar tu mente.<br />Sin prisas. A tu manera.</p>
               </div>
-              <HeaderIllustration scene="home" className="wellness-characters" />
+              <img className="wellness-characters" src="/images/wellness-companions.png" alt="" />
               <div className="session-actions">
                 <button className="session-start" onClick={() => {
                   soundService.playTap();

@@ -328,14 +328,14 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
 
     if (isCorrect) {
       soundService.playSuccess();
-      soundService.speak('Bien hecho. Has colocado los pasos en orden.');
+      soundService.speak('¡Excelente! Secuencia lógica completada a la perfección.');
       setFeedback('¡Correcto! Has ordenado los pasos de forma lógica.');
       if (!hasErrorInCurrentRound) {
         setCorrectScenariosCount(prev => prev + 1);
       }
     } else {
       soundService.playGentlePrompt();
-      soundService.speak('Vamos a repasarlo con calma. Pulsa Corregir y prueba otro orden.');
+      soundService.speak('El orden no es del todo correcto. Puedes pulsar en Corregir para intentarlo de nuevo.');
       setFeedback('El orden no es el adecuado. Toca en una tarjeta para cambiar el orden o pulsa "Corregir".');
       setHasErrorInCurrentRound(true);
 
@@ -406,7 +406,6 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
 
   return (
     <ExerciseWrapper
-      exerciseId="daily-sequencing"
       title={sessionScenarios.length > 1 ? `${currentScenario.title} (${scenarioIdx + 1}/${sessionScenarios.length})` : currentScenario.title}
       domain="executive"
       instructionText="Toca las tarjetas en el orden en que harías cada paso."
@@ -446,14 +445,19 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
                 aria-label={`${step.text}${orderNumber ? ` - Seleccionado como paso ${orderNumber}` : ''}`}
                 title={isSelected ? `Paso ${orderNumber} seleccionado (toca para cambiar el orden)` : 'Toca para seleccionar este paso'}
               >
-                {/* Selection order stays separate from the illustrated action. */}
+                {/* Verde difuminado translúcido con desenfoque suave */}
+                {isSelected && <div className="seq-green-overlay" />}
+
+                {/* Número de la selección en medio en grande pero permitiendo ver el fondo */}
                 {isSelected && (
-                  <span className="seq-order-badge" aria-hidden="true">Paso {orderNumber}</span>
+                  <div className="seq-order-badge">
+                    <span>{orderNumber}</span>
+                  </div>
                 )}
 
                 {/* Emoji del paso */}
                 <div className="seq-card-emoji-wrap">
-                  <span className="seq-card-emoji"><GameObject transparent symbol={step.emoji} /></span>
+                  <span className="seq-card-emoji"><GameObject symbol={step.emoji} /></span>
                 </div>
 
                 {/* Texto descriptivo del paso claramente visible */}

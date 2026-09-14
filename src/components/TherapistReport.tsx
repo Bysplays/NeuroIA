@@ -1,4 +1,3 @@
-import { HeaderIllustration } from './HeaderIllustration';
 import React, { useState } from 'react';
 import { Calendar, Clock, Printer, PlusCircle, Check, RotateCcw } from 'lucide-react';
 import type { UserProfile, CognitiveDomain, ExerciseResult } from '../types';
@@ -96,7 +95,6 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
     <div className="therapist-container clinical-dashboard">
       <header className="clinical-heading">
         <div><span className="clinical-eyebrow">Espacio profesional</span><h1>El progreso de {profile.name}</h1><p>Una mirada a su actividad y al siguiente paso.</p></div>
-        <HeaderIllustration scene="therapist" className="menu-header-art" />
         <button className="touch-btn touch-btn-secondary" onClick={() => window.print()}><Printer size={18} /> Exportar informe</button>
       </header>
 

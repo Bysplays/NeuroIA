@@ -1,5 +1,3 @@
-import { selectSpainVoice } from './speechVoice';
-
 // Servicio de audio sintético (Web Audio API) y síntesis de voz (Web Speech API)
 // Diseñado para evitar sonidos estridentes o que causen sobresalto, priorizando tonos cálidos y armónicos
 
@@ -31,7 +29,11 @@ class SoundService {
   private initVoices() {
     if (!('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();
-    this.spanishVoice = selectSpainVoice(voices);
+    // Priorizar voces en español de alta calidad
+    this.spanishVoice =
+      voices.find(v => v.lang.startsWith('es') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Monica') || v.name.includes('Jorge') || v.name.includes('Paulina'))) ||
+      voices.find(v => v.lang.startsWith('es')) ||
+      null;
   }
 
   private getAudioContext(): AudioContext | null {
@@ -229,7 +231,6 @@ class SoundService {
     }
 
     try {
-      this.initVoices(); // The voice list may arrive after the first render.
       window.speechSynthesis.cancel(); // Detener locución previa si existiera
 
       const utterance = new SpeechSynthesisUtterance(text);

@@ -453,7 +453,6 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
   return (
     <ExerciseWrapper
-      exerciseId="categorization"
       title={`Clasificación por Categorías (${currentIdx + 1}/${sessionItems.length})`}
       domain="executive"
       instructionText="Cada cosa en su lugar. Elige el grupo al que pertenece."
@@ -470,7 +469,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
         <div className="categorization-card">
           {/* Objeto central a clasificar */}
           <div className="category-object-card">
-            <span className="large-object-emoji"><GameObject transparent symbol={currentItem.emoji} /></span>
+            <span className="large-object-emoji"><GameObject symbol={currentItem.emoji} /></span>
             <h2 className="object-name-title">{currentItem.name}</h2>
             <button
               className="touch-btn touch-btn-secondary object-voice-btn"
@@ -513,7 +512,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
                     className="bin-icon-circle"
                     style={{ backgroundColor: cat.bgColor, color: cat.color }}
                   >
-                    <span className="bin-emoji"><GameObject transparent symbol={cat.emoji} /></span>
+                    <span className="bin-emoji"><GameObject symbol={cat.emoji} /></span>
                   </div>
                   <h3 className="bin-title">{cat.name}</h3>
 

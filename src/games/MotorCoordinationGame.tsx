@@ -137,7 +137,6 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
   return (
     <ExerciseWrapper
-      exerciseId="motor-target"
       title={`Toca la Diana (${targetIdx + 1}/${targets.length})`}
       domain="motor"
       instructionText="Toca el centro de la diana de papel. Sin prisa, una a una."

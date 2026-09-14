@@ -259,7 +259,6 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
   return (
     <ExerciseWrapper
-      exerciseId="memory-pairs"
       title={isPreviewPhase ? "Parejas de Memoria (Memoriza el Tablero)" : `Parejas de Memoria (${matchedCount}/3 Parejas)`}
       domain="memory"
       instructionText={
@@ -322,7 +321,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
                   </div>
                 ) : (
                   <div className="tile-back animate-fade-in">
-                    <img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} className="tile-back-mark" alt="" />
+                    <img src="/brand/neuroia-mark.svg" className="tile-back-mark" alt="" />
                     <span className="tile-back-hint">Toca</span>
                   </div>
                 )}
