@@ -398,7 +398,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
     <ExerciseWrapper
       title={`Completar Palabras (${currentIdx + 1}/${sessionItems.length})`}
       domain="language"
-      instructionText="Observa la imagen y la palabra. Toca la letra que falta para completarla correctamente."
+      instructionText="Mira la imagen y toca la letra que falta."
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}

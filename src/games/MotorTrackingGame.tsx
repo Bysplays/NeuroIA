@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Compass } from 'lucide-react';
+import { PaperTarget } from '../components/PaperTarget';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -73,20 +73,24 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
         let newVx = velocity.vx;
         let newVy = velocity.vy;
 
-        // Rebote suave en los bordes con margen acorde al tamaño de la diana
-        if (newX < 14) {
-          newX = 14;
+        const arena = arenaRef.current?.getBoundingClientRect();
+        const marginX = Math.min(50, Math.max(14, (TARGET_SIZE / 2 + 8) / (arena?.width || 600) * 100));
+        const marginY = Math.min(50, Math.max(14, (TARGET_SIZE / 2 + 8) / (arena?.height || 400) * 100));
+
+        // Keep the whole paper token visible, including on narrow screens.
+        if (newX < marginX) {
+          newX = marginX;
           newVx = Math.abs(newVx);
-        } else if (newX > 86) {
-          newX = 86;
+        } else if (newX > 100 - marginX) {
+          newX = 100 - marginX;
           newVx = -Math.abs(newVx);
         }
 
-        if (newY < 14) {
-          newY = 14;
+        if (newY < marginY) {
+          newY = marginY;
           newVy = Math.abs(newVy);
-        } else if (newY > 86) {
-          newY = 86;
+        } else if (newY > 100 - marginY) {
+          newY = 100 - marginY;
           newVy = -Math.abs(newVy);
         }
 
@@ -195,9 +199,9 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
 
   return (
     <ExerciseWrapper
-      title="Persecución de Diana Móvil"
+      title="Sigue a tu compañero"
       domain="motor"
-      instructionText="Mantén el dedo o el puntero sobre el círculo móvil para recargar la barra verde de progreso."
+      instructionText="Acompaña al personaje con el dedo o el puntero mientras se mueve."
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}
@@ -211,7 +215,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
         {/* Barra superior de progreso de contacto */}
         <div className="tracking-progress-header card">
           <div className="tracking-progress-info">
-            <span className="tracking-label">Contacto con la Diana:</span>
+            <span className="tracking-label">Un ratito juntos</span>
             <strong className="tracking-percent">{progressPercent}%</strong>
           </div>
           <div className="tracking-progress-bar-bg">
@@ -241,9 +245,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
             }}
             onPointerDown={handlePointerDownTarget}
           >
-            <div className="tracking-target-inner">
-              <Compass size={54} className="tracking-icon" />
-            </div>
+            <PaperTarget variant="companion" />
             {isHoveringOrTouching && <div className="tracking-target-halo" />}
           </div>
         </div>

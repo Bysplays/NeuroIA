@@ -408,7 +408,7 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
     <ExerciseWrapper
       title={sessionScenarios.length > 1 ? `${currentScenario.title} (${scenarioIdx + 1}/${sessionScenarios.length})` : currentScenario.title}
       domain="executive"
-      instructionText={`Situación: ${currentScenario.title}. ${currentScenario.description}. Toca las opciones en el orden en que se realizan (1º, 2º y 3º).`}
+      instructionText="Toca las tarjetas en el orden en que harías cada paso."
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}

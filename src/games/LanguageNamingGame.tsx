@@ -459,7 +459,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
     <ExerciseWrapper
       title={`¿Qué objeto es este? (${currentIdx + 1}/${sessionQuestions.length})`}
       domain="language"
-      instructionText="Observa la imagen central y toca el botón con la palabra correcta. Puedes escuchar su sonido si lo necesitas."
+      instructionText="Mira la imagen y elige su nombre. Puedes pedir una pista."
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}

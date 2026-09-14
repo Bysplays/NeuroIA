@@ -217,7 +217,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
         </span>
       }
       domain="attention"
-      instructionText={`Toca con tu dedo todas las ${currentTarget.name} que veas en la pantalla. Explora con calma desde la izquierda hasta la derecha.`}
+      instructionText={`Encuentra todas las ${currentTarget.name}. Mira con calma de izquierda a derecha.`}
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}

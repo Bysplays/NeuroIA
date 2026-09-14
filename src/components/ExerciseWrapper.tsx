@@ -37,15 +37,13 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   planProgress,
   onNextPlanExercise,
   children,
-  hideBadges = true,
-  hideInstructionBanner = true,
 }) => {
   const domainData: Record<CognitiveDomain, { name: string; color: string; bg: string }> = {
-    attention: { name: 'Atención y Rastreo Visual', color: 'var(--color-attention)', bg: 'var(--color-attention-bg)' },
-    language: { name: 'Lenguaje y Vocabulario', color: 'var(--color-language)', bg: 'var(--color-language-bg)' },
-    memory: { name: 'Memoria de Trabajo', color: 'var(--color-memory)', bg: 'var(--color-memory-bg)' },
-    executive: { name: 'Funciones Ejecutivas', color: 'var(--color-executive)', bg: 'var(--color-executive-bg)' },
-    motor: { name: 'Coordinación Visomotora', color: 'var(--color-motor)', bg: 'var(--color-motor-bg)' },
+    attention: { name: 'Atención', color: 'var(--color-attention)', bg: 'var(--color-attention-bg)' },
+    language: { name: 'Lenguaje', color: 'var(--color-language)', bg: 'var(--color-language-bg)' },
+    memory: { name: 'Memoria', color: 'var(--color-memory)', bg: 'var(--color-memory-bg)' },
+    executive: { name: 'Organización', color: 'var(--color-executive)', bg: 'var(--color-executive-bg)' },
+    motor: { name: 'Coordinación', color: 'var(--color-motor)', bg: 'var(--color-motor-bg)' },
   };
 
   const currentDomain = domainData[domain];
@@ -87,57 +85,29 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 
   return (
     <div className="exercise-container" data-domain={domain}>
-      {/* Barra superior del ejercicio */}
-      <div className="exercise-top-bar">
-        <button
-          className="touch-btn touch-btn-secondary"
-          onClick={() => {
-            soundService.stopSpeaking();
-            soundService.playTap();
-            onBack();
-          }}
-          aria-label="Volver al menú principal"
-        >
-          <ArrowLeft size={24} />
-          <span>Volver al inicio</span>
+      <header className="paper-game-nav">
+        <button className="paper-game-brand" onClick={onBack} aria-label="NeuroIA, ir al inicio">
+          <img src="/brand/neuroia-mark.svg" alt="" width="36" height="36" />
+          <span>NeuroIA</span>
         </button>
-
-        <div className="exercise-info-center">
-          {!hideBadges && (
-            <div className="exercise-badges-row">
-              <span
-                className="exercise-domain-pill"
-                style={{ backgroundColor: currentDomain.bg, color: currentDomain.color }}
-              >
-                {currentDomain.name}
-              </span>
-              {planProgress && (
-                <span className="plan-step-pill">
-                  ⭐ Plan del Día: Ejercicio {planProgress.current} de {planProgress.total}
-                </span>
-              )}
-            </div>
-          )}
-          <span className="game-overline">{currentDomain.name}{planProgress ? ` · Ejercicio ${planProgress.current} de ${planProgress.total}` : ' · A tu ritmo'}</span>
-          <h2 className="exercise-screen-title">{title}</h2>
+        <div className="paper-game-tools">
+          <button className="paper-nav-button" onClick={() => { soundService.stopSpeaking(); soundService.playTap(); onBack(); }} aria-label="Volver al menú principal">
+            <ArrowLeft size={19} /><span>Volver al inicio</span>
+          </button>
+          <button className="paper-nav-button paper-voice-button" onClick={handleToggleNarrator} aria-label={isNarratorMuted ? 'Activar voz del locutor' : 'Silenciar la voz del locutor'} title={isNarratorMuted ? 'Activar voz' : 'Silenciar voz'}>
+            {isNarratorMuted ? <VolumeX size={21} /> : <Volume2 size={21} />}
+          </button>
         </div>
-
-        <button
-          className={`touch-btn instruction-speak-btn ${isNarratorMuted ? 'touch-btn-secondary narrator-muted-btn' : 'touch-btn-secondary'}`}
-          onClick={handleToggleNarrator}
-          title={isNarratorMuted ? 'Activar voz del locutor' : 'Silenciar la voz del locutor'}
-          aria-label={isNarratorMuted ? 'Activar voz del locutor' : 'Silenciar la voz del locutor'}
-        >
-          {isNarratorMuted ? <VolumeX size={24} className="narrator-muted-icon" /> : <Volume2 size={24} />}
-          <span>{isNarratorMuted ? 'Activar voz' : 'Silenciar voz'}</span>
-        </button>
-      </div>
-
-      {/* Franja de instrucción visual clara */}
-      {!isCompleted && !hideInstructionBanner && (
-        <div className="exercise-instruction-banner">
-          <p className="instruction-text">{instructionText}</p>
-        </div>
+      </header>
+      {!isCompleted && (
+        <section className="paper-game-welcome" aria-labelledby="paper-game-title">
+          <div className="paper-game-intro">
+            <span className="paper-game-label"><span aria-hidden="true" />{currentDomain.name}{planProgress ? ` · Ejercicio ${planProgress.current} de ${planProgress.total}` : ' · A tu ritmo'}</span>
+            <h1 id="paper-game-title" className="exercise-screen-title">{title}</h1>
+            <p className="paper-game-instruction">{instructionText}</p>
+          </div>
+          <img className="paper-game-companions" src="/images/wellness-companions.png" alt="" />
+        </section>
       )}
 
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}

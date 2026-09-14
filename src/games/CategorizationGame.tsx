@@ -455,7 +455,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
     <ExerciseWrapper
       title={`Clasificación por Categorías (${currentIdx + 1}/${sessionItems.length})`}
       domain="executive"
-      instructionText="Observa el objeto central y toca el contenedor o caja al que pertenece."
+      instructionText="Cada cosa en su lugar. Elige el grupo al que pertenece."
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}
