@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="main-header">
       <button className="header-left" onClick={() => onNavigate('dashboard')} aria-label="NeuroIA, ir al inicio">
         <div className="header-logo-icon">
-          <img src="/brand/neuroia-mark.svg" alt="" width="40" height="40" />
+          <img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="40" height="40" />
         </div>
         <div>
           <span className="header-title">Neuro<span className="brand-light">IA</span></span>

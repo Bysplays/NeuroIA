@@ -1,3 +1,4 @@
+import { HeaderIllustration } from './HeaderIllustration';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { CognitiveDomain, ExerciseDefinition, UserProfile } from '../types';
@@ -31,6 +32,7 @@ export function ExerciseCatalog({ profile, onBack, onSelectExercise }: {
           <h1 id="library-title" tabIndex={-1} ref={heading}>Encuentra tu próximo juego</h1>
           <p>Elige lo que te apetezca. Practica a tu ritmo.</p>
         </div>
+        <HeaderIllustration scene="catalog" className="menu-header-art" />
       </div>
       <div className="library-filters" role="group" aria-label="Filtrar juegos por área">
         <button aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>Todos <span>{ALL_EXERCISES.length}</span></button>

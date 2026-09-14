@@ -21,9 +21,10 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
 
   const handleSpeechToggle = (enabled: boolean) => {
     soundService.playTap();
+    soundService.setVoiceEnabled(enabled);
     onUpdateSettings({ speechEnabled: enabled });
     if (enabled) {
-      soundService.speak('Lectura por voz activada. Te acompañaré durante los ejercicios.');
+      soundService.speak('Hola. Vamos a practicar a tu ritmo. Tómate el tiempo que necesites.');
     }
   };
 
@@ -168,6 +169,16 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                 }}
               >
                 <span>Velocidad: {settings.speechRate < 0.95 ? 'Pausada' : 'Normal'}</span>
+              </button>
+              <button
+                className="option-btn"
+                onClick={() => {
+                  soundService.setVoiceEnabled(true);
+                  onUpdateSettings({ speechEnabled: true });
+                  soundService.speak('Hola. Estoy aquí para acompañarte. Vamos poco a poco, a tu ritmo.');
+                }}
+              >
+                Escuchar la voz
               </button>
             </div>
           </section>

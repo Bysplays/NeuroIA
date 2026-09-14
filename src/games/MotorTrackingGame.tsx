@@ -199,6 +199,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
 
   return (
     <ExerciseWrapper
+      exerciseId="motor-tracking"
       title="Sigue a tu compañero"
       domain="motor"
       instructionText="Acompaña al personaje con el dedo o el puntero mientras se mueve."
