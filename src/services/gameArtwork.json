@@ -1,0 +1,704 @@
+[
+  {
+    "symbol": "🥕",
+    "name": "carrot",
+    "sheet": 0,
+    "cell": 0
+  },
+  {
+    "symbol": "🍎",
+    "name": "red apple",
+    "sheet": 0,
+    "cell": 1
+  },
+  {
+    "symbol": "👕",
+    "name": "t-shirt",
+    "sheet": 0,
+    "cell": 2
+  },
+  {
+    "symbol": "👖",
+    "name": "jeans",
+    "sheet": 0,
+    "cell": 3
+  },
+  {
+    "symbol": "🍌",
+    "name": "banana",
+    "sheet": 0,
+    "cell": 4
+  },
+  {
+    "symbol": "🧦",
+    "name": "socks",
+    "sheet": 0,
+    "cell": 5
+  },
+  {
+    "symbol": "🥖",
+    "name": "baguette bread",
+    "sheet": 0,
+    "cell": 6
+  },
+  {
+    "symbol": "🧢",
+    "name": "billed cap",
+    "sheet": 0,
+    "cell": 7
+  },
+  {
+    "symbol": "🧼",
+    "name": "bar of soap",
+    "sheet": 0,
+    "cell": 8
+  },
+  {
+    "symbol": "🍳",
+    "name": "frying pan with egg",
+    "sheet": 0,
+    "cell": 9
+  },
+  {
+    "symbol": "🪥",
+    "name": "toothbrush",
+    "sheet": 0,
+    "cell": 10
+  },
+  {
+    "symbol": "🥄",
+    "name": "spoon",
+    "sheet": 0,
+    "cell": 11
+  },
+  {
+    "symbol": "☕",
+    "name": "hot beverage",
+    "sheet": 0,
+    "cell": 12
+  },
+  {
+    "symbol": "🧴",
+    "name": "liquid soap pump bottle",
+    "sheet": 0,
+    "cell": 13
+  },
+  {
+    "symbol": "🍲",
+    "name": "pot of food",
+    "sheet": 0,
+    "cell": 14
+  },
+  {
+    "symbol": "🧽",
+    "name": "sponge",
+    "sheet": 0,
+    "cell": 15
+  },
+  {
+    "symbol": "🔨",
+    "name": "hammer",
+    "sheet": 0,
+    "cell": 16
+  },
+  {
+    "symbol": "🛋️",
+    "name": "couch and lamp",
+    "sheet": 0,
+    "cell": 17
+  },
+  {
+    "symbol": "🔧",
+    "name": "wrench",
+    "sheet": 0,
+    "cell": 18
+  },
+  {
+    "symbol": "🪛",
+    "name": "screwdriver",
+    "sheet": 0,
+    "cell": 19
+  },
+  {
+    "symbol": "🛏️",
+    "name": "bed",
+    "sheet": 0,
+    "cell": 20
+  },
+  {
+    "symbol": "🪚",
+    "name": "carpentry saw",
+    "sheet": 0,
+    "cell": 21
+  },
+  {
+    "symbol": "🪑",
+    "name": "chair",
+    "sheet": 0,
+    "cell": 22
+  },
+  {
+    "symbol": "🐶",
+    "name": "dog face",
+    "sheet": 0,
+    "cell": 23
+  },
+  {
+    "symbol": "🐾",
+    "name": "paw prints",
+    "sheet": 0,
+    "cell": 24
+  },
+  {
+    "symbol": "🚗",
+    "name": "automobile",
+    "sheet": 0,
+    "cell": 25
+  },
+  {
+    "symbol": "🚌",
+    "name": "bus",
+    "sheet": 0,
+    "cell": 26
+  },
+  {
+    "symbol": "🐱",
+    "name": "cat face",
+    "sheet": 0,
+    "cell": 27
+  },
+  {
+    "symbol": "🚲",
+    "name": "bicycle",
+    "sheet": 0,
+    "cell": 28
+  },
+  {
+    "symbol": "🐴",
+    "name": "horse face",
+    "sheet": 0,
+    "cell": 29
+  },
+  {
+    "symbol": "✈️",
+    "name": "airplane",
+    "sheet": 0,
+    "cell": 30
+  },
+  {
+    "symbol": "🔥",
+    "name": "fire",
+    "sheet": 0,
+    "cell": 31
+  },
+  {
+    "symbol": "🗄️",
+    "name": "small kitchen cupboard",
+    "sheet": 0,
+    "cell": 32
+  },
+  {
+    "symbol": "🚰",
+    "name": "water tap pouring into glass",
+    "sheet": 0,
+    "cell": 33
+  },
+  {
+    "symbol": "⚡",
+    "name": "high voltage sign",
+    "sheet": 0,
+    "cell": 34
+  },
+  {
+    "symbol": "🍯",
+    "name": "honey pot",
+    "sheet": 0,
+    "cell": 35
+  },
+  {
+    "symbol": "🤲",
+    "name": "palms up together",
+    "sheet": 0,
+    "cell": 36
+  },
+  {
+    "symbol": "🛑",
+    "name": "red stop octagon, no text",
+    "sheet": 0,
+    "cell": 37
+  },
+  {
+    "symbol": "👀",
+    "name": "eyes",
+    "sheet": 0,
+    "cell": 38
+  },
+  {
+    "symbol": "🚶",
+    "name": "pedestrian",
+    "sheet": 0,
+    "cell": 39
+  },
+  {
+    "symbol": "🔘",
+    "name": "round push button",
+    "sheet": 1,
+    "cell": 0
+  },
+  {
+    "symbol": "🟢",
+    "name": "green circle",
+    "sheet": 1,
+    "cell": 1
+  },
+  {
+    "symbol": "🦓",
+    "name": "zebra pedestrian crossing",
+    "sheet": 1,
+    "cell": 2
+  },
+  {
+    "symbol": "🚦",
+    "name": "vertical traffic light",
+    "sheet": 1,
+    "cell": 3
+  },
+  {
+    "symbol": "😁",
+    "name": "grinning face with smiling eyes",
+    "sheet": 1,
+    "cell": 4
+  },
+  {
+    "symbol": "💧",
+    "name": "droplet",
+    "sheet": 1,
+    "cell": 5
+  },
+  {
+    "symbol": "🔍",
+    "name": "left-pointing magnifying glass",
+    "sheet": 1,
+    "cell": 6
+  },
+  {
+    "symbol": "🦷",
+    "name": "tooth",
+    "sheet": 1,
+    "cell": 7
+  },
+  {
+    "symbol": "✨",
+    "name": "three little sparkles",
+    "sheet": 1,
+    "cell": 8
+  },
+  {
+    "symbol": "🪴",
+    "name": "potted plant",
+    "sheet": 1,
+    "cell": 9
+  },
+  {
+    "symbol": "🌿",
+    "name": "green leafy sprig",
+    "sheet": 1,
+    "cell": 10
+  },
+  {
+    "symbol": "☀️",
+    "name": "golden sun",
+    "sheet": 1,
+    "cell": 11
+  },
+  {
+    "symbol": "🍂",
+    "name": "fallen leaf",
+    "sheet": 1,
+    "cell": 12
+  },
+  {
+    "symbol": "♨️",
+    "name": "bread toaster",
+    "sheet": 1,
+    "cell": 13
+  },
+  {
+    "symbol": "🍞",
+    "name": "bread",
+    "sheet": 1,
+    "cell": 14
+  },
+  {
+    "symbol": "🍽️",
+    "name": "fork and knife with plate",
+    "sheet": 1,
+    "cell": 15
+  },
+  {
+    "symbol": "🔌",
+    "name": "electric plug",
+    "sheet": 1,
+    "cell": 16
+  },
+  {
+    "symbol": "🔪",
+    "name": "hocho",
+    "sheet": 1,
+    "cell": 17
+  },
+  {
+    "symbol": "🍅",
+    "name": "tomato",
+    "sheet": 1,
+    "cell": 18
+  },
+  {
+    "symbol": "🩲",
+    "name": "briefs",
+    "sheet": 1,
+    "cell": 19
+  },
+  {
+    "symbol": "👟",
+    "name": "athletic shoe",
+    "sheet": 1,
+    "cell": 20
+  },
+  {
+    "symbol": "👔",
+    "name": "necktie",
+    "sheet": 1,
+    "cell": 21
+  },
+  {
+    "symbol": "🪞",
+    "name": "mirror",
+    "sheet": 1,
+    "cell": 22
+  },
+  {
+    "symbol": "📱",
+    "name": "mobile phone",
+    "sheet": 1,
+    "cell": 23
+  },
+  {
+    "symbol": "📖",
+    "name": "open book",
+    "sheet": 1,
+    "cell": 24
+  },
+  {
+    "symbol": "📞",
+    "name": "telephone receiver",
+    "sheet": 1,
+    "cell": 25
+  },
+  {
+    "symbol": "👋",
+    "name": "waving hand sign",
+    "sheet": 1,
+    "cell": 26
+  },
+  {
+    "symbol": "🔋",
+    "name": "battery",
+    "sheet": 1,
+    "cell": 27
+  },
+  {
+    "symbol": "⭐",
+    "name": "golden star",
+    "sheet": 1,
+    "cell": 28
+  },
+  {
+    "symbol": "👂",
+    "name": "ear",
+    "sheet": 1,
+    "cell": 29
+  },
+  {
+    "symbol": "🔴",
+    "name": "red circle",
+    "sheet": 1,
+    "cell": 30
+  },
+  {
+    "symbol": "👛",
+    "name": "purse",
+    "sheet": 1,
+    "cell": 31
+  },
+  {
+    "symbol": "🏠",
+    "name": "house building",
+    "sheet": 1,
+    "cell": 32
+  },
+  {
+    "symbol": "🔑",
+    "name": "key",
+    "sheet": 1,
+    "cell": 33
+  },
+  {
+    "symbol": "💭",
+    "name": "thought balloon",
+    "sheet": 1,
+    "cell": 34
+  },
+  {
+    "symbol": "🧍",
+    "name": "standing person",
+    "sheet": 1,
+    "cell": 35
+  },
+  {
+    "symbol": "⏰",
+    "name": "alarm clock",
+    "sheet": 1,
+    "cell": 36
+  },
+  {
+    "symbol": "🥛",
+    "name": "clear glass of milk",
+    "sheet": 1,
+    "cell": 37
+  },
+  {
+    "symbol": "✂️",
+    "name": "black scissors",
+    "sheet": 1,
+    "cell": 38
+  },
+  {
+    "symbol": "👓",
+    "name": "eyeglasses",
+    "sheet": 1,
+    "cell": 39
+  },
+  {
+    "symbol": "☂️",
+    "name": "umbrella",
+    "sheet": 2,
+    "cell": 0
+  },
+  {
+    "symbol": "🎸",
+    "name": "guitar",
+    "sheet": 2,
+    "cell": 1
+  },
+  {
+    "symbol": "💡",
+    "name": "electric light bulb",
+    "sheet": 2,
+    "cell": 2
+  },
+  {
+    "symbol": "👒",
+    "name": "womans hat",
+    "sheet": 2,
+    "cell": 3
+  },
+  {
+    "symbol": "📻",
+    "name": "radio",
+    "sheet": 2,
+    "cell": 4
+  },
+  {
+    "symbol": "🌻",
+    "name": "sunflower",
+    "sheet": 2,
+    "cell": 5
+  },
+  {
+    "symbol": "🪟",
+    "name": "window",
+    "sheet": 2,
+    "cell": 6
+  },
+  {
+    "symbol": "🌊",
+    "name": "water wave",
+    "sheet": 2,
+    "cell": 7
+  },
+  {
+    "symbol": "🌸",
+    "name": "cherry blossom",
+    "sheet": 2,
+    "cell": 8
+  },
+  {
+    "symbol": "🍐",
+    "name": "pear",
+    "sheet": 2,
+    "cell": 9
+  },
+  {
+    "symbol": "🍇",
+    "name": "grapes",
+    "sheet": 2,
+    "cell": 10
+  },
+  {
+    "symbol": "🍊",
+    "name": "tangerine",
+    "sheet": 2,
+    "cell": 11
+  },
+  {
+    "symbol": "🍓",
+    "name": "strawberry",
+    "sheet": 2,
+    "cell": 12
+  },
+  {
+    "symbol": "🍒",
+    "name": "cherries",
+    "sheet": 2,
+    "cell": 13
+  },
+  {
+    "symbol": "🍋",
+    "name": "lemon",
+    "sheet": 2,
+    "cell": 14
+  },
+  {
+    "symbol": "🍉",
+    "name": "watermelon",
+    "sheet": 2,
+    "cell": 15
+  },
+  {
+    "symbol": "🍑",
+    "name": "peach",
+    "sheet": 2,
+    "cell": 16
+  },
+  {
+    "symbol": "🍍",
+    "name": "pineapple",
+    "sheet": 2,
+    "cell": 17
+  },
+  {
+    "symbol": "🥝",
+    "name": "kiwifruit",
+    "sheet": 2,
+    "cell": 18
+  },
+  {
+    "symbol": "🥑",
+    "name": "avocado",
+    "sheet": 2,
+    "cell": 19
+  },
+  {
+    "symbol": "🥥",
+    "name": "coconut",
+    "sheet": 2,
+    "cell": 20
+  },
+  {
+    "symbol": "🌽",
+    "name": "ear of maize",
+    "sheet": 2,
+    "cell": 21
+  },
+  {
+    "symbol": "🥦",
+    "name": "broccoli",
+    "sheet": 2,
+    "cell": 22
+  },
+  {
+    "symbol": "🥔",
+    "name": "potato",
+    "sheet": 2,
+    "cell": 23
+  },
+  {
+    "symbol": "🍆",
+    "name": "aubergine",
+    "sheet": 2,
+    "cell": 24
+  },
+  {
+    "symbol": "🍄",
+    "name": "mushroom",
+    "sheet": 2,
+    "cell": 25
+  },
+  {
+    "symbol": "🥐",
+    "name": "croissant",
+    "sheet": 2,
+    "cell": 26
+  },
+  {
+    "symbol": "🫒",
+    "name": "olive",
+    "sheet": 2,
+    "cell": 27
+  },
+  {
+    "symbol": "🍈",
+    "name": "melon",
+    "sheet": 2,
+    "cell": 28
+  },
+  {
+    "symbol": "🪵",
+    "name": "wood",
+    "sheet": 2,
+    "cell": 29
+  },
+  {
+    "symbol": "🥾",
+    "name": "hiking boot",
+    "sheet": 2,
+    "cell": 30
+  },
+  {
+    "symbol": "🌙",
+    "name": "crescent moon",
+    "sheet": 2,
+    "cell": 31
+  },
+  {
+    "symbol": "✋",
+    "name": "raised hand",
+    "sheet": 2,
+    "cell": 32
+  },
+  {
+    "symbol": "👄",
+    "name": "mouth",
+    "sheet": 2,
+    "cell": 33
+  },
+  {
+    "symbol": "💇",
+    "name": "head with visible hair",
+    "sheet": 2,
+    "cell": 34
+  },
+  {
+    "symbol": "👁️",
+    "name": "eye",
+    "sheet": 2,
+    "cell": 35
+  },
+  {
+    "symbol": "🚆",
+    "name": "train",
+    "sheet": 2,
+    "cell": 36
+  }
+]

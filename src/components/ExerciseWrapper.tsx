@@ -59,7 +59,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
           particleCount: 60,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#0284c7', '#10b981', '#7c3aed', '#f59e0b', '#ec4899'],
+          colors: ['#b9dce3', '#c6dfb9', '#cfc6e8', '#edd9bb', '#e9c5df'],
         });
       } catch {
         // Silencioso
@@ -86,7 +86,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   };
 
   return (
-    <div className="exercise-container">
+    <div className="exercise-container" data-domain={domain}>
       {/* Barra superior del ejercicio */}
       <div className="exercise-top-bar">
         <button
@@ -99,7 +99,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
           aria-label="Volver al menú principal"
         >
           <ArrowLeft size={24} />
-          <span>Menú Principal</span>
+          <span>Volver al inicio</span>
         </button>
 
         <div className="exercise-info-center">
@@ -118,6 +118,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
               )}
             </div>
           )}
+          <span className="game-overline">{currentDomain.name}{planProgress ? ` · Ejercicio ${planProgress.current} de ${planProgress.total}` : ' · A tu ritmo'}</span>
           <h2 className="exercise-screen-title">{title}</h2>
         </div>
 
@@ -128,7 +129,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
           aria-label={isNarratorMuted ? 'Activar voz del locutor' : 'Silenciar la voz del locutor'}
         >
           {isNarratorMuted ? <VolumeX size={24} className="narrator-muted-icon" /> : <Volume2 size={24} />}
-          <span>{isNarratorMuted ? 'Activar Locutor' : 'Silenciar Locutor'}</span>
+          <span>{isNarratorMuted ? 'Activar voz' : 'Silenciar voz'}</span>
         </button>
       </div>
 
@@ -144,10 +145,10 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
         {isCompleted && result ? (
           <div className="exercise-completed-card card animate-fade-in">
             <div className="completed-icon-wrapper">
-              <CheckCircle2 size={52} className="completed-check-icon" />
+              <img className="game-completion-art" src="/images/wellness-companions.png" alt="" />
             </div>
 
-            <h2 className="completed-title">¡Gran Trabajo Realizado!</h2>
+            <h2 className="completed-title">Un paso más. Bien hecho.</h2>
 
             <div className="completed-stats-row">
               <div className="stat-box">

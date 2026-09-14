@@ -1,3 +1,4 @@
+import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect, useRef } from 'react';
 import { Eye, RotateCcw, Play } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
@@ -266,7 +267,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
                 onClick={() => handleTileClick(tile.id)}
                 disabled={isPlayingDemo || sequence.length === 0}
               >
-                <span className="tile-emoji">{tile.emoji}</span>
+                <span className="tile-emoji"><GameObject symbol={tile.emoji} /></span>
                 <span className="tile-name">{tile.label}</span>
                 {isActive && <div className="tile-glow-ring" />}
               </button>

@@ -1,3 +1,4 @@
+import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect } from 'react';
 import { Volume2, HelpCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
@@ -473,7 +474,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
           {/* Bloque superior: Foto + Botones de audio inmediatamente debajo */}
           <div className="naming-target-block">
             <div className="naming-emoji-display">
-              <span className="large-object-emoji">{currentQ.emoji}</span>
+              <span className="large-object-emoji"><GameObject symbol={currentQ.emoji} /></span>
             </div>
 
             <div className="naming-audio-helpers">
