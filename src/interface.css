@@ -280,6 +280,7 @@ body:has(.dashboard-area-selection-active),
 
 /* Modales: una única superficie y acciones breves. */
 .modal-shell {
+  --modal-inset: 28px;
   position: fixed;
   inset: 0;
   margin: auto;
@@ -287,6 +288,7 @@ body:has(.dashboard-area-selection-active),
   max-width: none;
   max-height: calc(100dvh - 40px);
   padding: 0;
+  scrollbar-gutter: stable both-edges;
   border: 1px solid var(--color-border);
   border-radius: 30px;
   color: var(--color-text-main);
@@ -326,24 +328,25 @@ body:has(.dashboard-area-selection-active),
 .modal-shell .modal-close-btn svg { width: 21px; height: 21px; }
 .modal-shell .modal-close-btn:hover { background: var(--color-surface-hover); }
 .modal-shell .modal-body,
-.modal-shell .mistakes-modal-body { padding: 4px 28px 24px; gap: 16px; max-height: none; overflow: visible; }
+.modal-shell .mistakes-modal-body { padding: 4px var(--modal-inset) 24px; gap: 16px; max-height: none; overflow: visible; }
 .modal-shell .modal-footer {
   position: sticky; bottom: 0; z-index: 2; background: var(--color-bg);
-  display: flex; justify-content: flex-end; gap: 12px; padding: 16px 28px 24px; border: 0;
+  display: flex; justify-content: flex-end; gap: 12px; padding: 16px var(--modal-inset) 24px; border: 0;
 }
 .modal-shell .touch-btn { min-height: 48px; padding: 12px 22px; border-radius: 99px; font-size: 0.8rem; font-weight: 500; box-shadow: none; }
-.modal-shell .setting-section { background: var(--color-surface); padding: 20px; border: 0; border-radius: 22px; margin: 0; }
+.modal-shell .setting-section { background: var(--color-surface); padding: 20px; border: 0; border-radius: 22px; margin: 0; gap: 0; }
 .modal-shell .setting-label-row { gap: 12px; margin-bottom: 14px; }
 .modal-shell .setting-label-row > svg { width: 21px; height: 21px; stroke-width: 1.5; color: var(--color-primary); flex-shrink: 0; }
 .modal-shell .setting-title { font-size: 0.88rem; font-weight: 500; }
 .modal-shell .setting-desc { font-size: 0.7rem; line-height: 1.5; margin-top: 5px; }
-.modal-shell .options-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.modal-shell .option-btn { flex: 1 1 auto; min-height: 48px; padding: 10px 14px; background: var(--color-bg); border: 1px solid transparent; border-radius: 15px; font-size: 0.72rem; font-weight: 400; color: var(--color-text-main); box-shadow: none; gap: 6px; }
+.modal-shell .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.modal-shell .options-grid:has(> :nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.modal-shell .option-btn { min-width: 0; min-height: 48px; padding: 10px 8px; background: var(--color-bg); border: 1px solid transparent; border-radius: 15px; font-size: 0.72rem; font-weight: 400; color: var(--color-text-main); box-shadow: none; gap: 6px; }
 .modal-shell .option-btn-selected { background: var(--panel-lilac); border-color: var(--color-accent); color: var(--panel-ink); font-weight: 500; }
 .modal-shell .check-icon { width: 16px; height: 16px; color: inherit; }
 .modal-shell .exercise-modal-domain-badge { width: 48px; height: 48px; flex-shrink: 0; border-radius: 17px; }
 .modal-shell .exercise-modal-domain-badge svg { width: 25px; height: 25px; }
-.modal-shell .exercise-choice-grid { display: flex; flex-direction: column; padding: 4px 28px 28px; gap: 12px; }
+.modal-shell .exercise-choice-grid { display: flex; flex-direction: column; padding: 4px var(--modal-inset) 28px; gap: 12px; }
 .modal-shell .exercise-choice-card { display: flex; flex-direction: row; align-items: center; gap: 16px; width: 100%; min-height: 130px; padding: 22px; border: 1px solid transparent; border-radius: 22px; background: var(--color-surface); color: var(--color-text-main); cursor: pointer; text-align: left; box-shadow: none; }
 .modal-shell .exercise-choice-card:hover { border-color: var(--color-primary); transform: none; }
 .modal-shell .choice-icon-bubble { flex-shrink: 0; width: 50px; height: 60px; border-radius: 20px; display: grid; place-items: center; }
@@ -396,7 +399,7 @@ body:has(.dashboard-area-selection-active),
 .modal-shell .col-val, .modal-shell .mistake-hint-box { font-size: 0.8rem; color: inherit; line-height: 1.6; }
 .modal-shell .mistake-hint-box { background: var(--color-bg); border: 0; }
 @media (max-width: 480px) {
-  .modal-shell { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); border-radius: 25px; }
+  .modal-shell { --modal-inset: 18px; width: calc(100vw - 20px); max-height: calc(100dvh - 20px); border-radius: 25px; }
   .modal-shell .modal-header { padding: 22px 18px 16px; }
   .modal-shell .modal-title { font-size: 1.15rem; }
   .modal-shell .modal-title-group { gap: 10px; }
@@ -417,25 +420,26 @@ body:has(.dashboard-area-selection-active),
 /* Lenguaje editorial compartido con las tarjetas de bienestar. */
 .modal-overline { display: block; margin-bottom: 10px; font-size: 0.66rem; color: var(--color-text-muted); font-weight: 400; }
 .modal-shell .modal-title { font-weight: 500; letter-spacing: -0.04em; font-size: 1.55rem; }
-.modal-shell .modal-header { padding-top: 30px; padding-bottom: 26px; }
+.modal-shell .modal-header { padding: 24px var(--modal-inset); align-items: flex-start; }
 .modal-shell .modal-close-btn { border: 1px solid var(--color-border); background: transparent; }
 .modal-shell .exercise-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .modal-shell .exercise-choice-grid:has(> :only-child) { grid-template-columns: 1fr; }
 .modal-shell .exercise-choice-card {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
-  min-height: 300px; padding: 25px; background: var(--panel-lilac); color: var(--panel-ink);
+  display: grid; grid-template-rows: auto 1fr auto; align-content: start; align-items: start; gap: 20px;
+  min-height: 0; padding: 25px; background: var(--panel-lilac); color: var(--panel-ink);
   border-radius: 32px; position: relative;
 }
 .modal-shell .exercise-choice-card:nth-child(2) { background: var(--panel-pink); }
-.modal-shell .choice-art { display: block; margin-bottom: 22px; color: var(--panel-ink); }
+.modal-shell .choice-art { display: block; margin: 0; color: var(--panel-ink); }
 .wellness-glyph { width: 74px; height: 74px; display: block; }
 .modal-shell .choice-card-title { font-size: 1.02rem; font-weight: 500; }
 .modal-shell .choice-card-desc { font-size: 0.73rem; line-height: 1.65; color: inherit; opacity: 0.88; }
-.modal-shell .choice-cta { display: flex; align-items: center; justify-content: space-between; width: 100%; padding-top: 24px; margin-top: auto; font-size: 0.76rem; }
+.modal-shell .choice-cta { display: flex; align-items: center; justify-content: space-between; width: 100%; padding-top: 0; margin-top: 0; font-size: 0.76rem; }
 .modal-shell .choice-arrow { display: grid; place-items: center; width: 36px; height: 36px; background: rgba(255,255,255,.45); border-radius: 50%; color: inherit; }
-.modal-shell .exercise-choice-card:only-child { min-height: 220px; }
-.modal-shell .exercise-choice-card:only-child .choice-art { position: absolute; top: 25px; right: 25px; }
-.modal-shell .exercise-choice-card:only-child .choice-copy { max-width: 72%; padding-top: 10px; }
+.modal-shell .exercise-choice-card:only-child { grid-template-columns: 64px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 20px; }
+.modal-shell .exercise-choice-card:only-child .choice-art { grid-row: 1 / 3; }
+.modal-shell .exercise-choice-card:only-child .choice-cta { grid-column: 2; }
+.modal-shell .exercise-choice-card:only-child .choice-copy { max-width: none; padding: 0; }
 .modal-shell .setting-section { padding: 22px; border-radius: 26px; }
 .modal-shell .setting-section:nth-child(1) { background: var(--panel-blue); }
 .modal-shell .setting-section:nth-child(2) { background: var(--panel-lilac); }
@@ -443,14 +447,14 @@ body:has(.dashboard-area-selection-active),
 .modal-shell .setting-section:nth-child(4) { background: var(--panel-sage); }
 .modal-shell .setting-section:nth-child(5) { background: var(--panel-peach); }
 .modal-shell .setting-section, .modal-shell .setting-title, .modal-shell .setting-desc { color: var(--panel-ink); }
-.modal-shell .setting-label-row { margin-bottom: 16px; }
+.modal-shell .setting-label-row { margin-bottom: 12px; }
 .modal-shell .setting-title { font-size: 0.95rem; font-weight: 500; }
 .modal-shell .option-btn { border-radius: 99px; background: color-mix(in srgb, var(--color-surface) 55%, transparent); border: 1px solid transparent; }
 .modal-shell .option-btn-selected { color: var(--color-action-text); background: var(--color-action-bg); border-color: var(--color-action-bg); }
 .modal-shell .points-total { min-height: 170px; justify-content: space-between; overflow: hidden; background: var(--panel-blue); }
 .points-total > div { display: flex; flex-direction: column; gap: 12px; flex: 1; }
 .points-total img { width: 42%; max-width: 170px; mix-blend-mode: darken; }
-.modal-shell .fatigue-modal { text-align: center; }
+.modal-shell .fatigue-modal { text-align: center; align-items: stretch; }
 .rest-character-art { background: var(--panel-blue); border-radius: 28px; margin-bottom: 25px; display: flex; justify-content: center; }
 .rest-character-art img { width: 180px; height: 180px; object-fit: contain; mix-blend-mode: darken; }
 .modal-shell .fatigue-tips { background: transparent; padding: 0; text-align: center; }
@@ -466,9 +470,10 @@ body:not([data-contrast="standard"]) .rest-character-art img,
 body:not([data-contrast="standard"]) .points-total img { mix-blend-mode: normal; border-radius: 24px; }
 @media (max-width: 480px) {
   .modal-shell .exercise-choice-grid { grid-template-columns: 1fr; }
-  .modal-shell .exercise-choice-card { min-height: 230px; padding: 22px; }
-  .modal-shell .choice-art { position: absolute; top: 20px; right: 20px; }
-  .modal-shell .choice-copy, .modal-shell .exercise-choice-card:only-child .choice-copy { max-width: 74%; padding-top: 0; }
-  .modal-shell .wellness-glyph { width: 52px; height: 52px; }
+  .modal-shell .exercise-choice-card, .modal-shell .exercise-choice-card:only-child { min-height: 0; padding: 20px; grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto auto; gap: 16px; }
+  .modal-shell .choice-art { grid-row: 1 / 3; }
+  .modal-shell .choice-cta { grid-column: 2; }
+  .modal-shell .choice-copy, .modal-shell .exercise-choice-card:only-child .choice-copy { max-width: none; padding-top: 0; }
+  .modal-shell .wellness-glyph { width: 48px; height: 48px; }
   .modal-shell .modal-title { font-size: 1.3rem; }
 }
