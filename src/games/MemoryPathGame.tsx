@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect, useRef } from 'react';
 import { Eye, RotateCcw, Play } from 'lucide-react';
@@ -39,6 +40,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const activeTiles = ALL_TILES;
   const maxRounds = 3;
 
@@ -51,14 +53,14 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   const [score, setScore] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
   const [errorsCount, setErrorsCount] = useState(0);
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
   const timeoutRefs = useRef<number[]>([]);
 
   const clearTimeouts = () => {
-    timeoutRefs.current.forEach(t => clearTimeout(t));
+    timeoutRefs.current.forEach(t => clock.clearTimeout(t));
     timeoutRefs.current = [];
   };
 
@@ -91,12 +93,12 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     const highlightDuration = 550;
 
     seq.forEach((tileId, idx) => {
-      const t1 = window.setTimeout(() => {
+      const t1 = clock.setTimeout(() => {
         setActiveTile(tileId);
         soundService.playTap();
       }, (idx + 1) * delayBetweenSteps);
 
-      const t2 = window.setTimeout(() => {
+      const t2 = clock.setTimeout(() => {
         setActiveTile(null);
       }, (idx + 1) * delayBetweenSteps + highlightDuration);
 
@@ -104,7 +106,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     });
 
     const totalTime = (seq.length + 1) * delayBetweenSteps + 200;
-    const finishTimeout = window.setTimeout(() => {
+    const finishTimeout = clock.setTimeout(() => {
       setIsPlayingDemo(false);
       setStatusMessage('¡Tu turno! Toca las fichas en el mismo orden que viste.');
       soundService.speak('Tu turno. Toca las fichas en el mismo orden.');
@@ -117,7 +119,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
     soundService.playTap();
     setActiveTile(tileId);
-    setTimeout(() => setActiveTile(null), 300);
+    clock.setTimeout(() => setActiveTile(null), 300);
 
     const nextInput = [...playerInput, tileId];
     setPlayerInput(nextInput);
@@ -136,7 +138,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       setMistakesList(prev => [
         ...prev,
         {
-          id: 'mem-' + Date.now(),
+          id: 'mem-' + clock.now(),
           item: `Ronda ${round}: Secuencia de ${sequence.length} fichas`,
           userAction: `Tocaste la ficha ${pressed?.label || tileId} en el paso ${currentStep + 1}`,
           correctSolution: `La ficha correcta en ese paso era ${expected?.label || sequence[currentStep]}`,
@@ -154,7 +156,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       if (round < maxRounds) {
         setStatusMessage(`¡Fantástico! Ronda ${round} superada. Avanzamos a una ficha más.`);
         soundService.speak('¡Muy bien! Añadimos una ficha más.');
-        setTimeout(() => {
+        clock.setTimeout(() => {
           setRound(prev => prev + 1);
           startCurrentRound(round + 1);
         }, 1500);
@@ -171,11 +173,11 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   };
 
   const finishGame = (finalScore: number) => {
-    const elapsedSeconds = Math.max(20, Math.round((Date.now() - startTime) / 1000));
+    const elapsedSeconds = Math.max(20, Math.round((clock.now() - startTime) / 1000));
     const accuracy = Math.max(50, Math.round((maxRounds / (maxRounds + errorsCount)) * 100));
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + Date.now(),
+      id: 'res-' + clock.now(),
       exerciseId: 'memory-path',
       domain: 'memory',
       date: new Date().toISOString().split('T')[0],
@@ -203,7 +205,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     setMistakesList([]);
     setIsCompleted(false);
     setResult(null);
-    setStartTime(Date.now());
+    setStartTime(clock.now());
   };
 
   return (

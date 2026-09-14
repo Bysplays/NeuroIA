@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Eye, Play } from 'lucide-react';
@@ -67,12 +68,13 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const [cards, setCards] = useState<CardItem[]>([]);
   const [selectedCards, setSelectedCards] = useState<number[]>([]); // índices de las cartas volteadas
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
@@ -87,16 +89,16 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     soundService.speak('Memoriza dónde está cada pareja');
 
     if (countdownTimerRef.current) {
-      clearInterval(countdownTimerRef.current);
+      clock.clearInterval(countdownTimerRef.current);
     }
 
     let remaining = 4;
-    countdownTimerRef.current = window.setInterval(() => {
+    countdownTimerRef.current = clock.setInterval(() => {
       remaining -= 1;
       setPreviewCountdown(remaining);
       if (remaining <= 0) {
         if (countdownTimerRef.current) {
-          clearInterval(countdownTimerRef.current);
+          clock.clearInterval(countdownTimerRef.current);
           countdownTimerRef.current = null;
         }
         endPreview();
@@ -106,20 +108,20 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
   const endPreview = () => {
     if (countdownTimerRef.current) {
-      clearInterval(countdownTimerRef.current);
+      clock.clearInterval(countdownTimerRef.current);
       countdownTimerRef.current = null;
     }
     setIsPreviewPhase(false);
     setCards(prev => prev.map(c => ({ ...c, isFlipped: false })));
     soundService.playGentlePrompt();
     soundService.speak('¡Encuentra las parejas!');
-    setStartTime(Date.now());
+    setStartTime(clock.now());
   };
 
   useEffect(() => {
     return () => {
       if (countdownTimerRef.current) {
-        clearInterval(countdownTimerRef.current);
+        clock.clearInterval(countdownTimerRef.current);
       }
     };
   }, []);
@@ -209,7 +211,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
         setMistakesList(prev => [
           ...prev,
           {
-            id: 'pair-' + Date.now(),
+            id: 'pair-' + clock.now(),
             item: `Intento entre ${cardA.label} y ${cardB.label}`,
             userAction: 'Seleccionaste dos cartas distintas',
             correctSolution: 'Recordar su ubicación para emparejarlas',
@@ -217,7 +219,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
           },
         ]);
 
-        setTimeout(() => {
+        clock.setTimeout(() => {
           newCards[firstIdx].isFlipped = false;
           newCards[secondIdx].isFlipped = false;
           setCards([...newCards]);
@@ -229,12 +231,12 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   };
 
   const handleGameFinish = (finalAttempts: number, mistakes: MistakeDetail[]) => {
-    const elapsedSeconds = Math.max(15, Math.round((Date.now() - startTime) / 1000));
+    const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
     // Precisión basada en intentos óptimos (3 intentos perfectos)
     const accuracy = Math.min(100, Math.max(65, Math.round((3 / Math.max(3, finalAttempts)) * 100)));
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + Date.now(),
+      id: 'res-' + clock.now(),
       exerciseId: 'memory-pairs',
       domain: 'memory',
       date: new Date().toISOString().split('T')[0],

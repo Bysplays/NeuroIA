@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, HelpCircle, CheckCircle2, ArrowRight } from 'lucide-react';
@@ -261,6 +262,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const [sessionItems, setSessionItems] = useState<CompletionItem[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -269,7 +271,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime] = useState<number>(Date.now());
+  const [startTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
@@ -327,7 +329,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
       setMistakesList(prev => [
         ...prev,
         {
-          id: 'comp-' + Date.now(),
+          id: 'comp-' + clock.now(),
           item: `Palabra: ${currentItem.word}`,
           userAction: `Seleccionaste "${letter}"`,
           correctSolution: `La letra correcta era "${targetLetter}"`,
@@ -366,13 +368,13 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
     if (currentIdx + 1 < sessionItems.length) {
       setCurrentIdx(prev => prev + 1);
     } else {
-      const elapsedSeconds = Math.max(15, Math.round((Date.now() - startTime) / 1000));
+      const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
       const total = sessionItems.length;
       const finalCorrect = Math.min(total, correctCount);
       const accuracy = Math.min(100, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + Date.now(),
+        id: 'res-' + clock.now(),
         exerciseId: 'word-completion',
         domain: 'language',
         date: new Date().toISOString().split('T')[0],

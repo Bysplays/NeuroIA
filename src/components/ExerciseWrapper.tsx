@@ -1,7 +1,8 @@
+import { useGameSession } from './GameSession';
 import { HeaderIllustration } from './HeaderIllustration';
 import { ModalFrame } from './ModalFrame';
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Volume2, VolumeX, CheckCircle2, RotateCcw, ArrowRight, ClipboardCheck, X } from 'lucide-react';
+import { CheckCircle2, RotateCcw, ArrowRight, ClipboardCheck, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { CognitiveDomain, ExerciseId, ExerciseResult } from '../types';
 import { soundService } from '../services/soundService';
@@ -32,7 +33,6 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   title,
   exerciseId,
   domain,
-  instructionText,
   onBack,
   isCompleted,
   result,
@@ -41,6 +41,8 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   onNextPlanExercise,
   children,
 }) => {
+  const session = useGameSession();
+  useEffect(() => { session.finish(isCompleted); }, [isCompleted, session.finish]);
   const domainData: Record<CognitiveDomain, { name: string; color: string; bg: string }> = {
     attention: { name: 'Atención', color: 'var(--color-attention)', bg: 'var(--color-attention-bg)' },
     language: { name: 'Lenguaje', color: 'var(--color-language)', bg: 'var(--color-language-bg)' },
@@ -71,49 +73,9 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
     }
   }, [isCompleted]);
 
-  const [isNarratorMuted, setIsNarratorMuted] = useState(!soundService.isVoiceEnabled());
-
-  useEffect(() => {
-    setIsNarratorMuted(!soundService.isVoiceEnabled());
-    const unsubscribe = soundService.onVoiceChange(enabled => {
-      setIsNarratorMuted(!enabled);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleToggleNarrator = () => {
-    soundService.playTap();
-    const newEnabled = soundService.toggleVoice();
-    setIsNarratorMuted(!newEnabled);
-  };
-
   return (
     <div className="exercise-container" data-domain={domain}>
-      <header className="paper-game-nav">
-        <button className="paper-game-brand" onClick={onBack} aria-label="NeuroIA, ir al inicio">
-          <img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="36" height="36" />
-          <span>NeuroIA</span>
-        </button>
-        <div className="paper-game-tools">
-          {(!isCompleted || planProgress) && <button className="paper-nav-button" onClick={() => { soundService.stopSpeaking(); soundService.playTap(); onBack(); }} aria-label="Volver al menú principal">
-            <ArrowLeft size={19} /><span>Volver al inicio</span>
-          </button>}
-          <button className="paper-nav-button paper-voice-button" onClick={handleToggleNarrator} aria-label={isNarratorMuted ? 'Activar voz del locutor' : 'Silenciar la voz del locutor'} title={isNarratorMuted ? 'Activar voz' : 'Silenciar voz'}>
-            {isNarratorMuted ? <VolumeX size={21} /> : <Volume2 size={21} />}
-          </button>
-        </div>
-      </header>
-      {!isCompleted && (
-        <section className="paper-game-welcome" aria-labelledby="paper-game-title">
-          <div className="paper-game-intro">
-            <span className="paper-game-label"><span aria-hidden="true" />{currentDomain.name}{planProgress ? ` · Ejercicio ${planProgress.current} de ${planProgress.total}` : ' · A tu ritmo'}</span>
-            <h1 id="paper-game-title" className="exercise-screen-title">{title}</h1>
-            <p className="paper-game-instruction">{instructionText}</p>
-          </div>
-          <HeaderIllustration scene={exerciseId} className="paper-game-companions" />
-        </section>
-      )}
-
+      {!isCompleted && <h1 className="game-task-title">{title}</h1>}
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}
       <div className="exercise-viewport">
         {isCompleted && result ? (
@@ -149,7 +111,8 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                 <button className="result-text-action" onClick={() => { soundService.playTap(); setShowMistakesModal(true); }}>
                   <ClipboardCheck size={18} aria-hidden="true" /> Ver respuestas
                 </button>
-                <button className="result-text-action" onClick={() => { soundService.playTap(); onRestart(); }}>
+                <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
+                  onRestart(); }}>
                   <RotateCcw size={18} aria-hidden="true" /> Repetir
                 </button>
               </div>
@@ -244,6 +207,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                 onClick={() => {
                   soundService.playTap();
                   setShowMistakesModal(false);
+                  session.restart();
                   onRestart();
                 }}
               >

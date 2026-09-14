@@ -3,6 +3,7 @@ import type { UserProfile, CognitiveDomain, ExerciseResult, AccessibilitySetting
 import { StorageService } from './services/storageService';
 import { soundService } from './services/soundService';
 import { getExercisesForDomain } from './services/exerciseCatalog';
+import { GameSession } from './components/GameSession';
 import { Header } from './components/Header';
 import { AchievementShowcase } from './components/AchievementShowcase';
 import { Dashboard } from './components/Dashboard';
@@ -185,6 +186,7 @@ export const App: React.FC = () => {
           />
         )}
 
+        {isPlayingGame && <GameSession key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={activeView} onBack={handleBackToDashboard}>
         {/* 1. ATENCIÓN */}
         {(activeView === 'attention' || activeView === 'visual-scanning') && (
           <VisualScanningGame
@@ -279,6 +281,7 @@ export const App: React.FC = () => {
             onNextPlanExercise={handleNextPlanExercise}
           />
         )}
+        </GameSession>}
       </main>
 
       <AccessibilityModal

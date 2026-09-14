@@ -43,7 +43,9 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 | `src/components/ExerciseCatalog.tsx` | Nine-game catalog and area filters |
 | `src/services/exerciseCatalog.ts` | Canonical exercise definitions and short summaries |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
-| `src/components/ExerciseWrapper.tsx` | Shared game navigation, introduction, results, and review |
+| `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |
+| `src/services/gameClock.ts` | Pausable timers and animation frames |
+| `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and review |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
 | `src/services/storageService.ts` | Local persistence, progress, settings, notes, daily plan |
@@ -175,3 +177,9 @@ link between them instead of duplicating long explanations.
 Before finishing, check whether the next contributor could follow these files
 without relying on the conversation history. Do not add a chronological task log
 or promise an automated documentation monitor that does not exist.
+
+Games use `useGameSession().clock` for durations, timeouts, intervals and animation
+frames. Help pauses scheduled activity without discarding answers. GameSession
+mounts games only after Start and is keyed by exercise and daily-plan position.
+Run `node --experimental-strip-types --test tests/gameClock.test.ts` to verify
+the clock, alongside the existing speech-voice tests.

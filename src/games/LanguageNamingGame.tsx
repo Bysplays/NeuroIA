@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect } from 'react';
 import { Volume2, HelpCircle, CheckCircle2, ArrowRight } from 'lucide-react';
@@ -339,6 +340,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   // Preguntas seleccionadas al azar para esta sesión
   const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -347,7 +349,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime] = useState<number>(Date.now());
+  const [startTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
@@ -397,7 +399,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
       setMistakesList(prev => [
         ...prev,
         {
-          id: 'lang-' + Date.now(),
+          id: 'lang-' + clock.now(),
           item: `Objeto: ${currentQ.word}`,
           userAction: `Seleccionaste "${option}"`,
           correctSolution: `La respuesta correcta es "${currentQ.word}"`,
@@ -427,13 +429,13 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
     if (currentIdx + 1 < sessionQuestions.length) {
       setCurrentIdx(prev => prev + 1);
     } else {
-      const elapsedSeconds = Math.max(15, Math.round((Date.now() - startTime) / 1000));
+      const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
       const total = sessionQuestions.length;
       const finalCorrect = Math.min(total, correctCount);
       const accuracy = Math.min(100, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + Date.now(),
+        id: 'res-' + clock.now(),
         exerciseId: 'language-naming',
         domain: 'language',
         date: new Date().toISOString().split('T')[0],

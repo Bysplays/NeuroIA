@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, ArrowRight, Volume2 } from 'lucide-react';
@@ -360,12 +361,13 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const [sessionItems, setSessionItems] = useState<ItemToClassify[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime] = useState<number>(Date.now());
+  const [startTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
@@ -408,7 +410,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
       setMistakesList(prev => [
         ...prev,
         {
-          id: 'cat-' + Date.now(),
+          id: 'cat-' + clock.now(),
           item: `Objeto: ${currentItem.name}`,
           userAction: `Clasificado erróneamente`,
           correctSolution: `Categoría correcta: ${currentItem.categoryName}`,
@@ -423,13 +425,13 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
     if (currentIdx + 1 < sessionItems.length) {
       setCurrentIdx(prev => prev + 1);
     } else {
-      const elapsedSeconds = Math.max(15, Math.round((Date.now() - startTime) / 1000));
+      const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
       const total = sessionItems.length;
       const finalCorrect = Math.min(total, correctCount);
       const accuracy = Math.min(100, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + Date.now(),
+        id: 'res-' + clock.now(),
         exerciseId: 'categorization',
         domain: 'executive',
         date: new Date().toISOString().split('T')[0],

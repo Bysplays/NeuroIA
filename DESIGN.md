@@ -124,9 +124,9 @@ The daily-plan entry remains on the home.
 ### Games
 
 The game is part of the home experience, not a separate clinical application.
-Use the shared `ExerciseWrapper`: brand navigation, a short pastel introduction,
-a scene specific to the exercise, the play area, and consistent completion/review
-actions. Each game keeps its own scene on completion. Header scenes alternate
+Use `GameSession` for full-viewport instructions before mounting a game, with
+a scene specific to that exercise, a listen action and a start action.
+`ExerciseWrapper` keeps task clues and consistent completion/review actions. Each game keeps its own scene on completion. Header scenes alternate
 solo companions and shared activities; do not repeat the original walking pair
 across screens. Keep decoration separate from the actual exercise clues.
 
@@ -138,8 +138,12 @@ paper backing so dark ink limbs stay visible. The Organization scenes use a
 shared true-alpha sheet and remain transparent in every theme, with normal
 blending. Never crop limbs to hide a backdrop.
 
-- Put the task title and instructions together in the introduction. Keep return
-  and voice controls easy to find. Daily-plan position must remain visible.
+- Place written instructions, return, listen and daily-plan position in the
+  full-viewport introduction. This fills the app without forcing browser fullscreen.
+- During play, show a question-mark help button on the left and elapsed active
+  time on the right. Help reopens instructions and pauses scheduled activity
+  without resetting answers. Keep essential task clues, not the instruction hero.
+  The clock counts up; existing minimum result durations remain unchanged.
 - Build the play area from purposeful pastel sections. For object naming and
   categorization, separate the stimulus panel from answer cards on desktop and
   stack them on mobile. Keep answer-card alignment consistent.
