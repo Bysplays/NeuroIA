@@ -18,7 +18,7 @@
 .paper-game-label > span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .exercise-screen-title { font-size: clamp(1.35rem, 2.3vw, 1.9rem); font-weight: 550; line-height: 1.2; margin: 12px 0; color: inherit; }
 .paper-game-instruction { color: inherit; font-size: .78rem; line-height: 1.6; max-width: 650px; }
-.paper-game-companions { width: 145px; height: 145px; object-fit: contain; mix-blend-mode: darken; border-radius: 38%; }
+.paper-game-companions { width: 145px; height: 145px; object-fit: contain; mix-blend-mode: multiply; }
 body:not([data-contrast="standard"]) .paper-game-companions { mix-blend-mode: normal; }
 .exercise-viewport { min-height: 0; }
 .exercise-container .card { box-shadow: none; }
@@ -93,8 +93,7 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .seq-card-emoji { font-size: 110px; display: flex; }
 .seq-card-text { font-size: .88rem; line-height: 1.6; }
 .sequencing-option-card.card-selected { border-color: var(--color-primary); background: var(--color-primary-light); box-shadow: none; }
-.seq-green-overlay { display: none; }
-.seq-order-badge { background: var(--color-primary); box-shadow: none; }
+.seq-order-badge { position: absolute; top: 12px; left: 14px; padding: 6px 12px; border-radius: 12px 16px 12px 15px; background: var(--panel-ink); color: var(--color-surface); font-size: .7rem; font-weight: 550; line-height: 1.4; pointer-events: none; }
 .sequencing-bottom-bar { margin-top: 20px; }
 
 /* Motor targets: solid, high contrast centers without neon effects. */
@@ -109,14 +108,6 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .tracking-label, .tracking-percent { font-size: .85rem; }
 .tracking-progress-fill { background: var(--color-primary); box-shadow: none; }
 .tracking-target-halo { display: none; }
-.game-completion-art { width: 150px; height: 150px; object-fit: contain; mix-blend-mode: multiply; }
-.completed-icon-wrapper { background: transparent; width: auto; height: auto; margin: 0; }
-.exercise-completed-card { border: 0; border-radius: 30px; padding: 28px; gap: 20px; }
-.completed-title { font-size: 1.6rem; }
-.completed-stats-row { gap: 12px; width: 100%; }
-.completed-stats-row .stat-box { background: var(--color-bg); border: 0; border-radius: 20px; padding: 16px; }
-.completed-stats-row .stat-number { font-size: 1.25rem; }
-.completed-feedback-box { background: var(--panel-sage); border: 0; border-radius: 20px; }
 @media (max-width: 700px) {
   .exercise-container { padding: 16px; gap: 20px; }
   .naming-card, .word-completion-card, .categorization-card { padding: 0; }
@@ -134,7 +125,6 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
   .seq-card-text { font-size: .76rem; }
   .category-bins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .category-bin-card { padding: 14px; }
-  .completed-stats-row { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) {
   .exercise-container *, .exercise-container *::before, .exercise-container *::after { animation: none !important; transition: none !important; }
@@ -162,23 +152,7 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
   .memory-card-tile .tile-label { font-size: .7rem; }
   .tile-back-mark { width: 42px; height: 42px; }
 }
-.game-completion-art { border-radius: 32%; }
-.completed-stats-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.completed-stats-row .stat-box { min-width: 0; width: auto; }
-.completed-stats-row .stat-label { font-size: .7rem; }
-.completed-stats-row .stat-number { color: var(--color-text-main); }
-.completed-feedback-box p { font-size: .9rem; line-height: 1.6; }
-.completed-feedback-box svg { flex-shrink: 0; color: #466951; }
-.exercise-container .touch-btn-correction { background: var(--panel-lilac); color: var(--panel-ink); border: 0; }
-@media (max-width: 700px) {
-  .exercise-completed-card { padding: 24px 18px; }
-  .completed-stats-row { gap: 8px; }
-  .completed-stats-row .stat-box { padding: 14px 8px; }
-  .completed-stats-row .stat-label { font-size: .6rem; }
-  .completed-stats-row .stat-number { font-size: .9rem; }
-  .completed-stats-row .stat-number svg { display: none !important; }
-  .completed-title { font-size: 1.35rem; }
-}
+
 
 /* Paper cards instead of a single white clinical panel. */
 .naming-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 18px 24px; }
@@ -211,7 +185,7 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .pairs-preview-banner { background: var(--color-surface); }
 .pairs-stat-pill { background: var(--color-surface); padding: 10px 16px; border-radius: 99px; }
 .pairs-status-bar { border: 0; padding: 0; }
-.sequencing-option-card { background: var(--game-paper); color: var(--panel-ink); padding: 24px 20px; }
+.sequencing-option-card { background: var(--game-paper); color: var(--panel-ink); padding: 48px 20px 24px; }
 .sequencing-option-card:nth-child(2) { background: var(--panel-peach); }
 .sequencing-option-card:nth-child(3) { background: var(--panel-lilac); }
 .sequencing-option-card:nth-child(4) { background: var(--panel-blue); }
@@ -220,7 +194,6 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .tracking-progress-header { background: transparent; padding: 0 4px; }
 .tracking-progress-info { margin-bottom: 8px; }
 .tracking-progress-bar-bg { height: 10px; border: 0; background: var(--color-surface); }
-.exercise-completed-card { background: var(--game-paper); }
 @media (max-width: 700px) {
   .paper-game-brand { font-size: 1.1rem; gap: 8px; }
   .paper-game-brand img { width: 30px; height: 30px; }
@@ -233,8 +206,6 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
   .paper-game-instruction { font-size: .7rem; }
   .exercise-screen-title { font-size: 1.2rem; }
   .paper-game-intro { min-width: 0; }
-  .paper-game-welcome:has(.title-target-emoji) { grid-template-columns: 1fr; }
-  .paper-game-welcome:has(.title-target-emoji) .paper-game-companions { display: none; }
   .scanning-game-container { padding: 12px; border-radius: 24px; }
   .scanning-cell { aspect-ratio: 1.1; }
   .cell-emoji { font-size: clamp(40px, 11vw, 68px); }
@@ -253,8 +224,41 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 }
 @media (max-width: 360px) {
   .paper-game-brand span { display: none; }
-  .paper-game-welcome { grid-template-columns: 1fr; }
-  .paper-game-companions { display: none; }
+  .paper-game-welcome { grid-template-columns: minmax(0, 1fr) 64px; padding: 16px; }
+  .paper-game-companions { width: 64px; height: 80px; }
 }
 .exercise-container .sequencing-option-card.card-success { background: var(--panel-sage); border-color: #56816d; }
 .exercise-container .sequencing-option-card.card-warning { background: #f4dfc9; border-color: #a17a40; }
+
+/* Completion: one calm surface, unboxed metrics and one next action. */
+.exercise-result { width: 100%; max-width: 860px; margin: 8px auto; padding: clamp(24px, 4vw, 48px); border-radius: 32px; background: var(--game-paper); color: var(--panel-ink); }
+.result-heading { display: grid; grid-template-columns: minmax(0, 1fr) 180px; align-items: center; gap: 24px; }
+.result-eyebrow { font-size: .72rem; margin: 0 0 14px; }
+.result-heading h1 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 550; line-height: 1.2; margin: 0; }
+.result-message { font-size: .85rem; line-height: 1.6; margin-top: 16px; }
+.game-completion-art { width: 180px; height: 180px; object-fit: contain; mix-blend-mode: multiply; }
+.result-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 32px 0; padding: 24px 0; border-block: 1px solid color-mix(in srgb, currentColor 18%, transparent); }
+.result-summary dt { font-size: .72rem; margin-bottom: 8px; }
+.result-summary dd { margin: 0; font-size: 1.5rem; font-weight: 550; font-variant-numeric: tabular-nums; }
+.result-summary dd span { font-size: .8rem; font-weight: 400; }
+.result-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.result-primary { gap: 24px; justify-content: space-between; min-width: 250px; }
+.result-secondary-actions { display: flex; flex-wrap: wrap; column-gap: 24px; }
+.result-text-action { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; border: 0; padding: 8px 0; color: inherit; background: transparent; font: inherit; font-size: .75rem; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+.result-text-action:hover { text-decoration-thickness: 2px; }
+@media (max-width: 600px) {
+  .exercise-result { padding: 24px; border-radius: 26px; }
+  .result-heading { grid-template-columns: minmax(0, 1fr) 80px; gap: 12px; }
+  .game-completion-art { width: 80px; height: 100px; }
+  .result-summary { gap: 12px; margin: 24px 0; }
+  .result-summary dd { font-size: 1.2rem; }
+  .result-primary { width: 100%; min-width: 0; }
+  .result-actions { align-items: stretch; }
+  .result-secondary-actions { justify-content: space-between; gap: 8px; }
+}
+
+.paper-game-companions.header-illustration-transparent,
+.game-completion-art.header-illustration-transparent { height: auto; }
+
+.game-object.game-object-transparent { display: inline-flex; align-items: center; justify-content: center; mix-blend-mode: normal; border-radius: 0; }
+.game-object-crop { display: block; flex-shrink: 0; background-repeat: no-repeat; }

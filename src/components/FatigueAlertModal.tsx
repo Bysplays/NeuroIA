@@ -1,3 +1,4 @@
+import { HeaderIllustration } from './HeaderIllustration';
 import { ModalFrame } from './ModalFrame';
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
@@ -19,7 +20,7 @@ export const FatigueAlertModal: React.FC<FatigueAlertModalProps> = ({
   return (
     <ModalFrame onClose={onClose} labelledBy="fatigue-title">
       <div className="modal-container fatigue-modal" onClick={e => e.stopPropagation()}>
-        <div className="rest-character-art"><img src="/images/wellness-companions.png" alt="" /></div>
+        <div className="rest-character-art"><HeaderIllustration scene="rest" /></div>
         <span className="modal-overline">También está bien parar</span>
 
         <h2 id="fatigue-title" className="fatigue-title">¿Hacemos una pausa?</h2>

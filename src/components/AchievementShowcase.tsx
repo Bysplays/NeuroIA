@@ -1,3 +1,4 @@
+import { HeaderIllustration } from './HeaderIllustration';
 import { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { ArrowLeft, Check, LockKeyhole, X } from 'lucide-react';
 import type { UserProfile } from '../types';
@@ -29,6 +30,7 @@ export function AchievementShowcase({ profile, onBack }: { profile: UserProfile;
       <button className="text-link achievement-back" onClick={onBack}><ArrowLeft size={18} /> Volver al inicio</button>
       <div className="achievement-heading">
         <div><span className="achievement-overline">Pequeños pasos, grandes recuerdos</span><h1 id="achievements-title" tabIndex={-1} ref={headingRef}>Tu colección de logros</h1><p>{earned ? 'Cada chapa guarda un poquito de tu recorrido.' : 'Tu primera chapa te espera al completar un ejercicio.'}</p></div>
+        <HeaderIllustration scene="achievements" className="menu-header-art" />
         <span className="achievement-count">{earned} de {achievements.length} conseguidas</span>
       </div>
       <div className="badge-shelf">
