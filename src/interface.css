@@ -212,7 +212,7 @@ body:has(.dashboard-area-selection-active),
   .consistency-heading { grid-column: 1; }
   .streak-number { grid-column: 1; margin: 16px 0 10px; }
   .consistency-card > p { grid-column: 1; margin-bottom: 0; }
-  .consistency-stats { grid-template-columns: 1fr; grid-column: 2; grid-row: 1 / 4; margin: 0; padding: 12px 0 12px 28px; border-top: 0; border-left: 1px solid color-mix(in srgb, var(--panel-ink) 15%, transparent); }
+  .consistency-stats { grid-template-columns: 1fr; grid-column: 2; grid-row: 1 / 4; margin: 0; padding: 0; border: 0; justify-items: end; }
   .daily-session-card { padding: 26px; }
   .practice-cards { gap: 10px; }
   .practice-card { padding: 18px 14px; }
@@ -255,7 +255,7 @@ body:has(.dashboard-area-selection-active),
   .session-actions { gap: 16px; align-items: stretch; }
   .session-footnote { text-align: center; }
   .consistency-card { display: flex; }
-  .consistency-stats { grid-template-columns: 1fr 1fr; width: 100%; border-left: 0; border-top: 1px solid color-mix(in srgb, var(--panel-ink) 15%, transparent); padding: 20px 0 0; margin-top: 20px; }
+  .consistency-stats { grid-template-columns: 1fr 1fr; justify-items: stretch; width: 100%; border-left: 0; border-top: 1px solid color-mix(in srgb, var(--panel-ink) 15%, transparent); padding: 20px 0 0; margin-top: 20px; }
   .daily-session-copy h2 { font-size: 1.95rem; }
   .daily-session-copy p { max-width: none; }
   .practice-heading { align-items: flex-start; gap: 12px; }
@@ -627,4 +627,8 @@ body:not([data-contrast="standard"]) .achievement-art { mix-blend-mode: normal; 
 @media (max-width: 480px) {
   .achievement-page { margin: 16px 0; }
   .achievement-page .badge-shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 481px) and (max-width: 1050px) {
+  .consistency-stats > * { justify-content: end; text-align: right; }
 }

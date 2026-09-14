@@ -10,7 +10,6 @@ import {
   Play,
   Sun,
   Clock3,
-  Flame,
   Medal,
   Shuffle,
   ArrowLeft,
@@ -128,7 +127,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </section>
 
             <section className="consistency-card" aria-labelledby="consistency-title">
-              <div className="consistency-heading"><h2 id="consistency-title">Cada día suma</h2><Flame size={25} strokeWidth={1.5} /></div>
+              <div className="consistency-heading"><h2 id="consistency-title">Cada día suma</h2></div>
               <div className="streak-number">{profile.streakDays}<span>{profile.streakDays === 1 ? 'día seguido' : 'días seguidos'}</span></div>
               <p>{profile.streakDays > 0 ? 'Sigue encontrando ese ratito para ti.' : 'Tu próximo pequeño logro empieza hoy.'}</p>
               <div className="consistency-stats">
