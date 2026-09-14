@@ -31,17 +31,17 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="main-header">
-      <div className="header-left" onClick={() => onNavigate('dashboard')} role="button" tabIndex={0}>
+      <button className="header-left" onClick={() => onNavigate('dashboard')} aria-label="NeuroIA, ir al inicio">
         <div className="header-logo-icon">
-          <Brain size={34} strokeWidth={2.2} />
+          <Brain size={30} strokeWidth={1.4} />
         </div>
         <div>
-          <h1 className="header-title">NeuroIA</h1>
-          <p className="header-subtitle">Rehabilitación y Neuroentrenamiento</p>
+          <span className="header-title">Neuro<span className="brand-light">IA</span></span>
         </div>
-      </div>
+      </button>
 
       <div className="header-right">
+        <span className="header-context">{activeView === 'therapist' ? 'ESPACIO PROFESIONAL' : 'MI ESPACIO'}</span>
         {/* Botón Panel del Terapeuta */}
         <button
           className={`header-btn ${activeView === 'therapist' ? 'header-btn-active' : ''}`}
@@ -49,10 +49,10 @@ export const Header: React.FC<HeaderProps> = ({
             soundService.playTap();
             onNavigate(activeView === 'therapist' ? 'dashboard' : 'therapist');
           }}
-          aria-label="Panel del Terapeuta"
+          aria-label={activeView === 'therapist' ? 'Volver a ejercicios' : 'Panel del terapeuta'}
           title="Panel clínico para terapeuta y seguimiento"
         >
-          <Stethoscope size={24} />
+          <Stethoscope size={20} />
           <span className="btn-label">{activeView === 'therapist' ? 'Volver a Ejercicios' : 'Panel Terapeuta'}</span>
         </button>
 
@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
           aria-label={soundActive ? 'Silenciar sonidos' : 'Activar sonidos'}
           title={soundActive ? 'Silenciar sonidos' : 'Activar sonidos'}
         >
-          {soundActive ? <Volume2 size={24} /> : <VolumeX size={24} />}
+          {soundActive ? <Volume2 size={20} /> : <VolumeX size={20} />}
         </button>
 
         {/* Botón de Accesibilidad */}
@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
           aria-label="Ajustes de accesibilidad"
           title="Ajustar tamaño de letra, contraste y mano hábil"
         >
-          <Settings size={24} />
+          <Settings size={20} />
         </button>
       </div>
     </header>

@@ -111,12 +111,12 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
         <div className="therapist-badge-title">
           <Stethoscope size={28} className="therapist-stethoscope-icon" />
           <div>
-            <h2>Panel de Seguimiento Clínico</h2>
-            <p>Evolución, diagnóstico de mejoras y prescripción personalizada</p>
+            <h2>Seguimiento clínico</h2>
+            <p>Evolución y pautas de entrenamiento de tu paciente.</p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="therapist-header-actions">
           <button
             className="touch-btn touch-btn-secondary"
             onClick={() => {
@@ -142,7 +142,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
             title="Imprimir informe clínico para historia médica"
           >
             <Printer size={22} />
-            <span>Imprimir / Exportar Informe</span>
+            <span>Exportar informe</span>
           </button>
         </div>
       </div>

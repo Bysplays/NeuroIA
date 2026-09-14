@@ -7,13 +7,14 @@ import {
   Hand,
   Stethoscope,
   Play,
-  Calendar,
+  Sun,
+  Clock3,
   Flame,
   Award,
-  HelpCircle,
   X,
   Shuffle,
-  ArrowLeft
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 import type { UserProfile, CognitiveDomain, ExerciseId } from '../types';
 import { soundService } from '../services/soundService';
@@ -93,91 +94,92 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className={`dashboard-container ${showAreaSelection ? 'dashboard-area-selection-active' : ''}`}>
-      {/* Banner de Bienvenida y NeuroPuntos (solo visible en vista inicial, oculto al elegir área) */}
-      {!showAreaSelection && (
-        <section className="welcome-banner card">
-          <div className="welcome-content">
-            <div className="welcome-greeting">
-              <span className="welcome-tag">Hola, {profile.name} 👋</span>
-              <h2 className="welcome-title">Bienvenido a tu sesión de NeuroIA</h2>
-            </div>
-
-          {profile.therapistGuidanceNote && (
-            <div className="therapist-guidance-pill" onClick={onOpenTherapistReport}>
-              <Stethoscope size={22} className="guidance-icon" />
-              <div>
-                <strong>Indicación del Terapeuta:</strong>
-                <p>{profile.therapistGuidanceNote}</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Métricas clave: Racha, Tiempo y NeuroPuntos */}
-        <div className="welcome-stats-box">
-          <div
-            className="welcome-stat-item stat-interactive"
-            onClick={() => {
-              soundService.playTap();
-              setShowPointsModal(true);
-            }}
-            title="Haz clic para ver para qué sirven los NeuroPuntos"
-          >
-            <div className="stat-icon-wrapper points-icon-wrapper">
-              <Award size={26} className="points-award-icon" />
-            </div>
-            <div>
-              <div className="stat-header-inline">
-                <span className="stat-big text-primary">{profile.totalScore ?? 0}</span>
-                <HelpCircle size={15} className="help-icon-subtle" />
-              </div>
-              <span className="stat-sub">NeuroPuntos</span>
-            </div>
-          </div>
-
-          <div className="welcome-stat-item">
-            <div className="stat-icon-wrapper flame-icon-wrapper">
-              <Flame size={26} className="flame-icon" />
-            </div>
-            <div>
-              <span className="stat-big">{profile.streakDays}</span>
-              <span className="stat-sub">Días seguidos</span>
-            </div>
-          </div>
-
-          <div className="welcome-stat-item">
-            <div className="stat-icon-wrapper cal-icon-wrapper">
-              <Calendar size={26} className="cal-icon" />
-            </div>
-            <div>
-              <span className="stat-big">{profile.totalMinutes}</span>
-              <span className="stat-sub">Minutos activos</span>
-            </div>
-          </div>
-        </div>
-      </section>
-      )}
-
-      {/* Botón Central Comenzar Plan del Día / Selector de Áreas */}
       {!showAreaSelection ? (
-        <div className="daily-plan-center-wrapper">
-          <button
-            className="touch-btn touch-btn-primary daily-plan-giant-btn gentle-bounce"
-            onClick={() => {
-              soundService.playTap();
-              setShowAreaSelection(true);
-            }}
-          >
-            <Play size={36} fill="currentColor" />
-            <span>Comenzar Plan del Día</span>
-          </button>
+        <div className="wellness-home">
+          <div className="home-greeting">
+            <div>
+              <h1>Hola, {profile.name}. <Sun size={30} strokeWidth={1.5} aria-hidden="true" /></h1>
+              <p>Qué bien tenerte por aquí.</p>
+            </div>
+            <time className="home-date" dateTime={new Date().toLocaleDateString('sv-SE')}>
+              {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </time>
+          </div>
+
+          <div className="home-feature-grid">
+            <section className="daily-session-card">
+              <div className="daily-session-copy">
+                <span className="soft-label"><span className="status-dot" /> Tu sesión de hoy</span>
+                <h2>Un rato para ti.<br />Un paso más.</h2>
+                <p>Tres ejercicios para activar tu mente.<br />Sin prisas. A tu manera.</p>
+                <button className="session-start" onClick={() => {
+                  soundService.playTap();
+                  onStartDailyPlan();
+                }}>
+                  Empezar mi sesión <ArrowRight size={21} />
+                </button>
+                <span className="session-footnote">{profile.dailyPlanCompletedToday ? 'Ya has completado tu plan de hoy. Puedes volver a practicar.' : 'Atención, memoria y mucho más'}</span>
+              </div>
+              <img className="wellness-characters" src="/images/wellness-companions.png" alt="" />
+            </section>
+
+            <section className="consistency-card" aria-labelledby="consistency-title">
+              <div className="consistency-heading"><h2 id="consistency-title">Cada día suma</h2><Flame size={25} strokeWidth={1.5} /></div>
+              <div className="streak-number">{profile.streakDays}<span>{profile.streakDays === 1 ? 'día seguido' : 'días seguidos'}</span></div>
+              <p>{profile.streakDays > 0 ? 'Sigue encontrando ese ratito para ti.' : 'Tu próximo pequeño logro empieza hoy.'}</p>
+              <div className="consistency-stats">
+                <div><Clock3 size={20} /><strong>{profile.totalMinutes}</strong><span>minutos</span></div>
+                <button onClick={() => setShowPointsModal(true)} aria-label={`${profile.totalScore ?? 0} NeuroPuntos. Ver información`}><Award size={20} /><strong>{profile.totalScore ?? 0}</strong><span>NeuroPuntos <span aria-hidden="true">↗</span></span></button>
+              </div>
+            </section>
+          </div>
+
+          <section className="practice-section" aria-labelledby="practice-title">
+            <div className="practice-heading">
+              <h2 id="practice-title">¿Qué te apetece practicar?</h2>
+              <button className="text-link" onClick={() => setShowAreaSelection(true)}>Ver ejercicios <ArrowRight size={18} /></button>
+            </div>
+            <div className="practice-cards">
+              {domainCards.map((domain, index) => (
+                <button key={domain.id} className={`practice-card practice-${domain.id}`} onClick={() => {
+                  soundService.playTap();
+                  setSelectedDomainForModal(domain.id);
+                }}>
+                  <span className="practice-name">{['Atención', 'Lenguaje', 'Memoria', 'Organización', 'Coordinación'][index]}</span>
+                  <span className="practice-detail">2 ejercicios</span>
+                  <span className="practice-symbol" aria-hidden="true">{domain.icon}</span>
+                  <span className="practice-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <div className="home-bottom-grid">
+            <section className="progress-summary">
+              <div><h2>Tu recorrido</h2><p>{profile.totalSessions === 0 ? 'Aquí irás viendo todo lo que vas consiguiendo.' : `${profile.totalSessions} ejercicios completados. Cada intento cuenta.`}</p></div>
+              <div className="progress-domains">
+                {domainCards.map((domain, index) => (
+                  <div key={domain.id}>
+                    <span className={`progress-marker marker-${domain.id}`} />
+                    <strong>{domain.stats.totalCompleted}</strong>
+                    <span>{['Atención', 'Lenguaje', 'Memoria', 'Organización', 'Coordinación'][index]}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <button className="guidance-card" onClick={onOpenTherapistReport}>
+              <span className="guidance-top"><Stethoscope size={22} /><span>Tu espacio de apoyo</span><ArrowRight size={19} /></span>
+              <strong>{profile.therapistGuidanceNote ? 'Una nota para ti' : 'Acompañamos tu progreso.'}</strong>
+              <span className="guidance-description">{profile.therapistGuidanceNote || 'Consulta tus pautas y comparte tus avances con tu terapeuta.'}</span>
+            </button>
+          </div>
         </div>
       ) : (
         <section className="area-selection-section card animate-fade-in">
           <div className="section-header-row">
             <div>
-              <h3 className="section-title">Elige el Área que deseas entrenar</h3>
-              <p className="section-subtitle">Toca la tarjeta del área que prefieras practicar hoy:</p>
+              <h1 className="section-title">Encuentra tu entrenamiento</h1>
+              <p className="section-subtitle">Elige la capacidad que quieres practicar hoy.</p>
             </div>
 
             <div className="area-header-buttons">
@@ -219,6 +221,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   }}
                   role="button"
                   tabIndex={0}
+                  onKeyDown={e => {
+                    if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      setSelectedDomainForModal(domain.id);
+                    }
+                  }}
                 >
                   {isPrescribed && (
                     <div className="prescribed-badge">

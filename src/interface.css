@@ -1,0 +1,279 @@
+/* NeuroIA · espacios suaves, color plano y una jerarquía editorial. */
+:root {
+  --color-bg: #e8f2f3;
+  --color-surface: #ffffff;
+  --color-surface-card: #ffffff;
+  --color-surface-hover: #dce9ea;
+  --color-border: #cfdddf;
+  --color-border-subtle: #b4cace;
+  --color-text-main: #17343b;
+  --color-text-muted: #486068;
+  --color-text-faint: #526b73;
+  --color-primary: #075569;
+  --color-primary-hover: #064353;
+  --color-primary-dark: #043847;
+  --color-primary-light: #d4e9ed;
+  --color-action-bg: #075569;
+  --color-action-hover: #064353;
+  --color-action-text: #ffffff;
+  --color-attention-bg: #cce4ed;
+  --color-language-bg: #edcde7;
+  --color-memory-bg: #d3cfee;
+  --color-executive-bg: #d4ebcb;
+  --color-motor-bg: #f0ddc6;
+  --color-accent-bg: #edcde7;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-card-hover: none;
+  --panel-blue: #c5e3eb;
+  --panel-pink: #edcde7;
+  --panel-lilac: #d3cfee;
+  --panel-sage: #d4ebcb;
+  --panel-peach: #f0ddc6;
+  --panel-ink: #17343b;
+}
+body[data-contrast="soft-dark"], body[data-contrast="high-contrast"] {
+  --panel-blue: var(--color-surface);
+  --panel-pink: var(--color-surface);
+  --panel-lilac: var(--color-surface);
+  --panel-sage: var(--color-surface);
+  --panel-peach: var(--color-surface);
+  --panel-ink: var(--color-text-main);
+}
+#root { background-image: none; }
+html, body { font-family: 'DM Sans', system-ui, sans-serif; }
+h1, h2, h3, h4, h5, h6 { font-family: inherit; letter-spacing: -0.035em; font-weight: 600; }
+button, textarea, input, select, .touch-btn { font-family: inherit; }
+button { -webkit-appearance: none; }
+button:focus-visible, [role="button"]:focus-visible, textarea:focus-visible,
+input:focus-visible, select:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 5px; }
+.main-header {
+  position: relative; max-width: 1224px; width: 100%; margin: 0 auto;
+  padding: 25px 32px; background: transparent; border: 0; box-shadow: none;
+}
+.header-left { border: 0; background: transparent; color: var(--color-text-main); font: inherit; gap: 7px; min-height: 48px; }
+.header-logo-icon { width: 32px; height: 40px; background: transparent; color: var(--color-primary); box-shadow: none; }
+.header-title { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.05em; }
+.brand-light { font-weight: 400; }
+.header-right { gap: 10px; }
+.header-context { display: none; }
+.header-btn, .header-icon-btn { min-height: 48px; border: 0; background: var(--color-surface); border-radius: 999px; font-size: 0.72rem; font-weight: 500; }
+.header-btn-active { color: var(--color-primary); background: var(--color-primary-light); }
+.dashboard-container { max-width: 1224px; padding: 25px 32px 48px; gap: 0; }
+.wellness-home { display: flex; flex-direction: column; gap: 30px; }
+.home-greeting { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.home-greeting h1 { font-size: 1.85rem; display: flex; align-items: center; gap: 16px; font-weight: 650; }
+.home-greeting h1 svg { color: #776040; }
+.home-greeting p { margin-top: 5px; font-size: 0.85rem; }
+.home-date { font-size: 0.75rem; color: var(--color-text-muted); text-transform: capitalize; }
+.home-feature-grid { display: grid; grid-template-columns: 1.85fr 1fr; gap: 24px; }
+.daily-session-card { display: flex; position: relative; align-items: center; min-width: 0; border-radius: 32px; background: var(--panel-blue); color: var(--panel-ink); padding: 32px; overflow: hidden; }
+.daily-session-copy { position: relative; z-index: 1; width: 62%; flex-shrink: 0; }
+.soft-label { display: inline-flex; align-items: center; gap: 9px; font-size: 0.72rem; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.daily-session-copy h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.12; margin-top: 25px; font-weight: 600; }
+.daily-session-copy p { font-size: 0.8rem; line-height: 1.6; color: inherit; margin-top: 15px; }
+.session-start { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 52px; margin-top: 25px; border-radius: 99px; padding: 12px 22px; background: var(--color-action-bg); color: var(--color-action-text); border: 0; cursor: pointer; font-size: 0.78rem; font-weight: 500; }
+.session-start:hover { background: var(--color-action-hover); }
+.session-footnote { display: block; font-size: 0.6rem; margin-top: 12px; line-height: 1.5; }
+.wellness-characters { width: 46%; position: absolute; right: 0; bottom: 8%; aspect-ratio: 1; object-fit: contain; mix-blend-mode: darken; pointer-events: none; }
+body:not([data-contrast="standard"]) .wellness-characters { mix-blend-mode: normal; border-radius: 40%; opacity: 0.85; }
+.consistency-card { background: var(--panel-pink); color: var(--panel-ink); border-radius: 32px; padding: 28px; display: flex; flex-direction: column; }
+.consistency-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.consistency-heading h2 { font-size: 1rem; font-weight: 500; }
+.streak-number { font-size: 4.3rem; font-weight: 500; line-height: 1; letter-spacing: -0.07em; margin: 24px 0 12px; display: flex; gap: 16px; align-items: baseline; }
+.streak-number span { font-size: 0.8rem; font-weight: 400; letter-spacing: 0; }
+.consistency-card > p { color: inherit; font-size: 0.73rem; line-height: 1.6; margin-bottom: 20px; }
+.consistency-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid color-mix(in srgb, var(--panel-ink) 15%, transparent); padding-top: 20px; margin-top: auto; }
+.consistency-stats > * { display: grid; grid-template-columns: 24px auto; align-content: start; align-items: center; gap: 8px; border: 0; background: transparent; color: inherit; text-align: left; padding: 0; }
+.consistency-stats button { cursor: pointer; }
+.consistency-stats strong { font-size: 1.05rem; font-weight: 600; }
+.consistency-stats > * > span { grid-column: 1 / -1; font-size: 0.63rem; }
+.practice-heading { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 18px; }
+.practice-heading h2 { font-size: 1.2rem; font-weight: 500; }
+.text-link { display: flex; align-items: center; gap: 8px; background: transparent; color: var(--color-text-main); border: 0; min-height: 48px; cursor: pointer; font-size: 0.7rem; }
+.text-link:hover { text-decoration: underline; }
+.practice-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.practice-card { position: relative; text-align: left; display: flex; flex-direction: column; align-items: flex-start; min-height: 184px; padding: 22px; border-radius: 30px; color: var(--panel-ink); border: 2px solid transparent; cursor: pointer; transition: border-color 160ms, transform 160ms; }
+.practice-card:hover { border-color: currentColor; transform: translateY(-3px); }
+.practice-attention { background: var(--panel-blue); }
+.practice-language { background: var(--panel-pink); }
+.practice-memory { background: var(--panel-lilac); }
+.practice-executive { background: var(--panel-sage); }
+.practice-motor { background: var(--panel-peach); }
+.practice-name { font-size: 0.85rem; font-weight: 600; }
+.practice-detail { font-size: 0.62rem; margin-top: 3px; }
+.practice-symbol { display: block; margin-top: 24px; transform: rotate(-10deg); }
+.practice-symbol svg { width: 48px; height: 48px; stroke-width: 1.2; }
+.practice-arrow { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.4); position: absolute; right: 16px; bottom: 20px; }
+.home-bottom-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 24px; }
+.progress-summary { border-radius: 28px; background: var(--color-surface); padding: 25px 28px; }
+.progress-summary h2 { font-size: 1rem; font-weight: 500; }
+.progress-summary p { font-size: 0.7rem; margin-top: 6px; line-height: 1.6; }
+.progress-domains { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
+.progress-domains > div { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.progress-domains strong { font-size: 1rem; font-weight: 500; }
+.progress-domains > div > span:last-child { font-size: 0.55rem; }
+.progress-marker { width: 24px; height: 7px; border-radius: 8px; }
+.marker-attention { background: #81bdcd; }
+.marker-language { background: #d1a1c7; }
+.marker-memory { background: #aaa3d2; }
+.marker-executive { background: #9dbb8d; }
+.marker-motor { background: #cbac86; }
+.guidance-card { display: flex; flex-direction: column; align-items: flex-start; padding: 25px 28px; background: transparent; border: 1px solid var(--color-border-subtle); border-radius: 28px; text-align: left; color: var(--color-text-main); cursor: pointer; }
+.guidance-card:hover { background: var(--color-surface); }
+.guidance-top { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 0.67rem; }
+.guidance-top > svg:last-child { margin-left: auto; }
+.guidance-card strong { font-size: 1.1rem; line-height: 1.3; font-weight: 500; margin-top: 22px; }
+.guidance-description { font-size: 0.73rem; line-height: 1.7; margin-top: 10px; }
+.card { border: 0; box-shadow: none; }
+.touch-btn { font-weight: 500; }
+.touch-btn-primary, .touch-btn-primary:hover, .touch-btn-secondary { box-shadow: none; }
+.modal-container { border-radius: 30px; }
+/* La selección permite desplazarse también con el texto ampliado. */
+body:has(.dashboard-area-selection-active),
+#root:has(.dashboard-area-selection-active) {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+.dashboard-container.dashboard-area-selection-active {
+  max-width: 1168px !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 auto !important;
+  padding: 40px !important;
+  overflow: visible !important;
+}
+.dashboard-area-selection-active .area-selection-section {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+  gap: 32px;
+}
+.dashboard-area-selection-active .section-header-row { gap: 24px; flex-wrap: wrap; }
+.dashboard-area-selection-active .section-title { font-size: 1.8rem; font-weight: 400; }
+.dashboard-area-selection-active .section-subtitle { font-size: 0.85rem; margin-top: 10px; }
+.dashboard-area-selection-active .domains-grid { gap: 22px; grid-template-rows: auto; }
+.dashboard-area-selection-active .domain-card { padding: 28px; overflow: visible; gap: 20px; }
+.dashboard-area-selection-active .domain-card-header { flex-direction: column; align-items: flex-start; gap: 18px; }
+.dashboard-area-selection-active .domain-card-title { font-size: 1.05rem; font-weight: 500; line-height: 1.4; }
+.dashboard-area-selection-active .domain-card-subtitle { font-size: 0.72rem; line-height: 1.5; }
+.dashboard-area-selection-active .domain-card-desc { display: block; font-size: 0.8rem; line-height: 1.7; overflow: visible; }
+.dashboard-area-selection-active .domain-play-btn { min-height: 48px; padding: 10px 16px; font-size: 0.75rem; border-radius: 99px; }
+.dashboard-area-selection-active .domain-card-stat .stat-val { font-weight: 500; }
+.area-header-buttons .touch-btn { font-size: 0.75rem; min-height: 48px; border-radius: 99px; }
+
+/* Espacio profesional */
+.therapist-container { max-width: 1248px; padding: 32px 40px 64px; gap: 28px; }
+.therapist-header-bar { flex-wrap: wrap; gap: 20px; margin-bottom: 12px; }
+.therapist-header-bar > .touch-btn { font-size: 0.72rem; min-height: 48px; }
+.therapist-badge-title { flex: 1; }
+.therapist-badge-title > svg { display: none; }
+.therapist-badge-title h2 { font-size: 1.75rem; font-weight: 400; }
+.therapist-badge-title p { font-size: 0.8rem; margin-top: 8px; }
+.therapist-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.therapist-container .touch-btn { font-size: 0.75rem; min-height: 48px; border-radius: 99px; padding: 10px 18px; }
+.therapist-container .card { padding: 28px; border-radius: 24px; }
+.therapist-container h3 { font-size: 1.05rem; font-weight: 500; }
+.therapist-container p, .therapist-container label, .patient-info-row { font-size: 0.8rem; line-height: 1.65; }
+.therapist-container .card-header-icon { align-items: flex-start; gap: 12px; }
+.therapist-container .card-header-icon > svg { width: 20px; stroke-width: 1.5; }
+.patient-info-row { padding: 14px 0; gap: 16px; }
+.patient-info-row .val { font-weight: 500; }
+.therapist-container .priority-chip { font-size: 0.72rem; font-weight: 400; min-height: 48px; padding: 10px 14px; border-width: 1px; }
+.therapist-container .prescription-status-hint { font-size: 0.72rem; padding: 12px 16px; }
+.therapist-container .text-amber { color: var(--color-executive); }
+.therapist-container .text-green { color: var(--color-memory); }
+.therapist-container .prescription-textarea { font-size: 0.8rem; padding: 16px; }
+.therapist-container .card-strengths, .therapist-container .card-weaknesses { border-left-width: 1px; border-left-color: var(--color-border); }
+.therapist-container .icon-circle { width: 40px; height: 40px; flex-shrink: 0; }
+.therapist-container .icon-circle-green, .therapist-container .badge-green { color: var(--color-memory); background: var(--color-memory-bg); }
+.therapist-container .icon-circle-amber, .therapist-container .badge-mild, .therapist-container .badge-points { color: var(--color-executive); background: var(--color-executive-bg); }
+.therapist-container .analysis-item, .therapist-container table { font-size: 0.78rem; }
+.therapist-container .metric-bar-label { font-size: 0.78rem; }
+
+
+/* Fondos de área conectados con las tarjetas del inicio. */
+.dashboard-area-selection-active .domain-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 28px; }
+.dashboard-area-selection-active .domain-icon-circle { border-radius: 50%; }
+.therapist-container .therapist-patient-card { background: var(--panel-blue); color: var(--panel-ink); }
+.therapist-patient-card h3 { color: inherit; }
+.therapist-container .card-strengths { background: var(--panel-sage); }
+.therapist-container .card-weaknesses { background: var(--panel-peach); }
+
+@media (max-width: 1050px) {
+  .home-feature-grid { grid-template-columns: 1.6fr 1fr; }
+  .daily-session-card { padding: 26px; }
+  .daily-session-copy { width: 72%; }
+  .wellness-characters { width: 40%; right: 0; bottom: 15%; }
+  .practice-cards { gap: 10px; }
+  .practice-card { padding: 18px 14px; }
+  .practice-name { font-size: 0.75rem; }
+  .therapist-grid { grid-template-columns: 1fr; }
+  .therapist-header-actions { width: 100%; }
+}
+@media (max-width: 760px) {
+  .main-header { padding: 20px; }
+  .dashboard-container { padding: 20px; }
+  .home-feature-grid { grid-template-columns: 1fr; }
+  .daily-session-card { min-height: 330px; padding: 28px; }
+  .daily-session-copy { width: 62%; }
+  .wellness-characters { width: 45%; right: 0; bottom: 5%; }
+  .consistency-card { padding: 24px; }
+  .streak-number { font-size: 3rem; margin: 15px 0; }
+  .consistency-stats { gap: 14px; }
+  .home-bottom-grid { grid-template-columns: 1fr; }
+  .practice-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .practice-card { min-height: 175px; }
+  .home-date { font-size: 0.65rem; max-width: 110px; text-align: right; }
+  .home-greeting h1 { font-size: 1.5rem; }
+  .home-greeting h1 svg { width: 24px; }
+  .home-greeting p { font-size: 0.75rem; }
+  .therapist-container { padding: 24px; }
+  .dashboard-area-selection-active .domains-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-area-selection-active .domains-grid > :nth-child(n) { grid-column: auto; }
+  .dashboard-container.dashboard-area-selection-active { padding: 24px !important; }
+}
+@media (max-width: 480px) {
+  .main-header { gap: 10px; }
+  .header-title { font-size: 1.15rem; }
+  .header-right { gap: 6px; }
+  .header-btn { padding: 8px 12px; }
+  .header-btn .btn-label { display: none; }
+  .wellness-home { gap: 26px; }
+  .home-greeting { align-items: flex-start; gap: 12px; }
+  .home-greeting h1 { gap: 8px; }
+  .home-date { max-width: 90px; }
+  .daily-session-card { padding: 25px; min-height: 400px; align-items: flex-start; }
+  .daily-session-copy { width: 100%; }
+  .daily-session-copy h2 { font-size: 1.95rem; }
+  .daily-session-copy p { max-width: 70%; }
+  .wellness-characters { width: 43%; bottom: 95px; right: 0; }
+  .session-start { margin-top: 45px; }
+  .practice-heading { align-items: flex-start; gap: 12px; }
+  .practice-heading h2 { font-size: 1.15rem; max-width: 210px; }
+  .text-link { font-size: 0.65rem; min-width: 95px; }
+  .practice-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .practice-card { min-height: 180px; padding: 20px; }
+  .practice-name { font-size: 0.83rem; }
+  .practice-card:last-child { grid-column: 1 / -1; min-height: 110px; padding-right: 120px; }
+  .practice-card:last-child .practice-symbol { position: absolute; right: 70px; top: 10px; margin: 0; }
+  .practice-card:last-child .practice-arrow { bottom: 34px; }
+  .progress-summary { padding: 24px 20px; }
+  .progress-domains { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 20px; }
+  .progress-domains > div > span:last-child { font-size: 0.62rem; }
+  .therapist-container { padding: 20px 16px; }
+  .therapist-header-bar { flex-direction: column; align-items: flex-start; }
+  .therapist-analysis-grid { grid-template-columns: 1fr; }
+  .patient-info-row { flex-wrap: wrap; }
+  .dashboard-area-selection-active .domains-grid { grid-template-columns: 1fr; }
+  .area-header-buttons { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) { .practice-card { transition: none; } }
+@media print {
+  .therapist-container { max-width: none; padding: 0; }
+  .therapist-container .card { box-shadow: none; break-inside: avoid; }
+}
