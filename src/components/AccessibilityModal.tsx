@@ -1,5 +1,6 @@
+import { ModalFrame } from './ModalFrame';
 import React from 'react';
-import { X, Type, Eye, Hand, Volume2, ShieldCheck, Check } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import type { AccessibilitySettings } from '../types';
 import { soundService } from '../services/soundService';
 
@@ -27,14 +28,14 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <ModalFrame onClose={onClose} labelledBy="accessibility-title">
       <div className="modal-container" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-group">
-            <ShieldCheck size={28} className="modal-icon" />
             <div>
-              <h2 className="modal-title">Ajustes de Accesibilidad</h2>
-              <p className="modal-subtitle">Adaptado a tus necesidades físicas y visuales</p>
+              <span className="modal-overline">Tu espacio, tus preferencias</span>
+              <h2 id="accessibility-title" className="modal-title">Hazlo a tu manera</h2>
+              <p className="modal-subtitle">Elige cómo te resulta más cómodo entrenar.</p>
             </div>
           </div>
           <button className="modal-close-btn" onClick={onClose} aria-label="Cerrar ventana">
@@ -45,16 +46,15 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
         <div className="modal-body">
           <section className="setting-section">
             <div className="setting-label-row">
-              <Type size={24} />
               <div>
-                <h3 className="setting-title">Tamaño de Letra</h3>
-                <p className="setting-desc">Aumenta el tamaño para leer con total comodidad</p>
+                <h3 className="setting-title">Tamaño del texto</h3>
               </div>
             </div>
             <div className="options-grid">
               {(['normal', 'large', 'xlarge'] as const).map(size => (
                 <button
                   key={size}
+                  aria-pressed={settings.fontSize === size}
                   className={`option-btn ${settings.fontSize === size ? 'option-btn-selected' : ''}`}
                   onClick={() => {
                     soundService.playTap();
@@ -62,7 +62,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                   }}
                 >
                   {settings.fontSize === size && <Check size={20} className="check-icon" />}
-                  <span>{size === 'normal' ? 'Normal (100%)' : size === 'large' ? 'Grande (120%)' : 'Extra Grande (140%)'}</span>
+                  <span>{size === 'normal' ? 'Normal' : size === 'large' ? 'Grande' : 'Muy grande'}</span>
                 </button>
               ))}
             </div>
@@ -70,16 +70,15 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
 
           <section className="setting-section">
             <div className="setting-label-row">
-              <Eye size={24} />
               <div>
-                <h3 className="setting-title">Modo de Pantalla y Contraste</h3>
-                <p className="setting-desc">Optimiza el fondo para evitar deslumbramientos o fatiga visual</p>
+                <h3 className="setting-title">Pantalla</h3>
               </div>
             </div>
             <div className="options-grid">
               {(['standard', 'high-contrast', 'soft-dark'] as const).map(mode => (
                 <button
                   key={mode}
+                  aria-pressed={settings.contrast === mode}
                   className={`option-btn ${settings.contrast === mode ? 'option-btn-selected' : ''}`}
                   onClick={() => {
                     soundService.playTap();
@@ -87,7 +86,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                   }}
                 >
                   {settings.contrast === mode && <Check size={20} className="check-icon" />}
-                  <span>{mode === 'standard' ? 'Claridad Suave' : mode === 'high-contrast' ? 'Alto Contraste' : 'Modo Noche'}</span>
+                  <span>{mode === 'standard' ? 'Claro' : mode === 'high-contrast' ? 'Alto contraste' : 'Oscuro'}</span>
                 </button>
               ))}
             </div>
@@ -95,16 +94,16 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
 
           <section className="setting-section">
             <div className="setting-label-row">
-              <Hand size={24} />
               <div>
-                <h3 className="setting-title">Mano de Manejo en Tablet</h3>
-                <p className="setting-desc">Coloca los botones principales al alcance de la mano que estés utilizando</p>
+                <h3 className="setting-title">Posición de los controles</h3>
+                <p className="setting-desc">Acerca los botones a la mano que utilizas.</p>
               </div>
             </div>
             <div className="options-grid">
               {(['left', 'center', 'right'] as const).map(hand => (
                 <button
                   key={hand}
+                  aria-pressed={settings.handDominance === hand}
                   className={`option-btn ${settings.handDominance === hand ? 'option-btn-selected' : ''}`}
                   onClick={() => {
                     soundService.playTap();
@@ -112,7 +111,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                   }}
                 >
                   {settings.handDominance === hand && <Check size={20} className="check-icon" />}
-                  <span>{hand === 'left' ? 'Mano Izquierda' : hand === 'right' ? 'Mano Derecha' : 'Ambas Manos'}</span>
+                  <span>{hand === 'left' ? 'Izquierda' : hand === 'right' ? 'Derecha' : 'Centro'}</span>
                 </button>
               ))}
             </div>
@@ -120,14 +119,14 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
 
           <section className="setting-section">
             <div className="setting-label-row">
-              <Eye size={24} />
               <div>
-                <h3 className="setting-title">Guía Visual de Borde Izquierdo</h3>
-                <p className="setting-desc">Muestra una línea guía luminosa a la izquierda para estimular el rastreo visual (heminegligencia)</p>
+                <h3 className="setting-title">Guía visual izquierda</h3>
+                <p className="setting-desc">Una línea en el borde para ayudarte a explorar la pantalla.</p>
               </div>
             </div>
             <div className="options-grid">
               <button
+                aria-pressed={settings.leftSideAnchor}
                 className={`option-btn ${settings.leftSideAnchor ? 'option-btn-selected' : ''}`}
                 onClick={() => {
                   soundService.playTap();
@@ -135,29 +134,30 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                 }}
               >
                 {settings.leftSideAnchor && <Check size={20} className="check-icon" />}
-                <span>{settings.leftSideAnchor ? 'Activada (Recomendado post-ictus)' : 'Desactivada'}</span>
+                <span>{settings.leftSideAnchor ? 'Activada' : 'Desactivada'}</span>
               </button>
             </div>
           </section>
 
           <section className="setting-section">
             <div className="setting-label-row">
-              <Volume2 size={24} />
               <div>
-                <h3 className="setting-title">Voz de Apoyo y Velocidad</h3>
-                <p className="setting-desc">Lee en voz alta las instrucciones y palabras para ayudar en caso de afasia</p>
+                <h3 className="setting-title">Lectura por voz</h3>
+                <p className="setting-desc">Escucha las instrucciones durante los ejercicios.</p>
               </div>
             </div>
             <div className="options-grid">
               <button
+                aria-pressed={settings.speechEnabled}
                 className={`option-btn ${settings.speechEnabled ? 'option-btn-selected' : ''}`}
                 onClick={() => handleSpeechToggle(!settings.speechEnabled)}
               >
                 {settings.speechEnabled && <Check size={20} className="check-icon" />}
-                <span>{settings.speechEnabled ? 'Lectura por Voz: Activa' : 'Lectura por Voz: Silenciada'}</span>
+                <span>{settings.speechEnabled ? 'Voz activada' : 'Voz desactivada'}</span>
               </button>
 
               <button
+                aria-pressed={settings.speechRate < 0.95}
                 className={`option-btn ${settings.speechRate < 0.95 ? 'option-btn-selected' : ''}`}
                 onClick={() => {
                   soundService.playTap();
@@ -167,7 +167,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                   soundService.speak(newRate < 0.95 ? 'Velocidad de voz pausada y tranquila.' : 'Velocidad de voz normal.');
                 }}
               >
-                <span>Velocidad: {settings.speechRate < 0.95 ? 'Pausada y Clara (0.8x)' : 'Normal (1.0x)'}</span>
+                <span>Velocidad: {settings.speechRate < 0.95 ? 'Pausada' : 'Normal'}</span>
               </button>
             </div>
           </section>
@@ -181,10 +181,10 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
               onClose();
             }}
           >
-            Listo, Guardar Ajustes
+            Listo
           </button>
         </div>
       </div>
-    </div>
+    </ModalFrame>
   );
 };

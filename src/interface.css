@@ -277,3 +277,198 @@ body:has(.dashboard-area-selection-active),
   .therapist-container { max-width: none; padding: 0; }
   .therapist-container .card { box-shadow: none; break-inside: avoid; }
 }
+
+/* Modales: una única superficie y acciones breves. */
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(620px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 40px);
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 30px;
+  color: var(--color-text-main);
+  background: var(--color-bg);
+  box-shadow: 0 24px 80px rgba(23, 52, 59, 0.16);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.modal-shell::backdrop { background: rgba(23, 52, 59, 0.3); backdrop-filter: blur(5px); }
+.modal-shell .modal-container,
+.modal-shell .modal-card {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--color-bg);
+  overflow: visible;
+  animation: none;
+}
+.modal-shell .modal-header {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--color-bg);
+  padding: 26px 28px 20px;
+  border: 0; gap: 16px; align-items: flex-start;
+}
+.modal-shell .modal-title-group,
+.modal-shell .modal-title-with-icon { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.modal-shell .modal-title-group > svg,
+.modal-shell .modal-title-with-icon > svg { display: none; }
+.modal-shell .modal-title { font-size: 1.3rem; font-weight: 600; line-height: 1.25; margin: 0; }
+.modal-shell .modal-subtitle { font-size: 0.76rem; font-weight: 400; line-height: 1.6; margin-top: 8px; }
+.modal-shell .modal-close-btn { background: var(--color-surface); color: var(--color-text-main); min-width: 48px; height: 48px; flex-shrink: 0; }
+.modal-shell .modal-close-btn svg { width: 21px; height: 21px; }
+.modal-shell .modal-close-btn:hover { background: var(--color-surface-hover); }
+.modal-shell .modal-body,
+.modal-shell .mistakes-modal-body { padding: 4px 28px 24px; gap: 16px; max-height: none; overflow: visible; }
+.modal-shell .modal-footer {
+  position: sticky; bottom: 0; z-index: 2; background: var(--color-bg);
+  display: flex; justify-content: flex-end; gap: 12px; padding: 16px 28px 24px; border: 0;
+}
+.modal-shell .touch-btn { min-height: 48px; padding: 12px 22px; border-radius: 99px; font-size: 0.8rem; font-weight: 500; box-shadow: none; }
+.modal-shell .setting-section { background: var(--color-surface); padding: 20px; border: 0; border-radius: 22px; margin: 0; }
+.modal-shell .setting-label-row { gap: 12px; margin-bottom: 14px; }
+.modal-shell .setting-label-row > svg { width: 21px; height: 21px; stroke-width: 1.5; color: var(--color-primary); flex-shrink: 0; }
+.modal-shell .setting-title { font-size: 0.88rem; font-weight: 500; }
+.modal-shell .setting-desc { font-size: 0.7rem; line-height: 1.5; margin-top: 5px; }
+.modal-shell .options-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.modal-shell .option-btn { flex: 1 1 auto; min-height: 48px; padding: 10px 14px; background: var(--color-bg); border: 1px solid transparent; border-radius: 15px; font-size: 0.72rem; font-weight: 400; color: var(--color-text-main); box-shadow: none; gap: 6px; }
+.modal-shell .option-btn-selected { background: var(--panel-lilac); border-color: var(--color-accent); color: var(--panel-ink); font-weight: 500; }
+.modal-shell .check-icon { width: 16px; height: 16px; color: inherit; }
+.modal-shell .exercise-modal-domain-badge { width: 48px; height: 48px; flex-shrink: 0; border-radius: 17px; }
+.modal-shell .exercise-modal-domain-badge svg { width: 25px; height: 25px; }
+.modal-shell .exercise-choice-grid { display: flex; flex-direction: column; padding: 4px 28px 28px; gap: 12px; }
+.modal-shell .exercise-choice-card { display: flex; flex-direction: row; align-items: center; gap: 16px; width: 100%; min-height: 130px; padding: 22px; border: 1px solid transparent; border-radius: 22px; background: var(--color-surface); color: var(--color-text-main); cursor: pointer; text-align: left; box-shadow: none; }
+.modal-shell .exercise-choice-card:hover { border-color: var(--color-primary); transform: none; }
+.modal-shell .choice-icon-bubble { flex-shrink: 0; width: 50px; height: 60px; border-radius: 20px; display: grid; place-items: center; }
+.modal-shell .choice-icon-bubble svg { width: 28px; height: 28px; stroke-width: 1.4; }
+.modal-shell .choice-copy { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.modal-shell .choice-card-title { display: block; font-size: 0.91rem; font-weight: 500; line-height: 1.4; margin: 0; }
+.modal-shell .choice-card-desc { display: block; font-size: 0.7rem; line-height: 1.65; font-weight: 400; color: var(--color-text-muted); margin: 0; }
+.modal-shell .choice-arrow { flex-shrink: 0; color: var(--color-primary); }
+.points-total { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--panel-pink); color: var(--panel-ink); padding: 25px; border-radius: 24px; }
+.points-total strong { font-size: 2.4rem; font-weight: 500; line-height: 1; }
+.points-total span { font-size: 0.75rem; }
+.points-modal-body > p, .points-note { font-size: 0.8rem; line-height: 1.75; }
+.points-note { background: var(--color-surface); border-radius: 20px; padding: 20px; color: var(--color-text-muted); }
+.modal-shell .fatigue-modal { padding: 30px; text-align: left; }
+.modal-shell .fatigue-icon-wrapper { width: 64px; height: 64px; margin: 0 0 20px; background: var(--panel-pink); color: var(--panel-ink); box-shadow: none; animation: none; }
+.modal-shell .fatigue-heart-icon { color: inherit; width: 30px; animation: none; }
+.modal-shell .fatigue-title { font-size: 1.55rem; font-weight: 500; margin-bottom: 12px; }
+.modal-shell .fatigue-text { font-size: 0.82rem; line-height: 1.7; }
+.modal-shell .fatigue-tips { padding: 18px; border-radius: 20px; background: var(--color-surface); margin: 22px 0; }
+.modal-shell .fatigue-tip-item { font-size: 0.78rem; color: var(--color-text-main); }
+.modal-shell .fatigue-actions { display: flex; flex-direction: column; gap: 10px; }
+.modal-shell .rest-modal-container { padding: 28px; }
+.modal-shell .rest-modal-header { gap: 12px; align-items: flex-start; }
+.modal-shell .rest-title-icon-wrap { display: none; }
+.modal-shell .rest-modal-title { font-size: 1.35rem; font-weight: 500; }
+.modal-shell .rest-modal-subtitle { font-size: 0.76rem; line-height: 1.6; }
+.modal-shell .rest-breathe-ring { width: 190px; height: 190px; background: var(--panel-lilac); border: 0; box-shadow: none; }
+.modal-shell .rest-timer-digits { font-size: 2.6rem; font-weight: 500; color: var(--panel-ink); }
+.modal-shell .rest-breathe-status { font-size: 0.7rem; font-weight: 400; color: var(--panel-ink); }
+.modal-shell .rest-progress-bar-wrap { width: 210px; height: 5px; }
+.modal-shell .rest-progress-bar-fill { background: var(--color-primary); }
+.modal-shell .rest-tips-grid { grid-template-columns: 1fr; gap: 8px; margin-bottom: 20px; }
+.modal-shell .rest-tip-card { display: flex; align-items: center; gap: 12px; background: var(--color-surface); border: 0; border-radius: 17px; padding: 13px 16px; }
+.modal-shell .rest-tip-icon-box { width: 30px; height: 30px; background: transparent; flex-shrink: 0; }
+.modal-shell .rest-tip-icon-box svg { width: 20px; color: var(--color-primary); }
+.modal-shell .rest-tip-card strong { font-size: 0.78rem; font-weight: 500; }
+.modal-shell .rest-tip-card p { font-size: 0.68rem; line-height: 1.5; }
+.modal-shell .rest-modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.modal-shell .rest-completed-notice { background: var(--panel-sage); padding: 24px; border: 0; }
+.modal-shell .rest-completed-notice h3 { font-size: 1.2rem; }
+.modal-shell .rest-completed-notice p { font-size: 0.8rem; }
+.modal-shell .mistake-item-card { background: var(--color-surface); padding: 20px; border: 0; border-radius: 22px; box-shadow: none; }
+.modal-shell .mistake-item-header { flex-wrap: wrap; }
+.modal-shell .mistake-badge-num { background: var(--panel-lilac); color: var(--panel-ink); font-size: 0.65rem; font-weight: 500; }
+.modal-shell .mistake-item-title { font-size: 0.9rem; font-weight: 500; }
+.modal-shell .mistake-comparison-row { grid-template-columns: 1fr; }
+.modal-shell .comparison-wrong { background: var(--panel-peach); color: var(--panel-ink); border: 0; }
+.modal-shell .comparison-correct { background: var(--panel-sage); color: var(--panel-ink); border: 0; }
+.modal-shell .col-label { font-size: 0.68rem; color: inherit; }
+.modal-shell .col-val, .modal-shell .mistake-hint-box { font-size: 0.8rem; color: inherit; line-height: 1.6; }
+.modal-shell .mistake-hint-box { background: var(--color-bg); border: 0; }
+@media (max-width: 480px) {
+  .modal-shell { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); border-radius: 25px; }
+  .modal-shell .modal-header { padding: 22px 18px 16px; }
+  .modal-shell .modal-title { font-size: 1.15rem; }
+  .modal-shell .modal-title-group { gap: 10px; }
+  .modal-shell .exercise-modal-domain-badge { display: none; }
+  .modal-shell .modal-body, .modal-shell .mistakes-modal-body { padding: 0 18px 18px; }
+  .modal-shell .modal-footer { padding: 14px 18px 18px; flex-wrap: wrap; }
+  .modal-shell .setting-section { padding: 16px; }
+  .modal-shell .exercise-choice-grid { padding: 0 18px 20px; }
+  .modal-shell .exercise-choice-card { gap: 12px; padding: 18px 14px; }
+  .modal-shell .choice-icon-bubble { width: 36px; height: 48px; }
+  .modal-shell .choice-arrow { display: none; }
+  .modal-shell .fatigue-modal, .modal-shell .rest-modal-container { padding: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-shell .rest-breathe-ring { transform: none; transition: none; }
+}
+
+/* Lenguaje editorial compartido con las tarjetas de bienestar. */
+.modal-overline { display: block; margin-bottom: 10px; font-size: 0.66rem; color: var(--color-text-muted); font-weight: 400; }
+.modal-shell .modal-title { font-weight: 500; letter-spacing: -0.04em; font-size: 1.55rem; }
+.modal-shell .modal-header { padding-top: 30px; padding-bottom: 26px; }
+.modal-shell .modal-close-btn { border: 1px solid var(--color-border); background: transparent; }
+.modal-shell .exercise-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.modal-shell .exercise-choice-grid:has(> :only-child) { grid-template-columns: 1fr; }
+.modal-shell .exercise-choice-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+  min-height: 300px; padding: 25px; background: var(--panel-lilac); color: var(--panel-ink);
+  border-radius: 32px; position: relative;
+}
+.modal-shell .exercise-choice-card:nth-child(2) { background: var(--panel-pink); }
+.modal-shell .choice-art { display: block; margin-bottom: 22px; color: var(--panel-ink); }
+.wellness-glyph { width: 74px; height: 74px; display: block; }
+.modal-shell .choice-card-title { font-size: 1.02rem; font-weight: 500; }
+.modal-shell .choice-card-desc { font-size: 0.73rem; line-height: 1.65; color: inherit; opacity: 0.88; }
+.modal-shell .choice-cta { display: flex; align-items: center; justify-content: space-between; width: 100%; padding-top: 24px; margin-top: auto; font-size: 0.76rem; }
+.modal-shell .choice-arrow { display: grid; place-items: center; width: 36px; height: 36px; background: rgba(255,255,255,.45); border-radius: 50%; color: inherit; }
+.modal-shell .exercise-choice-card:only-child { min-height: 220px; }
+.modal-shell .exercise-choice-card:only-child .choice-art { position: absolute; top: 25px; right: 25px; }
+.modal-shell .exercise-choice-card:only-child .choice-copy { max-width: 72%; padding-top: 10px; }
+.modal-shell .setting-section { padding: 22px; border-radius: 26px; }
+.modal-shell .setting-section:nth-child(1) { background: var(--panel-blue); }
+.modal-shell .setting-section:nth-child(2) { background: var(--panel-lilac); }
+.modal-shell .setting-section:nth-child(3) { background: var(--panel-pink); }
+.modal-shell .setting-section:nth-child(4) { background: var(--panel-sage); }
+.modal-shell .setting-section:nth-child(5) { background: var(--panel-peach); }
+.modal-shell .setting-section, .modal-shell .setting-title, .modal-shell .setting-desc { color: var(--panel-ink); }
+.modal-shell .setting-label-row { margin-bottom: 16px; }
+.modal-shell .setting-title { font-size: 0.95rem; font-weight: 500; }
+.modal-shell .option-btn { border-radius: 99px; background: color-mix(in srgb, var(--color-surface) 55%, transparent); border: 1px solid transparent; }
+.modal-shell .option-btn-selected { color: var(--color-action-text); background: var(--color-action-bg); border-color: var(--color-action-bg); }
+.modal-shell .points-total { min-height: 170px; justify-content: space-between; overflow: hidden; background: var(--panel-blue); }
+.points-total > div { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.points-total img { width: 42%; max-width: 170px; mix-blend-mode: darken; }
+.modal-shell .fatigue-modal { text-align: center; }
+.rest-character-art { background: var(--panel-blue); border-radius: 28px; margin-bottom: 25px; display: flex; justify-content: center; }
+.rest-character-art img { width: 180px; height: 180px; object-fit: contain; mix-blend-mode: darken; }
+.modal-shell .fatigue-tips { background: transparent; padding: 0; text-align: center; }
+.modal-shell .fatigue-tip-item { justify-content: center; font-size: 0.75rem; }
+.modal-shell .fatigue-actions .touch-btn svg { display: none; }
+.modal-shell .rest-tip-card:nth-child(1) { background: var(--panel-blue); }
+.modal-shell .rest-tip-card:nth-child(2) { background: var(--panel-lilac); }
+.modal-shell .rest-tip-card:nth-child(3) { background: var(--panel-sage); }
+.modal-shell .rest-tip-card, .modal-shell .rest-tip-card p { color: var(--panel-ink); }
+.modal-shell .rest-breathe-ring { border-radius: 46% 54% 55% 45% / 53% 43% 57% 47%; }
+.modal-shell .mistake-item-card { background: var(--color-surface); }
+body:not([data-contrast="standard"]) .rest-character-art img,
+body:not([data-contrast="standard"]) .points-total img { mix-blend-mode: normal; border-radius: 24px; }
+@media (max-width: 480px) {
+  .modal-shell .exercise-choice-grid { grid-template-columns: 1fr; }
+  .modal-shell .exercise-choice-card { min-height: 230px; padding: 22px; }
+  .modal-shell .choice-art { position: absolute; top: 20px; right: 20px; }
+  .modal-shell .choice-copy, .modal-shell .exercise-choice-card:only-child .choice-copy { max-width: 74%; padding-top: 0; }
+  .modal-shell .wellness-glyph { width: 52px; height: 52px; }
+  .modal-shell .modal-title { font-size: 1.3rem; }
+}

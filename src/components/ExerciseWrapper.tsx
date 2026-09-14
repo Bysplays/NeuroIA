@@ -1,3 +1,4 @@
+import { ModalFrame } from './ModalFrame';
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Volume2, VolumeX, Sparkles, CheckCircle2, RotateCcw, Home, ArrowRight, Award, ClipboardCheck, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -239,22 +240,20 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
         )}
       </div>
 
-      {/* Modal accesible de Revisión y Corrección de Fallos */}
+      {/* Modal accesible de Repasamos juntos */}
       {showMistakesModal && result && (
-        <div className="modal-backdrop" onClick={() => setShowMistakesModal(false)}>
+        <ModalFrame onClose={() => setShowMistakesModal(false)} labelledBy="review-title">
           <div
             className="modal-card mistakes-modal-card"
             onClick={e => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
           >
             <div className="modal-header">
               <div className="modal-title-with-icon">
                 <ClipboardCheck size={28} className="text-primary" />
                 <div>
-                  <h3 className="modal-title">Revisión y Corrección de Fallos</h3>
+                  <h3 id="review-title" className="modal-title">Repasamos juntos</h3>
                   <p className="modal-subtitle">
-                    Entender los errores activa la neuroplasticidad cerebral para corregir patrones.
+                    Mira las respuestas y prueba de nuevo cuando quieras.
                   </p>
                 </div>
               </div>
@@ -272,7 +271,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
               result.correctAnswers === result.totalQuestions ? (
                 <div className="no-mistakes-box card">
                   <CheckCircle2 size={54} className="text-green" />
-                  <h4>¡Sesión Impecable! Ningún Fallo Cometido</h4>
+                  <h4>Todo correcto</h4>
                   <p>
                     Has completado todos los pasos y objetivos de este ejercicio con un 100% de aciertos.
                   </p>
@@ -292,24 +291,24 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                   ).map((m, idx) => (
                     <div key={idx} className="card mistake-item-card">
                       <div className="mistake-item-header">
-                        <span className="mistake-badge-num">Fallo #{idx + 1}</span>
+                        <span className="mistake-badge-num">Paso {idx + 1}</span>
                         <strong className="mistake-item-title">{m.item}</strong>
                       </div>
 
                       <div className="mistake-comparison-row">
                         <div className="comparison-col comparison-wrong">
-                          <span className="col-label">❌ Lo que se marcó / ocurrió:</span>
+                          <span className="col-label">Tu respuesta</span>
                           <p className="col-val">{m.userAction}</p>
                         </div>
                         <div className="comparison-col comparison-correct">
-                          <span className="col-label">✅ Solución correcta:</span>
+                          <span className="col-label">Respuesta correcta</span>
                           <p className="col-val">{m.correctSolution}</p>
                         </div>
                       </div>
 
                       {m.explanation && (
                         <div className="mistake-hint-box">
-                          <strong>💡 Consejo clínico: </strong>
+                          <strong>Una pista: </strong>
                           <span>{m.explanation}</span>
                         </div>
                       )}
@@ -329,7 +328,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                 }}
               >
                 <RotateCcw size={22} />
-                <span>Reintentar Ejercicio</span>
+                <span>Volver a practicar</span>
               </button>
 
               <button
@@ -339,11 +338,11 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                   setShowMistakesModal(false);
                 }}
               >
-                <span>Entendido / Cerrar</span>
+                <span>Listo</span>
               </button>
             </div>
           </div>
-        </div>
+        </ModalFrame>
       )}
     </div>
   );

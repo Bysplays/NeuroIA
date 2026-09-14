@@ -1,3 +1,4 @@
+import { ModalFrame } from './ModalFrame';
 import React, { useState } from 'react';
 import {
   Eye,
@@ -281,8 +282,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <ExerciseSelectionModal
           domain={selectedDomainForModal}
           domainTitle={domainCards.find(d => d.id === selectedDomainForModal)?.title || ''}
-          domainColor={domainCards.find(d => d.id === selectedDomainForModal)?.color || ''}
-          domainBg={domainCards.find(d => d.id === selectedDomainForModal)?.bgColor || ''}
           onSelectExercise={exerciseId => {
             const dom = selectedDomainForModal;
             setSelectedDomainForModal(null);
@@ -298,14 +297,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Modal explicativo: ¿Para qué sirven los puntos ganados? */}
       {showPointsModal && (
-        <div className="modal-backdrop" onClick={() => setShowPointsModal(false)} role="dialog" aria-modal="true">
-          <div className="modal-container" onClick={e => e.stopPropagation()}>
+        <ModalFrame onClose={() => setShowPointsModal(false)} labelledBy="points-title">
+          <div className="modal-container points-dialog" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-group">
                 <Award size={32} className="text-primary" />
                 <div>
-                  <h2 className="modal-title">¿De qué sirven los NeuroPuntos?</h2>
-                  <p className="modal-subtitle">La función clínica y psicológica de tu puntuación</p>
+                  <h2 id="points-title" className="modal-title">Tus pequeños logros</h2>
+                  <p className="modal-subtitle">Cada ejercicio cuenta.</p>
                 </div>
               </div>
               <button className="modal-close-btn" onClick={() => setShowPointsModal(false)} aria-label="Cerrar ventana">
@@ -314,35 +313,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             <div className="modal-body points-modal-body">
-              <div className="points-benefit-item">
-                <div className="benefit-icon-badge">🧠</div>
-                <div>
-                  <h4>1. Refuerzo de la Neuroplasticidad Cerebral</h4>
-                  <p>
-                    Tras un ictus, el cerebro necesita motivación constante para reconectar circuitos neuronales dañados. Los puntos activan la vía dopaminérgica de recompensa positiva, combatiendo la apatía y el desánimo frecuentes en la recuperación.
-                  </p>
-                </div>
-              </div>
-
-              <div className="points-benefit-item">
-                <div className="benefit-icon-badge">🛡️</div>
-                <div>
-                  <h4>2. Gamificación Libre de Estrés (Sin Castigos)</h4>
-                  <p>
-                    En NeuroIA <strong>nunca se restan puntos por equivocarse</strong> ni hay "Game Over". Cada intento suma valor porque cada repetición estimula el cerebro. Los puntos premian tu constancia y perseverancia.
-                  </p>
-                </div>
-              </div>
-
-              <div className="points-benefit-item">
-                <div className="benefit-icon-badge">🩺</div>
-                <div>
-                  <h4>3. Indicador Objetivo para el Terapeuta</h4>
-                  <p>
-                    Para tu terapeuta ocupacional o logopeda, los puntos reflejan la fluidez y velocidad de respuesta sin necesidad de someterte a exámenes invasivos, permitiéndole evaluar tu recuperación semana a semana.
-                  </p>
-                </div>
-              </div>
+              <div className="points-total"><div><strong>{profile.totalScore ?? 0}</strong><span>NeuroPuntos acumulados</span></div><img src="/images/wellness-companions.png" alt="" /></div>
+              <p>Los puntos reconocen tu práctica. Puedes ver cómo avanzas a medida que completas ejercicios.</p>
+              <div className="points-note">Tu progreso también incluye el tiempo que dedicas y las actividades que vas completando.</div>
             </div>
 
             <div className="modal-footer">
@@ -353,11 +326,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   setShowPointsModal(false);
                 }}
               >
-                Entendido, ¡a seguir sumando!
+                Entendido
               </button>
             </div>
           </div>
-        </div>
+        </ModalFrame>
       )}
     </div>
   );
