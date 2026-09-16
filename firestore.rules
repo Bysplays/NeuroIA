@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function validProgress() {
+      let value = request.resource.data;
+      let profile = value.data.profile;
+      return value.keys().hasAll(['schemaVersion', 'data', 'updatedAt'])
+        && value.keys().hasOnly(['schemaVersion', 'data', 'updatedAt'])
+        && value.schemaVersion == 1
+        && value.updatedAt == request.time
+        && value.data.keys().hasOnly(['profile', 'history'])
+        && value.data.history is list && value.data.history.size() <= 60
+        && profile.keys().hasOnly(['name', 'streakDays', 'lastActiveDate', 'totalMinutes',
+          'totalSessions', 'totalScore', 'domainProgress', 'dailyPlanCompletedToday',
+          'settings', 'therapistNotes', 'prescribedDomains', 'therapistGuidanceNote'])
+        && profile.name is string && profile.name.size() <= 200
+        && profile.totalSessions is int && profile.totalSessions >= 0
+        && profile.totalMinutes is int && profile.totalMinutes >= 0
+        && profile.totalScore is number && profile.totalScore >= 0
+        && profile.streakDays is int && profile.streakDays >= 0
+        && profile.lastActiveDate is string
+        && profile.dailyPlanCompletedToday is bool
+        && profile.domainProgress is map && profile.settings is map
+        // This patient-only phase grants no clinical permissions or editable clinical data.
+        && profile.therapistNotes == [] && profile.prescribedDomains == []
+        && profile.therapistGuidanceNote == '';
+    }
+    match /users/{uid}/progress/main {
+      allow get: if owns(uid);
+      allow create, update: if owns(uid) && validProgress();
+    }
+    match /users/{uid}/operations/{operationId} {
+      allow get: if owns(uid);
+      allow create: if owns(uid)
+        && request.resource.data.keys().hasOnly(['kind', 'createdAt'])
+        && request.resource.data.kind in ['result', 'settings']
+        && request.resource.data.createdAt == request.time;
+    }
+    match /users/{uid}/results/{resultId} {
+      allow read: if owns(uid);
+      allow create: if owns(uid)
+        && request.resource.data.keys().hasOnly(['id', 'exerciseId', 'domain', 'date',
+          'durationSeconds', 'accuracy', 'score', 'correctAnswers', 'totalQuestions',
+          'difficulty', 'feedbackMessage', 'notes', 'mistakesList'])
+        && request.resource.data.id is string
+        && request.resource.data.exerciseId is string
+        && request.resource.data.domain in ['attention', 'language', 'memory', 'executive', 'motor']
+        && request.resource.data.date is string
+        && request.resource.data.durationSeconds is number && request.resource.data.durationSeconds >= 0
+        && request.resource.data.accuracy is number && request.resource.data.accuracy >= 0 && request.resource.data.accuracy <= 100
+        && request.resource.data.correctAnswers is int && request.resource.data.correctAnswers >= 0
+        && request.resource.data.totalQuestions is int && request.resource.data.totalQuestions >= request.resource.data.correctAnswers;
+    }
+    // All other paths, role changes, cross-account access and deletes stay denied.
+  }
+}

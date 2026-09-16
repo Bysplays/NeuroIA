@@ -7,15 +7,19 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:firestore": "npx --yes firebase-tools@15.30.1 emulators:exec --only firestore --project demo-neuroia \"node --experimental-strip-types --test tests/firestore.rules.test.mjs\""
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
+    "firebase": "^12.19.0",
     "lucide-react": "^1.42.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",

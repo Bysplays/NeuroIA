@@ -1,3 +1,4 @@
+import type { ProgressData, ProgressOperation } from './progressData.ts';
 import type { UserProfile, ExerciseResult, AccessibilitySettings, CognitiveDomain, TherapistNote } from '../types';
 
 const STORAGE_KEY = 'neuroia_profile_v1';
@@ -10,7 +11,7 @@ export const defaultSettings: AccessibilitySettings = {
   speechEnabled: true,
   speechRate: 0.88,
   soundEffects: true,
-  leftSideAnchor: true,
+  leftSideAnchor: false,
   hapticTouchFeedback: true,
 };
 
@@ -22,7 +23,6 @@ const initialDomainProgress = {
   motor: { level: 1, totalCompleted: 0, avgAccuracy: 0, history: [] },
 };
 
-const initialTherapistNotes: TherapistNote[] = [];
 
 export const getInitialProfile = (): UserProfile => {
   const today = new Date().toISOString().split('T')[0];
@@ -38,25 +38,101 @@ export const getInitialProfile = (): UserProfile => {
     domainProgress: JSON.parse(JSON.stringify(initialDomainProgress)),
     dailyPlanCompletedToday: false,
     settings: { ...defaultSettings },
-    therapistNotes: initialTherapistNotes,
+    therapistNotes: [],
     prescribedDomains: [],
     therapistGuidanceNote: ''
   };
 };
 
 export class StorageService {
+  private static account: { uid: string; displayName: string | null } | null = null;
+
+  public static setAccount(account: { uid: string; displayName: string | null } | null): void {
+    this.account = account;
+    this.knownOutbox = new Set();
+  }
+
+  public static freshAccountProgress(): ProgressData {
+    return { profile: this.initialProfile(), history: [] };
+  }
+
+  public static backupLocalProgress(): void {
+    const key = this.key('neuroia_local_backup_v1');
+    if (!localStorage.getItem(key)) {
+      const data = this.readCachedProgress();
+      if (data) localStorage.setItem(key, JSON.stringify(data));
+    }
+  }
+
+  public static readCachedProgress(): ProgressData | null {
+    try {
+      const raw = localStorage.getItem(this.key(STORAGE_KEY));
+      return raw ? { profile: JSON.parse(raw), history: this.getHistory() } : null;
+    } catch { return null; }
+  }
+
+  public static readLegacyProgress(): ProgressData | null {
+    try {
+      const profile = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('neuroactiva_profile_v5');
+      const history = localStorage.getItem(HISTORY_KEY) || localStorage.getItem('neuroactiva_history_v5');
+      return profile ? { profile: JSON.parse(profile), history: history ? JSON.parse(history) : [] } : null;
+    } catch { return null; }
+  }
+
+  public static cacheProgress(data: ProgressData): void {
+    this.saveProfile(data.profile);
+    try { localStorage.setItem(this.key(HISTORY_KEY), JSON.stringify(data.history)); } catch { /* Cloud remains authoritative. */ }
+  }
+
+  private static knownOutbox = new Set<string>();
+
+  public static readOutbox(): ProgressOperation[] {
+    const prefix = this.key('neuroia_outbox_v1') + ':';
+    const operations: ProgressOperation[] = [];
+    for (let index = 0; index < localStorage.length; index++) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(prefix)) operations.push(JSON.parse(localStorage.getItem(key)!));
+    }
+    this.knownOutbox = new Set(operations.map(operation => operation.id));
+    return operations;
+  }
+
+  public static writeOutbox(operations: ProgressOperation[]): void {
+    const prefix = this.key('neuroia_outbox_v1') + ':';
+    for (const operation of operations) localStorage.setItem(prefix + encodeURIComponent(operation.id), JSON.stringify(operation));
+    const ids = new Set(operations.map(operation => operation.id));
+    for (const id of this.knownOutbox) if (!ids.has(id)) localStorage.removeItem(prefix + encodeURIComponent(id));
+    this.knownOutbox = ids;
+  }
+
+  public static isAccount(uid: string): boolean { return this.account?.uid === uid; }
+
+  private static key(base: string): string {
+    return this.account ? `${base}:${encodeURIComponent(this.account.uid)}` : base;
+  }
+
+  private static initialProfile(): UserProfile {
+    const profile = getInitialProfile();
+    if (this.account) {
+      profile.name = this.account.displayName?.trim() || 'Mi espacio';
+      delete profile.strokeDate;
+      delete profile.affectedSide;
+    }
+    return profile;
+  }
+
   public static getProfile(): UserProfile {
-    if (typeof window === 'undefined') return getInitialProfile();
+    if (typeof window === 'undefined') return this.initialProfile();
     try {
       // Limpiar versiones obsoletas de prueba para garantizar inicio limpio desde 0
-      ['v1', 'v2', 'v3', 'v4'].forEach(v => {
+      if (!this.account) ['v1', 'v2', 'v3', 'v4'].forEach(v => {
         localStorage.removeItem(`neuroactiva_profile_${v}`);
         localStorage.removeItem(`neuroactiva_history_${v}`);
       });
 
-      const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('neuroactiva_profile_v5');
+      const data = localStorage.getItem(this.key(STORAGE_KEY)) || (!this.account ? localStorage.getItem('neuroactiva_profile_v5') : null);
       if (!data) {
-        const initial = getInitialProfile();
+        const initial = this.initialProfile();
         this.saveProfile(initial);
         return initial;
       }
@@ -93,17 +169,17 @@ export class StorageService {
         this.saveProfile(parsed);
       }
 
-      this.checkDailyStreak(parsed);
+      if (!this.account) this.checkDailyStreak(parsed);
       return parsed;
     } catch {
-      return getInitialProfile();
+      return this.initialProfile();
     }
   }
 
   public static saveProfile(profile: UserProfile): void {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+      localStorage.setItem(this.key(STORAGE_KEY), JSON.stringify(profile));
     } catch {
       // Silencioso
     }
@@ -250,7 +326,7 @@ export class StorageService {
   public static getHistory(): ExerciseResult[] {
     if (typeof window === 'undefined') return [];
     try {
-      const data = localStorage.getItem(HISTORY_KEY) || localStorage.getItem('neuroactiva_history_v5');
+      const data = localStorage.getItem(this.key(HISTORY_KEY)) || (!this.account ? localStorage.getItem('neuroactiva_history_v5') : null);
       if (data) {
         const history: ExerciseResult[] = JSON.parse(data);
         return history.map(h => ({
@@ -273,17 +349,17 @@ export class StorageService {
       const history = this.getHistory();
       history.unshift(result);
       if (history.length > 60) history.pop();
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      localStorage.setItem(this.key(HISTORY_KEY), JSON.stringify(history));
     } catch {
       // Silencioso
     }
   }
 
   public static resetProgress(): UserProfile {
-    const initial = getInitialProfile();
+    const initial = this.initialProfile();
     this.saveProfile(initial);
     if (typeof window !== 'undefined') {
-      localStorage.removeItem(HISTORY_KEY);
+      localStorage.removeItem(this.key(HISTORY_KEY));
     }
     return initial;
   }

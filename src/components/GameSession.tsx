@@ -1,3 +1,4 @@
+import { usePortrait } from '../services/orientation';
 import { HeaderIllustration } from './HeaderIllustration';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, CircleHelp, Clock, Volume2 } from 'lucide-react';
@@ -17,6 +18,7 @@ export function useGameSession() {
   return session;
 }
 export function GameSession({ id, step, onBack, children }: { id: string; step?: string; onBack: () => void; children: ReactNode }) {
+  const portrait = usePortrait();
   const [clock] = useState(createGameClock);
   const [started, setStarted] = useState(false);
   const [help, setHelp] = useState(true);
@@ -42,7 +44,7 @@ export function GameSession({ id, step, onBack, children }: { id: string; step?:
     else helpButton.current?.focus();
   }, [help]);
   useEffect(() => {
-    if (help || completed || !started) return;
+    if (portrait || help || completed || !started) return;
     let previous = performance.now();
     let frame: number;
     const tick = (now: number) => {
@@ -53,7 +55,7 @@ export function GameSession({ id, step, onBack, children }: { id: string; step?:
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [clock, help, completed, started]);
+  }, [clock, help, completed, started, portrait]);
   return <SessionContext.Provider value={{ clock, finish, restart: () => { clock.reset(); setHelp(true); setSeconds(0); } }}>
     {help && <section className="game-instruction-screen" aria-labelledby="game-instruction-title">
       <button className="paper-nav-button" onClick={onBack}><ArrowLeft size={20} />Volver al inicio</button>

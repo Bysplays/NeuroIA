@@ -181,20 +181,6 @@ html, body {
   flex-direction: column;
 }
 
-/* Guía visual izquierda para heminegligencia */
-body.with-left-anchor::before {
-  content: '';
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  background: linear-gradient(180deg, var(--color-primary) 0%, #10b981 50%, var(--color-language) 100%);
-  box-shadow: 2px 0 12px rgba(var(--color-primary-rgb), 0.5);
-  z-index: 999;
-  pointer-events: none;
-}
-
 /* Tipografía */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Outfit', 'Lexend', sans-serif;
