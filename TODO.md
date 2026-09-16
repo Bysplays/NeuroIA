@@ -124,3 +124,18 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
 - [ ] Reproduce the reported blank background in object naming. It was not
   reproduced through the catalog; inspect the domain entry and modal/scroll
   state. Do not mark fixed without a reproduction and verification.
+
+## Accounts and professional access
+
+- [x] Google sign-in confirmed by the project owner.
+- [x] Implement Firestore profile/settings/results synchronization, transaction
+  receipts, local pending queue, initial import choice and emulator tests.
+- [ ] Publish the reviewed `firestore.rules` in the real Firebase project. Local
+  CLI has no authorized account; the production-mode default still needs replacing.
+- [ ] Verify real-account cloud saving from two devices after publishing rules.
+- [ ] Authorize the final deployment hostname in Firebase Authentication.
+- [ ] Implement verified professional roles, patient-professional care links and
+  revocation before restoring professional navigation.
+- [ ] Add private clinical notes and patient-facing instructions with distinct
+  permissions, account deletion, and explicit merge of retained local backups
+  into an already-existing cloud account. Initial empty-account import is available.

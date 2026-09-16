@@ -689,3 +689,45 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 /* True-alpha organization scenes must not acquire the old white backing. */
 .header-illustration.header-illustration-transparent { display: flex; align-items: center; justify-content: center; aspect-ratio: 1; mix-blend-mode: normal; background-color: transparent; border-radius: 0; }
 .header-scene-crop { display: block; flex-shrink: 0; background-repeat: no-repeat; }
+
+/* Entry and orientation share the existing paper palette and accessibility tokens. */
+.login-screen { display: grid; grid-template-rows: minmax(64px, 1fr) auto minmax(64px, 1fr); min-height: 100svh; max-width: 1160px; margin: 0 auto; padding: 24px 32px; }
+.login-screen::after { content: ""; }
+.login-brand { display: flex; align-items: center; gap: 10px; align-self: start; font-size: 1.35rem; }
+.login-brand strong { font-weight: 400; }
+.login-card { display: grid; grid-template-columns: 1fr 1fr; border-radius: 32px; background: var(--color-surface); overflow: hidden; }
+.login-welcome { position: relative; display: grid; place-items: center; padding: 36px; background: var(--panel-blue); }
+.login-paper-edge { position: absolute; right: -1px; top: 0; width: 56px; height: 100%; color: var(--color-surface); pointer-events: none; }
+.login-actions h1 { font-size: clamp(1.8rem, 3.4vw, 2.8rem); line-height: 1.12; }
+.login-actions > p { line-height: 1.6; }
+.login-welcome .login-art { display: block; width: min(100%, 340px); height: auto; margin: 0; }
+.login-actions { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 20px; padding: 40px; min-width: 0; }
+.google-login-button { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 56px; width: 100%; padding: 12px 18px; border: 1px solid var(--color-border-subtle); border-radius: 99px; background: var(--color-surface); color: var(--color-text-main); font-size: .88rem; cursor: pointer; }
+.google-login-button:hover { background: var(--color-surface-hover); }
+.google-login-mark { font-weight: 700; font-size: 1.2rem; }
+.entry-note { font-size: .75rem; color: var(--color-text-muted); line-height: 1.6; }
+.orientation-gate { display: grid; justify-items: center; gap: 22px; text-align: center; padding: 32px; }
+.orientation-gate h1 { font-size: 1.6rem; }
+.orientation-gate .touch-btn { white-space: normal; }
+.modal-shell:has(.orientation-gate) { width: min(560px, calc(100% - 32px)); }
+.modal-shell:has(.orientation-gate)::backdrop { background: var(--color-bg); }
+@media (max-width: 900px) and (orientation: landscape) {
+  .login-screen { padding: 16px 24px; }
+  .login-screen { grid-template-rows: minmax(48px, 1fr) auto minmax(48px, 1fr); }
+  .login-paper-edge { width: 36px; }
+  .login-welcome, .login-actions { padding: 24px; }
+  .login-actions { gap: 16px; }
+  .login-welcome .login-art { width: 230px; }
+  .header-right { flex-wrap: wrap; }
+}
+@media (orientation: portrait) {
+  .login-card { grid-template-columns: minmax(0, 1fr); }
+  .login-paper-edge { display: none; }
+  .login-welcome, .login-actions { padding: 24px; }
+}
+.account-notice { max-width: 1224px; margin: 0 auto; padding: 12px 32px 0; font-size: .75rem; color: var(--color-text-muted); }
+.google-login-button:disabled { cursor: wait; opacity: .7; }
+.cloud-entry { max-width: 720px; min-height: 100svh; margin: 0 auto; padding: 40px 24px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 24px; }
+.cloud-entry h1 { font-size: 1.7rem; }
+.cloud-entry p { line-height: 1.6; }
+.cloud-status { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; }

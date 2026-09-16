@@ -39,7 +39,10 @@ Use the actual home screen and these repository assets as the visual references:
   for Organization stimuli, preserving object identities and original map order.
 - `public/images/game-objects-0.png` through `game-objects-2.png`: recognizable
   objects and action symbols for game stimuli.
-- `public/brand/neuroia-mark.svg` and `neuroia-logo.svg`: the brand identity.
+- `public/brand/neuroia-mark.svg` and `neuroia-logo.svg`: a soft turquoise/lilac
+  paper-leaf sprout with dark ink veins, echoing the plant in the home illustration.
+  This compact vector brand symbol is distinct from the raster mascots. See
+  `public/brand/README.md` for construction and usage.
 
 The mascots have soft organic bodies, imperfect dark ink features, small limbs,
 and visible paper grain. Keep the same characters across screens. Avoid neon
@@ -104,7 +107,9 @@ the secondary values form a narrower column aligned to the right, with a subtle
 vertical separator. Do not restore the flame icon. The compact stacked layout
 can place the secondary values below the streak.
 
-The therapist entry belongs in the top navigation. Do not add back the duplicate
+The therapist entry belongs in the top navigation once professional access is
+authorized. It is currently unavailable while roles and care links are pending.
+Do not add back the duplicate
 “Acompañamos tu progreso” card at the bottom. “Tu recorrido” uses the available
 width. The home links to achievements rather than displaying the badge collection.
 
@@ -227,6 +232,9 @@ around the companions.
 
 ## Interaction and accessibility
 
+Do not display the former left-edge visual guide or its settings control. It has
+been removed from the product; existing saved preferences must not restore it.
+
 Use comfortable touch targets, generally at least 44–48 px for controls, with
 larger areas where the exercise requires them. Preserve keyboard operation,
 visible focus, meaningful accessible names, and dialog focus return. Keep labels
@@ -270,3 +278,47 @@ Use this review before finishing a visual change:
 - Are spacing, text, and artwork balanced on phone, tablet, and desktop?
 - Are the exercise clues and interaction states still correct and recognizable?
 - Do the documentation and actual implementation now describe the same product?
+
+### Entry and landscape requirement
+
+Center the login card vertically in the viewport with balanced flexible space
+above and below; keep the brand at the top. On short screens let the page scroll
+without clipping controls. A soft curved edge with a subtle paper-layer echo
+separates the illustration and action panels, rather than a straight vertical cut.
+Use a decorative inline SVG colored with the existing surface token.
+
+The initial screen has a blue paper illustration panel and one heading,
+“Tu espacio, a tu ritmo”, beside the “Continuar con Google” action. Use
+`public/images/headers/login-transparent.png`, a true-alpha cutout derived from
+the home scene, without blend modes or an opaque image backing. Keep only one
+short note explaining account-linked progress; omit introductory paragraphs,
+secondary headings and account badges. Show pending
+and recoverable error states without replacing the screen. A closed popup does
+not prove intentional cancellation: use neutral copy and suggest an external
+browser if an embedded browser closes the window automatically. Cloud saving is tied to the signed-in account; show an actionable notice only when saving remains pending or fails. The
+header offers “Cerrar sesión”; signing out preserves cloud progress and pending account-local work. Existing
+unscoped demo data is never silently assigned to the first person who signs in.
+
+All interactive views require a landscape viewport. In portrait, a blocking
+shared native dialog asks the user to rotate the device or widen the window.
+It cannot be dismissed with Escape or the backdrop. Its optional fullscreen
+action attempts the browser's landscape lock and explains rejection inline.
+Physical rotation cannot be guaranteed by a website. Preserve mounted game state,
+pause the game clock, and stop narration while the portrait gate is visible.
+Allow vertical scrolling in landscape, including short phones and large text;
+do not rotate the DOM or shrink the application to fit a fixed-height canvas.
+
+### Cloud progress
+
+Before entering the workspace, load the account's cloud progress. Failed access
+shows a concise recovery screen with retry and logout; never show fabricated zero
+progress as a fallback. When the cloud profile does not exist but local completed
+activity does, show its exercise count, identify the source and target account,
+and offer “Importar mi progreso” or “Empezar sin importar”. Do not silently upload
+another person's old browser profile or clinical notes. This import screen can
+scroll on short landscape phones and uses the existing action styles.
+
+Do not display a session-owner strip or a routine saving/saved banner above the
+workspace. Successful synchronization stays silent. Show a textual pending notice
+with a retry action only when changes cannot be saved; advise keeping the page
+open. Preserve this recovery notice during exercise results.

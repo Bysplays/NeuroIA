@@ -48,7 +48,11 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 | `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and review |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
-| `src/services/storageService.ts` | Local persistence, progress, settings, notes, daily plan |
+| `src/services/storageService.ts` | Account-scoped cache/outbox, legacy local operations and daily plan |
+| `src/services/progressData.ts` | Pure cloud progress reducer and patient-only import sanitation |
+| `src/services/progressSync.ts` | Durable operation queue, retries and session cancellation |
+| `src/services/firestoreProgress.ts` | Firestore transactions, retry receipts and live updates |
+| `src/components/CloudProgress.tsx` | Cloud loading, import choice and save-status boundary |
 | `src/services/soundService.ts` and `speechVoice.ts` | Shared audio, narrator controls, and Spain-voice selection |
 | `src/services/achievements.ts` | Cumulative achievement conditions |
 | `src/components/AchievementShowcase.tsx` | Standalone badge collection and details |
@@ -83,6 +87,8 @@ npm ci
 npm run dev
 npm run build
 npm run lint
+npm test
+npm run test:firestore
 git diff --check
 ```
 
@@ -106,7 +112,9 @@ To verify a repository deployment locally, run
 
 As of 2026-09-14, `package.json` does not define `check`, `check:test`,
 `check:types`, `check:lint`, `check:format`, or `check:deadcode`, although
-CONTRIBUTING.md lists them. Voice selection has focused coverage via `node --experimental-strip-types --test tests/speechVoice.test.ts` (Node 22+); there is no aggregate repository test script. Existing game
+CONTRIBUTING.md lists them. Focused unit tests run through `npm test` (Node 22+). `npm run test:firestore`
+runs the real Firestore adapter and rules against the demo-only emulator; it
+requires Java 21+ on PATH and downloads Firebase CLI 15.30.1 with npx. Existing game
 code also produces React-related lint warnings. Report actual command results;
 do not claim that missing checks ran or that a zero exit code means zero warnings.
 This documents the gap, not an exemption from the merge requirements. Reconcile
@@ -135,9 +143,17 @@ files. Commit the application assets actually used by the UI.
 
 ## Data and interaction contracts
 
-Persistence is local to the browser. The current keys are `neuroia_profile_v1` and
-`neuroia_history_v1`; narrator preference is managed separately by the sound
-service. Preserve compatibility with existing profiles and history. Use
+Firestore is authoritative for signed-in progress. `users/{uid}/progress/main`
+contains the profile and latest 60 results; `users/{uid}/results/{resultId}` retains
+new completed results and `users/{uid}/operations/{operationId}` holds permanent
+retry receipts. Legacy keys are `neuroia_profile_v1` and `neuroia_history_v1`;
+authenticated browser caches append `:<encoded Firebase UID>` to each key.
+`neuroia_outbox_v1:<encoded UID>:<encoded operation ID>` stores pending work;
+`neuroia_local_backup_v1:<encoded UID>` preserves the pre-cloud account cache.
+Existing unscoped data is preserved and never imported automatically.
+Narrator preference remains device-wide and managed by the sound service. Preserve compatibility with existing profiles and history. `leftSideAnchor` is
+a legacy persisted setting, defaults to false, and is neither rendered nor
+configurable; keep the field for compatibility without restoring its visual guide. Use
 `StorageService` for app writes rather than scattering direct localStorage calls.
 
 `totalSessions` currently counts completed exercises, not completed daily plans.
@@ -205,3 +221,60 @@ frames. Help pauses scheduled activity without discarding answers. GameSession
 mounts games only after Start and is keyed by exercise and daily-plan position.
 Run `node --experimental-strip-types --test tests/gameClock.test.ts` to verify
 the clock, alongside the existing speech-voice tests.
+
+## Firebase entry and orientation
+
+`App` observes Firebase Authentication before mounting the cloud progress boundary.
+Configuration and session persistence are in `src/services/firebase.ts`; Analytics
+is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy.
+The user has confirmed Google login. Firebase manages the tab session with an
+in-memory fallback. `StorageService.setAccount` is set by the auth observer; cache
+and pending writes are scoped to the UID. Auth changes unmount the old boundary,
+unsubscribe listeners, and prevent late callbacks from touching the next account.
+
+`CloudProgress` is lazy loaded after authentication. It loads from the server
+before mounting games; an inaccessible/offline initial load shows retry/logout,
+never an empty replacement profile. First cloud initialization offers an explicit
+import of account-local activity or the older unscoped profile when present.
+Import keeps aggregate progress and the available latest 60 results, strips demo
+clinical fields and uses the signed-in display name. It only creates a missing
+cloud document, never overwrites an existing one. Original local data is retained
+or backed up. Merging an older local profile into an existing cloud account is
+not implemented; retained backups need an explicit future reconciliation flow.
+
+Use `ProgressSync.enqueue` for authenticated result/settings changes. Do not call
+legacy `StorageService.addExerciseResult`/`updateSettings` from the signed-in UI.
+Transactions apply operations to the latest server state and write permanent
+receipts atomically. Results are idempotent by their existing exercise-result ID;
+settings patch individual fields, with the last committed same-field change winning.
+Recent profile/domain histories are bounded at 60; cumulative totals remain intact.
+There is no automated receipt pruning. The cloud streak changes on completed
+activity, not profile reads. Imported historical totals are preserved.
+
+Pending operations are persisted per operation before sending, to avoid one tab
+clearing another tab's pending work. If browser storage fails, in-memory work can
+still be sent; the pending UI advises keeping the page open. Retry on reconnect,
+explicit retry, and every 30 seconds only while work is pending. Initial offline
+entry is not supported. Logout preserves pending operations for the same account's
+next login. Successful saves and session identity have no top banner. Only pending/failed
+saves show a recovery notice. Cloud errors must not be labeled saved. Device-local narrator toggles
+are not synced; accessibility settings in the profile are synced.
+
+Professional navigation remains unavailable pending verified roles and care links.
+The retained therapist component is not wired to cloud mutations. Current rules
+allow only the owner's patient progress, append-only results and immutable retry
+receipts; all role, cross-account, clinical and delete paths stay denied. Totals
+are self-reported client data, not medically verified records. Publish the exact
+reviewed `firestore.rules` before using the real project. No rules are deployed
+by a frontend build. See `AUTHENTICATION.md` and `TODO.md`.
+
+`LandscapeGate` uses the portrait viewport media query and `ModalFrame`. Its
+context in `src/services/orientation.ts` pauses `GameSession` and the workspace
+fatigue timer without discarding answers. Locking is attempted only from an
+explicit fullscreen button, with a manual-rotation fallback.
+
+`npm test` runs focused unit coverage; `npm run test:firestore` uses project
+`demo-neuroia` only and checks isolation, real transactions, idempotency, import
+and forbidden writes. Never create fixture users/results in the real project.
+Browser verification uses isolated contexts with a test-only identity adapter and
+the local Firestore emulator; no authentication bypass ships in application code.

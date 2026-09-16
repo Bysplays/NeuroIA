@@ -33,7 +33,7 @@ export interface AccessibilitySettings {
   speechEnabled: boolean;
   speechRate: number; // 0.7 - 1.2
   soundEffects: boolean;
-  leftSideAnchor: boolean; // Guía visual izquierda activa para heminegligencia
+  leftSideAnchor: boolean; // Legacy persisted field; no longer rendered or configurable.
   hapticTouchFeedback: boolean;
 }
 

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Settings, Stethoscope, Volume2, VolumeX } from 'lucide-react';
+import { Settings, Volume2, VolumeX } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { soundService } from '../services/soundService';
 
 interface HeaderProps {
+  onSignOut: () => void;
+  signingOut: boolean;
   profile: UserProfile;
   sessionMinutes: number;
   activeView: 'dashboard' | 'therapist' | 'game';
@@ -13,6 +15,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  onSignOut,
+  signingOut,
   profile,
   activeView,
   onNavigate,
@@ -41,20 +45,9 @@ export const Header: React.FC<HeaderProps> = ({
       </button>
 
       <div className="header-right">
+        <button className="header-btn" disabled={signingOut} onClick={onSignOut}>{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}</button>
         <span className="header-context">{activeView === 'therapist' ? 'ESPACIO PROFESIONAL' : 'MI ESPACIO'}</span>
-        {/* Botón Panel del Terapeuta */}
-        <button
-          className={`header-btn ${activeView === 'therapist' ? 'header-btn-active' : ''}`}
-          onClick={() => {
-            soundService.playTap();
-            onNavigate(activeView === 'therapist' ? 'dashboard' : 'therapist');
-          }}
-          aria-label={activeView === 'therapist' ? 'Volver a ejercicios' : 'Panel del terapeuta'}
-          title="Panel clínico para terapeuta y seguimiento"
-        >
-          <Stethoscope size={20} />
-          <span className="btn-label">{activeView === 'therapist' ? 'Volver a Ejercicios' : 'Panel Terapeuta'}</span>
-        </button>
+        {/* Professional navigation stays unavailable until verified roles and care links exist. */}
 
         {/* Botón de Sonido */}
         <button

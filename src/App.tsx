@@ -1,5 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import type { UserProfile, CognitiveDomain, ExerciseResult, AccessibilitySettings, DailyPlanSession, ExerciseId } from './types';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
+import { auth } from './services/firebase';
+import type { ProgressSync } from './services/progressSync';
+import type { ProgressData } from './services/progressData';
+import { authErrorMessage } from './services/authErrors';
+import type { CognitiveDomain, ExerciseResult, AccessibilitySettings, DailyPlanSession, ExerciseId } from './types';
 import { StorageService } from './services/storageService';
 import { soundService } from './services/soundService';
 import { getExercisesForDomain } from './services/exerciseCatalog';
@@ -10,6 +15,9 @@ import { Dashboard } from './components/Dashboard';
 import { TherapistReport } from './components/TherapistReport';
 import { AccessibilityModal } from './components/AccessibilityModal';
 import { FatigueAlertModal } from './components/FatigueAlertModal';
+import { LandscapeGate } from './components/LandscapeGate';
+import { usePortrait } from './services/orientation';
+import { LoginScreen } from './components/LoginScreen';
 import { RestBreakModal } from './components/RestBreakModal';
 
 // Juegos disponibles de neurorrehabilitación
@@ -23,9 +31,59 @@ import { CategorizationGame } from './games/CategorizationGame';
 import { MotorCoordinationGame } from './games/MotorCoordinationGame';
 import { MotorTrackingGame } from './games/MotorTrackingGame';
 
+const CloudProgress = lazy(() => import('./components/CloudProgress'));
+
 export const App: React.FC = () => {
-  const [profile, setProfile] = useState<UserProfile>(() => StorageService.getProfile());
-  const [history, setHistory] = useState<ExerciseResult[]>(() => StorageService.getHistory());
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => onAuthStateChanged(auth, nextUser => {
+    soundService.stopSpeaking();
+    StorageService.setAccount(nextUser ? { uid: nextUser.uid, displayName: nextUser.displayName } : null);
+    setUser(nextUser);
+    setLoading(false);
+  }, error => {
+    StorageService.setAccount(null);
+    setUser(null);
+    setLoading(false);
+    setError(authErrorMessage(error));
+  }), []);
+
+  const handleSignIn = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      setError(authErrorMessage(error));
+    } finally { setBusy(false); }
+  };
+  const handleSignOut = async () => {
+    setBusy(true);
+    setError('');
+    soundService.stopSpeaking();
+    try { await signOut(auth); }
+    catch { setError('No hemos podido cerrar la sesión. Vuelve a intentarlo.'); }
+    finally { setBusy(false); }
+  };
+
+  return <LandscapeGate>{loading
+    ? <main className="login-screen" role="status">Preparando tu acceso…</main>
+    : user
+      ? <>
+        {error && <p className="account-notice" role="alert">{error}</p>}
+        <Suspense fallback={<p className="account-notice" role="status">Cargando tu progreso…</p>}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></Suspense></>
+      : <LoginScreen onSignIn={handleSignIn} busy={busy} error={error} />
+  }</LandscapeGate>;
+};
+
+const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: ProgressSync; data: ProgressData }> = ({ onSignOut, signingOut, sync, data }) => {
+  const portrait = usePortrait();
+  const { profile, history } = data;
   const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | 'achievements' | CognitiveDomain | ExerciseId>('dashboard');
 
   useEffect(() => {
@@ -43,6 +101,7 @@ export const App: React.FC = () => {
 
   // Contador de minutos de sesión para prevención de fatiga post-ictus
   useEffect(() => {
+    if (portrait) return;
     const timer = setInterval(() => {
       setSessionMinutes(prev => {
         const next = prev + 1;
@@ -54,27 +113,23 @@ export const App: React.FC = () => {
     }, 60000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [portrait]);
 
   useEffect(() => {
     document.body.setAttribute('data-contrast', profile.settings.contrast);
     document.body.setAttribute('data-font', profile.settings.fontSize);
     document.body.setAttribute('data-hand', profile.settings.handDominance);
-    document.body.classList.toggle('with-left-anchor', profile.settings.leftSideAnchor);
 
     soundService.setSoundEnabled(profile.settings.soundEffects);
     soundService.setSpeechRate(profile.settings.speechRate);
   }, [profile.settings]);
 
   const handleUpdateSettings = (newSettings: Partial<AccessibilitySettings>) => {
-    const updated = StorageService.updateSettings(newSettings);
-    setProfile(updated);
+    sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings: newSettings });
   };
 
   const handleSaveExerciseResult = (result: ExerciseResult) => {
-    const updated = StorageService.addExerciseResult(result);
-    setProfile(updated);
-    setHistory(StorageService.getHistory());
+    sync.enqueue({ id: `result:${result.id}`, kind: 'result', result });
   };
 
   // Iniciar un dominio individual libremente
@@ -148,6 +203,8 @@ export const App: React.FC = () => {
     <div className={`app-root ${isPlayingGame ? 'app-root-focus-mode' : ''}`}>
       {!isPlayingGame && (
         <Header
+          onSignOut={onSignOut}
+          signingOut={signingOut}
           profile={profile}
           sessionMinutes={sessionMinutes}
           activeView={activeView === 'therapist' ? 'therapist' : 'dashboard'}
@@ -179,10 +236,7 @@ export const App: React.FC = () => {
             profile={profile}
             history={history}
             onBack={handleBackToDashboard}
-            onProfileUpdated={updated => {
-              setProfile(updated);
-              setHistory(StorageService.getHistory());
-            }}
+            onProfileUpdated={() => {}}
           />
         )}
 
