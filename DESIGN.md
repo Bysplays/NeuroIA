@@ -232,11 +232,22 @@ larger areas where the exercise requires them. Preserve keyboard operation,
 visible focus, meaningful accessible names, and dialog focus return. Keep labels
 outside decorative images when possible.
 
-Narration uses Spanish from Spain (`es-ES`) with a calm, conversational tone.
+Narration uses Spanish from Spain (`es-ES`) with a clear, natural, conversational delivery and moderate expression.
+Use a Spain accent with audible distinction between s and z/soft c; an es-ES
+label or generation prompt alone does not establish that pronunciation. Avoid breathy, intimate or sensual
+voice qualities; a slow pace must not turn into an affected or whispered reading.
 Prefer natural/enhanced Spain voices and recognize accented voice names. Do not
 select a Latin American voice merely because it appears first. Keep pitch natural,
 preserve the user’s pace setting, and offer a short voice preview in accessibility
-settings. Browser speech quality still depends on the installed voices.
+settings. Browser speech quality still depends on the installed voices. Recorded narration uses Alejandro Castellanos with
+Eleven v3 and Spanish explicitly selected. Generate recognition words in short
+lists, as in the accepted pronunciation sample; isolated v2 requests produced
+unacceptable pronunciation. Validate each new clip before adoption. The local
+`public/audio/elevenlabs-v3/` collection supplies available narration; missing or
+unplayable files fall back to browser speech. Audio effects and narration remain
+independent. Playback rate follows the voice setting without shifting pitch.
+Show a quiet ElevenLabs attribution in accessibility settings. The recordings
+retain their free-plan non-commercial license.
 
 Motion and sound should reassure, not startle. Reuse the gentle tap sound and
 separate sound-effect and narrator preferences. Respect reduced-motion settings;

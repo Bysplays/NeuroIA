@@ -1,0 +1,1852 @@
+[
+  {
+    "id": "cdd7b0b2213daaeb",
+    "text": "Mira la figura del ejemplo. Busca y toca todas las iguales, recorriendo la pantalla de izquierda a derecha.",
+    "group": "instructions"
+  },
+  {
+    "id": "551806f9341986b4",
+    "text": "Mira la imagen y toca su nombre. Puedes escuchar las opciones o pedir una pista.",
+    "group": "instructions"
+  },
+  {
+    "id": "87d3662efd1e95bc",
+    "text": "Mira la imagen y la palabra. Toca la letra que falta.",
+    "group": "instructions"
+  },
+  {
+    "id": "c26ba281dc0082ca",
+    "text": "Pulsa el botón para ver la secuencia. Mira qué fichas se iluminan y después tócalas en el mismo orden.",
+    "group": "instructions"
+  },
+  {
+    "id": "7bfd2b9b2d8fd896",
+    "text": "Primero verás las cartas unos segundos. Recuerda su lugar. Después, descubre dos cartas cada vez para encontrar las parejas.",
+    "group": "instructions"
+  },
+  {
+    "id": "1eb82f967c8a1212",
+    "text": "Mira las tarjetas. Tócalas en el orden en que harías los pasos de la actividad.",
+    "group": "instructions"
+  },
+  {
+    "id": "d196e3767e1a9a0e",
+    "text": "Mira el objeto y toca el grupo al que pertenece.",
+    "group": "instructions"
+  },
+  {
+    "id": "1a58cabadb7dcf56",
+    "text": "Toca el centro de cada diana. Aparecerá una nueva en otro lugar. No hay prisa.",
+    "group": "instructions"
+  },
+  {
+    "id": "172108e01d9d198b",
+    "text": "Mantén el dedo o el puntero sobre el personaje mientras se mueve. Llena la barra acompañándolo.",
+    "group": "instructions"
+  },
+  {
+    "id": "17b64e5f1323b306",
+    "text": "Taza.",
+    "group": "instructions"
+  },
+  {
+    "id": "321bc3eb82177086",
+    "text": "Zapato.",
+    "group": "instructions"
+  },
+  {
+    "id": "1d183771b0f46954",
+    "text": "Bien hecho. Puedes continuar con el siguiente ejercicio.",
+    "group": "instructions"
+  },
+  {
+    "id": "b0e7ba67119e9d9d",
+    "text": "Hola. Vamos a practicar a tu ritmo. Tómate el tiempo que necesites.",
+    "group": "feedback"
+  },
+  {
+    "id": "4e1a9e12596e9bf9",
+    "text": "Hola. Estoy aquí para acompañarte. Vamos poco a poco, a tu ritmo.",
+    "group": "feedback"
+  },
+  {
+    "id": "fac5a45dc45fdaec",
+    "text": "Pausa completada. Vuelve a entrenar cuando te sientas preparado.",
+    "group": "feedback"
+  },
+  {
+    "id": "bd0f3c3821020121",
+    "text": "Pausa de descanso. Uno: Bebe un poco de agua si te apetece. Dos: Desvía la mirada de la pantalla y mira a lo lejos. Tres: Respira profundamente al compás del círculo.",
+    "group": "feedback"
+  },
+  {
+    "id": "332b2726a575d275",
+    "text": "Bien hecho. Has colocado los pasos en orden.",
+    "group": "feedback"
+  },
+  {
+    "id": "de4f8901065186e2",
+    "text": "Vamos a repasarlo con calma. Pulsa Corregir y prueba otro orden.",
+    "group": "feedback"
+  },
+  {
+    "id": "b6ca173f84b8bcb4",
+    "text": "Correcto",
+    "group": "feedback"
+  },
+  {
+    "id": "c467a38eee1b7ac2",
+    "text": "Memoriza dónde está cada pareja",
+    "group": "feedback"
+  },
+  {
+    "id": "a754ec2d26fece87",
+    "text": "¡Encuentra las parejas!",
+    "group": "feedback"
+  },
+  {
+    "id": "4cf1321941de2794",
+    "text": "Observa y memoriza.",
+    "group": "feedback"
+  },
+  {
+    "id": "d05bdd5dac371a8f",
+    "text": "Tu turno. Toca las fichas en el mismo orden.",
+    "group": "feedback"
+  },
+  {
+    "id": "5021dce04fb7b94e",
+    "text": "No te preocupes. Pulsa ver de nuevo para recordar.",
+    "group": "feedback"
+  },
+  {
+    "id": "2c06f46e894e1729",
+    "text": "¡Muy bien! Añadimos una ficha más.",
+    "group": "feedback"
+  },
+  {
+    "id": "4b5d02b22858cfc6",
+    "text": "Reloj",
+    "group": "words"
+  },
+  {
+    "id": "e7db75856293d5a4",
+    "text": "Mide las horas y los minutos del día.",
+    "group": "hints"
+  },
+  {
+    "id": "954c7ece5c2a3d78",
+    "text": "Empieza por Re...",
+    "group": "hints"
+  },
+  {
+    "id": "c6c5ec0c252faf84",
+    "text": "Buen intento. El objeto correcto es Reloj.",
+    "group": "feedback"
+  },
+  {
+    "id": "b3813027ed2150ec",
+    "text": "Casa",
+    "group": "words"
+  },
+  {
+    "id": "2ba8aa9dbaa8e237",
+    "text": "Lugar donde vivimos y nos resguardamos.",
+    "group": "hints"
+  },
+  {
+    "id": "faa2a061efce59a3",
+    "text": "Empieza por Ca...",
+    "group": "hints"
+  },
+  {
+    "id": "29d10e4fa20a5808",
+    "text": "Buen intento. El objeto correcto es Casa.",
+    "group": "feedback"
+  },
+  {
+    "id": "7b81c457f7572ced",
+    "text": "Cuchara",
+    "group": "words"
+  },
+  {
+    "id": "ed38fe3db6c6b5e2",
+    "text": "Cubierto para tomar caldos, sopas o yogur.",
+    "group": "hints"
+  },
+  {
+    "id": "d629dd36bdac84b2",
+    "text": "Empieza por Cucha...",
+    "group": "hints"
+  },
+  {
+    "id": "1030ee8a757d9a06",
+    "text": "Buen intento. El objeto correcto es Cuchara.",
+    "group": "feedback"
+  },
+  {
+    "id": "d3598d9fa1f79559",
+    "text": "Llave",
+    "group": "words"
+  },
+  {
+    "id": "3068a98551a3423a",
+    "text": "Sirve para abrir y cerrar cerraduras de puertas.",
+    "group": "hints"
+  },
+  {
+    "id": "65ac545ff79adeb9",
+    "text": "Empieza por Lla...",
+    "group": "hints"
+  },
+  {
+    "id": "e361cfbc7f376b3b",
+    "text": "Buen intento. El objeto correcto es Llave.",
+    "group": "feedback"
+  },
+  {
+    "id": "a8fa60a3db5e414e",
+    "text": "Zapato",
+    "group": "words"
+  },
+  {
+    "id": "ccd8819fe3fd8f34",
+    "text": "Calzado que cubre y protege el pie.",
+    "group": "hints"
+  },
+  {
+    "id": "fa6e9cc048289d69",
+    "text": "Empieza por Zapa...",
+    "group": "hints"
+  },
+  {
+    "id": "1ca154fe19c1f67b",
+    "text": "Buen intento. El objeto correcto es Zapato.",
+    "group": "feedback"
+  },
+  {
+    "id": "5795b07249101ff3",
+    "text": "Manzana",
+    "group": "words"
+  },
+  {
+    "id": "a2e5b56d912e44c6",
+    "text": "Fruta dulce y crujiente, a menudo de piel roja.",
+    "group": "hints"
+  },
+  {
+    "id": "dd56cabd2cd61523",
+    "text": "Empieza por Manza...",
+    "group": "hints"
+  },
+  {
+    "id": "273428499f559f98",
+    "text": "Buen intento. El objeto correcto es Manzana.",
+    "group": "feedback"
+  },
+  {
+    "id": "80d7e5aa330910bb",
+    "text": "Silla",
+    "group": "words"
+  },
+  {
+    "id": "d0fe64f59bf6edca",
+    "text": "Mueble con respaldo diseñado para sentarse.",
+    "group": "hints"
+  },
+  {
+    "id": "8b63683aa3874ad5",
+    "text": "Empieza por Si...",
+    "group": "hints"
+  },
+  {
+    "id": "bc392c09444bac11",
+    "text": "Buen intento. El objeto correcto es Silla.",
+    "group": "feedback"
+  },
+  {
+    "id": "8fb3aaa2de45e021",
+    "text": "Coche",
+    "group": "words"
+  },
+  {
+    "id": "9144625998b98ec8",
+    "text": "Vehículo de cuatro ruedas para desplazarse por carretera.",
+    "group": "hints"
+  },
+  {
+    "id": "ac963cb095aa4727",
+    "text": "Empieza por Co...",
+    "group": "hints"
+  },
+  {
+    "id": "76c6a4e5150b574c",
+    "text": "Buen intento. El objeto correcto es Coche.",
+    "group": "feedback"
+  },
+  {
+    "id": "a619c02c7f5ce6c7",
+    "text": "Taza",
+    "group": "words"
+  },
+  {
+    "id": "b7edb8805cd8edb6",
+    "text": "Recipiente con asa para tomar café o té caliente.",
+    "group": "hints"
+  },
+  {
+    "id": "e9f70495d01cd6ee",
+    "text": "Empieza por Ta...",
+    "group": "hints"
+  },
+  {
+    "id": "939b4e70a525112b",
+    "text": "Buen intento. El objeto correcto es Taza.",
+    "group": "feedback"
+  },
+  {
+    "id": "00e37ffae0562ab6",
+    "text": "Pan",
+    "group": "words"
+  },
+  {
+    "id": "0a661cf8eae9b3e4",
+    "text": "Alimento básico elaborado con harina, agua y levadura.",
+    "group": "hints"
+  },
+  {
+    "id": "69868cb00898e67c",
+    "text": "Palabra corta: P... an",
+    "group": "hints"
+  },
+  {
+    "id": "d5ea3f33fc1e4112",
+    "text": "Buen intento. El objeto correcto es Pan.",
+    "group": "feedback"
+  },
+  {
+    "id": "8edc043893ee77fe",
+    "text": "Cama",
+    "group": "words"
+  },
+  {
+    "id": "1c823d5653e865db",
+    "text": "Mueble donde dormimos y descansamos por la noche.",
+    "group": "hints"
+  },
+  {
+    "id": "57b80273e5a62e9c",
+    "text": "Buen intento. El objeto correcto es Cama.",
+    "group": "feedback"
+  },
+  {
+    "id": "a0739df1d6c95d6c",
+    "text": "Vaso",
+    "group": "words"
+  },
+  {
+    "id": "c42877e1177f4f56",
+    "text": "Recipiente cilíndrico de cristal para beber agua.",
+    "group": "hints"
+  },
+  {
+    "id": "ea80f1ca70f74b83",
+    "text": "Empieza por Va...",
+    "group": "hints"
+  },
+  {
+    "id": "62361ba0dab02e78",
+    "text": "Buen intento. El objeto correcto es Vaso.",
+    "group": "feedback"
+  },
+  {
+    "id": "c368f6c7b61c5632",
+    "text": "Teléfono",
+    "group": "words"
+  },
+  {
+    "id": "f51c6c47515ac9d3",
+    "text": "Dispositivo para llamar y comunicarse con los demás.",
+    "group": "hints"
+  },
+  {
+    "id": "ce932e5bfc3db77e",
+    "text": "Empieza por Tele...",
+    "group": "hints"
+  },
+  {
+    "id": "79567598396fe037",
+    "text": "Buen intento. El objeto correcto es Teléfono.",
+    "group": "feedback"
+  },
+  {
+    "id": "4a1e8c16a9623653",
+    "text": "Libro",
+    "group": "words"
+  },
+  {
+    "id": "f2f70f475f0d9414",
+    "text": "Conjunto de páginas encuadernadas con historias para leer.",
+    "group": "hints"
+  },
+  {
+    "id": "f6e79de7dd017797",
+    "text": "Empieza por Li...",
+    "group": "hints"
+  },
+  {
+    "id": "b06143be393579d0",
+    "text": "Buen intento. El objeto correcto es Libro.",
+    "group": "feedback"
+  },
+  {
+    "id": "65c365ecbc7f7888",
+    "text": "Tijeras",
+    "group": "words"
+  },
+  {
+    "id": "7dae55db21f0a416",
+    "text": "Herramienta de dos hojas articuladas que sirve para cortar.",
+    "group": "hints"
+  },
+  {
+    "id": "b22f08597fa032ed",
+    "text": "Empieza por Tije...",
+    "group": "hints"
+  },
+  {
+    "id": "0aa08fa82d1c94d7",
+    "text": "Buen intento. El objeto correcto es Tijeras.",
+    "group": "feedback"
+  },
+  {
+    "id": "717da21f90490151",
+    "text": "Gafas",
+    "group": "words"
+  },
+  {
+    "id": "50c0e6428cefa361",
+    "text": "Lentes que se apoyan en la nariz para ver y leer mejor.",
+    "group": "hints"
+  },
+  {
+    "id": "1909b852a9980d26",
+    "text": "Empieza por Ga...",
+    "group": "hints"
+  },
+  {
+    "id": "69719f014bdb2bd3",
+    "text": "Buen intento. El objeto correcto es Gafas.",
+    "group": "feedback"
+  },
+  {
+    "id": "64a9dd0c5f4de75b",
+    "text": "Cepillo",
+    "group": "words"
+  },
+  {
+    "id": "d7c1a80e7f5ba9a9",
+    "text": "Utensilio con cerdas para la limpieza diaria de los dientes.",
+    "group": "hints"
+  },
+  {
+    "id": "5c91f2c5eafe651e",
+    "text": "Empieza por Cepi...",
+    "group": "hints"
+  },
+  {
+    "id": "0d18e393b9ea0cdc",
+    "text": "Buen intento. El objeto correcto es Cepillo.",
+    "group": "feedback"
+  },
+  {
+    "id": "e1534634f2573171",
+    "text": "Paraguas",
+    "group": "words"
+  },
+  {
+    "id": "2070d0b2754f410d",
+    "text": "Artefacto impermeable que abrimos para no mojarnos con la lluvia.",
+    "group": "hints"
+  },
+  {
+    "id": "fd9e66335a96e992",
+    "text": "Empieza por Para...",
+    "group": "hints"
+  },
+  {
+    "id": "442e914ec649cf26",
+    "text": "Buen intento. El objeto correcto es Paraguas.",
+    "group": "feedback"
+  },
+  {
+    "id": "a0dd39558401509b",
+    "text": "Guitarra",
+    "group": "words"
+  },
+  {
+    "id": "fa81541467362b24",
+    "text": "Instrumento musical de cuerda con caja de resonancia de madera.",
+    "group": "hints"
+  },
+  {
+    "id": "549bf37d4c44f3aa",
+    "text": "Empieza por Guita...",
+    "group": "hints"
+  },
+  {
+    "id": "45dd22df08a28521",
+    "text": "Buen intento. El objeto correcto es Guitarra.",
+    "group": "feedback"
+  },
+  {
+    "id": "9b8133582416f6ab",
+    "text": "Lámpara",
+    "group": "words"
+  },
+  {
+    "id": "e1d3af7dacf3a150",
+    "text": "Aparato que produce luz artificial para iluminar la estancia.",
+    "group": "hints"
+  },
+  {
+    "id": "2aba7094d57a0d39",
+    "text": "Empieza por Lám...",
+    "group": "hints"
+  },
+  {
+    "id": "658a0ef0f46e0be2",
+    "text": "Buen intento. El objeto correcto es Lámpara.",
+    "group": "feedback"
+  },
+  {
+    "id": "7d443d0e0663e490",
+    "text": "Bicicleta",
+    "group": "words"
+  },
+  {
+    "id": "8cd93e0fb818636d",
+    "text": "Vehículo de dos ruedas que avanza impulsado por pedales.",
+    "group": "hints"
+  },
+  {
+    "id": "c28491b5bfb53848",
+    "text": "Empieza por Bici...",
+    "group": "hints"
+  },
+  {
+    "id": "ed4a3e0d72ab15b5",
+    "text": "Buen intento. El objeto correcto es Bicicleta.",
+    "group": "feedback"
+  },
+  {
+    "id": "87e4571bc7b47363",
+    "text": "Plato",
+    "group": "words"
+  },
+  {
+    "id": "8dd439f82f4d9735",
+    "text": "Recipiente llano y redondo sobre el que se sirve la comida.",
+    "group": "hints"
+  },
+  {
+    "id": "4dc918468bbb8556",
+    "text": "Empieza por Pla...",
+    "group": "hints"
+  },
+  {
+    "id": "a5052da27a292838",
+    "text": "Buen intento. El objeto correcto es Plato.",
+    "group": "feedback"
+  },
+  {
+    "id": "a1ef9196875cc605",
+    "text": "Sombrero",
+    "group": "words"
+  },
+  {
+    "id": "973f495d0a19a53b",
+    "text": "Prenda con ala que se lleva en la cabeza para protegerse del sol.",
+    "group": "hints"
+  },
+  {
+    "id": "fce329493ea1d6fe",
+    "text": "Empieza por Sombre...",
+    "group": "hints"
+  },
+  {
+    "id": "d590a9c490e6eace",
+    "text": "Buen intento. El objeto correcto es Sombrero.",
+    "group": "feedback"
+  },
+  {
+    "id": "aa3a05d9d57c08d6",
+    "text": "Radio",
+    "group": "words"
+  },
+  {
+    "id": "05fb6bd3ee198f74",
+    "text": "Aparato transmisor para escuchar noticias, charlas y música.",
+    "group": "hints"
+  },
+  {
+    "id": "cf76d37ef753a700",
+    "text": "Empieza por Ra...",
+    "group": "hints"
+  },
+  {
+    "id": "44f51906a9b75a7a",
+    "text": "Buen intento. El objeto correcto es Radio.",
+    "group": "feedback"
+  },
+  {
+    "id": "8fc9c94f022d84cf",
+    "text": "Perro",
+    "group": "words"
+  },
+  {
+    "id": "ba4e8e295a92e2b8",
+    "text": "Animal doméstico leal y cariñoso, conocido como el mejor amigo.",
+    "group": "hints"
+  },
+  {
+    "id": "6956706f92fbc3e4",
+    "text": "Empieza por Pe...",
+    "group": "hints"
+  },
+  {
+    "id": "611b0bcf5d09ec00",
+    "text": "Buen intento. El objeto correcto es Perro.",
+    "group": "feedback"
+  },
+  {
+    "id": "d4e8973e04e657a4",
+    "text": "Gato",
+    "group": "words"
+  },
+  {
+    "id": "d30f7cd65018b94c",
+    "text": "Felino doméstico que ronronea y es muy ágil.",
+    "group": "hints"
+  },
+  {
+    "id": "75f8765ccdbacc86",
+    "text": "Buen intento. El objeto correcto es Gato.",
+    "group": "feedback"
+  },
+  {
+    "id": "02299019027bebc8",
+    "text": "Girasol",
+    "group": "words"
+  },
+  {
+    "id": "308dd73b4ee125bd",
+    "text": "Flor amarilla grande que gira siguiendo la luz del sol.",
+    "group": "hints"
+  },
+  {
+    "id": "e69fcc87642e22b6",
+    "text": "Empieza por Gira...",
+    "group": "hints"
+  },
+  {
+    "id": "ec05f0f48d67e70a",
+    "text": "Buen intento. El objeto correcto es Girasol.",
+    "group": "feedback"
+  },
+  {
+    "id": "98dbeafb3db61580",
+    "text": "Plátano",
+    "group": "words"
+  },
+  {
+    "id": "7226d023910eb944",
+    "text": "Fruta dulce alargada y curvada de piel amarilla.",
+    "group": "hints"
+  },
+  {
+    "id": "f025b04726eea4e7",
+    "text": "Empieza por Pláta...",
+    "group": "hints"
+  },
+  {
+    "id": "7428de439e76de97",
+    "text": "Buen intento. El objeto correcto es Plátano.",
+    "group": "feedback"
+  },
+  {
+    "id": "4a3fd2fd072c18f7",
+    "text": "Camisa",
+    "group": "words"
+  },
+  {
+    "id": "5f031df61827d768",
+    "text": "Prenda de vestir con cuello, botones y mangas para el torso.",
+    "group": "hints"
+  },
+  {
+    "id": "50bb9eb7fec5f139",
+    "text": "Empieza por Cami...",
+    "group": "hints"
+  },
+  {
+    "id": "f7920bc584ab8f7b",
+    "text": "Buen intento. El objeto correcto es Camisa.",
+    "group": "feedback"
+  },
+  {
+    "id": "67a6ddae1cc397ab",
+    "text": "Ventana",
+    "group": "words"
+  },
+  {
+    "id": "48af9abee2e600e3",
+    "text": "Abertura en la pared con cristal para mirar al exterior.",
+    "group": "hints"
+  },
+  {
+    "id": "fdb97a24858d027d",
+    "text": "Empieza por Venta...",
+    "group": "hints"
+  },
+  {
+    "id": "bca43624d179abb9",
+    "text": "Buen intento. El objeto correcto es Ventana.",
+    "group": "feedback"
+  },
+  {
+    "id": "a773279b20cbf15d",
+    "text": "Lugar donde vivimos. Suena /ss/...",
+    "group": "hints"
+  },
+  {
+    "id": "996d13591c1c4632",
+    "text": "¡Correcto! CASA",
+    "group": "feedback"
+  },
+  {
+    "id": "3582c609dd3ece75",
+    "text": "La letra correcta es la S. Formamos CASA.",
+    "group": "feedback"
+  },
+  {
+    "id": "1440c9aa28e815da",
+    "text": "Mide las horas. Es la vocal O...",
+    "group": "hints"
+  },
+  {
+    "id": "284ae3d475d5f238",
+    "text": "¡Correcto! RELOJ",
+    "group": "feedback"
+  },
+  {
+    "id": "d6f15b36200c5ed3",
+    "text": "La letra correcta es la O. Formamos RELOJ.",
+    "group": "feedback"
+  },
+  {
+    "id": "15b7fb0c1cde0083",
+    "text": "Fruta dulce y crujiente. Falta la letra N...",
+    "group": "hints"
+  },
+  {
+    "id": "fc969f80b54776f5",
+    "text": "¡Correcto! MANZANA",
+    "group": "feedback"
+  },
+  {
+    "id": "fdafbeedda2d0e0c",
+    "text": "La letra correcta es la N. Formamos MANZANA.",
+    "group": "feedback"
+  },
+  {
+    "id": "8f7a4d6334ecf010",
+    "text": "Sirve para abrir cerraduras. Falta la letra V...",
+    "group": "hints"
+  },
+  {
+    "id": "e340eba5536ded61",
+    "text": "¡Correcto! LLAVE",
+    "group": "feedback"
+  },
+  {
+    "id": "75241b4edb325ac3",
+    "text": "La letra correcta es la V. Formamos LLAVE.",
+    "group": "feedback"
+  },
+  {
+    "id": "5677d90d219fac8e",
+    "text": "Protege el pie al caminar. Suena /t/...",
+    "group": "hints"
+  },
+  {
+    "id": "4218b92f86991637",
+    "text": "¡Correcto! ZAPATO",
+    "group": "feedback"
+  },
+  {
+    "id": "4d95248e9ea6a3d8",
+    "text": "La letra correcta es la T. Formamos ZAPATO.",
+    "group": "feedback"
+  },
+  {
+    "id": "bfe1fa77150a8cc2",
+    "text": "Recipiente con asa para café o té. Falta la Z...",
+    "group": "hints"
+  },
+  {
+    "id": "c489bf3e7f90133e",
+    "text": "¡Correcto! TAZA",
+    "group": "feedback"
+  },
+  {
+    "id": "665f5d5b2f8ea755",
+    "text": "La letra correcta es la Z. Formamos TAZA.",
+    "group": "feedback"
+  },
+  {
+    "id": "1b7c7c625c2e312d",
+    "text": "Alimento básico de harina. Es la vocal A...",
+    "group": "hints"
+  },
+  {
+    "id": "0ebadcb3bbb2bfd3",
+    "text": "¡Correcto! PAN",
+    "group": "feedback"
+  },
+  {
+    "id": "f6bfdeb1dac51232",
+    "text": "La letra correcta es la A. Formamos PAN.",
+    "group": "feedback"
+  },
+  {
+    "id": "bee67a4d6825fff5",
+    "text": "Mueble para dormir. Falta la letra M...",
+    "group": "hints"
+  },
+  {
+    "id": "609c0e5a84f9dd86",
+    "text": "¡Correcto! CAMA",
+    "group": "feedback"
+  },
+  {
+    "id": "7758f27427f3c0c7",
+    "text": "La letra correcta es la M. Formamos CAMA.",
+    "group": "feedback"
+  },
+  {
+    "id": "555f4cffdcf8a6b7",
+    "text": "Vehículo de cuatro ruedas. Es la vocal O...",
+    "group": "hints"
+  },
+  {
+    "id": "8625e34ab57f3297",
+    "text": "¡Correcto! COCHE",
+    "group": "feedback"
+  },
+  {
+    "id": "1c8774122d11b5d0",
+    "text": "La letra correcta es la O. Formamos COCHE.",
+    "group": "feedback"
+  },
+  {
+    "id": "2cb1890f00260671",
+    "text": "Recipiente de cristal para beber agua. Falta la V...",
+    "group": "hints"
+  },
+  {
+    "id": "41372d676b5e917c",
+    "text": "¡Correcto! VASO",
+    "group": "feedback"
+  },
+  {
+    "id": "4e12a5cb5f62c49e",
+    "text": "La letra correcta es la V. Formamos VASO.",
+    "group": "feedback"
+  },
+  {
+    "id": "213ab9f63374e968",
+    "text": "Lentes para ver y leer. Falta la letra S...",
+    "group": "hints"
+  },
+  {
+    "id": "9f1a16a60495fa26",
+    "text": "¡Correcto! GAFAS",
+    "group": "feedback"
+  },
+  {
+    "id": "eab4ff06c7b5e832",
+    "text": "La letra correcta es la S. Formamos GAFAS.",
+    "group": "feedback"
+  },
+  {
+    "id": "b81492e03e4f470f",
+    "text": "Contiene páginas para leer. Falta la vocal O...",
+    "group": "hints"
+  },
+  {
+    "id": "064794ebb83e1fb2",
+    "text": "¡Correcto! LIBRO",
+    "group": "feedback"
+  },
+  {
+    "id": "4230a7e81900d999",
+    "text": "La letra correcta es la O. Formamos LIBRO.",
+    "group": "feedback"
+  },
+  {
+    "id": "c0a081a5c288dba8",
+    "text": "Mueble para sentarse. Falta la letra L...",
+    "group": "hints"
+  },
+  {
+    "id": "70fa2a6543faca81",
+    "text": "¡Correcto! SILLA",
+    "group": "feedback"
+  },
+  {
+    "id": "16614af953f85460",
+    "text": "La letra correcta es la L. Formamos SILLA.",
+    "group": "feedback"
+  },
+  {
+    "id": "961d74f4a021ea72",
+    "text": "El mejor amigo fiel. Falta la letra R...",
+    "group": "hints"
+  },
+  {
+    "id": "d7de52b2dcbf28bb",
+    "text": "¡Correcto! PERRO",
+    "group": "feedback"
+  },
+  {
+    "id": "911e45be73a2fb93",
+    "text": "La letra correcta es la R. Formamos PERRO.",
+    "group": "feedback"
+  },
+  {
+    "id": "6dbdbcc6a7da32df",
+    "text": "Mascota ágil que ronronea. Falta la letra T...",
+    "group": "hints"
+  },
+  {
+    "id": "38a711bab63a02a0",
+    "text": "¡Correcto! GATO",
+    "group": "feedback"
+  },
+  {
+    "id": "e698f4b971c121d5",
+    "text": "La letra correcta es la T. Formamos GATO.",
+    "group": "feedback"
+  },
+  {
+    "id": "1aedac41cf160ca5",
+    "text": "FLOR",
+    "group": "words"
+  },
+  {
+    "id": "0c67fcba8c55e1c9",
+    "text": "Planta aromática y bonita. Es la vocal O...",
+    "group": "hints"
+  },
+  {
+    "id": "d971976e56a904d2",
+    "text": "¡Correcto! FLOR",
+    "group": "feedback"
+  },
+  {
+    "id": "be0e13e22f6cbd38",
+    "text": "La letra correcta es la O. Formamos FLOR.",
+    "group": "feedback"
+  },
+  {
+    "id": "73e29454bd930074",
+    "text": "MESA",
+    "group": "words"
+  },
+  {
+    "id": "2546fcd442283fa3",
+    "text": "Mueble donde comemos. Suena /ss/...",
+    "group": "hints"
+  },
+  {
+    "id": "7dd62ffbe38dbaa9",
+    "text": "¡Correcto! MESA",
+    "group": "feedback"
+  },
+  {
+    "id": "a591c8e940322014",
+    "text": "La letra correcta es la S. Formamos MESA.",
+    "group": "feedback"
+  },
+  {
+    "id": "5f1da0912e175651",
+    "text": "AGUA",
+    "group": "words"
+  },
+  {
+    "id": "e24f209528ac1f31",
+    "text": "Líquido para beber y saciar la sed. Es la vocal U...",
+    "group": "hints"
+  },
+  {
+    "id": "3b726d469c555c58",
+    "text": "¡Correcto! AGUA",
+    "group": "feedback"
+  },
+  {
+    "id": "f7a7fa2851d0e3bb",
+    "text": "La letra correcta es la U. Formamos AGUA.",
+    "group": "feedback"
+  },
+  {
+    "id": "5cfa0da81d678685",
+    "text": "BOTA",
+    "group": "words"
+  },
+  {
+    "id": "80dd2643997f3da9",
+    "text": "Calzado que cubre el tobillo. Falta la letra T...",
+    "group": "hints"
+  },
+  {
+    "id": "1c19e50918af1b64",
+    "text": "¡Correcto! BOTA",
+    "group": "feedback"
+  },
+  {
+    "id": "013e6f08702019c0",
+    "text": "La letra correcta es la T. Formamos BOTA.",
+    "group": "feedback"
+  },
+  {
+    "id": "7a0027aa3ef9af67",
+    "text": "SOPA",
+    "group": "words"
+  },
+  {
+    "id": "d38dd918ddb1e005",
+    "text": "Plato caliente que tomamos con cuchara. Falta la P...",
+    "group": "hints"
+  },
+  {
+    "id": "602e54c129285184",
+    "text": "¡Correcto! SOPA",
+    "group": "feedback"
+  },
+  {
+    "id": "05536addb89eab2d",
+    "text": "La letra correcta es la P. Formamos SOPA.",
+    "group": "feedback"
+  },
+  {
+    "id": "019e93ad37dd96e8",
+    "text": "ROPA",
+    "group": "words"
+  },
+  {
+    "id": "d4f2fd809c1729fc",
+    "text": "Prendas con las que nos vestimos. Falta la P...",
+    "group": "hints"
+  },
+  {
+    "id": "c1a1c466145d6692",
+    "text": "¡Correcto! ROPA",
+    "group": "feedback"
+  },
+  {
+    "id": "2e06958df609ed96",
+    "text": "La letra correcta es la P. Formamos ROPA.",
+    "group": "feedback"
+  },
+  {
+    "id": "970ec274ca867815",
+    "text": "LUNA",
+    "group": "words"
+  },
+  {
+    "id": "6e1d220e7d9ca7dd",
+    "text": "Brilla en el cielo por la noche. Falta la N...",
+    "group": "hints"
+  },
+  {
+    "id": "340f37a40ad5ba07",
+    "text": "¡Correcto! LUNA",
+    "group": "feedback"
+  },
+  {
+    "id": "d04bc2d5a12e8e1c",
+    "text": "La letra correcta es la N. Formamos LUNA.",
+    "group": "feedback"
+  },
+  {
+    "id": "3ebf7a087f79ad7f",
+    "text": "MANO",
+    "group": "words"
+  },
+  {
+    "id": "aa0f02bdb2b9a63a",
+    "text": "Tiene cinco dedos. Falta la letra N...",
+    "group": "hints"
+  },
+  {
+    "id": "2e94ea4904e59776",
+    "text": "¡Correcto! MANO",
+    "group": "feedback"
+  },
+  {
+    "id": "05f256463cfe348d",
+    "text": "La letra correcta es la N. Formamos MANO.",
+    "group": "feedback"
+  },
+  {
+    "id": "7ab2d6e73d6ed4fb",
+    "text": "BOCA",
+    "group": "words"
+  },
+  {
+    "id": "e18aca54b5db8d9f",
+    "text": "La usamos para hablar y comer. Falta la C...",
+    "group": "hints"
+  },
+  {
+    "id": "ce908ce1aea42bd1",
+    "text": "¡Correcto! BOCA",
+    "group": "feedback"
+  },
+  {
+    "id": "24891fd55d4a86cf",
+    "text": "La letra correcta es la C. Formamos BOCA.",
+    "group": "feedback"
+  },
+  {
+    "id": "9cbd50828265df38",
+    "text": "PELO",
+    "group": "words"
+  },
+  {
+    "id": "c2509964825b3406",
+    "text": "Crece en la cabeza y lo peinamos. Falta la L...",
+    "group": "hints"
+  },
+  {
+    "id": "05e92fad428e9cd7",
+    "text": "¡Correcto! PELO",
+    "group": "feedback"
+  },
+  {
+    "id": "a01636fa0f91f5c6",
+    "text": "La letra correcta es la L. Formamos PELO.",
+    "group": "feedback"
+  },
+  {
+    "id": "8db59feb4d217f26",
+    "text": "SOL",
+    "group": "words"
+  },
+  {
+    "id": "1e243ba4a48f40ee",
+    "text": "Nos da calor y luz de día. Es la vocal O...",
+    "group": "hints"
+  },
+  {
+    "id": "e4b3ee520234f45c",
+    "text": "¡Correcto! SOL",
+    "group": "feedback"
+  },
+  {
+    "id": "374470ee45850760",
+    "text": "La letra correcta es la O. Formamos SOL.",
+    "group": "feedback"
+  },
+  {
+    "id": "3c52384d8749fcb4",
+    "text": "OJO",
+    "group": "words"
+  },
+  {
+    "id": "614ad28354997075",
+    "text": "Órgano con el que vemos. Falta la letra J...",
+    "group": "hints"
+  },
+  {
+    "id": "be9d059c4cb081e8",
+    "text": "¡Correcto! OJO",
+    "group": "feedback"
+  },
+  {
+    "id": "e0a219694629ebd2",
+    "text": "La letra correcta es la J. Formamos OJO.",
+    "group": "feedback"
+  },
+  {
+    "id": "76abef6399af5e8b",
+    "text": "TREN",
+    "group": "words"
+  },
+  {
+    "id": "c84278208d2a5223",
+    "text": "Medio de transporte que va por vías. Es la vocal E...",
+    "group": "hints"
+  },
+  {
+    "id": "ae9c66a2696f4034",
+    "text": "¡Correcto! TREN",
+    "group": "feedback"
+  },
+  {
+    "id": "303ed5bfb1da5147",
+    "text": "La letra correcta es la E. Formamos TREN.",
+    "group": "feedback"
+  },
+  {
+    "id": "3817abcffcb4e957",
+    "text": "Zanahoria",
+    "group": "words"
+  },
+  {
+    "id": "39002ce33328d639",
+    "text": "¡Correcto! Zanahoria pertenece a Alimentos.",
+    "group": "feedback"
+  },
+  {
+    "id": "046d865402a9a0f3",
+    "text": "El objeto Zanahoria corresponde a Alimentos.",
+    "group": "feedback"
+  },
+  {
+    "id": "3e15c11478d96276",
+    "text": "Pantalón",
+    "group": "words"
+  },
+  {
+    "id": "e3ba9a82dc799aef",
+    "text": "¡Correcto! Pantalón pertenece a Prendas de Ropa.",
+    "group": "feedback"
+  },
+  {
+    "id": "ee37839247ec0f22",
+    "text": "El objeto Pantalón corresponde a Prendas de Ropa.",
+    "group": "feedback"
+  },
+  {
+    "id": "cb8123cf899efee6",
+    "text": "¡Correcto! Manzana pertenece a Alimentos.",
+    "group": "feedback"
+  },
+  {
+    "id": "8b217b7fe6103d6c",
+    "text": "El objeto Manzana corresponde a Alimentos.",
+    "group": "feedback"
+  },
+  {
+    "id": "5847c148d97095c2",
+    "text": "¡Correcto! Camisa pertenece a Prendas de Ropa.",
+    "group": "feedback"
+  },
+  {
+    "id": "a173b086ea1b1dbb",
+    "text": "El objeto Camisa corresponde a Prendas de Ropa.",
+    "group": "feedback"
+  },
+  {
+    "id": "f8b1a44148e44f3c",
+    "text": "¡Correcto! Plátano pertenece a Alimentos.",
+    "group": "feedback"
+  },
+  {
+    "id": "553447dbf128054c",
+    "text": "El objeto Plátano corresponde a Alimentos.",
+    "group": "feedback"
+  },
+  {
+    "id": "2abce94a4493fbfb",
+    "text": "Calcetines",
+    "group": "words"
+  },
+  {
+    "id": "b2baec9f2c2e2046",
+    "text": "¡Correcto! Calcetines pertenece a Prendas de Ropa.",
+    "group": "feedback"
+  },
+  {
+    "id": "6a4d77768687ff5f",
+    "text": "El objeto Calcetines corresponde a Prendas de Ropa.",
+    "group": "feedback"
+  },
+  {
+    "id": "243ee9eefc166fd7",
+    "text": "¡Correcto! Pan pertenece a Alimentos.",
+    "group": "feedback"
+  },
+  {
+    "id": "65ec48959798606b",
+    "text": "El objeto Pan corresponde a Alimentos.",
+    "group": "feedback"
+  },
+  {
+    "id": "2dc56434dc8bbe4a",
+    "text": "Gorra",
+    "group": "words"
+  },
+  {
+    "id": "e296d32758280651",
+    "text": "¡Correcto! Gorra pertenece a Prendas de Ropa.",
+    "group": "feedback"
+  },
+  {
+    "id": "d646c7c5c2846b41",
+    "text": "El objeto Gorra corresponde a Prendas de Ropa.",
+    "group": "feedback"
+  },
+  {
+    "id": "31942b62c1a1b94e",
+    "text": "Jabón",
+    "group": "words"
+  },
+  {
+    "id": "defd299bc784adfa",
+    "text": "¡Correcto! Jabón pertenece a Higiene y Baño.",
+    "group": "feedback"
+  },
+  {
+    "id": "d4a027e175628281",
+    "text": "El objeto Jabón corresponde a Higiene y Baño.",
+    "group": "feedback"
+  },
+  {
+    "id": "edb4e72a13a47666",
+    "text": "Sartén",
+    "group": "words"
+  },
+  {
+    "id": "9bb4b816b9fe1b22",
+    "text": "¡Correcto! Sartén pertenece a Cocina.",
+    "group": "feedback"
+  },
+  {
+    "id": "d59cb4d68eb4f22f",
+    "text": "El objeto Sartén corresponde a Cocina.",
+    "group": "feedback"
+  },
+  {
+    "id": "ae43f099121a7a7f",
+    "text": "¡Correcto! Cuchara pertenece a Cocina.",
+    "group": "feedback"
+  },
+  {
+    "id": "ec42510c6c0e5e3a",
+    "text": "El objeto Cuchara corresponde a Cocina.",
+    "group": "feedback"
+  },
+  {
+    "id": "75e11bb184b9fb33",
+    "text": "Cepillo de Dientes",
+    "group": "words"
+  },
+  {
+    "id": "0f79f47a8e305be5",
+    "text": "¡Correcto! Cepillo de Dientes pertenece a Higiene y Baño.",
+    "group": "feedback"
+  },
+  {
+    "id": "b4aea95c021d0022",
+    "text": "El objeto Cepillo de Dientes corresponde a Higiene y Baño.",
+    "group": "feedback"
+  },
+  {
+    "id": "c299a3ba7b9abdd9",
+    "text": "¡Correcto! Taza pertenece a Cocina.",
+    "group": "feedback"
+  },
+  {
+    "id": "74926270ed30ccf3",
+    "text": "El objeto Taza corresponde a Cocina.",
+    "group": "feedback"
+  },
+  {
+    "id": "936d0b18cc9561ad",
+    "text": "Toalla",
+    "group": "words"
+  },
+  {
+    "id": "15403096e00261d4",
+    "text": "¡Correcto! Toalla pertenece a Higiene y Baño.",
+    "group": "feedback"
+  },
+  {
+    "id": "a69e2953dcefb98f",
+    "text": "El objeto Toalla corresponde a Higiene y Baño.",
+    "group": "feedback"
+  },
+  {
+    "id": "6710ac2b3a6fab05",
+    "text": "Olla",
+    "group": "words"
+  },
+  {
+    "id": "6696198efc033022",
+    "text": "¡Correcto! Olla pertenece a Cocina.",
+    "group": "feedback"
+  },
+  {
+    "id": "a8ca6233746a7e18",
+    "text": "El objeto Olla corresponde a Cocina.",
+    "group": "feedback"
+  },
+  {
+    "id": "99673bbf42469a4c",
+    "text": "Esponja de Baño",
+    "group": "words"
+  },
+  {
+    "id": "480851e77a6bc588",
+    "text": "¡Correcto! Esponja de Baño pertenece a Higiene y Baño.",
+    "group": "feedback"
+  },
+  {
+    "id": "19699de3b9d2fa33",
+    "text": "El objeto Esponja de Baño corresponde a Higiene y Baño.",
+    "group": "feedback"
+  },
+  {
+    "id": "0608bfc4f3970905",
+    "text": "Martillo",
+    "group": "words"
+  },
+  {
+    "id": "686a7f24b09fcc5d",
+    "text": "¡Correcto! Martillo pertenece a Herramientas.",
+    "group": "feedback"
+  },
+  {
+    "id": "a244ee06529d11b8",
+    "text": "El objeto Martillo corresponde a Herramientas.",
+    "group": "feedback"
+  },
+  {
+    "id": "dca08d15c7ffa44c",
+    "text": "Sofá",
+    "group": "words"
+  },
+  {
+    "id": "0d3570458142f217",
+    "text": "¡Correcto! Sofá pertenece a Muebles del Hogar.",
+    "group": "feedback"
+  },
+  {
+    "id": "92e213ac2d0493c7",
+    "text": "El objeto Sofá corresponde a Muebles del Hogar.",
+    "group": "feedback"
+  },
+  {
+    "id": "05dfef64eab6549e",
+    "text": "Destornillador",
+    "group": "words"
+  },
+  {
+    "id": "5b2b73ba97a078a6",
+    "text": "¡Correcto! Destornillador pertenece a Herramientas.",
+    "group": "feedback"
+  },
+  {
+    "id": "2120e2070799d8ed",
+    "text": "El objeto Destornillador corresponde a Herramientas.",
+    "group": "feedback"
+  },
+  {
+    "id": "adf426e76190cc13",
+    "text": "¡Correcto! Cama pertenece a Muebles del Hogar.",
+    "group": "feedback"
+  },
+  {
+    "id": "355bd5e99e85b5de",
+    "text": "El objeto Cama corresponde a Muebles del Hogar.",
+    "group": "feedback"
+  },
+  {
+    "id": "7dfab46f9bb657f8",
+    "text": "Alicates",
+    "group": "words"
+  },
+  {
+    "id": "66b8864f733fd98f",
+    "text": "¡Correcto! Alicates pertenece a Herramientas.",
+    "group": "feedback"
+  },
+  {
+    "id": "ee0c132bc756ad91",
+    "text": "El objeto Alicates corresponde a Herramientas.",
+    "group": "feedback"
+  },
+  {
+    "id": "f4c44e710e339c81",
+    "text": "¡Correcto! Silla pertenece a Muebles del Hogar.",
+    "group": "feedback"
+  },
+  {
+    "id": "f52d78ade85a2687",
+    "text": "El objeto Silla corresponde a Muebles del Hogar.",
+    "group": "feedback"
+  },
+  {
+    "id": "412d5586f42421b5",
+    "text": "¡Correcto! Perro pertenece a Animales.",
+    "group": "feedback"
+  },
+  {
+    "id": "3276daa85c5006aa",
+    "text": "El objeto Perro corresponde a Animales.",
+    "group": "feedback"
+  },
+  {
+    "id": "b393c0a2e1b9b34e",
+    "text": "Autobús",
+    "group": "words"
+  },
+  {
+    "id": "3077cf9d9621cb58",
+    "text": "¡Correcto! Autobús pertenece a Medios de Transporte.",
+    "group": "feedback"
+  },
+  {
+    "id": "51df25a436ba929b",
+    "text": "El objeto Autobús corresponde a Medios de Transporte.",
+    "group": "feedback"
+  },
+  {
+    "id": "4f64028a5ec39ffe",
+    "text": "¡Correcto! Gato pertenece a Animales.",
+    "group": "feedback"
+  },
+  {
+    "id": "1dabe6a02b997284",
+    "text": "El objeto Gato corresponde a Animales.",
+    "group": "feedback"
+  },
+  {
+    "id": "4bf2452bc3cea516",
+    "text": "¡Correcto! Bicicleta pertenece a Medios de Transporte.",
+    "group": "feedback"
+  },
+  {
+    "id": "14cf914989302933",
+    "text": "El objeto Bicicleta corresponde a Medios de Transporte.",
+    "group": "feedback"
+  },
+  {
+    "id": "70c15896164923d6",
+    "text": "Caballo",
+    "group": "words"
+  },
+  {
+    "id": "07aee1e4ab93b282",
+    "text": "¡Correcto! Caballo pertenece a Animales.",
+    "group": "feedback"
+  },
+  {
+    "id": "0f492aeb2ddb5ed3",
+    "text": "El objeto Caballo corresponde a Animales.",
+    "group": "feedback"
+  },
+  {
+    "id": "3a7c5b16aca70d9a",
+    "text": "Avión",
+    "group": "words"
+  },
+  {
+    "id": "97928a064007e7c3",
+    "text": "¡Correcto! Avión pertenece a Medios de Transporte.",
+    "group": "feedback"
+  },
+  {
+    "id": "4d5a5fe046bcc861",
+    "text": "El objeto Avión corresponde a Medios de Transporte.",
+    "group": "feedback"
+  },
+  {
+    "id": "d6fd7110d956069a",
+    "text": "¡Pareja de Reloj!",
+    "group": "feedback"
+  },
+  {
+    "id": "a6a2f9cdfcef3d78",
+    "text": "¡Pareja de Casa!",
+    "group": "feedback"
+  },
+  {
+    "id": "5e1f3e1baee0c969",
+    "text": "¡Pareja de Llave!",
+    "group": "feedback"
+  },
+  {
+    "id": "81cfbc51a329e718",
+    "text": "¡Pareja de Teléfono!",
+    "group": "feedback"
+  },
+  {
+    "id": "e620af502e20bca1",
+    "text": "¡Pareja de Taza!",
+    "group": "feedback"
+  },
+  {
+    "id": "8df3c67520a8ebea",
+    "text": "¡Pareja de Gafas!",
+    "group": "feedback"
+  },
+  {
+    "id": "291c91e0a0642318",
+    "text": "¡Pareja de Zapato!",
+    "group": "feedback"
+  },
+  {
+    "id": "f74b76e203536fc4",
+    "text": "¡Pareja de Manzana!",
+    "group": "feedback"
+  },
+  {
+    "id": "29d1245707e04740",
+    "text": "¡Pareja de Pan!",
+    "group": "feedback"
+  },
+  {
+    "id": "ad7eead5bdd09852",
+    "text": "¡Pareja de Cuchara!",
+    "group": "feedback"
+  },
+  {
+    "id": "71c90a8c4455726f",
+    "text": "¡Pareja de Camisa!",
+    "group": "feedback"
+  },
+  {
+    "id": "cac1da12bb87d760",
+    "text": "¡Pareja de Coche!",
+    "group": "feedback"
+  },
+  {
+    "id": "66a397555829ad94",
+    "text": "¡Pareja de Silla!",
+    "group": "feedback"
+  },
+  {
+    "id": "89e4ea5ad025b571",
+    "text": "¡Pareja de Lámpara!",
+    "group": "feedback"
+  },
+  {
+    "id": "c5b28e32f2a9f63d",
+    "text": "¡Pareja de Libro!",
+    "group": "feedback"
+  },
+  {
+    "id": "0e81455f72740bea",
+    "text": "¡Pareja de Tijeras!",
+    "group": "feedback"
+  },
+  {
+    "id": "5542af481aad61fc",
+    "text": "¡Pareja de Cepillo!",
+    "group": "feedback"
+  },
+  {
+    "id": "a767aadfcc95c209",
+    "text": "¡Pareja de Paraguas!",
+    "group": "feedback"
+  },
+  {
+    "id": "0e4e07a3b693c4d5",
+    "text": "¡Pareja de Bicicleta!",
+    "group": "feedback"
+  },
+  {
+    "id": "b133bc4274bb6f8d",
+    "text": "¡Pareja de Girasol!",
+    "group": "feedback"
+  },
+  {
+    "id": "68051a73a9b3def4",
+    "text": "¡Pareja de Gato!",
+    "group": "feedback"
+  },
+  {
+    "id": "5804a6e13373da8a",
+    "text": "¡Pareja de Perro!",
+    "group": "feedback"
+  },
+  {
+    "id": "69e520ccb67d478f",
+    "text": "¡Pareja de Plátano!",
+    "group": "feedback"
+  },
+  {
+    "id": "edce5a363420b1fc",
+    "text": "¡Pareja de Cama!",
+    "group": "feedback"
+  },
+  {
+    "id": "1f38df76717dfc2f",
+    "text": "¡Pareja de Guitarra!",
+    "group": "feedback"
+  },
+  {
+    "id": "aac60d91993e403b",
+    "text": "¡Pareja de Radio!",
+    "group": "feedback"
+  },
+  {
+    "id": "20aac4476d9bba6f",
+    "text": "¡Pareja de Plato!",
+    "group": "feedback"
+  },
+  {
+    "id": "ef223de8b54846c1",
+    "text": "¡Pareja de Sombrero!",
+    "group": "feedback"
+  },
+  {
+    "id": "bb0e3bb76d7ebb76",
+    "text": "¡Pareja de Vaso!",
+    "group": "feedback"
+  },
+  {
+    "id": "ddc59fa2128e65e8",
+    "text": "¡Pareja de Jabón!",
+    "group": "feedback"
+  },
+  {
+    "id": "cd6fe760f9458a56",
+    "text": "Recuerda buscar las manzanas rojas.",
+    "group": "feedback"
+  },
+  {
+    "id": "bea21a17325dad5d",
+    "text": "Recuerda buscar las peras verdes.",
+    "group": "feedback"
+  },
+  {
+    "id": "2168a55f6174a83f",
+    "text": "Recuerda buscar las racimos de uvas.",
+    "group": "feedback"
+  },
+  {
+    "id": "410a3172ee3a1137",
+    "text": "Recuerda buscar las naranjas.",
+    "group": "feedback"
+  },
+  {
+    "id": "c729f84ce4215ae7",
+    "text": "Recuerda buscar las plátanos.",
+    "group": "feedback"
+  },
+  {
+    "id": "a8add0a362d5fb71",
+    "text": "Recuerda buscar las fresas.",
+    "group": "feedback"
+  },
+  {
+    "id": "ad9eabf598eeabd1",
+    "text": "Recuerda buscar las cerezas.",
+    "group": "feedback"
+  },
+  {
+    "id": "938fa6921cd1e8ed",
+    "text": "Recuerda buscar las limones.",
+    "group": "feedback"
+  },
+  {
+    "id": "1ec915e2b6ce15a2",
+    "text": "Recuerda buscar las sandías.",
+    "group": "feedback"
+  },
+  {
+    "id": "0173c327a84f9cd5",
+    "text": "Recuerda buscar las melocotones.",
+    "group": "feedback"
+  },
+  {
+    "id": "ff795bfebc258560",
+    "text": "Recuerda buscar las piñas.",
+    "group": "feedback"
+  },
+  {
+    "id": "313c73b610514878",
+    "text": "Recuerda buscar las kiwis.",
+    "group": "feedback"
+  },
+  {
+    "id": "93ad2f8a398228d1",
+    "text": "Recuerda buscar las aguacates.",
+    "group": "feedback"
+  },
+  {
+    "id": "9645f78af0b96fbd",
+    "text": "Recuerda buscar las cocos.",
+    "group": "feedback"
+  },
+  {
+    "id": "ec56a8bde7f7a527",
+    "text": "Recuerda buscar las zanahorias.",
+    "group": "feedback"
+  },
+  {
+    "id": "9fc48d2f8ecefc0d",
+    "text": "Recuerda buscar las mazorcas de maíz.",
+    "group": "feedback"
+  },
+  {
+    "id": "169e07a58d4abade",
+    "text": "Recuerda buscar las tomates.",
+    "group": "feedback"
+  },
+  {
+    "id": "1147919de20491ee",
+    "text": "Recuerda buscar las brócolis.",
+    "group": "feedback"
+  },
+  {
+    "id": "b651f14c7f8f2001",
+    "text": "Recuerda buscar las patatas.",
+    "group": "feedback"
+  },
+  {
+    "id": "63580b578dc4e2ee",
+    "text": "Recuerda buscar las berenjenas.",
+    "group": "feedback"
+  },
+  {
+    "id": "6b4a90f2a239e798",
+    "text": "Recuerda buscar las champiñones.",
+    "group": "feedback"
+  },
+  {
+    "id": "1ae24b213fcc7629",
+    "text": "Recuerda buscar las croissants.",
+    "group": "feedback"
+  },
+  {
+    "id": "7cfaa03e39db9f3d",
+    "text": "Recuerda buscar las aceitunas.",
+    "group": "feedback"
+  },
+  {
+    "id": "d427dbbfc08443fb",
+    "text": "Recuerda buscar las melones.",
+    "group": "feedback"
+  },
+  {
+    "id": "5a6e02fb621a998b",
+    "text": "Velocidad de voz pausada y tranquila.",
+    "group": "feedback"
+  },
+  {
+    "id": "e316be71ff89bb71",
+    "text": "Velocidad de voz normal.",
+    "group": "feedback"
+  },
+  {
+    "id": "67cfd5922cec7b1e",
+    "text": "Lee las opciones y responde a tu ritmo.",
+    "group": "feedback"
+  }
+]

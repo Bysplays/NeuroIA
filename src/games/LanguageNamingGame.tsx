@@ -420,7 +420,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
       soundService.speak(currentQ.semanticHint);
     } else if (hintType === 'semantic') {
       setHintType('phonetic');
-      soundService.speak(`Empieza por ${currentQ.phoneticHint}`);
+      soundService.speak(currentQ.phoneticHint);
     }
   };
 

@@ -181,6 +181,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                 Escuchar la voz
               </button>
             </div>
+            <p><small>Voz grabada con <a href="https://elevenlabs.io" target="_blank" rel="noreferrer">elevenlabs.io</a>.</small></p>
           </section>
         </div>
 
