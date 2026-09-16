@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect } from 'react';
 import { Check } from 'lucide-react';
@@ -67,13 +68,14 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const [currentTarget, setCurrentTarget] = useState<SymbolDef>(FRUITS_BANK[0]);
   const [items, setItems] = useState<GridItem[]>([]);
   const [totalTargets, setTotalTargets] = useState(0);
   const [foundCount, setFoundCount] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
@@ -132,7 +134,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
     setTotalTargets(targetCounter);
     setFoundCount(0);
     setMistakes(0);
-    setStartTime(Date.now());
+    setStartTime(clock.now());
   };
 
   useEffect(() => {
@@ -162,7 +164,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
       setMistakesList(prev => [
         ...prev,
         {
-          id: 'scan-' + Date.now(),
+          id: 'scan-' + clock.now(),
           item: `Casilla con ${item.symbol}`,
           userAction: `Tocaste una fruta incorrecta: ${item.symbol}`,
           correctSolution: `El objetivo de la partida era buscar: ${currentTarget.symbol} (${currentTarget.name})`,
@@ -173,13 +175,13 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   };
 
   const finishGame = (currentMistakes: number) => {
-    const elapsedSeconds = Math.max(10, Math.round((Date.now() - startTime) / 1000));
+    const elapsedSeconds = Math.max(10, Math.round((clock.now() - startTime) / 1000));
     const accuracy = Math.max(60, Math.round((totalTargets / (totalTargets + currentMistakes)) * 100));
     const baseScore = totalTargets * 80;
     const score = Math.max(120, baseScore - currentMistakes * 10);
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + Date.now(),
+      id: 'res-' + clock.now(),
       exerciseId: 'visual-scan',
       domain: 'attention',
       date: new Date().toISOString().split('T')[0],
@@ -211,6 +213,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   return (
     <ExerciseWrapper
+      exerciseId="visual-scanning"
       title={
         <span>
           Busca {article} {currentTarget.name} <span className="title-target-emoji"><GameObject symbol={currentTarget.symbol} /></span> ({foundCount}/{totalTargets})

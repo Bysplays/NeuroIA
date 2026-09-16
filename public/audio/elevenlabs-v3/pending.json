@@ -1,0 +1,548 @@
+[
+  {
+    "id": "0f79f47a8e305be5",
+    "text": "¡Correcto! Cepillo de Dientes pertenece a Higiene y Baño.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "b4aea95c021d0022",
+    "text": "El objeto Cepillo de Dientes corresponde a Higiene y Baño.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "c299a3ba7b9abdd9",
+    "text": "¡Correcto! Taza pertenece a Cocina.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "74926270ed30ccf3",
+    "text": "El objeto Taza corresponde a Cocina.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "15403096e00261d4",
+    "text": "¡Correcto! Toalla pertenece a Higiene y Baño.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "a69e2953dcefb98f",
+    "text": "El objeto Toalla corresponde a Higiene y Baño.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "6696198efc033022",
+    "text": "¡Correcto! Olla pertenece a Cocina.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "a8ca6233746a7e18",
+    "text": "El objeto Olla corresponde a Cocina.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "480851e77a6bc588",
+    "text": "¡Correcto! Esponja de Baño pertenece a Higiene y Baño.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "19699de3b9d2fa33",
+    "text": "El objeto Esponja de Baño corresponde a Higiene y Baño.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "686a7f24b09fcc5d",
+    "text": "¡Correcto! Martillo pertenece a Herramientas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "a244ee06529d11b8",
+    "text": "El objeto Martillo corresponde a Herramientas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "0d3570458142f217",
+    "text": "¡Correcto! Sofá pertenece a Muebles del Hogar.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "92e213ac2d0493c7",
+    "text": "El objeto Sofá corresponde a Muebles del Hogar.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "5b2b73ba97a078a6",
+    "text": "¡Correcto! Destornillador pertenece a Herramientas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "2120e2070799d8ed",
+    "text": "El objeto Destornillador corresponde a Herramientas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "adf426e76190cc13",
+    "text": "¡Correcto! Cama pertenece a Muebles del Hogar.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "355bd5e99e85b5de",
+    "text": "El objeto Cama corresponde a Muebles del Hogar.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "66b8864f733fd98f",
+    "text": "¡Correcto! Alicates pertenece a Herramientas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "ee0c132bc756ad91",
+    "text": "El objeto Alicates corresponde a Herramientas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "f4c44e710e339c81",
+    "text": "¡Correcto! Silla pertenece a Muebles del Hogar.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "f52d78ade85a2687",
+    "text": "El objeto Silla corresponde a Muebles del Hogar.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "412d5586f42421b5",
+    "text": "¡Correcto! Perro pertenece a Animales.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "3276daa85c5006aa",
+    "text": "El objeto Perro corresponde a Animales.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "3077cf9d9621cb58",
+    "text": "¡Correcto! Autobús pertenece a Medios de Transporte.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "51df25a436ba929b",
+    "text": "El objeto Autobús corresponde a Medios de Transporte.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "4f64028a5ec39ffe",
+    "text": "¡Correcto! Gato pertenece a Animales.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "1dabe6a02b997284",
+    "text": "El objeto Gato corresponde a Animales.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "4bf2452bc3cea516",
+    "text": "¡Correcto! Bicicleta pertenece a Medios de Transporte.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "14cf914989302933",
+    "text": "El objeto Bicicleta corresponde a Medios de Transporte.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "07aee1e4ab93b282",
+    "text": "¡Correcto! Caballo pertenece a Animales.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "0f492aeb2ddb5ed3",
+    "text": "El objeto Caballo corresponde a Animales.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "97928a064007e7c3",
+    "text": "¡Correcto! Avión pertenece a Medios de Transporte.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "4d5a5fe046bcc861",
+    "text": "El objeto Avión corresponde a Medios de Transporte.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "d6fd7110d956069a",
+    "text": "¡Pareja de Reloj!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "a6a2f9cdfcef3d78",
+    "text": "¡Pareja de Casa!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "5e1f3e1baee0c969",
+    "text": "¡Pareja de Llave!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "81cfbc51a329e718",
+    "text": "¡Pareja de Teléfono!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "e620af502e20bca1",
+    "text": "¡Pareja de Taza!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "8df3c67520a8ebea",
+    "text": "¡Pareja de Gafas!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "291c91e0a0642318",
+    "text": "¡Pareja de Zapato!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "f74b76e203536fc4",
+    "text": "¡Pareja de Manzana!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "29d1245707e04740",
+    "text": "¡Pareja de Pan!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "ad7eead5bdd09852",
+    "text": "¡Pareja de Cuchara!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "71c90a8c4455726f",
+    "text": "¡Pareja de Camisa!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "cac1da12bb87d760",
+    "text": "¡Pareja de Coche!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "66a397555829ad94",
+    "text": "¡Pareja de Silla!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "89e4ea5ad025b571",
+    "text": "¡Pareja de Lámpara!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "c5b28e32f2a9f63d",
+    "text": "¡Pareja de Libro!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "0e81455f72740bea",
+    "text": "¡Pareja de Tijeras!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "5542af481aad61fc",
+    "text": "¡Pareja de Cepillo!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "a767aadfcc95c209",
+    "text": "¡Pareja de Paraguas!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "0e4e07a3b693c4d5",
+    "text": "¡Pareja de Bicicleta!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "b133bc4274bb6f8d",
+    "text": "¡Pareja de Girasol!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "68051a73a9b3def4",
+    "text": "¡Pareja de Gato!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "5804a6e13373da8a",
+    "text": "¡Pareja de Perro!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "69e520ccb67d478f",
+    "text": "¡Pareja de Plátano!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "edce5a363420b1fc",
+    "text": "¡Pareja de Cama!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "1f38df76717dfc2f",
+    "text": "¡Pareja de Guitarra!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "aac60d91993e403b",
+    "text": "¡Pareja de Radio!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "20aac4476d9bba6f",
+    "text": "¡Pareja de Plato!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "ef223de8b54846c1",
+    "text": "¡Pareja de Sombrero!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "bb0e3bb76d7ebb76",
+    "text": "¡Pareja de Vaso!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "ddc59fa2128e65e8",
+    "text": "¡Pareja de Jabón!",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "cd6fe760f9458a56",
+    "text": "Recuerda buscar las manzanas rojas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "bea21a17325dad5d",
+    "text": "Recuerda buscar las peras verdes.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "2168a55f6174a83f",
+    "text": "Recuerda buscar las racimos de uvas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "410a3172ee3a1137",
+    "text": "Recuerda buscar las naranjas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "c729f84ce4215ae7",
+    "text": "Recuerda buscar las plátanos.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "a8add0a362d5fb71",
+    "text": "Recuerda buscar las fresas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "ad9eabf598eeabd1",
+    "text": "Recuerda buscar las cerezas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "938fa6921cd1e8ed",
+    "text": "Recuerda buscar las limones.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "1ec915e2b6ce15a2",
+    "text": "Recuerda buscar las sandías.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "0173c327a84f9cd5",
+    "text": "Recuerda buscar las melocotones.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "ff795bfebc258560",
+    "text": "Recuerda buscar las piñas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "313c73b610514878",
+    "text": "Recuerda buscar las kiwis.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "93ad2f8a398228d1",
+    "text": "Recuerda buscar las aguacates.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "9645f78af0b96fbd",
+    "text": "Recuerda buscar las cocos.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "ec56a8bde7f7a527",
+    "text": "Recuerda buscar las zanahorias.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "9fc48d2f8ecefc0d",
+    "text": "Recuerda buscar las mazorcas de maíz.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "169e07a58d4abade",
+    "text": "Recuerda buscar las tomates.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "1147919de20491ee",
+    "text": "Recuerda buscar las brócolis.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "b651f14c7f8f2001",
+    "text": "Recuerda buscar las patatas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "63580b578dc4e2ee",
+    "text": "Recuerda buscar las berenjenas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "6b4a90f2a239e798",
+    "text": "Recuerda buscar las champiñones.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "1ae24b213fcc7629",
+    "text": "Recuerda buscar las croissants.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "7cfaa03e39db9f3d",
+    "text": "Recuerda buscar las aceitunas.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "d427dbbfc08443fb",
+    "text": "Recuerda buscar las melones.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "5a6e02fb621a998b",
+    "text": "Velocidad de voz pausada y tranquila.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "e316be71ff89bb71",
+    "text": "Velocidad de voz normal.",
+    "group": "feedback",
+    "status": "pending"
+  },
+  {
+    "id": "67cfd5922cec7b1e",
+    "text": "Lee las opciones y responde a tu ritmo.",
+    "group": "feedback",
+    "status": "pending"
+  }
+]

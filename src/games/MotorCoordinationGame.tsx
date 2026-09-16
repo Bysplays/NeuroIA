@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { PaperTarget } from '../components/PaperTarget';
 import React, { useState, useEffect } from 'react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
@@ -30,6 +31,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const totalTargets = 8;
   const targetSize = 140; // Diana ampliada para máxima accesibilidad y visibilidad
 
@@ -55,7 +57,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   const [accuracySum, setAccuracySum] = useState(0);
   const [misses, setMisses] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
@@ -68,7 +70,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     setMistakesList([]);
     setIsCompleted(false);
     setResult(null);
-    setStartTime(Date.now());
+    setStartTime(clock.now());
   };
 
   useEffect(() => {
@@ -85,7 +87,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
     soundService.playSuccess();
 
-    const newTouch = { x: currentTarget.x, y: currentTarget.y, id: Date.now() };
+    const newTouch = { x: currentTarget.x, y: currentTarget.y, id: clock.now() };
     setTouches(prev => [...prev, newTouch]);
 
     const newSum = accuracySum + 95;
@@ -94,12 +96,12 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     if (targetIdx + 1 < targets.length) {
       setTargetIdx(prev => prev + 1);
     } else {
-      const elapsedSeconds = Math.max(15, Math.round((Date.now() - startTime) / 1000));
+      const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
       const avgAccuracy = Math.max(50, Math.round((targets.length / (targets.length + misses)) * 100));
       const finalScore = Math.round(avgAccuracy * 5);
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + Date.now(),
+        id: 'res-' + clock.now(),
         exerciseId: 'motor-coord',
         domain: 'motor',
         date: new Date().toISOString().split('T')[0],
@@ -126,7 +128,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     setMistakesList(prev => [
       ...prev,
       {
-        id: 'motor-' + Date.now(),
+        id: 'motor-' + clock.now(),
         item: `Diana ${targetIdx + 1} de ${targets.length}`,
         userAction: 'Pulsación fuera del perímetro de la diana circular',
         correctSolution: 'Apuntar al círculo central iluminado con la yema del dedo',
@@ -137,6 +139,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
   return (
     <ExerciseWrapper
+      exerciseId="motor-target"
       title={`Toca la Diana (${targetIdx + 1}/${targets.length})`}
       domain="motor"
       instructionText="Toca el centro de la diana de papel. Sin prisa, una a una."

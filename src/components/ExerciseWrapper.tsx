@@ -1,8 +1,10 @@
+import { useGameSession } from './GameSession';
+import { HeaderIllustration } from './HeaderIllustration';
 import { ModalFrame } from './ModalFrame';
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Volume2, VolumeX, Sparkles, CheckCircle2, RotateCcw, Home, ArrowRight, Clock, ClipboardCheck, X } from 'lucide-react';
+import { CheckCircle2, RotateCcw, ArrowRight, ClipboardCheck, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import type { CognitiveDomain, ExerciseResult } from '../types';
+import type { CognitiveDomain, ExerciseId, ExerciseResult } from '../types';
 import { soundService } from '../services/soundService';
 
 interface PlanProgress {
@@ -12,6 +14,7 @@ interface PlanProgress {
 }
 
 interface ExerciseWrapperProps {
+  exerciseId: ExerciseId;
   title: React.ReactNode;
   domain: CognitiveDomain;
   instructionText: string;
@@ -28,8 +31,8 @@ interface ExerciseWrapperProps {
 
 export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   title,
+  exerciseId,
   domain,
-  instructionText,
   onBack,
   isCompleted,
   result,
@@ -38,6 +41,8 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   onNextPlanExercise,
   children,
 }) => {
+  const session = useGameSession();
+  useEffect(() => { session.finish(isCompleted); }, [isCompleted, session.finish]);
   const domainData: Record<CognitiveDomain, { name: string; color: string; bg: string }> = {
     attention: { name: 'Atención', color: 'var(--color-attention)', bg: 'var(--color-attention-bg)' },
     language: { name: 'Lenguaje', color: 'var(--color-language)', bg: 'var(--color-language-bg)' },
@@ -54,6 +59,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
       soundService.playCompletionFanfare();
       try {
         confetti({
+          disableForReducedMotion: true,
           particleCount: 60,
           spread: 80,
           origin: { y: 0.6 },
@@ -67,145 +73,51 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
     }
   }, [isCompleted]);
 
-  const [isNarratorMuted, setIsNarratorMuted] = useState(!soundService.isVoiceEnabled());
-
-  useEffect(() => {
-    setIsNarratorMuted(!soundService.isVoiceEnabled());
-    const unsubscribe = soundService.onVoiceChange(enabled => {
-      setIsNarratorMuted(!enabled);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleToggleNarrator = () => {
-    soundService.playTap();
-    const newEnabled = soundService.toggleVoice();
-    setIsNarratorMuted(!newEnabled);
-  };
-
   return (
     <div className="exercise-container" data-domain={domain}>
-      <header className="paper-game-nav">
-        <button className="paper-game-brand" onClick={onBack} aria-label="NeuroIA, ir al inicio">
-          <img src="/brand/neuroia-mark.svg" alt="" width="36" height="36" />
-          <span>NeuroIA</span>
-        </button>
-        <div className="paper-game-tools">
-          <button className="paper-nav-button" onClick={() => { soundService.stopSpeaking(); soundService.playTap(); onBack(); }} aria-label="Volver al menú principal">
-            <ArrowLeft size={19} /><span>Volver al inicio</span>
-          </button>
-          <button className="paper-nav-button paper-voice-button" onClick={handleToggleNarrator} aria-label={isNarratorMuted ? 'Activar voz del locutor' : 'Silenciar la voz del locutor'} title={isNarratorMuted ? 'Activar voz' : 'Silenciar voz'}>
-            {isNarratorMuted ? <VolumeX size={21} /> : <Volume2 size={21} />}
-          </button>
-        </div>
-      </header>
-      {!isCompleted && (
-        <section className="paper-game-welcome" aria-labelledby="paper-game-title">
-          <div className="paper-game-intro">
-            <span className="paper-game-label"><span aria-hidden="true" />{currentDomain.name}{planProgress ? ` · Ejercicio ${planProgress.current} de ${planProgress.total}` : ' · A tu ritmo'}</span>
-            <h1 id="paper-game-title" className="exercise-screen-title">{title}</h1>
-            <p className="paper-game-instruction">{instructionText}</p>
-          </div>
-          <img className="paper-game-companions" src="/images/wellness-companions.png" alt="" />
-        </section>
-      )}
-
+      {!isCompleted && <h1 className="game-task-title">{title}</h1>}
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}
       <div className="exercise-viewport">
         {isCompleted && result ? (
-          <div className="exercise-completed-card card animate-fade-in">
-            <div className="completed-icon-wrapper">
-              <img className="game-completion-art" src="/images/wellness-companions.png" alt="" />
+          <section className="exercise-result" aria-labelledby="result-title">
+            <div className="result-heading">
+              <div>
+                <p className="result-eyebrow">{planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total} completado` : 'Ejercicio completado'}</p>
+                <h1 id="result-title">Un paso más. Bien hecho.</h1>
+                <p className="result-message">Gracias por dedicarte este rato.</p>
+              </div>
+              <HeaderIllustration scene={exerciseId} className="game-completion-art" />
             </div>
 
-            <h2 className="completed-title">Un paso más. Bien hecho.</h2>
+            <dl className="result-summary">
+              <div><dt>Aciertos</dt><dd>{result.correctAnswers} <span>de {result.totalQuestions}</span></dd></div>
+              <div><dt>Precisión</dt><dd>{result.accuracy}<span>%</span></dd></div>
+              <div><dt>Tiempo</dt><dd>{Math.floor(result.durationSeconds / 60)}:{String(Math.floor(result.durationSeconds % 60)).padStart(2, '0')}</dd></div>
+            </dl>
 
-            <div className="completed-stats-row">
-              <div className="stat-box">
-                <span className="stat-label">Aciertos</span>
-                <strong className="stat-number text-green">{result.correctAnswers} de {result.totalQuestions}</strong>
-              </div>
-              <div className="stat-box">
-                <span className="stat-label">Precisión</span>
-                <strong className="stat-number">{result.accuracy}%</strong>
-              </div>
-              <div className="stat-box">
-                <span className="stat-label">Tiempo de práctica</span>
-                <strong className="stat-number text-primary">
-                  <Clock size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
-                  {Math.floor(result.durationSeconds / 60)}:{String(Math.round(result.durationSeconds % 60)).padStart(2, '0')}
-                </strong>
-              </div>
-            </div>
-
-            <div className="completed-feedback-box">
-              <Sparkles size={24} className="sparkle-icon" />
-              <p>{result.feedbackMessage}</p>
-            </div>
-
-            {/* Botón para Ver y Corregir Fallos */}
-            <div className="completed-review-bar">
+            <div className="result-actions">
               <button
-                className="touch-btn touch-btn-correction touch-btn-large"
+                className="touch-btn touch-btn-primary result-primary"
                 onClick={() => {
                   soundService.playTap();
-                  setShowMistakesModal(true);
+                  if (planProgress && onNextPlanExercise) onNextPlanExercise();
+                  else onBack();
                 }}
-                title="Pulsar para revisar los fallos y ver las soluciones correctas"
               >
-                <ClipboardCheck size={26} />
-                <span>
-                  {result.mistakesList && result.mistakesList.length > 0
-                    ? `Ver y Corregir Fallos (${result.mistakesList.length})`
-                    : result.correctAnswers < result.totalQuestions
-                    ? `Ver y Corregir Fallos (${result.totalQuestions - result.correctAnswers})`
-                    : 'Revisar Ejercicio y Aciertos (100%)'}
-                </span>
+                <span>{planProgress && onNextPlanExercise ? (planProgress.isLast ? 'Terminar mi sesión' : 'Siguiente ejercicio') : 'Volver al inicio'}</span>
+                <ArrowRight size={20} aria-hidden="true" />
               </button>
-            </div>
-
-            {/* Acciones tras completar el ejercicio */}
-            <div className="completed-actions-row">
-              {planProgress && onNextPlanExercise && (
-                <button
-                  className="touch-btn touch-btn-primary touch-btn-large gentle-bounce"
-                  onClick={() => {
-                    soundService.playTap();
-                    onNextPlanExercise();
-                  }}
-                >
-                  <span>
-                    {planProgress.isLast
-                      ? 'Finalizar Plan del Día (¡Sesión Completada!)'
-                      : `Continuar al Ejercicio ${planProgress.current + 1} de ${planProgress.total}`}
-                  </span>
-                  <ArrowRight size={24} />
+              <div className="result-secondary-actions">
+                <button className="result-text-action" onClick={() => { soundService.playTap(); setShowMistakesModal(true); }}>
+                  <ClipboardCheck size={18} aria-hidden="true" /> Ver respuestas
                 </button>
-              )}
-
-              <button
-                className="touch-btn touch-btn-secondary touch-btn-large"
-                onClick={() => {
-                  soundService.playTap();
-                  onRestart();
-                }}
-              >
-                <RotateCcw size={24} />
-                <span>Repetir Este Ejercicio</span>
-              </button>
-
-              <button
-                className="touch-btn touch-btn-secondary touch-btn-large"
-                onClick={() => {
-                  soundService.playTap();
-                  onBack();
-                }}
-              >
-                <Home size={24} />
-                <span>Volver al Menú Principal</span>
-              </button>
+                <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
+                  onRestart(); }}>
+                  <RotateCcw size={18} aria-hidden="true" /> Repetir
+                </button>
+              </div>
             </div>
-          </div>
+          </section>
         ) : (
           children
         )}
@@ -295,6 +207,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                 onClick={() => {
                   soundService.playTap();
                   setShowMistakesModal(false);
+                  session.restart();
                   onRestart();
                 }}
               >

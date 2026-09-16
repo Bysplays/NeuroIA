@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import React, { useState, useEffect, useRef } from 'react';
 import { PaperTarget } from '../components/PaperTarget';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
@@ -27,6 +28,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const arenaRef = useRef<HTMLDivElement | null>(null);
 
   // Posición del objetivo (porcentajes de 0 a 100)
@@ -37,7 +39,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
-  const startTimeRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(clock.now());
   const animationFrameRef = useRef<number | null>(null);
   const isTouchingRef = useRef(false);
 
@@ -49,7 +51,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     setContactTime(0);
     setIsCompleted(false);
     setResult(null);
-    startTimeRef.current = Date.now();
+    startTimeRef.current = clock.now();
     isTouchingRef.current = false;
   };
 
@@ -61,7 +63,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   useEffect(() => {
     if (isCompleted) return;
 
-    let lastTimestamp = performance.now();
+    let lastTimestamp = clock.performanceNow();
 
     const updatePhysics = (timestamp: number) => {
       const deltaMs = timestamp - lastTimestamp;
@@ -109,14 +111,14 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
         });
       }
 
-      animationFrameRef.current = requestAnimationFrame(updatePhysics);
+      animationFrameRef.current = clock.requestAnimationFrame(updatePhysics);
     };
 
-    animationFrameRef.current = requestAnimationFrame(updatePhysics);
+    animationFrameRef.current = clock.requestAnimationFrame(updatePhysics);
 
     return () => {
       if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+        clock.cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [isCompleted, velocity]);
@@ -159,14 +161,14 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     isTouchingRef.current = false;
     setIsHoveringOrTouching(false);
 
-    const elapsedSeconds = Math.max(REQUIRED_CONTACT_SECONDS, Math.round((Date.now() - startTimeRef.current) / 1000));
+    const elapsedSeconds = Math.max(REQUIRED_CONTACT_SECONDS, Math.round((clock.now() - startTimeRef.current) / 1000));
     // Precisión calculada por ratio de contacto mantenido
     const accuracy = Math.min(100, Math.max(70, Math.round((REQUIRED_CONTACT_SECONDS / elapsedSeconds) * 100)));
 
     const mistakesList: MistakeDetail[] = [];
     if (elapsedSeconds > REQUIRED_CONTACT_SECONDS + 6) {
       mistakesList.push({
-        id: 'track-' + Date.now(),
+        id: 'track-' + clock.now(),
         item: 'Mantenimiento del contacto continuo',
         userAction: `Completado en ${elapsedSeconds}s`,
         correctSolution: `Meta ideal: ${REQUIRED_CONTACT_SECONDS}s de contacto continuo`,
@@ -175,7 +177,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     }
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + Date.now(),
+      id: 'res-' + clock.now(),
       exerciseId: 'motor-tracking',
       domain: 'motor',
       date: new Date().toISOString().split('T')[0],
@@ -199,6 +201,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
 
   return (
     <ExerciseWrapper
+      exerciseId="motor-tracking"
       title="Sigue a tu compañero"
       domain="motor"
       instructionText="Acompaña al personaje con el dedo o el puntero mientras se mueve."

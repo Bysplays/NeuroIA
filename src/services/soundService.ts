@@ -1,3 +1,7 @@
+import { selectSpainVoice } from './speechVoice';
+import recordings from './speechRecordings.json';
+import { NarrationPlayer, normalizeSpeechText } from './narrationPlayer';
+
 // Servicio de audio sintético (Web Audio API) y síntesis de voz (Web Speech API)
 // Diseñado para evitar sonidos estridentes o que causen sobresalto, priorizando tonos cálidos y armónicos
 
@@ -5,9 +9,22 @@ class SoundService {
   private audioCtx: AudioContext | null = null;
   private soundEnabled: boolean = true;
   private voiceEnabled: boolean = true; // Control de voz del locutor
-  private speechRate: number = 0.88; // Ritmo pausado y nítido para afasia/procesamiento
   private spanishVoice: SpeechSynthesisVoice | null = null;
   private voiceListeners: Set<(voiceEnabled: boolean) => void> = new Set();
+
+  private narration = new NarrationPlayer({
+    resolveAudio: text => {
+      const file = (recordings as Record<string, string>)[normalizeSpeechText(text)];
+      return typeof file === 'string' ? `${import.meta.env.BASE_URL}audio/elevenlabs-v3/${file}` : undefined;
+    },
+    createAudio: url => new Audio(url),
+    speakFallback: (text, rate, onEnd) => this.speakWithBrowser(text, rate, onEnd),
+    stopFallback: () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    },
+  });
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -29,11 +46,7 @@ class SoundService {
   private initVoices() {
     if (!('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();
-    // Priorizar voces en español de alta calidad
-    this.spanishVoice =
-      voices.find(v => v.lang.startsWith('es') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Monica') || v.name.includes('Jorge') || v.name.includes('Paulina'))) ||
-      voices.find(v => v.lang.startsWith('es')) ||
-      null;
+    this.spanishVoice = selectSpainVoice(voices);
   }
 
   private getAudioContext(): AudioContext | null {
@@ -55,7 +68,7 @@ class SoundService {
   }
 
   public setSpeechRate(rate: number) {
-    this.speechRate = Math.max(0.6, Math.min(1.4, rate));
+    this.narration.setRate(rate);
   }
 
   // Toque grave y breve, con entrada y salida suaves para evitar chasquidos.
@@ -218,47 +231,30 @@ class SoundService {
     }
   }
 
-  // Síntesis de voz en español nativo
   public speak(text: string, onEnd?: () => void): boolean {
-    if (!this.voiceEnabled) {
-      if (onEnd) onEnd();
+    if (!this.voiceEnabled || typeof window === 'undefined') {
+      onEnd?.();
       return false;
     }
+    return this.narration.speak(text, onEnd);
+  }
 
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      if (onEnd) onEnd();
-      return false;
-    }
-
-    try {
-      window.speechSynthesis.cancel(); // Detener locución previa si existiera
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-ES';
-      utterance.rate = this.speechRate; // Articulación clara y pausada
-      utterance.pitch = 1.0;
-
-      if (this.spanishVoice) {
-        utterance.voice = this.spanishVoice;
-      }
-
-      if (onEnd) {
-        utterance.onend = () => onEnd();
-        utterance.onerror = () => onEnd();
-      }
-
-      window.speechSynthesis.speak(utterance);
-      return true;
-    } catch {
-      if (onEnd) onEnd();
-      return false;
-    }
+  private speakWithBrowser(text: string, rate: number, onEnd: () => void): boolean {
+    if (!('speechSynthesis' in window)) return false;
+    this.initVoices();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.rate = rate;
+    utterance.pitch = 1;
+    if (this.spanishVoice) utterance.voice = this.spanishVoice;
+    utterance.onend = onEnd;
+    utterance.onerror = onEnd;
+    window.speechSynthesis.speak(utterance);
+    return true;
   }
 
   public stopSpeaking() {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
+    this.narration.stop();
   }
 
   public isVoiceEnabled(): boolean {

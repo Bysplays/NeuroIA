@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, RotateCcw, Check } from 'lucide-react';
@@ -242,6 +243,7 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const [sessionScenarios, setSessionScenarios] = useState<Scenario[]>([]);
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [selectedStepIds, setSelectedStepIds] = useState<number[]>([]);
@@ -252,7 +254,7 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
   const [correctScenariosCount, setCorrectScenariosCount] = useState<number>(0);
   const [hasErrorInCurrentRound, setHasErrorInCurrentRound] = useState<boolean>(false);
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
@@ -270,7 +272,7 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
     setHasErrorInCurrentRound(false);
     setIsCompleted(false);
     setResult(null);
-    setStartTime(Date.now());
+    setStartTime(clock.now());
     setAvailableSteps([...steps].sort(() => Math.random() - 0.5));
     setFeedback('Toca los pasos en el orden en que se realizan (1º, 2º y 3º).');
   };
@@ -328,14 +330,14 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
 
     if (isCorrect) {
       soundService.playSuccess();
-      soundService.speak('¡Excelente! Secuencia lógica completada a la perfección.');
+      soundService.speak('Bien hecho. Has colocado los pasos en orden.');
       setFeedback('¡Correcto! Has ordenado los pasos de forma lógica.');
       if (!hasErrorInCurrentRound) {
         setCorrectScenariosCount(prev => prev + 1);
       }
     } else {
       soundService.playGentlePrompt();
-      soundService.speak('El orden no es del todo correcto. Puedes pulsar en Corregir para intentarlo de nuevo.');
+      soundService.speak('Vamos a repasarlo con calma. Pulsa Corregir y prueba otro orden.');
       setFeedback('El orden no es el adecuado. Toca en una tarjeta para cambiar el orden o pulsa "Corregir".');
       setHasErrorInCurrentRound(true);
 
@@ -345,7 +347,7 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
       setMistakesList(prev => [
         ...prev,
         {
-          id: 'seq-' + Date.now(),
+          id: 'seq-' + clock.now(),
           item: `Situación: ${currentScenario.title}`,
           userAction: `Orden propuesto: ${proposedOrder}`,
           correctSolution: `Orden secuencial lógico: ${correctOrder}`,
@@ -377,14 +379,14 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
       setFeedback('Toca los pasos en el orden en que se realizan (Paso 1, Paso 2 y Paso 3).');
       setAvailableSteps([...steps].sort(() => Math.random() - 0.5));
     } else {
-      const elapsedSeconds = Math.max(20, Math.round((Date.now() - startTime) / 1000));
+      const elapsedSeconds = Math.max(20, Math.round((clock.now() - startTime) / 1000));
       const finalScore = 450;
       const total = sessionScenarios.length;
       const finalCorrect = correctScenariosCount;
       const finalAccuracy = Math.max(50, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + Date.now(),
+        id: 'res-' + clock.now(),
         exerciseId: 'daily-seq',
         domain: 'executive',
         date: new Date().toISOString().split('T')[0],
@@ -406,6 +408,7 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
 
   return (
     <ExerciseWrapper
+      exerciseId="daily-sequencing"
       title={sessionScenarios.length > 1 ? `${currentScenario.title} (${scenarioIdx + 1}/${sessionScenarios.length})` : currentScenario.title}
       domain="executive"
       instructionText="Toca las tarjetas en el orden en que harías cada paso."
@@ -445,19 +448,14 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
                 aria-label={`${step.text}${orderNumber ? ` - Seleccionado como paso ${orderNumber}` : ''}`}
                 title={isSelected ? `Paso ${orderNumber} seleccionado (toca para cambiar el orden)` : 'Toca para seleccionar este paso'}
               >
-                {/* Verde difuminado translúcido con desenfoque suave */}
-                {isSelected && <div className="seq-green-overlay" />}
-
-                {/* Número de la selección en medio en grande pero permitiendo ver el fondo */}
+                {/* Selection order stays separate from the illustrated action. */}
                 {isSelected && (
-                  <div className="seq-order-badge">
-                    <span>{orderNumber}</span>
-                  </div>
+                  <span className="seq-order-badge" aria-hidden="true">Paso {orderNumber}</span>
                 )}
 
                 {/* Emoji del paso */}
                 <div className="seq-card-emoji-wrap">
-                  <span className="seq-card-emoji"><GameObject symbol={step.emoji} /></span>
+                  <span className="seq-card-emoji"><GameObject transparent symbol={step.emoji} /></span>
                 </div>
 
                 {/* Texto descriptivo del paso claramente visible */}

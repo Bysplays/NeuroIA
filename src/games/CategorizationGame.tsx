@@ -1,3 +1,4 @@
+import { useGameSession } from '../components/GameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, ArrowRight, Volume2 } from 'lucide-react';
@@ -360,12 +361,13 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
+  const { clock } = useGameSession();
   const [sessionItems, setSessionItems] = useState<ItemToClassify[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime] = useState<number>(Date.now());
+  const [startTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
@@ -408,7 +410,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
       setMistakesList(prev => [
         ...prev,
         {
-          id: 'cat-' + Date.now(),
+          id: 'cat-' + clock.now(),
           item: `Objeto: ${currentItem.name}`,
           userAction: `Clasificado erróneamente`,
           correctSolution: `Categoría correcta: ${currentItem.categoryName}`,
@@ -423,13 +425,13 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
     if (currentIdx + 1 < sessionItems.length) {
       setCurrentIdx(prev => prev + 1);
     } else {
-      const elapsedSeconds = Math.max(15, Math.round((Date.now() - startTime) / 1000));
+      const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
       const total = sessionItems.length;
       const finalCorrect = Math.min(total, correctCount);
       const accuracy = Math.min(100, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + Date.now(),
+        id: 'res-' + clock.now(),
         exerciseId: 'categorization',
         domain: 'executive',
         date: new Date().toISOString().split('T')[0],
@@ -453,6 +455,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
   return (
     <ExerciseWrapper
+      exerciseId="categorization"
       title={`Clasificación por Categorías (${currentIdx + 1}/${sessionItems.length})`}
       domain="executive"
       instructionText="Cada cosa en su lugar. Elige el grupo al que pertenece."
@@ -469,7 +472,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
         <div className="categorization-card">
           {/* Objeto central a clasificar */}
           <div className="category-object-card">
-            <span className="large-object-emoji"><GameObject symbol={currentItem.emoji} /></span>
+            <span className="large-object-emoji"><GameObject transparent symbol={currentItem.emoji} /></span>
             <h2 className="object-name-title">{currentItem.name}</h2>
             <button
               className="touch-btn touch-btn-secondary object-voice-btn"
@@ -512,7 +515,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
                     className="bin-icon-circle"
                     style={{ backgroundColor: cat.bgColor, color: cat.color }}
                   >
-                    <span className="bin-emoji"><GameObject symbol={cat.emoji} /></span>
+                    <span className="bin-emoji"><GameObject transparent symbol={cat.emoji} /></span>
                   </div>
                   <h3 className="bin-title">{cat.name}</h3>
 
