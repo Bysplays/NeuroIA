@@ -1,5 +1,10 @@
 export function authErrorMessage(error: unknown): string {
   const code = error && typeof error === 'object' && 'code' in error ? error.code : '';
+  // Firebase can encode the rejected referrer in the error code instead of
+  // returning auth/unauthorized-domain. Never echo that arbitrary URL to the UI.
+  if (typeof code === 'string' && code.startsWith('auth/requests-from-referer-') && code.endsWith('-are-blocked.')) {
+    return 'Esta dirección está bloqueada para acceder con Google. Quien administra NeuroIA debe autorizarla en la configuración de acceso.';
+  }
   switch (code) {
     case 'auth/popup-closed-by-user': return 'No se ha completado el acceso con Google. Si la ventana se cierra sola, abre esta página en tu navegador habitual, como Safari o Chrome, y vuelve a intentarlo.';
     case 'auth/cancelled-popup-request': return 'Hay otro acceso en curso. Espera a que termine.';

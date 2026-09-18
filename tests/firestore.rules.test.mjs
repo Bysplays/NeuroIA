@@ -61,3 +61,85 @@ test('initial import is atomic, excludes clinical fields, and cannot replace exi
   assert.equal(remote.profile.totalSessions, 7);
   assert.equal(remote.profile.strokeDate, undefined);
 });
+
+test('patients cannot grant access, create invitations, claim professional roles or forge care links', async () => {
+  const db = env.authenticatedContext('patient-a').firestore();
+  await assertSucceeds(getDoc(doc(db, 'users/patient-a/access/main')));
+  await assertFails(getDoc(doc(db, 'users/patient-b/access/main')));
+  for (const path of ['users/patient-a/access/main', 'invitations/CEOABERTO', 'professionals/ceoaberto', 'professionals/ceoaberto/patients/patient-a', 'billing/patient-a']) {
+    await assertFails(setDoc(doc(db, path), { kind: 'invitation', active: true }));
+    await assertFails(deleteDoc(doc(db, path)));
+  }
+  await assertFails(getDoc(doc(db, 'invitations/CEOABERTO')));
+  await assertFails(getDoc(doc(db, 'billing/patient-a')));
+});
+
+// Exercise the production browser adapter against actual server-side rules.
+const { firestoreAccess } = await import('../src/services/firestoreAccess.ts');
+test('Spark: first CEOABERTO redemption creates a permanent entitlement and reserved professional atomically', async () => {
+  const db = env.authenticatedContext('spark-a').firestore();
+  await firestoreAccess('spark-a', db).invite(' ceoaberto ');
+  const access = await firestoreAccess('spark-a', db).load();
+  assert.equal(access.active, true);
+  assert.equal(access.expiresAt, null);
+  assert.equal(access.professionalId, 'ceoaberto');
+  assert.equal((await getDoc(doc(db, 'professionals/ceoaberto'))).data().ownerUid, null);
+  const first = (await getDoc(doc(db, 'users/spark-a/access/main'))).data().linkedAt;
+  await firestoreAccess('spark-a', db).invite('CEOABERTO');
+  const second = (await getDoc(doc(db, 'users/spark-a/access/main'))).data().linkedAt;
+  assert.ok(first.isEqual(second));
+  assert.ok(first.isEqual((await getDoc(doc(db, 'professionals/ceoaberto/patients/spark-a'))).data().linkedAt));
+});
+test('Spark: code is reusable across accounts and returning users retain their access and progress', async () => {
+  for (const uid of ['spark-b', 'spark-c']) {
+    const db = env.authenticatedContext(uid).firestore();
+    const progress = firestoreProgress(uid, db);
+    await progress.initialize(fresh());
+    await progress.commit(op(uid));
+    await firestoreAccess(uid, db).invite('CEOABERTO');
+    assert.equal((await firestoreAccess(uid, env.authenticatedContext(uid).firestore()).load()).active, true);
+    assert.equal((await progress.load()).profile.totalSessions, 1);
+  }
+});
+test('Spark: deny forged code, entitlement without reverse link, ownership theft and professional reassignment', async () => {
+  const uid = 'spark-attacker'; const db = env.authenticatedContext(uid).firestore();
+  await assert.rejects(firestoreAccess(uid, db).invite('OTHER'), {code:'invitation/invalid-code'});
+  await assertFails(setDoc(doc(db, `users/${uid}/access/main`), {
+    kind:'invitation',invitationCode:'CEOABERTO',professionalId:'ceoaberto',professionalName:'CeoAberto',expiresAt:null,linkedAt:serverTimestamp(),
+  }));
+  await assertFails(updateDoc(doc(db, 'professionals/ceoaberto'), {ownerUid:uid}));
+  await assertFails(setDoc(doc(db, `professionals/ceoaberto/patients/${uid}`), {patientId:uid,linkedAt:serverTimestamp()}));
+  const owner = env.authenticatedContext('spark-a').firestore();
+  await assertFails(updateDoc(doc(owner, 'users/spark-a/access/main'), {professionalId:'other'}));
+  await assertFails(updateDoc(doc(owner, 'users/spark-a/access/main'), {kind:'subscription',expiresAt:9999999999999}));
+  await assertFails(deleteDoc(doc(owner, 'users/spark-a/access/main')));
+  await assertFails(getDoc(doc(db, 'professionals/ceoaberto/patients/spark-a')));
+});
+test('Spark: trial uses server time, cannot restart and can become a permanent invitation', async () => {
+  const uid = 'spark-trial'; const db = env.authenticatedContext(uid).firestore();
+  const adapter = firestoreAccess(uid, db);
+  await adapter.trial();
+  const trial = await adapter.load();
+  assert.equal(trial.expiresAt - trial.trialStartedAt, 7*86400000);
+  await assert.rejects(adapter.trial());
+  await assertFails(updateDoc(doc(db, `users/${uid}/access/main`), {trialStartedAt:serverTimestamp()}));
+  await adapter.invite('CEOABERTO');
+  const permanent = await adapter.load();
+  assert.equal(permanent.trialStartedAt, trial.trialStartedAt);
+  assert.equal(permanent.active, true);
+  assert.equal(permanent.expiresAt, null);
+});
+test('Spark: pending billing prevents free redemption and inactive professionals cannot be used', async () => {
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'billing/spark-paid'), {attempt:'pending'});
+  });
+  const db = env.authenticatedContext('spark-paid').firestore();
+  await assertFails(firestoreAccess('spark-paid', db).invite('CEOABERTO'));
+  await env.withSecurityRulesDisabled(async context => {
+    await updateDoc(doc(context.firestore(), 'professionals/ceoaberto'), {active:false});
+  });
+  await assert.rejects(firestoreAccess('spark-off', env.authenticatedContext('spark-off').firestore()).invite('CEOABERTO'), {code:'invitation/inactive'});
+  await env.withSecurityRulesDisabled(async context => {
+    await updateDoc(doc(context.firestore(), 'professionals/ceoaberto'), {active:true});
+  });
+});

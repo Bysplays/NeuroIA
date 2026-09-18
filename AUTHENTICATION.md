@@ -26,8 +26,21 @@ npx firebase-tools@15.30.1 deploy --only firestore:rules --project ceoaberto-neu
 The browser configuration is not permission to administer Firebase. The local CLI
 was not authenticated during implementation, and no production rules were deployed.
 Keep Google enabled and authorize `localhost` and the final deployment hostname.
-Use `http://localhost:5173` during local development. Spark supports this phase;
-no Functions or paid upgrade is required. Reads/writes remain subject to quotas.
+Use `http://localhost:5173` during local development. Authentication and progress
+can use Spark, including direct Firestore invitation redemption and trials. Only the future
+Stripe Cloud Functions backend requires a billing-enabled project when deployed. Reads/writes remain subject to quotas.
+
+### Local access blocked by API-key restrictions
+
+A 403 from `identitytoolkit.googleapis.com/v1/projects` with
+`auth/requests-from-referer-http://localhost:5173/-are-blocked.` means that the
+web API key rejects the HTTP referrer. This is separate from Firebase Auth's
+authorized-domain list. In Google Cloud Console > APIs & Services > Credentials,
+find the web key matching `src/services/firebase.ts` and add
+`http://localhost:5173/*` to its allowed websites. Preserve existing restrictions
+and production referrers. Also keep `localhost` in Authentication's authorized
+domains. Do not spoof referrers or remove all key restrictions to bypass the block.
+The app reports this configuration error without echoing arbitrary provider URLs.
 
 ## Data layout
 
@@ -112,3 +125,11 @@ is the reliable fallback. Confirm native locking on physical target devices.
 - [Google embedded browser policy](https://developers.google.com/identity/protocols/oauth2/policies)
 - [Firestore transactions](https://firebase.google.com/docs/firestore/manage-data/transactions)
 - [Firestore security rules](https://firebase.google.com/docs/firestore/security/get-started)
+
+## Account access onboarding
+
+Authentication now precedes a mandatory server-validated access gate. See
+[ONBOARDING.md](ONBOARDING.md) for trials, professional invitations, Stripe,
+provisioning and required rule publication. Local development keeps real Google
+authentication; emulator identities are only for automated testing.
+Professional links do not yet authorize clinical access.

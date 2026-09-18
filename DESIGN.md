@@ -192,7 +192,7 @@ palette. Extend collections using a cohesive sheet when practical.
 ### Dialogs
 
 Use the shared native-dialog frame. Keep one title, concise supporting content,
-one obvious primary action, and a clear close affordance. Center the dialog in
+one obvious primary action, and a clear close affordance. Mandatory account entry and orientation dialogs are exceptions: Escape and backdrop cannot dismiss them; account entry offers logout. Center the dialog in
 the viewport; align its inner content independently. Avoid redundant wrappers,
 competing width rules, oversized icons, and unexplained gaps above or below
 content. Long content must scroll without losing access to dismissal.
@@ -322,3 +322,36 @@ Do not display a session-owner strip or a routine saving/saved banner above the
 workspace. Successful synchronization stays silent. Show a textual pending notice
 with a retry action only when changes cannot be saved; advise keeping the page
 open. Preserve this recovery notice during exercise results.
+
+### Mandatory account onboarding
+
+After sign-in and before progress or exercises, show a shared native modal with
+a blue-paper heading and curved paper-layer edge matching the login screen.
+Use the home heading weight, 32 px outer corners and pill-shaped actions.
+The invitation input uses a soft page-colored fill and 16 px corners without
+a visible outline at rest. Its keyboard focus has one inset 2 px ring; avoid
+the global detached focus ring here. High contrast retains a visible boundary.
+Below the heading, keep two unboxed sections on one neutral surface, subscription
+and invitation, separated by a fine rule. Omit illustrations, icons, eyebrow text and routine
+footer reassurance here: prioritize a compact heading and short option descriptions.
+Keep one filled subscription action. Directly underneath, show “Empezar prueba gratuita de 7 días” as a plain
+underlined text button without a fill, border or pill. Underline “Usar mi código”
+as well so both text actions are visibly clickable before hover. The trial is not a separate card. Show no invented price: Stripe displays
+the configured amount before purchase. Trials have no card or automatic charge.
+Explain that invitations provide free access and link the account to the named
+professional; do not expose the reusable bootstrap code in public interface copy.
+
+The modal cannot be dismissed but always offers logout. Focus its heading first
+so short viewports start at the explanation, not at the code input. Sections use
+two columns on desktop and tablets, with shared heading, description and action
+rows so the subscription button and invitation input align even when copy wraps.
+Use one column on narrow screens. Content scrolls inside the dialog. Portrait rotation takes
+priority; avoid stacking onboarding over the orientation dialog.
+
+Expired trials cannot be restarted. Keep purchase and invitation actions visible
+when access expires. Do not show a general server-error banner in this modal.
+Keep invitation validation beside its input, and display payment confirmation and
+automatic recovery states; do not expose a technical “Comprobar acceso” action.
+Never imply that returning from Stripe proves payment. The active
+subscription offers a customer-portal action. Technical setup and remaining
+production prerequisites are documented in `ONBOARDING.md`.

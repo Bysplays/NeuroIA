@@ -31,6 +31,7 @@ import { CategorizationGame } from './games/CategorizationGame';
 import { MotorCoordinationGame } from './games/MotorCoordinationGame';
 import { MotorTrackingGame } from './games/MotorTrackingGame';
 
+const AccessGate = lazy(() => import('./components/AccessGate'));
 const CloudProgress = lazy(() => import('./components/CloudProgress'));
 
 export const App: React.FC = () => {
@@ -76,7 +77,7 @@ export const App: React.FC = () => {
     : user
       ? <>
         {error && <p className="account-notice" role="alert">{error}</p>}
-        <Suspense fallback={<p className="account-notice" role="status">Cargando tu progreso…</p>}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></Suspense></>
+        <Suspense fallback={<p className="account-notice" role="status">Cargando tu progreso…</p>}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></Suspense></>
       : <LoginScreen onSignIn={handleSignIn} busy={busy} error={error} />
   }</LandscapeGate>;
 };

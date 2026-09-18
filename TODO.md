@@ -139,3 +139,18 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
 - [ ] Add private clinical notes and patient-facing instructions with distinct
   permissions, account deletion, and explicit merge of retained local backups
   into an already-existing cloud account. Initial empty-account import is available.
+
+## Onboarding and subscriptions
+
+- [x] Mandatory modal, server-timed seven-day trial and transactional invitation
+  redemption with care links; CEOABERTO is the only accepted code for now,
+  permanent and reusable. Other codes remain disabled until professional profiles.
+- [x] Add Stripe Checkout, signed webhook and customer portal integration code.
+- [ ] Supply monthly Stripe Price ID, configure secrets, APP_URL, webhook and
+  portal; run the payment lifecycle in Stripe test mode. See `ONBOARDING.md`.
+- [ ] Assign CeoAberto's actual Firebase owner UID before enabling professional
+  account access. The code now links to a reserved unclaimed professional record.
+- [ ] Publish reviewed Spark-compatible rules for real-account invitation/trial
+  access. No Cloud Functions or Blaze required; localhost:5173 keeps real Google login.
+- [ ] Implement verified professional profile and code creation; care-link
+  revocation and professional permissions remain unavailable.

@@ -37,6 +37,9 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 
 | Location | Responsibility |
 | --- | --- |
+| `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Mandatory account entry before progress and games |
+| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption; see `ONBOARDING.md` |
+| `functions/` | Future Stripe billing backend and administrator-only professional ownership script |
 | `src/App.tsx` | View state, profile refresh, game dispatch, daily-plan progression |
 | `src/types/index.ts` | Domain, exercise, profile, result, and settings contracts |
 | `src/components/Dashboard.tsx` | Home, entry points to areas and all exercises |
@@ -89,6 +92,8 @@ npm run build
 npm run lint
 npm test
 npm run test:firestore
+npm ci --prefix functions # when backend dependencies are needed
+npm run test:onboarding
 git diff --check
 ```
 
@@ -232,7 +237,7 @@ in-memory fallback. `StorageService.setAccount` is set by the auth observer; cac
 and pending writes are scoped to the UID. Auth changes unmount the old boundary,
 unsubscribe listeners, and prevent late callbacks from touching the next account.
 
-`CloudProgress` is lazy loaded after authentication. It loads from the server
+`AccessGate` is lazy loaded after authentication and validates server-owned access directly in Firestore before mounting `CloudProgress`. See [ONBOARDING.md](ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
 before mounting games; an inaccessible/offline initial load shows retry/logout,
 never an empty replacement profile. First cloud initialization offers an explicit
 import of account-local activity or the older unscoped profile when present.
@@ -263,7 +268,7 @@ are not synced; accessibility settings in the profile are synced.
 Professional navigation remains unavailable pending verified roles and care links.
 The retained therapist component is not wired to cloud mutations. Current rules
 allow only the owner's patient progress, append-only results and immutable retry
-receipts; all role, cross-account, clinical and delete paths stay denied. Totals
+receipts; all client role, cross-account, clinical and delete paths stay denied. Strict Firestore rules allow only the permanent CEOABERTO invitation, the reserved unclaimed CeoAberto profile and reciprocal owner-specific care links; ownership changes remain admin-only and no clinical access is granted. Totals
 are self-reported client data, not medically verified records. Publish the exact
 reviewed `firestore.rules` before using the real project. No rules are deployed
 by a frontend build. See `AUTHENTICATION.md` and `TODO.md`.

@@ -731,3 +731,42 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 .cloud-entry h1 { font-size: 1.7rem; }
 .cloud-entry p { line-height: 1.6; }
 .cloud-status { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; }
+
+/* Mandatory account entry; the workspace is mounted only after server approval. */
+.access-entry { min-height: 100svh; padding: 28px; background: var(--color-bg); }
+.modal-shell:has(.onboarding) { --onboarding-inset: clamp(24px, 4vw, 36px); width: min(760px, calc(100vw - 32px)); background: var(--color-surface); border-radius: 32px; scrollbar-gutter: auto; }
+.onboarding { padding: 0; }
+.onboarding-heading { position: relative; background: var(--panel-blue); color: var(--panel-ink); padding: 32px var(--onboarding-inset) 48px; border-radius: 31px 31px 0 0; }
+.onboarding-paper-edge { position: absolute; bottom: -1px; left: 0; width: 100%; height: 28px; color: var(--color-surface); pointer-events: none; }
+.onboarding > p { margin: 16px var(--onboarding-inset); line-height: 1.6; }
+.onboarding-heading h1 { font-size: clamp(1.5rem, 3vw, 1.9rem); font-weight: 600; line-height: 1.12; letter-spacing: -.035em; margin: 0; }
+.onboarding-heading h1:focus { outline: none; }
+.onboarding-heading p { margin-top: 12px; color: var(--color-text-muted); }
+.onboarding-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; padding: 24px var(--onboarding-inset) 0; }
+.onboarding-option { display: grid; grid-template-rows: subgrid; grid-row: span 3; row-gap: 16px; min-width: 0; color: var(--color-text-main); }
+.onboarding-option + .onboarding-option { border-left: 1px solid var(--color-border); padding-left: 32px; }
+.onboarding-option h2 { font-size: 1rem; line-height: 1.3; font-weight: 500; margin: 0; }
+.onboarding-option p { font-size: .8rem; line-height: 1.6; color: var(--color-text-muted); margin: 0 0 8px; }
+.onboarding-trial-link { appearance: none; display: block; padding: 8px 0; margin-top: 0; border: 0; border-radius: 0; background: transparent; color: var(--color-text-muted); font: inherit; font-size: .75rem; font-weight: 400; box-shadow: none; cursor: pointer; }
+.onboarding-trial-link:hover:not(:disabled) { color: var(--color-text-main); text-decoration: underline; background: transparent; transform: none; }
+.onboarding-actions { display: flex; flex-direction: column; gap: 8px; }
+.onboarding-actions > .touch-btn { min-height: 52px; line-height: 1.5; }
+.onboarding-trial-link, .onboarding-invite .paper-nav-button { text-decoration: underline; text-underline-offset: .2em; text-decoration-thickness: 1px; }
+.onboarding-option small { font-size: .75rem; line-height: 1.5; color: var(--color-text-muted); }
+.onboarding-option input { width: 100%; min-width: 0; min-height: 52px; border: 1px solid transparent; border-radius: 16px; padding: 12px 18px; background: var(--color-bg); color: var(--color-text-main); font: inherit; font-size: .8rem; }
+.onboarding-option input:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+body[data-contrast="high-contrast"] .onboarding-option input { border-color: var(--color-border-subtle); }
+.onboarding button { min-height: 48px; white-space: normal; }
+.onboarding button:disabled { opacity: .6; cursor: not-allowed; }
+.onboarding .paper-nav-button { background: transparent; border: 0; box-shadow: none; color: var(--color-text-muted); font-weight: 400; }
+.onboarding .paper-nav-button:hover:not(:disabled) { color: var(--color-text-main); text-decoration: underline; background: transparent; }
+.onboarding-footer { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin: 16px var(--onboarding-inset) 24px; }
+.onboarding-footer > span { margin-right: auto; font-size: .8rem; }
+.onboarding-footer .paper-nav-button { padding: 8px 0; font-size: .75rem; }
+.access-membership { display: flex; justify-content: flex-end; padding: 8px 24px; }
+@media (max-width: 560px) {
+  .onboarding-options { grid-template-columns: 1fr; gap: 24px; }
+  .onboarding-option + .onboarding-option { border-left: 0; padding-left: 0; border-top: 1px solid var(--color-border); padding-top: 24px; }
+  .onboarding-heading { padding-top: 28px; padding-bottom: 40px; }
+  .onboarding-option { display: flex; flex-direction: column; grid-row: auto; gap: 16px; }
+}

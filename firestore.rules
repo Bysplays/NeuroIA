@@ -54,6 +54,65 @@ service cloud.firestore {
         && request.resource.data.correctAnswers is int && request.resource.data.correctAnswers >= 0
         && request.resource.data.totalQuestions is int && request.resource.data.totalQuestions >= request.resource.data.correctAnswers;
     }
-    // All other paths, role changes, cross-account access and deletes stay denied.
+    function noBilling(uid) {
+      let path = /databases/$(database)/documents/billing/$(uid);
+      return !exists(path) || (get(path).data.get('subscriptionId', null) == null
+        && get(path).data.get('checkoutId', null) == null
+        && get(path).data.get('attempt', null) == null);
+    }
+    function reservedProfessional() {
+      let professional = getAfter(/databases/$(database)/documents/professionals/ceoaberto).data;
+      return professional.name == 'CeoAberto' && professional.active == true;
+    }
+    function invitation(value) {
+      return value.kind == 'invitation' && value.invitationCode == 'CEOABERTO'
+        && value.professionalId == 'ceoaberto' && value.professionalName == 'CeoAberto'
+        && value.expiresAt == null;
+    }
+    function matchingPatient(uid, linkedAt) {
+      let patient = getAfter(/databases/$(database)/documents/professionals/ceoaberto/patients/$(uid)).data;
+      return patient.patientId == uid && patient.linkedAt == linkedAt;
+    }
+    match /users/{uid}/access/main {
+      allow get: if owns(uid);
+      allow create: if owns(uid) && noBilling(uid) && (
+        (request.resource.data.keys().hasOnly(['kind', 'trialStartedAt'])
+          && request.resource.data.kind == 'trial'
+          && request.resource.data.trialStartedAt == request.time)
+        || (request.resource.data.keys().hasOnly(['kind', 'invitationCode', 'professionalId',
+            'professionalName', 'expiresAt', 'linkedAt'])
+          && invitation(request.resource.data) && reservedProfessional()
+          && request.resource.data.linkedAt == request.time
+          && matchingPatient(uid, request.resource.data.linkedAt)));
+      allow update: if owns(uid) && noBilling(uid)
+        && resource.data.kind in ['trial', 'invitation']
+        && resource.data.get('professionalId', 'ceoaberto') == 'ceoaberto'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'kind', 'invitationCode', 'professionalId', 'professionalName', 'expiresAt', 'linkedAt'])
+        && invitation(request.resource.data) && reservedProfessional()
+        && request.resource.data.linkedAt == resource.data.get('linkedAt', request.time)
+        && matchingPatient(uid, request.resource.data.linkedAt);
+    }
+    match /professionals/ceoaberto {
+      allow get: if request.auth != null;
+      // Only this fixed unclaimed profile may be bootstrapped alongside a redemption.
+      // Nobody can appoint themselves its owner or edit a professional from the app.
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['name', 'active', 'ownerUid'])
+        && request.resource.data.name == 'CeoAberto'
+        && request.resource.data.active == true && request.resource.data.ownerUid == null
+        && invitation(getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/access/main).data)
+        && matchingPatient(request.auth.uid,
+          getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/access/main).data.linkedAt);
+      match /patients/{uid} {
+        allow get: if owns(uid);
+        allow create: if owns(uid) && noBilling(uid) && reservedProfessional()
+          && request.resource.data.keys().hasOnly(['patientId', 'linkedAt'])
+          && request.resource.data.patientId == uid
+          && invitation(getAfter(/databases/$(database)/documents/users/$(uid)/access/main).data)
+          && request.resource.data.linkedAt == getAfter(/databases/$(database)/documents/users/$(uid)/access/main).data.linkedAt;
+      }
+    }
+    // Billing, professional ownership, all other codes and clinical access remain admin-only.
   }
 }
