@@ -446,8 +446,8 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
         totalQuestions: total,
         feedbackMessage:
           accuracy >= 80
-            ? '¡Excelente fluidez verbal! Has recuperado las palabras con gran agilidad.'
-            : '¡Muy buen entrenamiento de lenguaje! La asociación visual y fonológica reconecta tu léxico día a día.',
+            ? '¡Buen trabajo! Has identificado los nombres de los objetos con precisión.'
+            : 'Has practicado con imágenes y palabras. Cada intento cuenta.',
         mistakesList,
       };
 

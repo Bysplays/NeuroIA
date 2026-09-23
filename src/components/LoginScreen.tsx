@@ -1,3 +1,5 @@
+import { ProductInformation } from './ProductInformation';
+
 export function LoginScreen({ onSignIn, busy, error }: { onSignIn: () => void; busy: boolean; error: string }) {
   return <main className="login-screen">
     <div className="login-brand"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="40" height="40" /><span>Neuro<strong>IA</strong></span></div>
@@ -10,11 +12,12 @@ export function LoginScreen({ onSignIn, busy, error }: { onSignIn: () => void; b
         <img src={`${import.meta.env.BASE_URL}images/headers/login-transparent.png`} className="login-art" alt="" aria-hidden="true" width="512" height="512" />
       </div>
       <div className="login-actions">
-        <h1 id="login-title">Tu espacio, a tu ritmo</h1>
+        <h1 id="login-title">Jugar también puede ser una forma de entrenar</h1>
         <button className="google-login-button" onClick={onSignIn} disabled={busy} aria-describedby="login-disclaimer"><span className="google-login-mark" aria-hidden="true">G</span>{busy ? 'Conectando con Google…' : 'Continuar con Google'}</button>
         {error && <p className="entry-note" role="alert">{error}</p>}
         <p id="login-disclaimer" className="entry-note">Tu progreso, contigo en cada dispositivo.</p>
       </div>
     </section>
+    <ProductInformation />
   </main>;
 }

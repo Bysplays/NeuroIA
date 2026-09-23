@@ -187,7 +187,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       correctAnswers: maxRounds,
       totalQuestions: maxRounds + errorsCount,
       feedbackMessage:
-        '¡Gran capacidad de retención inmediata! Has ejercitado la memoria de trabajo y el span visual con éxito.',
+        'Has completado el juego de luces y secuencias. Puedes volver a jugar a tu ritmo.',
       mistakesList,
     };
 

@@ -100,7 +100,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        // Asegurar que al menos 2 objetivos estén en el lateral izquierdo (col 0 o 1) para estimular la heminegligencia
+        // Asegurar que al menos 2 objetivos estén en el lateral izquierdo (col 0 o 1) para distribuir los objetivos por toda la pantalla
         const isTarget = Math.random() < targetProbability || (c === 0 && r === 0 && targetCounter === 0);
         const symbol = isTarget
           ? targetItem.symbol
@@ -192,8 +192,8 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
       totalQuestions: totalTargets + currentMistakes,
       feedbackMessage:
         accuracy >= 85
-          ? '¡Extraordinario rastreo visual! Has cubierto todo el campo visual con gran precisión.'
-          : '¡Buen ejercicio! Has ejercitado el barrido ocular y la atención selectiva con gran perseverancia.',
+          ? '¡Buen trabajo! Has encontrado las figuras con precisión.'
+          : 'Has practicado buscando figuras entre otros elementos. Cada intento cuenta.',
       mistakesList,
     };
 

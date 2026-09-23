@@ -1,8 +1,10 @@
 # NeuroIA design guide
 
 NeuroIA should feel like the same welcoming place from the home screen through
-the last exercise. The visual direction is **cute paper**: pale surfaces, generous
-rounded sections, friendly illustrated companions, and clear, unhurried actions.
+the last exercise. The default visual direction is **Default**: a pale ivory-to-aqua background,
+translucent mint surfaces, dark blue ink, white activity cards and a solid teal
+streak panel. **Cozy** is the secondary, colorful paper style with illustrated
+companions. Both use generous rounded sections and clear, unhurried actions.
 Changing colors alone does not establish this style; composition, imagery,
 typography, and interaction states must work together.
 
@@ -12,8 +14,9 @@ English; the application speaks Spanish.
 
 ## Purpose and tone
 
-Support people practicing cognitive and motor skills, including people recovering
-from stroke. Make the next action easy to understand without making the interface
+Present NeuroIA as entertainment, training and serious play, following the supplied
+copy in [CONTENT.md](CONTENT.md). Describe practice and in-game activity without
+disease, rehabilitation or medical efficacy positioning. Make the next action easy to understand without making the interface
 feel like a clinical report or an exam. Warmth must not obscure a task or make
 recognition harder.
 
@@ -74,8 +77,14 @@ than color. Game colors that convey a clue must remain identifiable.
 
 Use DM Sans with the existing system fallback. Headings use moderate weight and
 compact line height; body copy has room to breathe. Use the existing font-size
-settings and relative units for text. Do not force a smaller fixed font simply to
+settings and relative units for text. Apply the selected scale at the document
+root so rem-based text responds throughout the interface (normal 100%, large
+118%, very large 135%); changing the body font size alone is insufficient. Do not force a smaller fixed font simply to
 make a layout fit.
+
+The token table above describes Cozy. Default overrides surface and accent tokens
+on the body; legacy accessibility contrast modes retain priority. Style choices
+use miniature layouts in their own palettes, independent of the active style.
 
 ## Composition and spacing
 
@@ -101,11 +110,14 @@ The daily-session panel is the main entry point. Keep its text, companions, and
 start action in a deliberate responsive grid. Illustrations must not overlap the
 copy or squeeze the button, particularly on mobile.
 
-“Cada día suma” gives the streak more weight than minutes and achievements. In
-its horizontal layout, the main content takes approximately 70% of the width;
-the secondary values form a narrower column aligned to the right, with a subtle
-vertical separator. Do not restore the flame icon. The compact stacked layout
-can place the secondary values below the streak.
+The session heading reads “Juega. Practica” followed by “Progresa a tu ritmo”.
+Omit supporting session paragraphs. The button reads “Completa tu sesión de hoy”
+until the daily plan is complete, then “Haz otra sesión adicional”.
+
+“Cada día suma” matches the session panel's height when side by side. Center its
+title, streak number and day label on separate lines. Place encouragement, minutes
+and the achievements link below a separator. On narrow screens the cards stack
+and size naturally to their content. Do not restore the flame icon.
 
 The therapist entry belongs in the top navigation once professional access is
 authorized. It is currently unavailable while roles and care links are pending.
@@ -180,7 +192,10 @@ push the task unnecessarily far down the page.
 ### Achievements
 
 The collection is a separate view reached through “Logros”, with a clear way
-back. It currently has 20 distinct achievements, each with its own illustration,
+back. Keep the illustration beside the heading and the count bar below it, spanning
+the full header width on desktop and mobile. Its count pill doubles as a progress bar: the subtle fill covers exactly the
+earned-to-total ratio, with readable text and accessible current/max values.
+It currently has 20 distinct achievements, each with its own illustration,
 condition, progress, and earned state. Use real cumulative activity; inactivity
 does not revoke earned milestones.
 
@@ -192,10 +207,55 @@ palette. Extend collections using a cohesive sheet when practical.
 ### Dialogs
 
 Use the shared native-dialog frame. Keep one title, concise supporting content,
-one obvious primary action, and a clear close affordance. Center the dialog in
+one obvious primary action, and a clear close affordance. Mandatory account entry and orientation dialogs are exceptions: Escape and backdrop cannot dismiss them; account entry offers logout. Center the dialog in
 the viewport; align its inner content independently. Avoid redundant wrappers,
 competing width rules, oversized icons, and unexplained gaps above or below
 content. Long content must scroll without losing access to dismissal.
+
+### Preferences
+
+Settings use one neutral surface, a compact sticky blue-paper header and a clear
+close button. Show text size and page style, followed by subscription status. Text size uses three segmented
+choices; show “Default” first and “Cozy” second. Default uses the supplied
+September 23 reference: soft
+translucent surfaces and teal accents. Preserve all real activity data, approved
+copy and navigation rather than copying placeholder or empty reference cards.
+Both styles offer the home companion illustration and its responsive layout.
+An “Amigos del bienestar” switch below the style choices controls the decorative
+illustration family throughout home, login, catalog, instructions, results, rest,
+professional view and achievement artwork. It works independently of the palette,
+defaults to on and collapses unused art space when off. Keep only 8px of section
+padding below the switch so it sits close to the following divider. Without illustrations, achievements use a circle with a check when earned and
+a dashed empty circle when pending, including the detail dialog. Names and
+progress remain visible. It never hides exercise stimuli or alters game content.
+Cozy retains the existing paper palette. Represent Cozy with a miniature home layout: blue hero with text and button shapes,
+pink side panel and five pastel activity tiles. Use literal Cozy
+colors inside the miniature so it remains recognizable in legacy contrast themes.
+Do not use mascots or a letter sample for the style preview. Keep the explicit selected check. Preserve stored contrast,
+hand-position and speech preferences for compatibility, but do not expose their
+controls here. Voice attribution lives in “Sobre NeuroIA”. The subscription section reads real
+account access, shows invitation/trial/monthly status and uses Stripe checkout or
+the customer portal only when billing is enabled. Show the plan type and its end date on separate lines, without a redundant
+subscription heading or status badge. Trials can subscribe via a pill-shaped “Mejorar” action; keep it disabled while
+Stripe is unavailable, without a coming-soon notice. Invited accounts show only
+“Abandonar”, with a confirmation explaining loss of access and the professional
+link while preserving progress. Invitation and paid access are mutually exclusive. Paid accounts show a pill-shaped
+“Gestionar” in the same position as “Abandonar” and “Mejorar”, beside the plan
+details. Paid plans show the quiet informational line “Renovación automática”.
+Stripe manages renewal; do not present a toggle or a local renewal setting. Do not show a subscription management banner above the workspace.
+Cancellation and any available plan changes are confirmed in Stripe; do
+not invent prices, upgrade plans or successful cancellation. Changes apply
+immediately through the existing settings service. Apply appearance attributes
+before browser paint so the selected control and the page update together, without
+a frame in the previous theme or text size. Keep locally edited settings stable
+through background saves for the rest of the session. Dismiss using the header
+close button; omit the redundant “Listo” action. Place “Cerrar sesión” at the
+bottom of settings, separated by a fine rule; omit it from the main header. Place
+“Sobre NeuroIA” and “Aviso legal” to its right in the same footer row. Allow the
+links to wrap within their right-hand group on narrow screens. Keep 22px of section
+spacing on both sides of the footer divider, without a trailing paragraph margin.
+Content scrolls with the close button accessible, including large text and short
+landscape screens. Do not reduce text to make controls fit.
 
 ### Therapist view
 
@@ -246,15 +306,15 @@ label or generation prompt alone does not establish that pronunciation. Avoid br
 voice qualities; a slow pace must not turn into an affected or whispered reading.
 Prefer natural/enhanced Spain voices and recognize accented voice names. Do not
 select a Latin American voice merely because it appears first. Keep pitch natural,
-preserve the user’s pace setting, and offer a short voice preview in accessibility
-settings. Browser speech quality still depends on the installed voices. Recorded narration uses Alejandro Castellanos with
+preserve the user’s pace setting, and keep the existing prerecorded and browser speech playback. Voice preview and
+pace controls are currently hidden from settings. Browser speech quality still depends on the installed voices. Recorded narration uses Alejandro Castellanos with
 Eleven v3 and Spanish explicitly selected. Generate recognition words in short
 lists, as in the accepted pronunciation sample; isolated v2 requests produced
 unacceptable pronunciation. Validate each new clip before adoption. The local
 `public/audio/elevenlabs-v3/` collection supplies available narration; missing or
 unplayable files fall back to browser speech. Audio effects and narration remain
 independent. Playback rate follows the voice setting without shifting pitch.
-Show a quiet ElevenLabs attribution in accessibility settings. The recordings
+Show a quiet ElevenLabs attribution in “Sobre NeuroIA”. The recordings
 retain their free-plan non-commercial license.
 
 Motion and sound should reassure, not startle. Reuse the gentle tap sound and
@@ -281,6 +341,15 @@ Use this review before finishing a visual change:
 
 ### Entry and landscape requirement
 
+Use the same centered brand mark, “Preparando tu espacio…” and restrained loading
+dots while restoring authentication, checking access, loading lazy code and reading
+initial progress. This transient loader uses fixed text and artwork dimensions so
+restoring the account's text-size preference cannot shift it; the rest of the UI
+continues to respect that preference. Respect reduced motion. Do not mount login until authentication
+resolves as signed out, or onboarding until a successful access read confirms no
+active entitlement. Failed initial access reads show retry/logout recovery, not a
+purchase modal. Background access refreshes keep the mounted workspace visible.
+
 Center the login card vertically in the viewport with balanced flexible space
 above and below; keep the brand at the top. On short screens let the page scroll
 without clipping controls. A soft curved edge with a subtle paper-layer echo
@@ -288,15 +357,18 @@ separates the illustration and action panels, rather than a straight vertical cu
 Use a decorative inline SVG colored with the existing surface token.
 
 The initial screen has a blue paper illustration panel and one heading,
-“Tu espacio, a tu ritmo”, beside the “Continuar con Google” action. Use
+“Jugar también puede ser una forma de entrenar”, beside the “Continuar con Google” action. Use
 `public/images/headers/login-transparent.png`, a true-alpha cutout derived from
 the home scene, without blend modes or an opaque image backing. Keep only one
-short note explaining account-linked progress; omit introductory paragraphs,
+short note explaining account-linked progress. Quiet “Sobre NeuroIA” and “Aviso
+legal” links below the card open the supplied product information in the shared
+dialog; signed-in users find these links in the settings footer. Keep long copy
+scrollable, selectable and readable in all themes. Omit introductory paragraphs,
 secondary headings and account badges. Show pending
 and recoverable error states without replacing the screen. A closed popup does
 not prove intentional cancellation: use neutral copy and suggest an external
 browser if an embedded browser closes the window automatically. Cloud saving is tied to the signed-in account; show an actionable notice only when saving remains pending or fails. The
-header offers “Cerrar sesión”; signing out preserves cloud progress and pending account-local work. Existing
+settings footer offers “Cerrar sesión”; signing out preserves cloud progress and pending account-local work. Existing
 unscoped demo data is never silently assigned to the first person who signs in.
 
 All interactive views require a landscape viewport. In portrait, a blocking
@@ -322,3 +394,39 @@ Do not display a session-owner strip or a routine saving/saved banner above the
 workspace. Successful synchronization stays silent. Show a textual pending notice
 with a retry action only when changes cannot be saved; advise keeping the page
 open. Preserve this recovery notice during exercise results.
+
+### Mandatory account onboarding
+
+After sign-in and before progress or exercises, show a shared native modal with
+a blue-paper heading and curved paper-layer edge matching the login screen.
+Use the home heading weight, 32 px outer corners and pill-shaped actions.
+The invitation input uses a soft page-colored fill and 16 px corners without
+a visible outline at rest. Its keyboard focus has one inset 2 px ring; avoid
+the global detached focus ring here. High contrast retains a visible boundary.
+Below the heading, keep two unboxed sections on one neutral surface, subscription
+and invitation, separated by a fine rule. Omit illustrations, icons, eyebrow text and routine
+footer reassurance here: prioritize a compact heading and short option descriptions.
+Keep one filled subscription action. Directly underneath, show “Empezar prueba gratuita de 7 días” as a plain
+underlined text button without a fill, border or pill. Underline “Usar mi código”
+as well so both text actions are visibly clickable before hover. The trial is not a separate card. Show no invented price: Stripe displays
+the configured amount before purchase. Trials have no card or automatic charge.
+Explain that invitations provide free access and link the account to the named
+professional; do not expose the reusable bootstrap code in public interface copy.
+
+The modal cannot be dismissed but always offers logout. Focus its heading first
+so short viewports start at the explanation, not at the code input. Sections use
+two columns on desktop and tablets, with shared heading, description and action
+rows so the subscription button and invitation input align even when copy wraps.
+Use one column on narrow screens. Content scrolls inside the dialog. Portrait rotation takes
+priority; avoid stacking onboarding over the orientation dialog.
+
+Expired trials cannot be restarted. Keep purchase and invitation actions visible
+when access expires. Do not show a general server-error banner in this modal.
+Omit the subscription coming-soon notice. Show invalid-code copy as “El código no es válido”,
+centered below “Usar mi código” in muted rose text without a background. Always reserve a
+single-line error slot, including when empty, so validation never resizes the modal.
+Longer messages scroll within that slot. Keep other invitation validation in that slot, and display payment confirmation and
+automatic recovery states; do not expose a technical “Comprobar acceso” action.
+Never imply that returning from Stripe proves payment. The active
+subscription offers a customer-portal action. Technical setup and remaining
+production prerequisites are documented in `ONBOARDING.md`.

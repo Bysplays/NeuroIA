@@ -7,7 +7,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
       domain: 'attention',
       title: 'Rastreo y Búsqueda Visual',
       subtitle: 'Cancelación y Foco',
-      description: 'Encuentra el elemento repetido en una cuadrícula con distractores. Esencial para la heminegligencia.',
+      description: 'Encuentra el elemento repetido entre las demás figuras de la cuadrícula.',
       iconName: 'Search',
     },
   ],
@@ -53,7 +53,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
       domain: 'executive',
       title: 'Secuencias de la Vida Diaria',
       subtitle: 'Lógica y Planificación Temporal',
-      description: 'Ordena temporalmente 3 acciones cotidianas (higiene, cocina, seguridad) para tu autonomía.',
+      description: 'Ordena tres acciones cotidianas y practica la lógica de sus secuencias.',
       iconName: 'ListOrdered',
     },
     {
@@ -71,7 +71,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
       domain: 'motor',
       title: 'Toque de Dianas Estáticas',
       subtitle: 'Precisión Táctil y Puntería',
-      description: 'Toca dianas grandes en pantalla a tu ritmo para reentrenar la motricidad fina de los dedos.',
+      description: 'Toca dianas grandes en pantalla para practicar la precisión a tu ritmo.',
       iconName: 'Hand',
     },
     {

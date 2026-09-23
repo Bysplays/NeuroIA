@@ -385,8 +385,8 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
         totalQuestions: total,
         feedbackMessage:
           accuracy >= 80
-            ? '¡Excelente recuperación léxica! Completaste las palabras con gran precisión ortográfica.'
-            : '¡Gran esfuerzo! Reconectar sonidos y letras refuerza la red lingüística día a día.',
+            ? '¡Buen trabajo! Completaste las palabras con precisión.'
+            : 'Has practicado con sonidos y letras. Puedes volver a intentarlo a tu ritmo.',
         mistakesList,
       };
 

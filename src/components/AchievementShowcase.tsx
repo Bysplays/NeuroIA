@@ -5,7 +5,7 @@ import type { UserProfile } from '../types';
 import { getAchievements, type Achievement } from '../services/achievements';
 import { ModalFrame } from './ModalFrame';
 
-function BadgeArt({ index }: { index: number }) {
+function IllustratedBadge({ index }: { index: number }) {
   if (index >= 6) return <span aria-hidden="true" className="achievement-art achievement-art-extended" style={{
     '--badge-x': `${([152, 441, 731, 1023, 1316, 1611, 1903][(index - 6) % 7] - 130) / 1796 * 100}%`,
     '--badge-y': `${((index < 13 ? 231 : 532) - 130) / 505 * 100}%`,
@@ -14,6 +14,15 @@ function BadgeArt({ index }: { index: number }) {
     '--badge-x': `${[7.18, 50, 92.73][index % 3]}%`,
     '--badge-y': `${index < 3 ? 10.71 : 85.87}%`,
   } as CSSProperties} />;
+}
+
+function BadgeArt({ index, unlocked }: { index: number; unlocked: boolean }) {
+  return <>
+    <IllustratedBadge index={index} />
+    <span className={`achievement-symbol ${unlocked ? 'achievement-symbol-earned' : 'achievement-symbol-pending'}`} aria-hidden="true">
+      {unlocked && <Check size={32} strokeWidth={2} />}
+    </span>
+  </>;
 }
 
 export function AchievementShowcase({ profile, onBack }: { profile: UserProfile; onBack: () => void }) {
@@ -29,14 +38,19 @@ export function AchievementShowcase({ profile, onBack }: { profile: UserProfile;
     <section className="achievement-showcase achievement-page" id="achievements" aria-labelledby="achievements-title" tabIndex={-1}>
       <button className="text-link achievement-back" onClick={onBack}><ArrowLeft size={18} /> Volver al inicio</button>
       <div className="achievement-heading">
-        <div><span className="achievement-overline">Pequeños pasos, grandes recuerdos</span><h1 id="achievements-title" tabIndex={-1} ref={headingRef}>Tu colección de logros</h1><p>{earned ? 'Cada chapa guarda un poquito de tu recorrido.' : 'Tu primera chapa te espera al completar un ejercicio.'}</p></div>
+        <div className="achievement-heading-copy"><span className="achievement-overline">Pequeños pasos, grandes recuerdos</span><h1 id="achievements-title" tabIndex={-1} ref={headingRef}>Tu colección de logros</h1><p>{earned ? 'Cada chapa guarda un poquito de tu recorrido.' : 'Tu primera chapa te espera al completar un ejercicio.'}</p></div>
         <HeaderIllustration scene="achievements" className="menu-header-art" />
-        <span className="achievement-count">{earned} de {achievements.length} conseguidas</span>
+        <div className="achievement-count" role="progressbar" aria-label="Logros conseguidos"
+          aria-valuemin={0} aria-valuemax={achievements.length} aria-valuenow={earned}
+          aria-valuetext={`${earned} de ${achievements.length} conseguidos`}
+          style={{ '--achievement-progress': `${achievements.length ? earned / achievements.length * 100 : 0}%` } as CSSProperties}>
+          <span>{earned} de {achievements.length} conseguidas</span>
+        </div>
       </div>
       <div className="badge-shelf">
         {achievements.map(achievement => (
           <button key={achievement.id} className={`badge-display ${achievement.unlocked ? 'badge-earned' : 'badge-pending'}`} onClick={() => setSelectedId(achievement.id)} aria-label={`${achievement.title}. ${achievement.unlocked ? 'Conseguida' : progressText(achievement)}. Ver logro`}>
-            <span className="badge-illustration"><BadgeArt index={achievement.artwork} /><span className="badge-state" aria-hidden="true">{achievement.unlocked ? <Check size={15} /> : <LockKeyhole size={13} />}</span></span>
+            <span className="badge-illustration"><BadgeArt index={achievement.artwork} unlocked={achievement.unlocked} /><span className="badge-state" aria-hidden="true">{achievement.unlocked ? <Check size={15} /> : <LockKeyhole size={13} />}</span></span>
             <strong>{achievement.title}</strong>
             <span className="badge-progress-text">{achievement.unlocked ? 'Conseguida' : progressText(achievement)}</span>
           </button>
@@ -47,7 +61,7 @@ export function AchievementShowcase({ profile, onBack }: { profile: UserProfile;
           <div className="modal-container achievement-dialog">
             <div className="modal-header"><span className="modal-overline">{selected.unlocked ? 'Una chapa para tu colección' : 'Tu próximo pequeño logro'}</span><button className="modal-close-btn" onClick={() => setSelectedId(null)} aria-label="Cerrar logro"><X size={21} /></button></div>
             <div className="achievement-detail">
-              <BadgeArt index={selected.artwork} />
+              <BadgeArt index={selected.artwork} unlocked={selected.unlocked} />
               <h2 id="achievement-detail-title">{selected.title}</h2>
               <p>{selected.description}</p>
               <progress max={selected.target} value={selected.current} aria-label={`Progreso de ${selected.title}`} />

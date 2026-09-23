@@ -1,3 +1,4 @@
+import type { AccessibilitySettings } from '../types/index.ts';
 import { applyProgressOperation, type ProgressData, type ProgressOperation } from './progressData.ts';
 
 export interface ProgressBackend {
@@ -12,6 +13,8 @@ export type SyncStatus = 'saving' | 'saved' | 'pending';
 export class ProgressSync {
   private data: ProgressData;
   private queue: ProgressOperation[];
+  // Keep locally edited fields stable for this session while cloud progress updates.
+  private localSettings: Partial<AccessibilitySettings> = {};
   private stopped = false;
   private running = false;
   private online = true;
@@ -31,14 +34,17 @@ export class ProgressSync {
     this.changed = changed;
     this.data = structuredClone(initial);
     this.queue = pending;
-    for (const operation of pending) this.data = applyProgressOperation(this.data, operation);
+    for (const operation of pending) {
+      if (operation.kind === 'settings') Object.assign(this.localSettings, operation.settings);
+      this.data = applyProgressOperation(this.data, operation);
+    }
   }
   start() {
     this.changed(this.data, this.queue.length || !this.online ? 'pending' : 'saved');
     this.unwatch = this.backend.watch(data => {
       if (!this.stopped && this.online && !this.running && !this.queue.length) {
-        this.data = data;
-        this.changed(data, 'saved');
+        this.data = this.withLocalSettings(data);
+        this.changed(this.data, 'saved');
       }
     }, error => { if (!this.stopped) this.changed(this.data, 'pending', error); });
     if (this.queue.length) void this.retry();
@@ -50,6 +56,7 @@ export class ProgressSync {
     const queue = [...this.queue, operation];
     try { this.persist(queue); } catch { /* Keep in memory and try the cloud; pending UI warns against closing. */ }
     this.queue = queue;
+    if (operation.kind === 'settings') Object.assign(this.localSettings, operation.settings);
     this.data = applyProgressOperation(this.data, operation);
     this.changed(this.data, 'saving');
     void this.retry();
@@ -74,12 +81,12 @@ export class ProgressSync {
         const remaining = this.queue.slice(1);
         this.persist(remaining);
         this.queue = remaining;
-        this.data = remote;
+        this.data = this.withLocalSettings(remote);
         for (const pending of remaining) this.data = applyProgressOperation(this.data, pending);
       }
       if (!this.stopped) {
         const remote = await this.backend.load();
-        if (!this.stopped && remote && !this.queue.length) this.data = remote;
+        if (!this.stopped && remote && !this.queue.length) this.data = this.withLocalSettings(remote);
         if (!this.stopped) this.changed(this.data, this.queue.length || !this.online ? 'pending' : 'saved');
       }
       succeeded = true;
@@ -89,6 +96,12 @@ export class ProgressSync {
       this.running = false;
       if (succeeded && this.queue.length && !this.stopped) void this.retry();
     }
+  }
+  private withLocalSettings(data: ProgressData): ProgressData {
+    return {
+      ...data,
+      profile: { ...data.profile, settings: { ...data.profile.settings, ...this.localSettings } },
+    };
   }
   stop() { this.stopped = true; this.unwatch(); }
 }

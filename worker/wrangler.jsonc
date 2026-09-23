@@ -1,0 +1,14 @@
+{
+  "name": "neuroia-billing",
+  "main": "index.mjs",
+  "compatibility_date": "2026-09-23",
+  "account_id": "1424cf0f2033b16c9b71ae93de742bf3",
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": {
+    "APP_URL": "https://bysplays.github.io/app-ictus/",
+    "FIREBASE_PROJECT_ID": "ceoaberto-neuroia",
+    "STRIPE_MONTHLY_PRICE_ID": "price_1UItenAWZtSdGYThrex9dsNh",
+    "STRIPE_MODE": "test",
+    "ALLOWED_ORIGINS": "http://localhost:5173"
+  }
+}

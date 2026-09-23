@@ -111,7 +111,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
         correctAnswers: targets.length,
         totalQuestions: targets.length + misses,
         feedbackMessage:
-          '¡Magnífico control visomotor! Has fortalecido la coordinación mano-ojo y la motricidad fina.',
+          'Has completado el juego de dianas. Gracias por practicar a tu ritmo.',
         mistakesList,
       };
 

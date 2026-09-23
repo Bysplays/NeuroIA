@@ -3,6 +3,13 @@
 Keep this checklist current when completing work. See [AGENTS.md](AGENTS.md)
 and [DESIGN.md](DESIGN.md) for development and design guidance.
 
+## Public text availability
+
+- [ ] Revisit the PDF's professional, AI and EEG sections when those features ship,
+  or when future-feature wording is explicitly chosen. See `CONTENT.md`.
+- New neutral completion messages use the existing speech fallback if narrated;
+  do not regenerate or reintroduce obsolete clinical-claim audio to fill gaps.
+
 ## Complete the ElevenLabs audio collection
 
 - 279 of 370 clips are available in `public/audio/elevenlabs-v3/`.
@@ -139,3 +146,33 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
 - [ ] Add private clinical notes and patient-facing instructions with distinct
   permissions, account deletion, and explicit merge of retained local backups
   into an already-existing cloud account. Initial empty-account import is available.
+
+## Onboarding and subscriptions
+
+- [x] Mandatory modal, server-timed seven-day trial and transactional invitation
+  redemption with care links; CEOABERTO is the only accepted code for now,
+  permanent and reusable. Other codes remain disabled until professional profiles.
+- [x] Add Stripe Checkout, signed webhook and customer portal integration code.
+- [ ] Supply monthly Stripe Price ID, configure secrets, APP_URL, webhook and
+  portal; run the payment lifecycle in Stripe test mode. See `ONBOARDING.md`.
+- [ ] Assign CeoAberto's actual Firebase owner UID before enabling professional
+  account access. The code now links to a reserved unclaimed professional record.
+- [ ] Publish reviewed Spark-compatible rules for real-account invitation/trial
+  access. No Cloud Functions or Blaze required; localhost:5173 keeps real Google login.
+- [ ] Implement verified professional profile and code creation; care-link
+  revocation and professional permissions remain unavailable.
+
+## Cloudflare billing deployment
+
+- Worker deployed: `/health` reports test mode, localhost CORS preflight succeeds,
+  unauthenticated requests return 401 and unsigned webhooks return 400. Local Vite
+  billing flags are enabled in ignored `.env.local`. Verify the configured secrets
+  and six sandbox webhook events with a signed end-to-end payment.
+- Verify real service-account access, signed delivery, Checkout, renewal, declined
+  payment and portal cancellation; automated checks do not make live API calls.
+- Measure CPU usage against the Workers Free limit before enabling the Pages
+  purchase flag. No billing backend was deployed by the local frontend build.
+
+- [ ] Redeploy the renewal-aware Worker and enable Cron `*/5 * * * *`; verify
+  daily reconciliation and Stripe test-clock failed renewal/recovery/cancellation.
+  See `worker/README.md` for bounded batches and checkpoint monitoring.

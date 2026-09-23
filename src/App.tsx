@@ -1,10 +1,12 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { AppLoading } from './components/AppLoading';
+import React, { useState, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
 import { auth } from './services/firebase';
 import type { ProgressSync } from './services/progressSync';
 import type { ProgressData } from './services/progressData';
 import { authErrorMessage } from './services/authErrors';
 import type { CognitiveDomain, ExerciseResult, AccessibilitySettings, DailyPlanSession, ExerciseId } from './types';
+import { applyAppearance } from './services/appearance';
 import { StorageService } from './services/storageService';
 import { soundService } from './services/soundService';
 import { getExercisesForDomain } from './services/exerciseCatalog';
@@ -20,7 +22,7 @@ import { usePortrait } from './services/orientation';
 import { LoginScreen } from './components/LoginScreen';
 import { RestBreakModal } from './components/RestBreakModal';
 
-// Juegos disponibles de neurorrehabilitación
+// Juegos disponibles de serious play
 import { VisualScanningGame } from './games/VisualScanningGame';
 import { LanguageNamingGame } from './games/LanguageNamingGame';
 import { WordCompletionGame } from './games/WordCompletionGame';
@@ -31,6 +33,7 @@ import { CategorizationGame } from './games/CategorizationGame';
 import { MotorCoordinationGame } from './games/MotorCoordinationGame';
 import { MotorTrackingGame } from './games/MotorTrackingGame';
 
+const AccessGate = lazy(() => import('./components/AccessGate'));
 const CloudProgress = lazy(() => import('./components/CloudProgress'));
 
 export const App: React.FC = () => {
@@ -42,6 +45,10 @@ export const App: React.FC = () => {
   useEffect(() => onAuthStateChanged(auth, nextUser => {
     soundService.stopSpeaking();
     StorageService.setAccount(nextUser ? { uid: nextUser.uid, displayName: nextUser.displayName } : null);
+    if (nextUser) {
+      const cached = StorageService.readCachedProgress();
+      if (cached) applyAppearance(cached.profile.settings);
+    }
     setUser(nextUser);
     setLoading(false);
   }, error => {
@@ -72,11 +79,11 @@ export const App: React.FC = () => {
   };
 
   return <LandscapeGate>{loading
-    ? <main className="login-screen" role="status">Preparando tu acceso…</main>
+    ? <AppLoading />
     : user
       ? <>
         {error && <p className="account-notice" role="alert">{error}</p>}
-        <Suspense fallback={<p className="account-notice" role="status">Cargando tu progreso…</p>}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></Suspense></>
+        <Suspense fallback={<AppLoading />}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></Suspense></>
       : <LoginScreen onSignIn={handleSignIn} busy={busy} error={error} />
   }</LandscapeGate>;
 };
@@ -99,7 +106,7 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
   const [isRestModalOpen, setIsRestModalOpen] = useState(false);
   const [sessionMinutes, setSessionMinutes] = useState(0);
 
-  // Contador de minutos de sesión para prevención de fatiga post-ictus
+  // Contador de minutos de sesión para ofrecer pausas
   useEffect(() => {
     if (portrait) return;
     const timer = setInterval(() => {
@@ -115,14 +122,15 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
     return () => clearInterval(timer);
   }, [portrait]);
 
-  useEffect(() => {
-    document.body.setAttribute('data-contrast', profile.settings.contrast);
-    document.body.setAttribute('data-font', profile.settings.fontSize);
-    document.body.setAttribute('data-hand', profile.settings.handDominance);
+  // Commit visual preferences before paint, together with the selected controls.
+  useLayoutEffect(() => {
+    applyAppearance({ showCompanions: profile.settings.showCompanions, pageStyle: profile.settings.pageStyle, contrast: profile.settings.contrast, fontSize: profile.settings.fontSize, handDominance: profile.settings.handDominance });
+  }, [profile.settings.showCompanions, profile.settings.pageStyle, profile.settings.contrast, profile.settings.fontSize, profile.settings.handDominance]);
 
+  useEffect(() => {
     soundService.setSoundEnabled(profile.settings.soundEffects);
     soundService.setSpeechRate(profile.settings.speechRate);
-  }, [profile.settings]);
+  }, [profile.settings.soundEffects, profile.settings.speechRate]);
 
   const handleUpdateSettings = (newSettings: Partial<AccessibilitySettings>) => {
     sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings: newSettings });
@@ -203,8 +211,6 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
     <div className={`app-root ${isPlayingGame ? 'app-root-focus-mode' : ''}`}>
       {!isPlayingGame && (
         <Header
-          onSignOut={onSignOut}
-          signingOut={signingOut}
           profile={profile}
           sessionMinutes={sessionMinutes}
           activeView={activeView === 'therapist' ? 'therapist' : 'dashboard'}
@@ -339,6 +345,8 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
       </main>
 
       <AccessibilityModal
+        onSignOut={onSignOut}
+        signingOut={signingOut}
         isOpen={isAccessibilityOpen}
         settings={profile.settings}
         onClose={() => setIsAccessibilityOpen(false)}

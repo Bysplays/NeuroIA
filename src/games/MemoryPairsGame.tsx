@@ -247,8 +247,8 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       totalQuestions: 3,
       feedbackMessage:
         accuracy >= 80
-          ? '¡Extraordinaria memoria visual! Has retenido la posición de las cartas con gran precisión.'
-          : '¡Gran ejercicio para tu memoria! Practicar la retención espacial favorece la orientación diaria.',
+          ? '¡Buen trabajo! Has encontrado las parejas con precisión.'
+          : 'Has practicado recordando la posición de las cartas. Cada intento cuenta.',
       mistakesList: mistakes,
     };
 

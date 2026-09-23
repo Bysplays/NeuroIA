@@ -1,178 +1,88 @@
+import { ProductInformation } from './ProductInformation';
+import { SubscriptionSettings } from './SubscriptionSettings';
 import { ModalFrame } from './ModalFrame';
 import React from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, Type, Contrast, LogOut } from 'lucide-react';
 import type { AccessibilitySettings } from '../types';
 import { soundService } from '../services/soundService';
 
 interface AccessibilityModalProps {
   isOpen: boolean;
+  onSignOut: () => void;
+  signingOut: boolean;
   settings: AccessibilitySettings;
   onClose: () => void;
   onUpdateSettings: (newSettings: Partial<AccessibilitySettings>) => void;
 }
 
 export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
-  isOpen,
-  settings,
-  onClose,
-  onUpdateSettings,
+  isOpen, settings, onClose, onUpdateSettings, onSignOut, signingOut,
 }) => {
   if (!isOpen) return null;
 
-  const handleSpeechToggle = (enabled: boolean) => {
+  const update = (patch: Partial<AccessibilitySettings>) => {
     soundService.playTap();
-    soundService.setVoiceEnabled(enabled);
-    onUpdateSettings({ speechEnabled: enabled });
-    if (enabled) {
-      soundService.speak('Hola. Vamos a practicar a tu ritmo. Tómate el tiempo que necesites.');
-    }
+    onUpdateSettings(patch);
   };
 
   return (
     <ModalFrame onClose={onClose} labelledBy="accessibility-title">
-      <div className="modal-container" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-title-group">
-            <div>
-              <span className="modal-overline">Tu espacio, tus preferencias</span>
-              <h2 id="accessibility-title" className="modal-title">Hazlo a tu manera</h2>
-              <p className="modal-subtitle">Elige cómo te resulta más cómodo entrenar.</p>
-            </div>
+      <div className="preferences">
+        <header className="preferences-header">
+          <div>
+            <h2 id="accessibility-title">Ajustes</h2>
+            <p>Un espacio cómodo para ti.</p>
           </div>
-          <button className="modal-close-btn" onClick={onClose} aria-label="Cerrar ventana">
-            <X size={28} />
-          </button>
-        </div>
+          <button className="preferences-close" onClick={onClose} aria-label="Cerrar ajustes"><X size={22} /></button>
+        </header>
 
-        <div className="modal-body">
-          <section className="setting-section">
-            <div className="setting-label-row">
-              <div>
-                <h3 className="setting-title">Tamaño del texto</h3>
-              </div>
-            </div>
-            <div className="options-grid">
-              {(['normal', 'large', 'xlarge'] as const).map(size => (
-                <button
-                  key={size}
-                  aria-pressed={settings.fontSize === size}
-                  className={`option-btn ${settings.fontSize === size ? 'option-btn-selected' : ''}`}
-                  onClick={() => {
-                    soundService.playTap();
-                    onUpdateSettings({ fontSize: size });
-                  }}
-                >
-                  {settings.fontSize === size && <Check size={20} className="check-icon" />}
+        <div className="preferences-body">
+          <section className="preferences-section" aria-labelledby="pref-text">
+            <h3 id="pref-text"><Type size={20} aria-hidden="true" />Tamaño del texto</h3>
+            <div className="preferences-segment" role="group" aria-labelledby="pref-text">
+              {(['normal', 'large', 'xlarge'] as const).map((size, index) => (
+                <button key={size} aria-pressed={settings.fontSize === size} onClick={() => update({ fontSize: size })}>
+                  <span className={`preferences-letter preferences-letter-${index}`} aria-hidden="true">Aa</span>
                   <span>{size === 'normal' ? 'Normal' : size === 'large' ? 'Grande' : 'Muy grande'}</span>
                 </button>
               ))}
             </div>
           </section>
 
-          <section className="setting-section">
-            <div className="setting-label-row">
-              <div>
-                <h3 className="setting-title">Pantalla</h3>
-              </div>
-            </div>
-            <div className="options-grid">
-              {(['standard', 'high-contrast', 'soft-dark'] as const).map(mode => (
-                <button
-                  key={mode}
-                  aria-pressed={settings.contrast === mode}
-                  className={`option-btn ${settings.contrast === mode ? 'option-btn-selected' : ''}`}
-                  onClick={() => {
-                    soundService.playTap();
-                    onUpdateSettings({ contrast: mode });
-                  }}
-                >
-                  {settings.contrast === mode && <Check size={20} className="check-icon" />}
-                  <span>{mode === 'standard' ? 'Claro' : mode === 'high-contrast' ? 'Alto contraste' : 'Oscuro'}</span>
+          <section className="preferences-section preferences-style-section" aria-labelledby="pref-screen">
+            <h3 id="pref-screen"><Contrast size={20} aria-hidden="true" />Estilo de la página</h3>
+            <div className="preferences-themes" role="group" aria-labelledby="pref-screen">
+              {(['default', 'cozy'] as const).map(style => (
+                <button key={style} aria-pressed={(settings.pageStyle ?? 'default') === style}
+                  onClick={() => update({ pageStyle: style, contrast: 'standard' })}>
+                  <span className={`preferences-cozy-preview ${style === 'default' ? 'preferences-default-preview' : ''}`} aria-hidden="true">
+                    <span className="cozy-preview-nav"><i /><i /></span>
+                    <span className="cozy-preview-main">
+                      <span className="cozy-preview-hero"><span><i /><i /><b /></span></span>
+                      <span className="cozy-preview-side"><i /><i /><i /></span>
+                    </span>
+                    <span className="cozy-preview-cards"><i /><i /><i /><i /><i /></span>
+                  </span>
+                  <span className="preferences-theme-label">{style === 'default' ? 'Default' : 'Cozy'}
+                    <Check size={16} aria-hidden="true" />
+                  </span>
                 </button>
               ))}
             </div>
+            <button className="preferences-companions" role="switch" aria-checked={settings.showCompanions !== false}
+              onClick={() => update({ showCompanions: settings.showCompanions === false })}>
+              <span>Amigos del bienestar</span>
+              <span className="preferences-switch-track" aria-hidden="true"><span /></span>
+            </button>
           </section>
 
-          <section className="setting-section">
-            <div className="setting-label-row">
-              <div>
-                <h3 className="setting-title">Posición de los controles</h3>
-                <p className="setting-desc">Acerca los botones a la mano que utilizas.</p>
-              </div>
-            </div>
-            <div className="options-grid">
-              {(['left', 'center', 'right'] as const).map(hand => (
-                <button
-                  key={hand}
-                  aria-pressed={settings.handDominance === hand}
-                  className={`option-btn ${settings.handDominance === hand ? 'option-btn-selected' : ''}`}
-                  onClick={() => {
-                    soundService.playTap();
-                    onUpdateSettings({ handDominance: hand });
-                  }}
-                >
-                  {settings.handDominance === hand && <Check size={20} className="check-icon" />}
-                  <span>{hand === 'left' ? 'Izquierda' : hand === 'right' ? 'Derecha' : 'Centro'}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="setting-section">
-            <div className="setting-label-row">
-              <div>
-                <h3 className="setting-title">Lectura por voz</h3>
-                <p className="setting-desc">Escucha las instrucciones durante los ejercicios.</p>
-              </div>
-            </div>
-            <div className="options-grid">
-              <button
-                aria-pressed={settings.speechEnabled}
-                className={`option-btn ${settings.speechEnabled ? 'option-btn-selected' : ''}`}
-                onClick={() => handleSpeechToggle(!settings.speechEnabled)}
-              >
-                {settings.speechEnabled && <Check size={20} className="check-icon" />}
-                <span>{settings.speechEnabled ? 'Voz activada' : 'Voz desactivada'}</span>
-              </button>
-
-              <button
-                aria-pressed={settings.speechRate < 0.95}
-                className={`option-btn ${settings.speechRate < 0.95 ? 'option-btn-selected' : ''}`}
-                onClick={() => {
-                  soundService.playTap();
-                  const newRate = settings.speechRate < 0.95 ? 1.0 : 0.82;
-                  soundService.setSpeechRate(newRate);
-                  onUpdateSettings({ speechRate: newRate });
-                  soundService.speak(newRate < 0.95 ? 'Velocidad de voz pausada y tranquila.' : 'Velocidad de voz normal.');
-                }}
-              >
-                <span>Velocidad: {settings.speechRate < 0.95 ? 'Pausada' : 'Normal'}</span>
-              </button>
-              <button
-                className="option-btn"
-                onClick={() => {
-                  soundService.setVoiceEnabled(true);
-                  onUpdateSettings({ speechEnabled: true });
-                  soundService.speak('Hola. Estoy aquí para acompañarte. Vamos poco a poco, a tu ritmo.');
-                }}
-              >
-                Escuchar la voz
-              </button>
-            </div>
-            <p><small>Voz grabada con <a href="https://elevenlabs.io" target="_blank" rel="noreferrer">elevenlabs.io</a>.</small></p>
-          </section>
-        </div>
-
-        <div className="modal-footer">
-          <button
-            className="touch-btn touch-btn-primary touch-btn-large"
-            onClick={() => {
-              soundService.playSuccess();
-              onClose();
-            }}
-          >
-            Listo
-          </button>
+          <SubscriptionSettings />
+          <div className="preferences-account">
+            <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>
+              <LogOut size={18} aria-hidden="true" />{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}
+            </button>
+            <ProductInformation />
+          </div>
         </div>
       </div>
     </ModalFrame>

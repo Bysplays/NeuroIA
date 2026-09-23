@@ -30,8 +30,9 @@ export function ModalFrame({ children, labelledBy, onClose, dismissOnBackdrop = 
       ref={dialogRef}
       className="modal-shell"
       aria-labelledby={labelledBy}
-      onCancel={event => { event.preventDefault(); onClose(); }}
+      onCancel={event => { event.preventDefault(); event.stopPropagation(); onClose(); }}
       onKeyDown={event => {
+        event.stopPropagation();
         if (event.key !== 'Tab') return;
         const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
           'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',

@@ -90,3 +90,57 @@ test('offline indication is immediate and queued work resumes on reconnection', 
   assert.equal(status, 'saved'); assert.equal(remote.data().profile.totalSessions, 1);
   sync.stop();
 });
+
+test('local settings remain stable through delayed commits, stale reads and live updates', async () => {
+  const remote = backend();
+  const stale = initial();
+  let publish: (data: ProgressData) => void = () => {};
+  let release: (() => void) | undefined;
+  const observed: ProgressData[] = [];
+  const api: ProgressBackend = {
+    ...remote.api,
+    commit: async operation => {
+      await new Promise<void>(resolve => { release = resolve; });
+      return remote.api.commit(operation);
+    },
+    load: async () => structuredClone(stale),
+    watch: next => { publish = next; return () => {}; },
+  };
+  const sync = new ProgressSync(initial(), [], api, () => {}, data => observed.push(data));
+  sync.start();
+  observed.length = 0;
+  sync.enqueue({ id: 'local-theme', kind: 'settings', settings: { contrast: 'soft-dark', fontSize: 'xlarge', pageStyle: 'cozy', showCompanions: false } });
+  assert.equal(observed.at(-1)?.profile.settings.contrast, 'soft-dark');
+  release!();
+  await settle();
+  publish(stale);
+  const otherDevice = applyProgressOperation(stale, result('remote-progress'));
+  otherDevice.profile.settings.handDominance = 'left';
+  publish(otherDevice);
+  assert.ok(observed.every(data => data.profile.settings.contrast === 'soft-dark' && data.profile.settings.fontSize === 'xlarge' && data.profile.settings.pageStyle === 'cozy' && data.profile.settings.showCompanions === false));
+  assert.equal(observed.at(-1)?.profile.totalSessions, 1);
+  assert.equal(observed.at(-1)?.profile.settings.handDominance, 'left');
+  sync.stop();
+  // A new session adopts the current cloud state, without inheriting the old session's overrides.
+  let nextData = initial();
+  const nextSession = new ProgressSync(otherDevice, [], remote.api, () => {}, data => { nextData = data; });
+  nextSession.start();
+  assert.equal(nextData.profile.settings.contrast, otherDevice.profile.settings.contrast);
+  nextSession.stop();
+});
+
+test('restored pending settings and rapid edits preserve the last local choice', async () => {
+  const remote = backend();
+  let publish: (data: ProgressData) => void = () => {};
+  let displayed = initial();
+  const queued: ProgressOperation = { id: 'restored-font', kind: 'settings', settings: { fontSize: 'xlarge' } };
+  const sync = new ProgressSync(initial(), [queued], { ...remote.api, watch: next => { publish = next; return () => {}; } }, () => {}, data => { displayed = data; });
+  sync.start();
+  sync.enqueue({ id: 'font-normal', kind: 'settings', settings: { fontSize: 'normal' } });
+  sync.enqueue({ id: 'font-large', kind: 'settings', settings: { fontSize: 'large' } });
+  await settle();
+  publish(initial());
+  assert.equal(displayed.profile.settings.fontSize, 'large');
+  assert.equal(remote.data().profile.settings.fontSize, 'large');
+  sync.stop();
+});

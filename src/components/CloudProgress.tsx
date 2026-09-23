@@ -1,3 +1,4 @@
+import { AppLoading } from './AppLoading';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { getFirestore } from 'firebase/firestore';
 import { auth } from '../services/firebase';
@@ -77,8 +78,9 @@ export function CloudProgress({ user, onSignOut, children }: {
     return () => { active = false; session?.stop(); window.removeEventListener('online', connectivity); window.removeEventListener('offline', connectivity); window.clearInterval(retryTimer); };
   }, [user.uid, attempt]);
 
+  if (view.stage === 'loading') return <AppLoading />;
+
   if (view.stage !== 'ready' || !view.sync || !view.data) return <main className="cloud-entry">
-    {view.stage === 'loading' && <p role="status">Cargando tu progreso…</p>}
     {view.stage === 'error' && <><h1>No hemos podido abrir tu progreso</h1><p role="alert">{view.message}</p><button className="touch-btn touch-btn-primary" onClick={() => { setView({ stage: 'loading' }); setAttempt(value => value + 1); }}>Reintentar</button></>}
     {view.stage === 'import' && <><h1>¿Quieres conservar tu progreso?</h1><p>Hay {view.candidate?.profile.totalSessions} ejercicios completados en {view.source}.</p><p>Importa solo si son tuyos. Se guardarán en la cuenta de {user.email || user.displayName}.</p><button className="touch-btn touch-btn-primary" onClick={() => choose.current(true)}>Importar mi progreso</button><button className="paper-nav-button" onClick={() => choose.current(false)}>Empezar sin importar</button></>}
     <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>

@@ -1,6 +1,6 @@
 /* ==========================================================================
    NEUROIA - DESIGN SYSTEM Y ESTILOS GLOBALES
-   Optimizados para Tablet, Neurorrehabilitación y Accesibilidad Post-Ictus
+   Optimizados para tabletas, juego y accesibilidad
    ========================================================================== */
 
 :root {
@@ -148,9 +148,9 @@ body[data-contrast="soft-dark"] {
 }
 
 /* Escalas de tamaño */
-body[data-font="normal"] { --font-scale: 1; }
-body[data-font="large"] { --font-scale: 1.18; }
-body[data-font="xlarge"] { --font-scale: 1.35; }
+:root:has(body[data-font="normal"]) { --font-scale: 1; }
+:root:has(body[data-font="large"]) { --font-scale: 1.18; }
+:root:has(body[data-font="xlarge"]) { --font-scale: 1.35; }
 
 /* Reset */
 * {
@@ -2416,7 +2416,7 @@ body:has(.dashboard-area-selection-active),
 }
 
 /* ==========================================================================
-   MODO FOCUS / PANTALLA COMPLETA DURANTE EL JUEGO (REHABILITACIÓN PURA)
+   MODO FOCUS / PANTALLA COMPLETA DURANTE EL JUEGO (ACTIVIDAD EN CURSO)
    ========================================================================== */
 
 /* ==========================================================================

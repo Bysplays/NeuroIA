@@ -42,8 +42,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     {
       id: 'attention' as CognitiveDomain,
       title: 'Atención y Rastreo Visual',
-      subtitle: 'Heminegligencia y Exploración',
-      desc: 'Localiza estímulos en toda la pantalla para estimular el barrido de izquierda a derecha.',
+      subtitle: 'Atención y concentración',
+      desc: 'Localiza objetivos e identifica elementos en la pantalla.',
       icon: <Eye size={36} />,
       color: 'var(--color-attention)',
       bgColor: 'var(--color-attention-bg)',
@@ -52,8 +52,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     {
       id: 'language' as CognitiveDomain,
       title: 'Lenguaje y Vocabulario',
-      subtitle: 'Afasia y Anomia',
-      desc: 'Recupera palabras y nombres de objetos cotidianos con apoyo fonológico y de voz.',
+      subtitle: 'Palabras y conceptos',
+      desc: 'Nombra imágenes y relaciona conceptos a través del juego.',
       icon: <MessageSquare size={36} />,
       color: 'var(--color-language)',
       bgColor: 'var(--color-language-bg)',
@@ -63,7 +63,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       id: 'memory' as CognitiveDomain,
       title: 'Memoria de Trabajo',
       subtitle: 'Secuencias y Recuerdos',
-      desc: 'Retén secuencias visuales paso a paso para reforzar la memoria inmediata.',
+      desc: 'Recuerda posiciones, secuencias, imágenes, palabras u objetos.',
       icon: <Brain size={36} />,
       color: 'var(--color-memory)',
       bgColor: 'var(--color-memory-bg)',
@@ -73,7 +73,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       id: 'executive' as CognitiveDomain,
       title: 'Funciones Ejecutivas',
       subtitle: 'Vida Diaria y Lógica',
-      desc: 'Ordena temporalmente acciones cotidianas (higiene, cocina, seguridad) para tu autonomía.',
+      desc: 'Organiza acciones y resuelve pequeños retos de lógica.',
       icon: <ListOrdered size={36} />,
       color: 'var(--color-executive)',
       bgColor: 'var(--color-executive-bg)',
@@ -83,7 +83,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       id: 'motor' as CognitiveDomain,
       title: 'Coordinación Visomotora',
       subtitle: 'Precisión Táctil y Mano',
-      desc: 'Toca dianas en pantalla a tu propio ritmo para reentrenar la motricidad fina.',
+      desc: 'Toca, arrastra o sigue recorridos a tu ritmo.',
       icon: <Hand size={36} />,
       color: 'var(--color-motor)',
       bgColor: 'var(--color-motor-bg)',
@@ -106,31 +106,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           <div className="home-feature-grid">
-            <section className="daily-session-card">
+            <section className={`daily-session-card${profile.settings.showCompanions === false ? ' daily-session-without-art' : ''}`}>
               <div className="daily-session-copy">
                 <span className="soft-label"><span className="status-dot" /> Tu sesión de hoy</span>
-                <h2>Un rato para ti.<br />Un paso más.</h2>
-                <p>Tres ejercicios para activar tu mente.<br />Sin prisas. A tu manera.</p>
+                <h2>Juega. Practica<br />Progresa a tu ritmo</h2>
               </div>
-              <HeaderIllustration scene="home" className="wellness-characters" />
+              {profile.settings.showCompanions !== false && <HeaderIllustration scene="home" className="wellness-characters" />}
               <div className="session-actions">
                 <button className="session-start" onClick={() => {
                   soundService.playTap();
                   onStartDailyPlan();
                 }}>
-                  Empezar mi sesión <ArrowRight size={21} />
+                  {profile.dailyPlanCompletedToday ? 'Haz otra sesión adicional' : 'Completa tu sesión de hoy'} <ArrowRight size={21} />
                 </button>
-                <span className="session-footnote">{profile.dailyPlanCompletedToday ? 'Ya has completado tu plan de hoy. Puedes volver a practicar.' : 'Atención, memoria y mucho más'}</span>
               </div>
             </section>
 
             <section className="consistency-card" aria-labelledby="consistency-title">
               <div className="consistency-heading"><h2 id="consistency-title">Cada día suma</h2></div>
               <div className="streak-number">{profile.streakDays}<span>{profile.streakDays === 1 ? 'día seguido' : 'días seguidos'}</span></div>
+              <div className="consistency-footer">
               <p>{profile.streakDays > 0 ? 'Sigue encontrando ese ratito para ti.' : 'Tu próximo pequeño logro empieza hoy.'}</p>
               <div className="consistency-stats">
                 <div><Clock3 size={20} /><strong>{profile.totalMinutes}</strong><span>minutos</span></div>
                 <button onClick={onOpenAchievements}><Medal size={20} /><strong>{earnedAchievements}</strong><span>Logros <span aria-hidden="true">↗</span></span></button>
+              </div>
               </div>
             </section>
           </div>
@@ -179,6 +179,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }}
         />
       )}
+
 
       {/* Modal para elegir entre los ejercicios del área */}
       {selectedDomainForModal && (
