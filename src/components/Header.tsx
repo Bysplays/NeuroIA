@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
             onOpenAccessibility();
           }}
           aria-label="Ajustes de accesibilidad"
-          title="Ajustar tamaño de letra, contraste y mano hábil"
+          title="Ajustar tamaño del texto y estilo de la página"
         >
           <Settings size={20} />
         </button>

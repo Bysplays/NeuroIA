@@ -264,7 +264,12 @@ legacy `StorageService.addExerciseResult`/`updateSettings` from the signed-in UI
 Transactions apply operations to the latest server state and write permanent
 receipts atomically. Results are idempotent by their existing exercise-result ID;
 settings patch individual fields, with the last committed same-field change winning
-in the backend. Locally edited fields stay pinned in the current `ProgressSync`
+in the backend. `settings.pageStyle` is optional for older profiles: absent means `default`, and
+`cozy` explicitly selects the original paper style. Optional `showCompanions`
+defaults to true for older profiles and controls the decorative companion family throughout the interface via
+`applyAppearance` and `data-companions`; exercise stimuli remain visible. It uses the same settings
+cache, queue and cloud patch as other preferences; `contrast` remains independent.
+Locally edited fields stay pinned in the current `ProgressSync`
 session, including after acknowledgment, to prevent server responses or another
 device from changing appearance mid-use. Untouched settings and progress continue
 to update live. A new session adopts the latest cloud settings and overlays any

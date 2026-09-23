@@ -1,8 +1,10 @@
 # NeuroIA design guide
 
 NeuroIA should feel like the same welcoming place from the home screen through
-the last exercise. The visual direction is **cute paper**: pale surfaces, generous
-rounded sections, friendly illustrated companions, and clear, unhurried actions.
+the last exercise. The default visual direction is **Default**: a pale ivory-to-aqua background,
+translucent mint surfaces, dark blue ink, white activity cards and a solid teal
+streak panel. **Cozy** is the secondary, colorful paper style with illustrated
+companions. Both use generous rounded sections and clear, unhurried actions.
 Changing colors alone does not establish this style; composition, imagery,
 typography, and interaction states must work together.
 
@@ -80,6 +82,10 @@ root so rem-based text responds throughout the interface (normal 100%, large
 118%, very large 135%); changing the body font size alone is insufficient. Do not force a smaller fixed font simply to
 make a layout fit.
 
+The token table above describes Cozy. Default overrides surface and accent tokens
+on the body; legacy accessibility contrast modes retain priority. Style choices
+use miniature layouts in their own palettes, independent of the active style.
+
 ## Composition and spacing
 
 Build a few clear sections, each with one purpose. Use flat pale panels, roughly
@@ -104,11 +110,14 @@ The daily-session panel is the main entry point. Keep its text, companions, and
 start action in a deliberate responsive grid. Illustrations must not overlap the
 copy or squeeze the button, particularly on mobile.
 
-“Cada día suma” gives the streak more weight than minutes and achievements. In
-its horizontal layout, the main content takes approximately 70% of the width;
-the secondary values form a narrower column aligned to the right, with a subtle
-vertical separator. Do not restore the flame icon. The compact stacked layout
-can place the secondary values below the streak.
+The session heading reads “Juega. Practica” followed by “Progresa a tu ritmo”.
+Omit supporting session paragraphs. The button reads “Completa tu sesión de hoy”
+until the daily plan is complete, then “Haz otra sesión adicional”.
+
+“Cada día suma” matches the session panel's height when side by side. Center its
+title, streak number and day label on separate lines. Place encouragement, minutes
+and the achievements link below a separator. On narrow screens the cards stack
+and size naturally to their content. Do not restore the flame icon.
 
 The therapist entry belongs in the top navigation once professional access is
 authorized. It is currently unavailable while roles and care links are pending.
@@ -183,7 +192,10 @@ push the task unnecessarily far down the page.
 ### Achievements
 
 The collection is a separate view reached through “Logros”, with a clear way
-back. It currently has 20 distinct achievements, each with its own illustration,
+back. Keep the illustration beside the heading and the count bar below it, spanning
+the full header width on desktop and mobile. Its count pill doubles as a progress bar: the subtle fill covers exactly the
+earned-to-total ratio, with readable text and accessible current/max values.
+It currently has 20 distinct achievements, each with its own illustration,
 condition, progress, and earned state. Use real cumulative activity; inactivity
 does not revoke earned milestones.
 
@@ -204,8 +216,19 @@ content. Long content must scroll without losing access to dismissal.
 
 Settings use one neutral surface, a compact sticky blue-paper header and a clear
 close button. Show text size and page style, followed by subscription status. Text size uses three segmented
-choices; the sole style offered for now is “Cozy”, the existing standard paper
-palette. Represent Cozy with a miniature home layout: blue hero with text and button shapes,
+choices; show “Default” first and “Cozy” second. Default uses the supplied
+September 23 reference: soft
+translucent surfaces and teal accents. Preserve all real activity data, approved
+copy and navigation rather than copying placeholder or empty reference cards.
+Both styles offer the home companion illustration and its responsive layout.
+An “Amigos del bienestar” switch below the style choices controls the decorative
+illustration family throughout home, login, catalog, instructions, results, rest,
+professional view and achievement artwork. It works independently of the palette,
+defaults to on and collapses unused art space when off. Keep only 8px of section
+padding below the switch so it sits close to the following divider. Without illustrations, achievements use a circle with a check when earned and
+a dashed empty circle when pending, including the detail dialog. Names and
+progress remain visible. It never hides exercise stimuli or alters game content.
+Cozy retains the existing paper palette. Represent Cozy with a miniature home layout: blue hero with text and button shapes,
 pink side panel and five pastel activity tiles. Use literal Cozy
 colors inside the miniature so it remains recognizable in legacy contrast themes.
 Do not use mascots or a letter sample for the style preview. Keep the explicit selected check. Preserve stored contrast,

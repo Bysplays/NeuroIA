@@ -106,31 +106,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           <div className="home-feature-grid">
-            <section className="daily-session-card">
+            <section className={`daily-session-card${profile.settings.showCompanions === false ? ' daily-session-without-art' : ''}`}>
               <div className="daily-session-copy">
                 <span className="soft-label"><span className="status-dot" /> Tu sesión de hoy</span>
-                <h2>Juega. Practica.<br />Progresa a tu ritmo.</h2>
-                <p>Tres juegos para practicar.<br />Sin prisas. A tu manera.</p>
+                <h2>Juega. Practica<br />Progresa a tu ritmo</h2>
               </div>
-              <HeaderIllustration scene="home" className="wellness-characters" />
+              {profile.settings.showCompanions !== false && <HeaderIllustration scene="home" className="wellness-characters" />}
               <div className="session-actions">
                 <button className="session-start" onClick={() => {
                   soundService.playTap();
                   onStartDailyPlan();
                 }}>
-                  Empezar mi sesión <ArrowRight size={21} />
+                  {profile.dailyPlanCompletedToday ? 'Haz otra sesión adicional' : 'Completa tu sesión de hoy'} <ArrowRight size={21} />
                 </button>
-                <span className="session-footnote">{profile.dailyPlanCompletedToday ? 'Ya has completado tu plan de hoy. Puedes volver a practicar.' : 'Atención, memoria y mucho más'}</span>
               </div>
             </section>
 
             <section className="consistency-card" aria-labelledby="consistency-title">
               <div className="consistency-heading"><h2 id="consistency-title">Cada día suma</h2></div>
               <div className="streak-number">{profile.streakDays}<span>{profile.streakDays === 1 ? 'día seguido' : 'días seguidos'}</span></div>
+              <div className="consistency-footer">
               <p>{profile.streakDays > 0 ? 'Sigue encontrando ese ratito para ti.' : 'Tu próximo pequeño logro empieza hoy.'}</p>
               <div className="consistency-stats">
                 <div><Clock3 size={20} /><strong>{profile.totalMinutes}</strong><span>minutos</span></div>
                 <button onClick={onOpenAchievements}><Medal size={20} /><strong>{earnedAchievements}</strong><span>Logros <span aria-hidden="true">↗</span></span></button>
+              </div>
               </div>
             </section>
           </div>

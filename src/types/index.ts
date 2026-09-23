@@ -27,6 +27,8 @@ export type ContrastMode = 'standard' | 'high-contrast' | 'soft-dark';
 export type HandDominance = 'center' | 'left' | 'right';
 
 export interface AccessibilitySettings {
+  showCompanions?: boolean; // Decorative companions; enabled when absent in older profiles.
+  pageStyle?: 'default' | 'cozy'; // Older profiles use Default when absent.
   fontSize: FontSize;
   contrast: ContrastMode;
   handDominance: HandDominance;

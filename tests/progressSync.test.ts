@@ -109,7 +109,7 @@ test('local settings remain stable through delayed commits, stale reads and live
   const sync = new ProgressSync(initial(), [], api, () => {}, data => observed.push(data));
   sync.start();
   observed.length = 0;
-  sync.enqueue({ id: 'local-theme', kind: 'settings', settings: { contrast: 'soft-dark', fontSize: 'xlarge' } });
+  sync.enqueue({ id: 'local-theme', kind: 'settings', settings: { contrast: 'soft-dark', fontSize: 'xlarge', pageStyle: 'cozy', showCompanions: false } });
   assert.equal(observed.at(-1)?.profile.settings.contrast, 'soft-dark');
   release!();
   await settle();
@@ -117,7 +117,7 @@ test('local settings remain stable through delayed commits, stale reads and live
   const otherDevice = applyProgressOperation(stale, result('remote-progress'));
   otherDevice.profile.settings.handDominance = 'left';
   publish(otherDevice);
-  assert.ok(observed.every(data => data.profile.settings.contrast === 'soft-dark' && data.profile.settings.fontSize === 'xlarge'));
+  assert.ok(observed.every(data => data.profile.settings.contrast === 'soft-dark' && data.profile.settings.fontSize === 'xlarge' && data.profile.settings.pageStyle === 'cozy' && data.profile.settings.showCompanions === false));
   assert.equal(observed.at(-1)?.profile.totalSessions, 1);
   assert.equal(observed.at(-1)?.profile.settings.handDominance, 'left');
   sync.stop();

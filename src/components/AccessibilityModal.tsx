@@ -49,21 +49,31 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             </div>
           </section>
 
-          <section className="preferences-section" aria-labelledby="pref-screen">
+          <section className="preferences-section preferences-style-section" aria-labelledby="pref-screen">
             <h3 id="pref-screen"><Contrast size={20} aria-hidden="true" />Estilo de la página</h3>
             <div className="preferences-themes" role="group" aria-labelledby="pref-screen">
-              <button aria-pressed={settings.contrast === 'standard'} onClick={() => update({ contrast: 'standard' })}>
-                <span className="preferences-cozy-preview" aria-hidden="true">
-                  <span className="cozy-preview-nav"><i /><i /></span>
-                  <span className="cozy-preview-main">
-                    <span className="cozy-preview-hero"><span><i /><i /><b /></span></span>
-                    <span className="cozy-preview-side"><i /><i /><i /></span>
+              {(['default', 'cozy'] as const).map(style => (
+                <button key={style} aria-pressed={(settings.pageStyle ?? 'default') === style}
+                  onClick={() => update({ pageStyle: style, contrast: 'standard' })}>
+                  <span className={`preferences-cozy-preview ${style === 'default' ? 'preferences-default-preview' : ''}`} aria-hidden="true">
+                    <span className="cozy-preview-nav"><i /><i /></span>
+                    <span className="cozy-preview-main">
+                      <span className="cozy-preview-hero"><span><i /><i /><b /></span></span>
+                      <span className="cozy-preview-side"><i /><i /><i /></span>
+                    </span>
+                    <span className="cozy-preview-cards"><i /><i /><i /><i /><i /></span>
                   </span>
-                  <span className="cozy-preview-cards"><i /><i /><i /><i /><i /></span>
-                </span>
-                <span className="preferences-theme-label">Cozy<Check size={16} aria-hidden="true" /></span>
-              </button>
+                  <span className="preferences-theme-label">{style === 'default' ? 'Default' : 'Cozy'}
+                    <Check size={16} aria-hidden="true" />
+                  </span>
+                </button>
+              ))}
             </div>
+            <button className="preferences-companions" role="switch" aria-checked={settings.showCompanions !== false}
+              onClick={() => update({ showCompanions: settings.showCompanions === false })}>
+              <span>Amigos del bienestar</span>
+              <span className="preferences-switch-track" aria-hidden="true"><span /></span>
+            </button>
           </section>
 
           <SubscriptionSettings />

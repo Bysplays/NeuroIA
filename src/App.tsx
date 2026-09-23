@@ -124,8 +124,8 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
 
   // Commit visual preferences before paint, together with the selected controls.
   useLayoutEffect(() => {
-    applyAppearance({ contrast: profile.settings.contrast, fontSize: profile.settings.fontSize, handDominance: profile.settings.handDominance });
-  }, [profile.settings.contrast, profile.settings.fontSize, profile.settings.handDominance]);
+    applyAppearance({ showCompanions: profile.settings.showCompanions, pageStyle: profile.settings.pageStyle, contrast: profile.settings.contrast, fontSize: profile.settings.fontSize, handDominance: profile.settings.handDominance });
+  }, [profile.settings.showCompanions, profile.settings.pageStyle, profile.settings.contrast, profile.settings.fontSize, profile.settings.handDominance]);
 
   useEffect(() => {
     soundService.setSoundEnabled(profile.settings.soundEffects);
