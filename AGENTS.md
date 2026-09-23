@@ -261,8 +261,10 @@ personal/professional switch passes the selected intent through the Google sign-
 callback. `AccountEntry` honors explicit player/professional entry and offers both profiles
 on restored sessions. Professional registration never replaces player progress
 or subscription. `ProfileSwitchContext` provides navigation from settings, entry
-recovery and the professional header; switching unmounts the old workspace.
-Player entry does not depend on professional reads.
+recovery and professional settings; switching unmounts the old workspace.
+Player entry does not depend on professional reads. Professional settings reuse
+CloudProgress and its durable settings operations for account-wide name and
+appearance; the shared modal hides personal subscription controls.
 `ProductInformation` provides the switch through its optional children slot.
 The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
 localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the

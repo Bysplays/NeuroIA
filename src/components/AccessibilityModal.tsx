@@ -9,6 +9,7 @@ import { soundService } from '../services/soundService';
 
 interface AccessibilityModalProps {
   isOpen: boolean;
+  showSubscription?: boolean;
   onSignOut: () => void;
   signingOut: boolean;
   settings: AccessibilitySettings;
@@ -19,7 +20,7 @@ interface AccessibilityModalProps {
 }
 
 export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
-  isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut,
+  isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut, showSubscription = true,
 }) => {
   if (!isOpen) return null;
 
@@ -80,7 +81,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             </button>
           </section>
 
-          <SubscriptionSettings />
+          {showSubscription && <SubscriptionSettings />}
           <div className="preferences-account">
             <ProfileSwitch disabled={signingOut} />
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>

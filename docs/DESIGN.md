@@ -285,6 +285,9 @@ is free and opens without a personal subscription or trial modal. Lead with
 subtitle and seats subtitle. Show honest empty states
 for both linked people and seats. Keep paid participant seats distinct from the
 free professional account. One monthly subscription funds one participant.
+Place purchase and the shared settings icon in the top header. Reuse player
+settings without its subscription section; name and appearance are account-wide.
+Profile switching, logout and information links live in the settings footer.
 
 People show their supplied name and an action to open the existing activity charts
 and table in read-only mode. Use “Volver al panel” and identify whose activity is
@@ -405,7 +408,7 @@ Professional sign-in opens the free professional workspace; personal sign-in
 keeps the existing account access flow even if a professional profile exists.
 Restored sessions offer “Jugador” and “Profesional” profiles for the same account.
 Place “Cambiar de perfil” in player settings, entry/recovery screens and the
-professional header. Use two descriptive buttons in the profile choice, stacked
+professional settings. Use two descriptive buttons in the profile choice, stacked
 on phones. Switching preserves saved activity and independent subscriptions.
 Quiet “Sobre NeuroIA” and “Aviso
 legal” links below the card open the supplied product information in the shared

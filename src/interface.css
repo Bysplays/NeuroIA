@@ -1027,3 +1027,8 @@ body[data-style="cozy"] .professional-people { background: var(--panel-blue); }
 .profile-choice-options span { color: var(--color-text-muted); line-height: 1.5; }
 .professional-account-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; }
 @media (max-width: 600px) { .profile-choice-options { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .professional-workspace > .main-header { flex-wrap: wrap; gap: 16px; }
+  .professional-account-actions { width: 100%; flex-wrap: nowrap; }
+  .professional-account-actions > .touch-btn { flex: 1; min-width: 0; }
+}

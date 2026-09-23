@@ -1,14 +1,14 @@
-import { ProfileSwitch } from './ProfileSwitch';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { AccessibilityModal } from './AccessibilityModal';
+import { applyAppearance } from '../services/appearance';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { getFirestore } from 'firebase/firestore';
-import { Copy, Plus, Users } from 'lucide-react';
+import { Copy, Plus, Settings, Users } from 'lucide-react';
 import { auth } from '../services/firebase';
 import { billingEnabled, billingRequest } from '../services/accessService';
 import { firestoreProfessional, type ProfessionalSeat } from '../services/firestoreProfessional';
-import type { ExerciseResult } from '../types';
+import type { ExerciseResult, UserProfile, AccessibilitySettings } from '../types';
 import { ActivityStatistics } from './ActivityStatistics';
 import { AppLoading } from './AppLoading';
-import { ProductInformation } from './ProductInformation';
 
 function PersonActivity({ uid, seat, onBack }: { uid: string; seat: ProfessionalSeat; onBack: () => void }) {
   const [activity, setActivity] = useState<{ name: string; history: ExerciseResult[] } | null>(null);
@@ -21,7 +21,13 @@ function PersonActivity({ uid, seat, onBack }: { uid: string; seat: Professional
   return <ActivityStatistics uid={seat.occupantUid!} history={activity.history} heading={`Actividad de ${activity.name || seat.patientName || 'la persona invitada'}`} backLabel="Volver al panel" onBack={onBack} />;
 }
 
-export function ProfessionalDashboard({ uid, onSignOut }: { uid: string; onSignOut: () => void }) {
+export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSettings, onUpdateName }: {
+  uid: string; onSignOut: () => void; profile: UserProfile;
+  onUpdateSettings: (settings: Partial<AccessibilitySettings>) => void;
+  onUpdateName: (name: string) => void;
+}) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  useLayoutEffect(() => { applyAppearance(profile.settings); }, [profile.settings]);
   const adapter = useMemo(() => firestoreProfessional(uid, getFirestore(auth.app)), [uid]);
   const [seats, setSeats] = useState<ProfessionalSeat[] | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -69,11 +75,10 @@ export function ProfessionalDashboard({ uid, onSignOut }: { uid: string; onSignO
   return <div className="professional-workspace">
     <header className="main-header">
       <button className="header-left" onClick={returnToPanel} aria-label="NeuroIA, volver al panel profesional"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="32" height="40"/><span className="header-title">Neuro<span className="brand-light">IA</span></span></button>
-      <div className="professional-account-actions"><ProfileSwitch /><button className="stats-quiet-button" onClick={onSignOut}>Cerrar sesión</button></div>
+      <div className="professional-account-actions"><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button></div>
     </header>
     {currentSeat ? <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main className="professional-panel">
       <div className="professional-heading"><h1>Espacio profesional</h1>
-        <button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button>
       </div>
       {checkoutReturn && <div className="professional-notice" role="status"><p>{checkoutReturn === 'cancelled' ? 'La compra no se ha completado. Puedes retomarla o cancelarla.' : 'El código estará disponible en «Tus asientos» cuando se confirme el pago.'}</p><button className="stats-quiet-button" onClick={clearReturn}>Cerrar aviso</button></div>}
       {error && <p className="professional-notice" role="alert">{error}</p>}
@@ -89,7 +94,7 @@ export function ProfessionalDashboard({ uid, onSignOut }: { uid: string; onSignO
           </li>)}</ul>}
         </section>
       </>}
-      <ProductInformation />
     </main>}
+    <AccessibilityModal isOpen={settingsOpen} showSubscription={false} settings={profile.settings} name={profile.name} onUpdateName={onUpdateName} onUpdateSettings={onUpdateSettings} onSignOut={onSignOut} signingOut={false} onClose={() => setSettingsOpen(false)} />
   </div>;
 }

@@ -6,9 +6,13 @@ have a player profile, personal subscription and progress. Explicit personal log
 opens the player flow without reading professional records. Restored sessions
 show a profile choice; Checkout return parameters select the matching workspace.
 “Cambiar de perfil” is available in player settings, entry/recovery screens and
-the professional header. Switching unmounts the previous workspace, preserves
+professional settings. Switching unmounts the previous workspace, preserves
 queued progress and never changes either subscription. Only professional entry
-registers/loads the professional profile; failures never block player entry. There is no professional trial, personal purchase modal,
+registers/loads the professional profile; failures never block player entry. Professional entry mounts the existing CloudProgress boundary for account-wide
+name and appearance settings, without an AccessGate. It preserves existing
+progress and import choice and uses the durable settings queue; it grants no
+player entitlement. The shared settings modal omits personal subscription controls.
+There is no professional trial, personal purchase modal,
 or fabricated patient list. Registration identifies the account owner, not a
 verified healthcare qualification.
 

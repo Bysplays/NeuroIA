@@ -5,6 +5,7 @@ import { auth } from '../services/firebase';
 import { firestoreProfessional, type ProfessionalProfile } from '../services/firestoreProfessional';
 import { soundService } from '../services/soundService';
 import { ProfileSwitchContext } from '../services/profileSwitch';
+import { CloudProgress } from './CloudProgress';
 import { AppLoading } from './AppLoading';
 import { ProfessionalDashboard } from './ProfessionalDashboard';
 
@@ -51,5 +52,7 @@ function ProfessionalEntry({ user, onSignOut, onChangeProfile }: {
     <button className="paper-nav-button" onClick={onChangeProfile}>Cambiar de perfil</button>
     <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
   </main> : <AppLoading />;
-  return <ProfessionalDashboard uid={user.uid} onSignOut={onSignOut} />;
+  return <CloudProgress user={user} onSignOut={onSignOut}>{(sync, data) => <ProfessionalDashboard uid={user.uid} onSignOut={onSignOut} profile={data.profile}
+    onUpdateSettings={settings => sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings })}
+    onUpdateName={name => sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings: {}, name })} />}</CloudProgress>;
 }
