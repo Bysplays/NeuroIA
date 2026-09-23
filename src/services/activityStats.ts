@@ -5,8 +5,16 @@ export function localDay(date: string) {
   if (!Number.isFinite(d.getTime())) return '';
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+// Resolve historical result IDs for display without rewriting saved activity.
+const legacyExerciseIds: Record<string, string> = {
+  'visual-scan': 'visual-scanning',
+  'daily-seq': 'daily-sequencing',
+  'motor-coord': 'motor-target',
+};
+
 export function mergeActivity(...sources: ExerciseResult[][]): ExerciseResult[] {
   return [...new Map(sources.flat().map(r => [r.id, r])).values()]
+    .map(r => Object.hasOwn(legacyExerciseIds, r.exerciseId) ? { ...r, exerciseId: legacyExerciseIds[r.exerciseId] } : r)
     .filter(r => localDay(r.date)).sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 }
 export function secondsPerQuestion(r: ExerciseResult) {

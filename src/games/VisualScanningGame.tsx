@@ -182,7 +182,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
     const gameResult: ExerciseResult = {
       id: 'res-' + clock.now(),
-      exerciseId: 'visual-scan',
+      exerciseId: 'visual-scanning',
       domain: 'attention',
       date: new Date().toISOString().split('T')[0],
       durationSeconds: elapsedSeconds,

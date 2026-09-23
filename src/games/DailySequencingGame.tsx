@@ -387,7 +387,7 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
 
       const gameResult: ExerciseResult = {
         id: 'res-' + clock.now(),
-        exerciseId: 'daily-seq',
+        exerciseId: 'daily-sequencing',
         domain: 'executive',
         date: new Date().toISOString().split('T')[0],
         durationSeconds: elapsedSeconds,

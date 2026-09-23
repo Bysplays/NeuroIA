@@ -21,3 +21,21 @@ test('zero-question and invalid timings are not plotted as zero-speed performanc
  assert.deepEqual(dailyActivity([], 'accuracy'), []);
  assert.equal(localDay('invalid'), '');
 });
+
+test('legacy result IDs share catalog names, filters and daily series without mutating saved records', () => {
+ const legacy = [
+  result('scan-old', { exerciseId: 'visual-scan', accuracy: 60 }),
+  result('sequence-old', { exerciseId: 'daily-seq' }),
+  result('motor-old', { exerciseId: 'motor-coord' }),
+ ];
+ const merged = mergeActivity(legacy, [result('scan-new', { exerciseId: 'visual-scanning', accuracy: 100 })]);
+ assert.deepEqual(merged.map(r => r.exerciseId), ['visual-scanning', 'daily-sequencing', 'motor-target', 'visual-scanning']);
+ assert.deepEqual(legacy.map(r => r.exerciseId), ['visual-scan', 'daily-seq', 'motor-coord']);
+ const filtered = merged.filter(r => r.exerciseId === 'visual-scanning');
+ assert.equal(filtered.length, 2);
+ const points = dailyActivity(filtered, 'accuracy');
+ assert.equal(points.length, 1);
+ assert.equal(points[0].value, 80);
+ assert.equal(points[0].exerciseId, 'visual-scanning');
+ assert.equal(merged[0].id, 'scan-old');
+});

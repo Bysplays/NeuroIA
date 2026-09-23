@@ -345,6 +345,10 @@ profile creation/import and is never updated by the settings input.
 
 `ActivityStatistics` is a React-state workspace view opened from Header.
 `activityStats.ts` deduplicates results and computes local-day per-exercise means.
+It maps historical result IDs `visual-scan`, `daily-seq` and `motor-coord` to
+`visual-scanning`, `daily-sequencing` and `motor-target` in the read-only activity
+view, keeping names, filters and chart series consistent without rewriting saved
+records. New game results use the canonical catalog IDs.
 Speed is seconds per question, not reaction time; exclude zero-question sessions
 from speed averages. `activityHistory.ts` reads owner-only result archives in
 explicit 200-document pages ordered by document ID. Merge pages with current
