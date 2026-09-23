@@ -23,6 +23,7 @@ export function firestoreAccess(uid: string, db: Firestore) {
         active: data?.kind === 'invitation' || (['trial', 'subscription'].includes(data?.kind) && typeof expiresAt === 'number' && expiresAt > now),
         kind: data?.kind as 'trial' | 'subscription' | 'invitation' | 'revoked' | undefined,
         serverNow: now, expiresAt, trialStartedAt,
+        autoRenew: typeof data?.autoRenew === 'boolean' ? data.autoRenew : undefined,
         professionalId: data?.professionalId as string | undefined,
         professionalName: data?.professionalName as string | undefined,
         invitationCode: data?.invitationCode as string | undefined,
@@ -30,7 +31,7 @@ export function firestoreAccess(uid: string, db: Firestore) {
     },
     async invite(value: string) {
       if (value.trim().toUpperCase() !== INVITATION_CODE) {
-        throw failure('invitation/invalid-code', 'El código no es válido. Revísalo con tu profesional.');
+        throw failure('invitation/invalid-code', 'El código no es válido');
       }
       await runTransaction(db, async tx => {
         const [access, professional, patient] = await Promise.all([

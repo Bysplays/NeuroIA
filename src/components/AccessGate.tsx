@@ -78,10 +78,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
       <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
     </main>;
   }
-  if (access?.active) return <>
-    {access.canManageSubscription && <div className="access-membership"><button className="paper-nav-button" disabled={busy} onClick={() => { void run(() => redirect('portal')); }}>Gestionar suscripción</button>{error && <p role="alert">{error}</p>}</div>}
-    {children}
-  </>;
+  if (access.active) return <>{children}</>;
   return <main className="access-entry">
     <img src={`${import.meta.env.BASE_URL}brand/neuroia-logo.svg`} alt="NeuroIA" width="160" />
     {!portrait && <OnboardingModal access={access} loadFailed={Boolean(error)} invitationIssue={invitationIssue} busy={busy}

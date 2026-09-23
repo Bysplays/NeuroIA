@@ -41,7 +41,8 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 | `src/components/AppLoading.tsx` | Shared initial loading presentation for auth, access, lazy chunks and progress |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Mandatory account entry before progress and games |
 | `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `ONBOARDING.md` |
-| `functions/` | Future Stripe billing backend and administrator-only professional ownership script |
+| `worker/` | Cloudflare Stripe backend, signed webhooks, daily reconciliation and Firestore REST transactions; see `worker/README.md` |
+| `functions/` | Previous Firebase billing backend and administrator-only professional ownership script |
 | `src/App.tsx` | View state, profile refresh, game dispatch, daily-plan progression |
 | `src/types/index.ts` | Domain, exercise, profile, result, and settings contracts |
 | `src/services/productCopy.ts` and `src/components/ProductInformation.tsx` | Supplied public presentation and notice, accessible from login and dashboard |
@@ -111,7 +112,9 @@ available. `npm run build` runs TypeScript and the production build.
 
 `.github/workflows/deploy.yml` builds and deploys every push to `main` using Node
 22 and `npm ci`. Set the repository's Pages source to **GitHub Actions** before
-its first run. The workflow passes the Pages base path to Vite, supporting both
+its first run. The workflow reads public repository variables `VITE_BILLING_API_URL` and
+`VITE_STRIPE_ENABLED` for the Cloudflare billing integration; secrets live only in
+Worker bindings. The workflow passes the Pages base path to Vite, supporting both
 repository subpaths and custom domains. Runtime references to public assets must
 use `import.meta.env.BASE_URL`; Vite handles URLs in CSS and HTML during build.
 To verify a repository deployment locally, run

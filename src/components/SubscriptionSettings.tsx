@@ -54,12 +54,13 @@ export function SubscriptionSettings() {
         <div>
           <h3>{invitation ? 'Acceso gratuito por invitación' : subscription ? 'Plan mensual' : access.kind === 'trial' ? 'Prueba gratuita de 7 días' : 'Sin plan activo'}</h3>
           <p className="subscription-date">{invitation ? 'Sin fecha de caducidad' : until ? `${access.active ? 'Hasta el' : 'Finalizó el'} ${until}` : access.active ? 'Fecha no disponible' : 'Sin acceso activo'}</p>
+          {subscription && <p className="subscription-date">Renovación automática</p>}
         </div>
+      {subscription && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable || !access.canManageSubscription} onClick={() => void openBilling('portal')}>{busy ? 'Abriendo Stripe…' : 'Gestionar'}</button>}
         {invitation && <button className="subscription-upgrade" onClick={() => { setError(''); setConfirmLeave(true); }}>Abandonar</button>}
         {!subscription && !invitation && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable} onClick={() => void openBilling('checkout')}>{busy ? 'Abriendo…' : 'Mejorar'}</button>}
       </div>
       {invitation && access.professionalName && <p className="subscription-detail">Vinculado a {access.professionalName}.</p>}
-      {subscription && <button className="paper-nav-button subscription-action" disabled={busy || !access.checkoutAvailable || !access.canManageSubscription} onClick={() => void openBilling('portal')}>{busy ? 'Abriendo Stripe…' : 'Gestionar o cancelar plan'}</button>}
     </>}
     {confirmLeave && <ModalFrame labelledBy="leave-invitation-title" onClose={() => { if (!busy) { setConfirmLeave(false); setError(''); } }}>
       <div className="leave-invitation">

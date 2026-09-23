@@ -937,3 +937,6 @@ body[data-companions="hidden"] .login-card { grid-template-columns: 1fr; }
 .achievement-symbol { display: none; }
 body[data-companions="hidden"] .achievement-symbol { display: grid; place-items: center; width: 88px; height: 88px; margin: 0 auto; border-radius: 50%; color: var(--color-primary); border: 2px solid currentColor; background: var(--color-primary-light); }
 body[data-companions="hidden"] .achievement-symbol-pending { border-style: dashed; color: var(--color-text-muted); background: transparent; }
+
+.onboarding-actions #invitation-error { width: 100%; min-width: 0; height: 1.5em; flex-shrink: 0; overflow-y: auto; overflow-wrap: anywhere; margin: 0; padding: 0; font-size: .75rem; line-height: 1.5; text-align: center; color: #b76a78; }
+body[data-contrast="high-contrast"] #invitation-error:not(:empty) { color: var(--color-text-main); }

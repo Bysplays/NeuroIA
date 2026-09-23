@@ -34,6 +34,8 @@ jobs:
         run: npm ci
       - name: Build
         env:
+          VITE_BILLING_API_URL: ${{ vars.VITE_BILLING_API_URL }}
+          VITE_STRIPE_ENABLED: ${{ vars.VITE_STRIPE_ENABLED }}
           PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: npm run build -- --base "$PAGES_BASE_PATH/"
       - name: Upload artifact

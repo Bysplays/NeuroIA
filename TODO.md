@@ -161,3 +161,18 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
   access. No Cloud Functions or Blaze required; localhost:5173 keeps real Google login.
 - [ ] Implement verified professional profile and code creation; care-link
   revocation and professional permissions remain unavailable.
+
+## Cloudflare billing deployment
+
+- Worker deployed: `/health` reports test mode, localhost CORS preflight succeeds,
+  unauthenticated requests return 401 and unsigned webhooks return 400. Local Vite
+  billing flags are enabled in ignored `.env.local`. Verify the configured secrets
+  and six sandbox webhook events with a signed end-to-end payment.
+- Verify real service-account access, signed delivery, Checkout, renewal, declined
+  payment and portal cancellation; automated checks do not make live API calls.
+- Measure CPU usage against the Workers Free limit before enabling the Pages
+  purchase flag. No billing backend was deployed by the local frontend build.
+
+- [ ] Redeploy the renewal-aware Worker and enable Cron `*/5 * * * *`; verify
+  daily reconciliation and Stripe test-clock failed renewal/recovery/cancellation.
+  See `worker/README.md` for bounded batches and checkpoint monitoring.

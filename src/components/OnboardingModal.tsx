@@ -32,8 +32,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
           <div className="onboarding-actions">
             <button className="touch-btn touch-btn-primary" disabled={busy || !access?.checkoutAvailable} onClick={onCheckout}>Suscribirme</button>
             <button className="onboarding-trial-link" disabled={busy || !access || expired} onClick={onTrial}>{expired ? 'Prueba gratuita ya utilizada' : 'Empezar prueba gratuita de 7 días'}</button>
-            {access && !access.checkoutAvailable && <small>La suscripción estará disponible próximamente.</small>}
-            {access?.canManageSubscription && <button className="paper-nav-button" disabled={busy} onClick={onPortal}>Gestionar suscripción</button>}
+            {access?.canManageSubscription && <button className="paper-nav-button" disabled={busy} onClick={onPortal}>Gestionar</button>}
           </div>
         </section>
         <section className="onboarding-option onboarding-invite">
@@ -41,8 +40,8 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
           <p>Acceso gratuito vinculado a tu profesional.</p>
           <form className="onboarding-actions" onSubmit={event => { event.preventDefault(); onInvite(code); }}>
             <input id="invitation-code" value={code} onChange={event => setCode(event.target.value)} maxLength={64} autoCapitalize="characters" autoComplete="off" spellCheck={false} aria-invalid={Boolean(codeError)} aria-describedby={codeError ? 'invitation-error' : undefined} aria-label="Código de invitación" placeholder="Código de invitación" required disabled={busy} />
-            {codeError && <p id="invitation-error" role="alert">{codeError}</p>}
             <button className="paper-nav-button" disabled={busy || !access || !code.trim()} type="submit">Usar mi código</button>
+            <p id="invitation-error" role="alert" aria-atomic="true">{codeError}</p>
           </form>
         </section>
       </div>

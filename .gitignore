@@ -25,3 +25,7 @@ dist-ssr
 
 # Local Firebase emulator data
 .firebase/
+
+# Cloudflare local secrets and build cache
+.dev.vars*
+.wrangler/

@@ -46,12 +46,12 @@ are server-controlled. Progress write rules remain unchanged for durable pending
 saves; the public frontend and downloadable exercise assets are not a secure DRM
 boundary.
 
-Stripe Checkout, webhook and portal functions remain in `functions/` for a
-separate future billing deployment. `VITE_STRIPE_ENABLED=true` enables the purchase
-option only after that backend is configured. Invitation and trial access do not
-need it. Stripe still needs `STRIPE_MONTHLY_PRICE_ID`, `APP_URL`, secret-manager
-keys, signed webhooks and test-mode payment verification. Never put secret keys
-in Vite environment variables.
+Stripe Checkout, webhook and portal now use the standalone Cloudflare Worker in
+`worker/`, without deploying Firebase Cloud Functions or enabling Blaze. See
+[worker/README.md](worker/README.md) for secrets, deployment, webhook events and
+sandbox validation. Both `VITE_BILLING_API_URL` and `VITE_STRIPE_ENABLED=true` are
+required to expose purchase actions. Frontend configuration alone cannot activate
+billing. `functions/` retains the previous backend and professional provisioning.
 
 ## Local development
 
@@ -101,3 +101,7 @@ cannot restart. The access gate immediately checks the new state. Publish the up
 Users can then redeem an invitation or subscribe when billing is enabled. CEOABERTO
 remains the explicit permanent, reusable exception and can be redeemed again.
 Trials may subscribe directly. Billing events never turn invited accounts into paid accounts.
+
+Paid renewal status and the daily Stripe reconciliation require the updated Worker
+and its Cron Trigger; see [renewal setup](worker/README.md#renewal-and-daily-reconciliation).
+The browser never grants an extra period from the Checkout return URL or an unpaid invoice.

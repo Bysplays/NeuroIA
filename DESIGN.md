@@ -239,7 +239,11 @@ the customer portal only when billing is enabled. Show the plan type and its end
 subscription heading or status badge. Trials can subscribe via a pill-shaped “Mejorar” action; keep it disabled while
 Stripe is unavailable, without a coming-soon notice. Invited accounts show only
 “Abandonar”, with a confirmation explaining loss of access and the professional
-link while preserving progress. Invitation and paid access are mutually exclusive. Cancellation and any available plan changes are confirmed in Stripe; do
+link while preserving progress. Invitation and paid access are mutually exclusive. Paid accounts show a pill-shaped
+“Gestionar” in the same position as “Abandonar” and “Mejorar”, beside the plan
+details. Paid plans show the quiet informational line “Renovación automática”.
+Stripe manages renewal; do not present a toggle or a local renewal setting. Do not show a subscription management banner above the workspace.
+Cancellation and any available plan changes are confirmed in Stripe; do
 not invent prices, upgrade plans or successful cancellation. Changes apply
 immediately through the existing settings service. Apply appearance attributes
 before browser paint so the selected control and the page update together, without
@@ -418,7 +422,10 @@ priority; avoid stacking onboarding over the orientation dialog.
 
 Expired trials cannot be restarted. Keep purchase and invitation actions visible
 when access expires. Do not show a general server-error banner in this modal.
-Keep invitation validation beside its input, and display payment confirmation and
+Omit the subscription coming-soon notice. Show invalid-code copy as “El código no es válido”,
+centered below “Usar mi código” in muted rose text without a background. Always reserve a
+single-line error slot, including when empty, so validation never resizes the modal.
+Longer messages scroll within that slot. Keep other invitation validation in that slot, and display payment confirmation and
 automatic recovery states; do not expose a technical “Comprobar acceso” action.
 Never imply that returning from Stripe proves payment. The active
 subscription offers a customer-portal action. Technical setup and remaining
