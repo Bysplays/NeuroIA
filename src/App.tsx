@@ -37,11 +37,14 @@ import { MotorTrackingGame } from './games/MotorTrackingGame';
 const AccessGate = lazy(() => import('./components/AccessGate'));
 const CloudProgress = lazy(() => import('./components/CloudProgress'));
 
+const AccountEntry = lazy(() => import('./components/AccountEntry'));
+
 export const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [professionalEntry, setProfessionalEntry] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, nextUser => {
     soundService.stopSpeaking();
@@ -59,7 +62,8 @@ export const App: React.FC = () => {
     setError(authErrorMessage(error));
   }), []);
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (professional = false) => {
+    setProfessionalEntry(professional);
     setBusy(true);
     setError('');
     try {
@@ -74,7 +78,7 @@ export const App: React.FC = () => {
     setBusy(true);
     setError('');
     soundService.stopSpeaking();
-    try { await signOut(auth); }
+    try { await signOut(auth); setProfessionalEntry(false); }
     catch { setError('No hemos podido cerrar la sesión. Vuelve a intentarlo.'); }
     finally { setBusy(false); }
   };
@@ -84,7 +88,7 @@ export const App: React.FC = () => {
     : user
       ? <>
         {error && <p className="account-notice" role="alert">{error}</p>}
-        <Suspense fallback={<AppLoading />}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace uid={user.uid} onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></Suspense></>
+        <Suspense fallback={<AppLoading />}><AccountEntry key={user.uid} user={user} professionalEntry={professionalEntry} onSignOut={handleSignOut}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace uid={user.uid} onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></AccountEntry></Suspense></>
       : <LoginScreen onSignIn={handleSignIn} busy={busy} error={error} />
   }</LandscapeGate>;
 };

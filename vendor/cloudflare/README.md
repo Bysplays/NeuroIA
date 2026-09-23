@@ -24,7 +24,8 @@ Set these **Secret** bindings directly in Cloudflare:
 - `STRIPE_WEBHOOK_SECRET`: signing secret for the specific endpoint below.
 
 The service account IAM role grants database-wide data access. The Worker constrains
-its writes to validated account access/billing records and an administrator-only
+its writes to validated account access/billing records, professional seats and
+reciprocal care links, and an administrator-only
 `billingMaintenance/daily` reconciliation checkpoint. Never put
 these secrets in the frontend, GitHub Pages variables, committed files or chat.
 Firestore read/write usage still counts against the Firebase project's quota.
@@ -118,3 +119,19 @@ For a large Stripe history, monitor sweep duration: five records per five minute
 is at most 1,440 per day, including canceled records. Move to a queue/larger worker
 budget before a sweep approaches one day. This is a recovery mechanism alongside
 webhooks, not a guarantee during provider outages.
+
+## Professional seats
+
+The same standalone Worker implements professional seat Checkout, portal,
+redemption and departure. See [professional contracts](../../docs/PROFESSIONALS.md).
+No subscription is required to open the professional panel. Each seat has a
+separate subscription and unique code. Optional `STRIPE_SEAT_PRICE_ID` overrides
+the existing monthly price for seats; without it the individual monthly price is
+used. Codes activate only after a paid Stripe state and are rotated on departure.
+
+Deploy this Worker and the reviewed Firestore rules before the professional
+frontend. Keep the same six webhook events and daily reconciliation trigger;
+subscription metadata routes seat events independently from personal access.
+Configure portal cancellation, without quantity or price changes for seats.
+Run `node --test vendor/cloudflare/index.test.mjs vendor/cloudflare/seats.test.mjs`
+and the combined sequential emulator command in the professional guide.

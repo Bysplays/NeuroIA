@@ -4,6 +4,21 @@ service cloud.firestore {
     function owns(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
+    function professionalOwner(id) {
+      let profile = get(/databases/$(database)/documents/professionals/$(id)).data;
+      return owns(id) && profile.ownerUid == request.auth.uid && profile.active == true;
+    }
+    function linkedProfessional(uid) {
+      let access = get(/databases/$(database)/documents/users/$(uid)/access/main).data;
+      let id = access.professionalId;
+      let seatId = access.seatId;
+      let seat = get(/databases/$(database)/documents/professionals/$(id)/seats/$(seatId)).data;
+      let link = get(/databases/$(database)/documents/professionals/$(id)/patients/$(uid)).data;
+      return request.auth != null && professionalOwner(id)
+        && access.kind == 'invitation' && access.expiresAt > request.time.toMillis()
+        && seat.status == 'active' && seat.expiresAt > request.time.toMillis()
+        && seat.occupantUid == uid && link.patientId == uid && link.seatId == seatId;
+    }
     function validProgress() {
       let value = request.resource.data;
       let profile = value.data.profile;
@@ -29,7 +44,7 @@ service cloud.firestore {
         && profile.therapistGuidanceNote == '';
     }
     match /users/{uid}/progress/main {
-      allow get: if owns(uid);
+      allow get: if owns(uid) || linkedProfessional(uid);
       allow create, update: if owns(uid) && validProgress();
     }
     match /users/{uid}/operations/{operationId} {
@@ -40,7 +55,7 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
     }
     match /users/{uid}/results/{resultId} {
-      allow read: if owns(uid);
+      allow read: if owns(uid) || linkedProfessional(uid);
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['id', 'exerciseId', 'domain', 'date',
           'durationSeconds', 'accuracy', 'score', 'correctAnswers', 'totalQuestions',
@@ -93,6 +108,7 @@ service cloud.firestore {
         && request.resource.data.linkedAt == resource.data.get('linkedAt', request.time)
         && matchingPatient(uid, request.resource.data.linkedAt);
       allow update: if owns(uid) && noBilling(uid) && resource.data.kind == 'invitation'
+        && resource.data.professionalId == 'ceoaberto' && !('seatId' in resource.data)
         && request.resource.data.keys().hasOnly(['kind', 'leftAt'])
         && request.resource.data.kind == 'revoked' && request.resource.data.leftAt == request.time
         && !existsAfter(/databases/$(database)/documents/professionals/ceoaberto/patients/$(uid));
@@ -121,6 +137,24 @@ service cloud.firestore {
           && request.resource.data.linkedAt == getAfter(/databases/$(database)/documents/users/$(uid)/access/main).data.linkedAt;
       }
     }
-    // Billing, professional ownership, all other codes and clinical access remain admin-only.
+    // A self-owned workspace is free; it is not a verified clinical credential.
+    match /professionals/{professionalId} {
+      allow get: if owns(professionalId);
+      allow create: if owns(professionalId) && professionalId != 'ceoaberto'
+        && request.resource.data.keys().hasOnly(['ownerUid', 'name', 'active', 'createdAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.active == true
+        && request.resource.data.name is string && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 200
+        && request.resource.data.createdAt == request.time;
+      match /seats/{seatId} {
+        allow read: if professionalOwner(professionalId);
+      }
+      match /patients/{uid} {
+        allow read: if professionalOwner(professionalId);
+      }
+    }
+    // Seats, codes, billing, reciprocal links and cross-account writes are server-only.
+    // Legacy CEOABERTO ownership remains administrator-only; it grants no clinical access.
   }
 }

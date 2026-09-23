@@ -46,7 +46,7 @@ async function googleToken(env) {
   return oauth.token;
 }
 const encodeValue = value => value === null ? { nullValue: null } : typeof value === 'number' ? { doubleValue: value } : typeof value === 'boolean' ? { booleanValue: value } : { stringValue: value };
-const decode = fields => Object.fromEntries(Object.entries(fields ?? {}).map(([k, v]) => [k, 'integerValue' in v ? Number(v.integerValue) : 'doubleValue' in v ? v.doubleValue : v.stringValue ?? v.booleanValue ?? null]));
+const decode = fields => Object.fromEntries(Object.entries(fields ?? {}).map(([k, v]) => [k, 'integerValue' in v ? Number(v.integerValue) : 'doubleValue' in v ? v.doubleValue : v.stringValue ?? v.booleanValue ?? (v.timestampValue ? Date.parse(v.timestampValue) : null)]));
 export function database(env) {
   const root = `projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents`;
   async function api(path, method = 'GET', body) {
@@ -56,6 +56,39 @@ export function database(env) {
     return data;
   }
   return {
+    // Shared server-only transaction primitive for seats and reciprocal care links.
+    async runTransaction(callback, maxAttempts = 4) {
+      let retryTransaction;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const { transaction } = await api(':beginTransaction', 'POST', { options: { readWrite: retryTransaction ? { retryTransaction } : {} } });
+        const writes = [];
+        try {
+          const tx = {
+            async getMany(paths) {
+              if (writes.length) throw Error('reads-after-writes');
+              const rows = await api(':batchGet', 'POST', { documents: paths.map(path => `${root}/${path}`), transaction });
+              return paths.map(path => {
+                const found = rows.find(row => row.found?.name === `${root}/${path}`)?.found;
+                return found ? decode(found.fields) : null;
+              });
+            },
+            async get(path) { return (await this.getMany([path]))[0]; },
+            set(path, values, merge = true) {
+              writes.push({ update: { name: `${root}/${path}`, fields: Object.fromEntries(Object.entries(values).map(([k,v]) => [k, encodeValue(v)])) }, ...(merge ? { updateMask: { fieldPaths: Object.keys(values) } } : {}) });
+            },
+            delete(path) { writes.push({ delete: `${root}/${path}` }); },
+          };
+          const value = await callback(tx);
+          await api(':commit', 'POST', { transaction, writes });
+          return value;
+        } catch (error) {
+          await api(':rollback', 'POST', { transaction }).catch(() => {});
+          if (error.code !== 'ABORTED' || attempt === maxAttempts - 1) throw error;
+          retryTransaction = transaction;
+          await new Promise(resolve => setTimeout(resolve, 50 * 2 ** attempt + Math.random() * 50));
+        }
+      }
+    },
     async maintenance() {
       return decode((await api('/billingMaintenance/daily'))?.fields);
     },
@@ -63,8 +96,9 @@ export function database(env) {
       await api('/billingMaintenance/daily', 'PATCH', { fields: Object.fromEntries(Object.entries(values).map(([k,v]) => [k, encodeValue(v)])) });
     },
     async transaction(uid, callback, maxAttempts = 4) {
+      let retryTransaction;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const { transaction } = await api(':beginTransaction', 'POST', { options: { readWrite: {} } });
+        const { transaction } = await api(':beginTransaction', 'POST', { options: { readWrite: retryTransaction ? { retryTransaction } : {} } });
         try {
           const paths = [`users/${uid}/access/main`, `billing/${uid}`];
           const read = await api(':batchGet', 'POST', { documents: paths.map(path => `${root}/${path}`), transaction });
@@ -77,6 +111,8 @@ export function database(env) {
         } catch (error) {
           await api(':rollback', 'POST', { transaction }).catch(() => {});
           if (error.code !== 'ABORTED' || attempt === maxAttempts - 1) throw error;
+          retryTransaction = transaction;
+          await new Promise(resolve => setTimeout(resolve, 50 * 2 ** attempt + Math.random() * 50));
         }
       }
     },
@@ -138,7 +174,8 @@ export async function webhook(event, env, db, stripe) {
   const initial = await stripe(`subscriptions/${encodeURIComponent(id)}`);
   const uid = initial.metadata?.uid;
   if (!uid || !/^[A-Za-z0-9_-]{1,128}$/.test(uid)) return;
-  await syncSubscription(uid, id, env, db, stripe);
+  if (initial.metadata?.kind === 'seat') await syncSeatSubscription(uid, initial.metadata.seatId, id, env, db, stripe);
+  else await syncSubscription(uid, id, env, db, stripe);
 }
 export async function syncSubscription(uid, id, env, db, stripe, maxAttempts = 4) {
   await db.transaction(uid, async (access, billing, patch) => {
@@ -169,7 +206,10 @@ export async function reconcileDaily(env, db = database(env), stripe = stripeCli
   const page = await stripe(`subscriptions?status=all&limit=5${state.cursor ? `&starting_after=${encodeURIComponent(state.cursor)}` : ''}`);
   for (const sub of page.data) {
     const uid = sub.metadata?.uid;
-    if (uid && /^[A-Za-z0-9_-]{1,128}$/.test(uid)) await syncSubscription(uid, sub.id, env, db, stripe, 1);
+    if (uid && /^[A-Za-z0-9_-]{1,128}$/.test(uid)) {
+      if (sub.metadata?.kind === 'seat') await syncSeatSubscription(uid, sub.metadata.seatId, sub.id, env, db, stripe, 1);
+      else await syncSubscription(uid, sub.id, env, db, stripe, 1);
+    }
   }
   // A failed page is retried next tick; never advance past an unverified account.
   if (page.has_more && !page.data.length) throw Error('empty-stripe-page');
@@ -177,6 +217,157 @@ export async function reconcileDaily(env, db = database(env), stripe = stripeCli
   await db.saveMaintenance({ cursor: page.has_more ? page.data.at(-1).id : null,
     startedAt: page.has_more ? startedAt : null, nextRunAt: page.has_more ? 0 : startedAt + 86400000 });
 }
+const seatIdPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+const invitationPattern = /^NIA-[A-F0-9]{32}$/;
+const newInvitation = () => `NIA-${crypto.randomUUID().replaceAll('-', '').toUpperCase()}`;
+const seatPath = (uid, id) => `professionals/${uid}/seats/${id}`;
+const proBillingPath = uid => `professionalBilling/${uid}`;
+function requireProfessional(profile, uid) {
+  if (!profile || profile.ownerUid !== uid || profile.active !== true) fail(403, 'No hemos podido confirmar tu espacio profesional.');
+}
+function validSeatId(id) { if (typeof id !== 'string' || !seatIdPattern.test(id)) fail(400, 'El asiento no es válido.'); }
+function seatReturn(env, state) { const url = returnUrl(env); url.searchParams.set('seatCheckout', state); return url.href; }
+
+export async function seatCheckout(uid, id, env, db, stripe) {
+  validSeatId(id);
+  const price = await stripe(`prices/${encodeURIComponent(env.STRIPE_SEAT_PRICE_ID || env.STRIPE_MONTHLY_PRICE_ID)}`);
+  if (!price.active || price.recurring?.interval !== 'month' || price.recurring.interval_count !== 1) fail(409, 'El plan mensual no está disponible.');
+  const current = await db.runTransaction(async tx => {
+    const [profile, billing, existing] = await tx.getMany([`professionals/${uid}`, proBillingPath(uid), seatPath(uid, id)]);
+    requireProfessional(profile, uid);
+    if (billing?.pendingSeatId && billing.pendingSeatId !== id) fail(409, 'Termina o cancela primero la compra pendiente.');
+    if (existing && existing.status !== 'pending') fail(409, 'Este asiento ya se ha procesado. Actualiza el panel.');
+    if (existing && !existing.checkoutId && Date.now() - existing.createdAt > 23 * 3600000) fail(409, 'Este pago pendiente necesita revisión.');
+    const seat = existing || { status: 'pending', createdAt: Date.now(), attempt: crypto.randomUUID(), invitationCode: newInvitation(), occupantUid: null, patientName: null, expiresAt: 0, subscriptionId: null, checkoutId: null, priceId: env.STRIPE_SEAT_PRICE_ID || env.STRIPE_MONTHLY_PRICE_ID };
+    if (!existing) tx.set(seatPath(uid, id), seat, false);
+    tx.set(proBillingPath(uid), { pendingSeatId: id });
+    return { ...seat, customerId: billing?.customerId };
+  });
+  if (current.checkoutId) {
+    const session = await stripe(`checkout/sessions/${encodeURIComponent(current.checkoutId)}`);
+    if (session.status === 'open') return { url: session.url };
+    fail(409, 'El pago está en confirmación o ha caducado. Actualiza el panel o cancela la compra pendiente.');
+  }
+  const session = await stripe('checkout/sessions', {
+    mode: 'subscription', 'payment_method_types[0]': 'card',
+    'line_items[0][price]': current.priceId, 'line_items[0][quantity]': '1',
+    client_reference_id: uid, 'metadata[uid]': uid, 'metadata[seatId]': id,
+    'subscription_data[metadata][uid]': uid, 'subscription_data[metadata][kind]': 'seat',
+    'subscription_data[metadata][seatId]': id, 'subscription_data[metadata][attempt]': current.attempt,
+    success_url: seatReturn(env, 'success'), cancel_url: seatReturn(env, 'cancelled'),
+    ...(current.customerId ? { customer: current.customerId } : {}),
+  }, `seat:${uid}:${id}:${current.attempt}`);
+  await db.runTransaction(async tx => {
+    const latest = await tx.get(seatPath(uid, id));
+    if (latest?.attempt === current.attempt && latest.status === 'pending') tx.set(seatPath(uid, id), { checkoutId: session.id });
+  });
+  return { url: session.url };
+}
+
+export async function syncSeatSubscription(uid, id, subscriptionId, env, db, stripe, maxAttempts = 4) {
+  if (typeof id !== 'string' || !seatIdPattern.test(id)) return;
+  await db.runTransaction(async tx => {
+    const [seat, billing] = await tx.getMany([seatPath(uid, id), proBillingPath(uid)]);
+    if (!seat) return;
+    // Read current Stripe state on every retry, never trust event order or URL parameters.
+    const sub = await stripe(`subscriptions/${encodeURIComponent(subscriptionId)}?expand[]=latest_invoice`);
+    if (sub.metadata?.uid !== uid || sub.metadata?.kind !== 'seat' || sub.metadata?.seatId !== id ||
+      !(seat.subscriptionId ? seat.subscriptionId === sub.id : seat.attempt && seat.attempt === sub.metadata.attempt)) return;
+    if (billing?.customerId && billing.customerId !== sub.customer) throw Error('seat-customer-mismatch');
+    const item = sub.items?.data?.length === 1 ? sub.items.data[0] : null;
+    const validPlan = item?.price?.id === seat.priceId && item.quantity === 1;
+    const paid = sub.latest_invoice?.status === 'paid';
+    const end = Math.min((item?.current_period_end || 0) * 1000, sub.cancel_at ? sub.cancel_at * 1000 : Infinity);
+    const expiresAt = validPlan && sub.status === 'active' && !sub.pause_collection
+      ? Math.min(end, paid ? end : Number(seat.expiresAt) || 0) : 0;
+    const autoRenew = validPlan && ['active','past_due'].includes(sub.status) && !sub.cancel_at_period_end && !sub.cancel_at && !sub.pause_collection;
+    const status = expiresAt > Date.now() ? 'active' : 'inactive';
+    const invitation = await tx.get(`seatInvitations/${seat.invitationCode}`);
+    if (invitation && (invitation.professionalId !== uid || invitation.seatId !== id)) throw Error('invitation-collision');
+    const access = seat.occupantUid ? await tx.get(`users/${seat.occupantUid}/access/main`) : null;
+    tx.set(seatPath(uid, id), { status, expiresAt, autoRenew, subscriptionStatus: sub.status, subscriptionId: sub.id, checkoutId: null, billingCheckedAt: Date.now() });
+    if (status === 'active' && !invitation) tx.set(`seatInvitations/${seat.invitationCode}`, { professionalId: uid, seatId: id }, false);
+    tx.set(proBillingPath(uid), { customerId: sub.customer, ...(billing?.pendingSeatId === id ? { pendingSeatId: null } : {}) });
+    if (access?.kind === 'invitation' && access.professionalId === uid && access.seatId === id) {
+      tx.set(`users/${seat.occupantUid}/access/main`, { expiresAt, autoRenew });
+    }
+  }, maxAttempts);
+}
+
+export async function redeemSeat(uid, input, db) {
+  const code = typeof input?.code === 'string' ? input.code.trim().toUpperCase() : '';
+  if (!invitationPattern.test(code)) fail(400, 'El código no es válido');
+  const name = typeof input.name === 'string' ? input.name.trim().slice(0, 200) : '';
+  await db.runTransaction(async tx => {
+    const [invitation, access, billing] = await tx.getMany([`seatInvitations/${code}`, `users/${uid}/access/main`, `billing/${uid}`]);
+    if (!invitation) fail(400, 'El código no es válido');
+    const professionalId = invitation.professionalId;
+    if (professionalId === uid) fail(409, 'Comparte este código con la persona que ocupará el asiento.');
+    const [profile, seat, link] = await tx.getMany([`professionals/${professionalId}`, seatPath(professionalId, invitation.seatId), `professionals/${professionalId}/patients/${uid}`]);
+    if (!profile?.active || !seat || seat.invitationCode !== code || seat.status !== 'active' || seat.expiresAt <= Date.now()) fail(409, 'Esta invitación no está disponible.');
+    if (seat.occupantUid && seat.occupantUid !== uid) fail(409, 'Este código ya lo ha utilizado otra persona.');
+    if ((access?.kind === 'subscription' && access.expiresAt > Date.now()) || billing?.attempt || billing?.checkoutId || billing?.subscriptionId) fail(409, 'Gestiona tu suscripción o pago pendiente antes de usar una invitación.');
+    if (access?.kind === 'invitation' && (access.professionalId !== professionalId || access.seatId !== invitation.seatId)) fail(409, 'Abandona tu invitación actual antes de usar otra.');
+    if (access?.kind === 'invitation' && access.seatId === invitation.seatId && seat.occupantUid === uid && link?.seatId === invitation.seatId) return;
+    const linkedAt = Date.now();
+    tx.set(`users/${uid}/access/main`, { kind: 'invitation', invitationCode: code, professionalId, professionalName: profile.name, seatId: invitation.seatId, expiresAt: seat.expiresAt, linkedAt, ...(access?.trialStartedAt != null ? { trialStartedAt: access.trialStartedAt } : {}) }, false);
+    tx.set(seatPath(professionalId, invitation.seatId), { occupantUid: uid, patientName: name || 'Persona invitada' });
+    tx.set(`professionals/${professionalId}/patients/${uid}`, { patientId: uid, seatId: invitation.seatId, linkedAt }, false);
+  });
+  return { ok: true };
+}
+
+export async function leaveSeat(uid, db) {
+  await db.runTransaction(async tx => {
+    const access = await tx.get(`users/${uid}/access/main`);
+    if (access?.kind !== 'invitation' || !access.seatId) fail(409, 'Tu cuenta ya no tiene este asiento asignado.');
+    const path = seatPath(access.professionalId, access.seatId);
+    const seat = await tx.get(path);
+    if (!seat || seat.occupantUid !== uid) fail(409, 'No hemos podido confirmar tu invitación.');
+    const code = newInvitation();
+    const collision = await tx.get(`seatInvitations/${code}`);
+    if (collision) throw Error('invitation-collision');
+    tx.set(`users/${uid}/access/main`, { kind: 'revoked', leftAt: Date.now() }, false);
+    tx.delete(`professionals/${access.professionalId}/patients/${uid}`);
+    tx.set(path, { occupantUid: null, patientName: null, invitationCode: code });
+    tx.set(`seatInvitations/${code}`, { professionalId: access.professionalId, seatId: access.seatId }, false);
+    // The old code remains unusable because it no longer matches the seat.
+  });
+  return { ok: true };
+}
+
+export async function professionalRequest(path, uid, input, env, db, stripe) {
+  if (path === '/redeem-seat') return redeemSeat(uid, input, db);
+  if (path === '/leave-seat') return leaveSeat(uid, db);
+  if (path === '/professional/checkout') return seatCheckout(uid, input?.seatId, env, db, stripe);
+  const billing = await db.runTransaction(async tx => {
+    const [profile, value] = await tx.getMany([`professionals/${uid}`, proBillingPath(uid)]);
+    requireProfessional(profile, uid); return value || {};
+  });
+  if (path === '/professional/portal') {
+    if (!billing.customerId) fail(404, 'Todavía no hay suscripciones que gestionar.');
+    return { url: (await stripe('billing_portal/sessions', { customer: billing.customerId, return_url: returnUrl(env).href })).url };
+  }
+  const id = billing.pendingSeatId;
+  if (!id) return { ok: true };
+  let seat = await db.runTransaction(tx => tx.get(seatPath(uid, id)));
+  if (!seat?.checkoutId && seat?.status === 'pending') {
+    await seatCheckout(uid, id, env, db, stripe);
+    seat = await db.runTransaction(tx => tx.get(seatPath(uid, id)));
+  }
+  if (seat?.checkoutId) {
+    const session = await stripe(`checkout/sessions/${encodeURIComponent(seat.checkoutId)}`);
+    if (session.status === 'complete') fail(409, 'Estamos confirmando el pago. Espera unos instantes.');
+    if (session.status === 'open') await stripe(`checkout/sessions/${encodeURIComponent(seat.checkoutId)}/expire`, {});
+  }
+  await db.runTransaction(async tx => {
+    const [latest, current] = await tx.getMany([seatPath(uid, id), proBillingPath(uid)]);
+    if (latest?.status === 'pending') tx.set(seatPath(uid, id), { status: 'cancelled', checkoutId: null });
+    if (current?.pendingSeatId === id) tx.set(proBillingPath(uid), { pendingSeatId: null });
+  });
+  return { ok: true };
+}
+
 export function createHandler(deps = {}) {
   return async (request, env) => {
     const origin = request.headers.get('Origin');
@@ -198,10 +389,16 @@ export function createHandler(deps = {}) {
         await webhook(JSON.parse(body), env, db, stripe);
         return reply({ received: true });
       }
-      if (!['/checkout','/portal','/cancel-checkout','/status'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
+      if (!['/checkout','/portal','/cancel-checkout','/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
       const token = request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1];
       if (!token) fail(401, 'Inicia sesión para continuar.');
       const uid = await (deps.verifyUser || verifyUser)(token, env.FIREBASE_PROJECT_ID);
+      if (path.startsWith('/professional/') || path === '/redeem-seat' || path === '/leave-seat') {
+        const body = await request.text();
+        if (body.length > 4096) fail(413, 'Solicitud demasiado grande.');
+        let input; try { input = body ? JSON.parse(body) : {}; } catch { fail(400, 'Solicitud no válida.'); }
+        return reply(await professionalRequest(path, uid, input, env, db, stripe));
+      }
       if (path === '/checkout') return reply(await checkout(uid, env, db, stripe));
       let billing = await db.transaction(uid, (_a, b) => b);
       if (path === '/status') return reply({ pendingCheckout: Boolean(billing.attempt || billing.checkoutId), canManageSubscription: Boolean(billing.customerId && billing.subscriptionId) });

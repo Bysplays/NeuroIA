@@ -49,7 +49,7 @@ function CategoryRadar({ results }: { results: ExerciseResult[] }) {
   </svg></section>;
 }
 
-export function ActivityStatistics({ uid, history, onBack }: { uid: string; history: ExerciseResult[]; onBack: () => void }) {
+export function ActivityStatistics({ uid, history, onBack, heading = 'Tu actividad', backLabel = 'Volver al inicio' }: { uid: string; history: ExerciseResult[]; onBack: () => void; heading?: string; backLabel?: string }) {
   const [archive, setArchive] = useState<ExerciseResult[]>([]);
   const [cursor, setCursor] = useState<string>();
   const [more, setMore] = useState(true);
@@ -72,7 +72,7 @@ export function ActivityStatistics({ uid, history, onBack }: { uid: string; hist
   };
   const resetPage = () => setPage(0);
   return <div className="activity-statistics">
-    <div className="stats-heading"><button className="stats-quiet-button" onClick={onBack}><ArrowLeft size={20}/> Volver al inicio</button><h1>Tu actividad</h1></div>
+    <div className="stats-heading"><button className="stats-quiet-button" onClick={onBack}><ArrowLeft size={20}/> {backLabel}</button><h1>{heading}</h1></div>
     <div className="stats-overview"><CategoryRadar results={results}/>
     <section className="stats-card stats-filter-panel" aria-labelledby="stats-filter-title">
       <div className="stats-section-heading"><div><h2 id="stats-filter-title">Explora tu actividad</h2><p>Filtra las gráficas y el historial.</p></div>

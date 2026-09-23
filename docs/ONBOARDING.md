@@ -1,15 +1,19 @@
 # Account entry and invitations (Firebase Spark)
 
-After Google sign-in, `AccessGate` loads the owner's entitlement directly from
+After Google sign-in, `AccountEntry` opens an existing professional workspace or
+registers one for explicit professional entry. Professional owners bypass personal
+entitlement checks; see [PROFESSIONALS.md](PROFESSIONALS.md). For personal accounts,
+`AccessGate` loads the owner's entitlement directly from
 Firestore before mounting `CloudProgress` and games. Invitation redemption and
 trials use `src/services/firestoreAccess.ts` and server-enforced Firestore rules.
 They do not call Cloud Functions and require no Blaze plan.
 
 ## CEOABERTO
 
-`CEOABERTO` is the only accepted code. Leading/trailing spaces and lowercase are
-normalized. It grants permanent free access, with no expiration or usage limit.
-Every other code is rejected, even if an old invitation document exists.
+`CEOABERTO` is the permanent, reusable exception. Leading/trailing spaces and
+lowercase are normalized. Paid seat codes (`NIA-` plus 32 hexadecimal characters)
+are redeemed by the Worker and expire with the confirmed subscription. Other
+codes are rejected, even if an old invitation document exists.
 
 One transaction creates or updates:
 
@@ -22,8 +26,9 @@ One transaction creates or updates:
 
 Rules use `getAfter()` to require both sides of the link in the committed state.
 A patient can bootstrap only that fixed unclaimed profile as part of redemption;
-they cannot claim ownership, grant professional roles, create other professionals,
-forge subscriptions, delete access, or change their assigned professional.
+they cannot claim ownership of that reserved record, forge subscriptions, delete
+access, or change their assigned professional. A separate self-owned workspace
+can be registered through professional entry; it starts without participants.
 Existing progress and results are untouched. Repeat redemption preserves the
 link date. A missing reverse link can be repaired. Pending billing blocks free
 redemption. Existing subscribers must manage their subscription first.
@@ -32,8 +37,9 @@ The profile is a persistent professional record, not a fabricated Google account
 Its real owner must later be assigned by an administrator using an existing
 Firebase Auth UID. `vendor/firebase/functions/seed-professional.js` supports that assignment with
 Application Default Credentials and verifies the UID outside the demo emulator.
-This assignment and the future professional UI are not needed to test redemption.
-Clinical access and patient lists remain unavailable to professional clients.
+This assignment is not needed to test redemption or open a separate self-owned workspace.
+This legacy profile grants no new clinical access or patient list. Self-owned
+professional workspaces use paid seats and explicit participant redemption instead.
 
 ## Trial and subscription
 
@@ -76,7 +82,7 @@ Publishing rules is a separate external action and must be authorized. Missing
 rules keep access blocked; infrastructure errors are not shown in the modal at
 the product owner's request. Invalid-code feedback stays beside the input.
 Access reloads automatically every 30 seconds and when the window gains focus.
-The modal cannot be dismissed; logout is available. The orientation gate takes
+The personal modal cannot be dismissed; logout is available. The orientation gate takes
 priority in portrait. No redirect or localStorage flag grants access.
 
 ## Verification
@@ -94,7 +100,7 @@ and [Stripe Checkout subscriptions](https://docs.stripe.com/payments/checkout/bu
 ### Separate invitation and paid access
 
 Invited accounts cannot start Checkout. Settings offers “Abandonar” with confirmation.
-Leaving atomically replaces access with `{kind: 'revoked', leftAt: serverTimestamp()}`
+For CEOABERTO, leaving atomically replaces access with `{kind: 'revoked', leftAt: serverTimestamp()}`
 and deletes the owner's reciprocal care link. Progress remains intact and trials
 cannot restart. The access gate immediately checks the new state. Publish the updated
 `vendor/firebase/firestore.rules` for this operation; a frontend build does not deploy rules.
@@ -105,3 +111,7 @@ Trials may subscribe directly. Billing events never turn invited accounts into p
 Paid renewal status and the daily Stripe reconciliation require the updated Worker
 and its Cron Trigger; see [renewal setup](../vendor/cloudflare/README.md#renewal-and-daily-reconciliation).
 The browser never grants an extra period from the Checkout return URL or an unpaid invoice.
+
+Paid-seat departure uses the Worker to revoke access and the care link and rotate
+the code atomically. A paid invitation expires; settings shows its paid-through
+date rather than “Sin fecha de caducidad”. See [PROFESSIONALS.md](PROFESSIONALS.md).

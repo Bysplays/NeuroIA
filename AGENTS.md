@@ -50,7 +50,9 @@ while Markdown links are relative to the document. Keep links current when movin
 | Location | Responsibility |
 | --- | --- |
 | `src/components/AppLoading.tsx` | Shared initial loading presentation for auth, access, lazy chunks and progress |
-| `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Mandatory account entry before progress and games |
+| `src/components/AccountEntry.tsx` | Resolves or registers the free professional workspace before personal access checks |
+| `src/components/ProfessionalDashboard.tsx` and `src/services/firestoreProfessional.ts` | Free professional panel, sponsored seats and read-only linked activity; see `docs/PROFESSIONALS.md` |
+| `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Personal account entry before progress and games |
 | `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
 | `vendor/cloudflare/` | Cloudflare Stripe backend, signed webhooks, daily reconciliation and Firestore REST transactions; see `vendor/cloudflare/README.md` |
 | `vendor/firebase/functions/` | Previous Firebase billing backend and administrator-only professional ownership script |
@@ -255,9 +257,10 @@ the clock, alongside the existing speech-voice tests.
 `App` observes Firebase Authentication before mounting the cloud progress boundary.
 Configuration and session persistence are in `src/services/firebase.ts`; Analytics
 is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy. Its local
-personal/professional presentation switch reuses the same sign-in callback and
-adds a text action through `ProductInformation`'s optional children slot. It does
-not persist a role, grant professional access or change account onboarding.
+personal/professional switch passes the selected intent through the Google sign-in
+callback. `AccountEntry` loads a self-owned professional workspace or registers it
+for explicit professional entry; returning owners bypass personal onboarding.
+`ProductInformation` provides the switch through its optional children slot.
 The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
 localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the
 auth session through the bottom of Settings (not the home header). Entry and
@@ -308,13 +311,16 @@ next login. Successful saves and session identity have no top banner. Only pendi
 saves show a recovery notice. Cloud errors must not be labeled saved. Device-local narrator toggles
 are not synced; accessibility settings in the profile are synced.
 
-Professional navigation remains unavailable pending verified roles and care links.
-The retained therapist component is not wired to cloud mutations. Current rules
-allow only the owner's patient progress, append-only results and immutable retry
-receipts; all client role, cross-account, clinical and delete paths stay denied. Strict Firestore rules allow only the permanent CEOABERTO invitation, the reserved unclaimed CeoAberto profile and reciprocal owner-specific care links; owners may atomically revoke their invitation and delete their matching care link; ownership changes remain admin-only and no clinical access is granted. Totals
-are self-reported client data, not medically verified records. Publish the exact
-reviewed `vendor/firebase/firestore.rules` before using the real project. No rules are deployed
-by a frontend build. See `docs/AUTHENTICATION.md` and `docs/TODO.md`.
+Professional owners use a free workspace, not the retained therapist component.
+Only server-confirmed paid seats and participant redemption create analytics
+permissions. Rules allow active linked owners to read participant progress and
+results; cross-account writes, clinical fields and retry receipts remain denied.
+Self-registration grants only ownership of an empty workspace, not clinical status.
+CEOABERTO remains the permanent reusable exception with administrator-only
+ownership. See `docs/PROFESSIONALS.md` for seat paths, codes, departure and billing.
+Totals remain self-reported, not medically verified. Publish the reviewed rules
+and Worker before this frontend; frontend builds deploy neither. See
+`docs/AUTHENTICATION.md` and `docs/TODO.md` for remaining release checks.
 
 `LandscapeGate` uses the portrait viewport media query and `ModalFrame`. Its
 context in `src/services/orientation.ts` pauses `GameSession` and the workspace
@@ -359,7 +365,7 @@ timestamps. Historical date-only results retain their recorded calendar day in
 activity filters/charts and display no time; never infer midnight as a known
 completion time. Full timestamps display in the device timezone.
 Speed is seconds per question, not reaction time; exclude zero-question sessions
-from speed averages. `activityHistory.ts` reads owner-only result archives in
+from speed averages. `activityHistory.ts` reads owner or authorized active-seat result archives in
 explicit 200-document pages ordered by document ID. Merge pages with current
 cloud history, preserving imported and pending results; disclose partial coverage.
 No new writes, authorization rules or progress storage are introduced.

@@ -59,10 +59,12 @@ for the active session (see Stable local preferences below). Existing result IDs
 Recent profile/domain histories are capped at 60; new individual result documents
 are retained separately. No permanent receipt pruning is implemented.
 
-Rules permit only the authenticated UID's data. They reject cross-user access,
-role documents, clinical writes, result edits/deletes and receipt mutation.
-Progress remains client-reported, not a clinically verified record. Professional
-approval, care links and clinical records are not part of this phase.
+Rules permit owner writes and immutable result/receipt creation. A professional
+owner with an active reciprocal paid-seat link can read that participant's progress
+and results, but cannot edit them or read receipts. Clinical writes, role forgery
+and unlinked cross-user access remain denied. Registration is self-owned workspace
+creation, not professional credential verification. See [PROFESSIONALS.md](PROFESSIONALS.md).
+Progress remains client-reported, not a clinically verified record.
 
 ## Local data and import
 

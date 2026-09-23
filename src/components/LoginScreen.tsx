@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { HeaderIllustration } from './HeaderIllustration';
 import { ProductInformation } from './ProductInformation';
 
-export function LoginScreen({ onSignIn, busy, error }: { onSignIn: () => void; busy: boolean; error: string }) {
+export function LoginScreen({ onSignIn, busy, error }: { onSignIn: (professional: boolean) => void; busy: boolean; error: string }) {
   const [professional, setProfessional] = useState(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const changedMode = useRef(false);
@@ -22,7 +22,7 @@ export function LoginScreen({ onSignIn, busy, error }: { onSignIn: () => void; b
   const actions = <div className="login-actions" key="actions">
     {professional && <p className="login-audience">Para profesionales</p>}
     <h1 id="login-title" ref={titleRef} tabIndex={-1}>{professional ? 'Acompaña la práctica de otras personas' : 'Jugar también puede ser una forma de entrenar'}</h1>
-    <button className="google-login-button" onClick={onSignIn} disabled={busy} aria-describedby={professional ? undefined : 'login-disclaimer'}><span className="google-login-mark" aria-hidden="true">G</span>{busy ? 'Conectando con Google…' : 'Continuar con Google'}</button>
+    <button className="google-login-button" onClick={() => onSignIn(professional)} disabled={busy} aria-describedby={professional ? undefined : 'login-disclaimer'}><span className="google-login-mark" aria-hidden="true">G</span>{busy ? 'Conectando con Google…' : 'Continuar con Google'}</button>
     {error && <p className="entry-note" role="alert">{error}</p>}
     {!professional && <p id="login-disclaimer" className="entry-note">Tu progreso, contigo en cada dispositivo.</p>}
   </div>;

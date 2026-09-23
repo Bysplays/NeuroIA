@@ -30,8 +30,9 @@ and personal progress support practice without competing against other people.
 | Daily sessions and individual games | Text sizes and Default / Cozy styles | Google sign-in and account-linked progress |
 | Pauses, help and instructions | Optional wellness companions | Seven-day trial, invitation or monthly plan |
 
-The app is in Spanish. Invitations link an account to a professional; professional
-navigation remains unavailable pending verified roles.
+The app is in Spanish. The [professional workspace](docs/PROFESSIONALS.md) is free;
+paid seats fund participants who redeem a unique code and share read-only activity.
+Professional rules and Worker deployment must precede frontend release.
 
 ## Project portals
 

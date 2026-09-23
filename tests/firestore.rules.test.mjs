@@ -169,3 +169,63 @@ test('Spark: leaving removes both access and care link atomically, preserves pro
   assert.equal((await adapter.load()).active, true);
   assert.equal((await getDoc(patient)).exists(), true);
 });
+
+const { firestoreProfessional } = await import('../src/services/firestoreProfessional.ts');
+test('professionals can open a free self-owned workspace but cannot claim another owner or create seats', async () => {
+  const uid = 'professional-new'; const db = env.authenticatedContext(uid).firestore();
+  const adapter = firestoreProfessional(uid, db);
+  assert.equal(await adapter.load(), null);
+  assert.equal((await adapter.register('Ana')).name, 'Ana');
+  assert.equal((await adapter.register('Changed')).name, 'Ana');
+  assert.equal((await getDoc(doc(db, `users/${uid}/access/main`))).exists(), false);
+  await assertFails(setDoc(doc(db, 'professionals/someone-else'), { ownerUid: uid, name: 'Forged', active: true, createdAt: serverTimestamp() }));
+  await assertFails(updateDoc(doc(db, `professionals/${uid}`), { ownerUid: 'someone-else' }));
+  await assertFails(setDoc(doc(db, `professionals/${uid}/seats/forged`), { status: 'active', expiresAt: 9999999999999 }));
+  await assertFails(setDoc(doc(db, 'seatInvitations/forged'), { professionalId: uid }));
+  await assertFails(setDoc(doc(db, `professionals/${uid}/patients/other`), { patientId: 'other' }));
+  await assertFails(getDoc(doc(db, 'users/patient-a/progress/main')));
+});
+
+test('professional analytics are read-only, scoped to reciprocal active seats and revoked immediately on expiry or departure', async () => {
+  const professional = 'professional-linked'; const patient = 'linked-person'; const seatId = 'seat-paid';
+  const owner = env.authenticatedContext(professional).firestore();
+  const personDb = env.authenticatedContext(patient).firestore();
+  await firestoreProfessional(professional, owner).register('Profesional');
+  await firestoreProgress(patient, personDb).initialize(fresh());
+  await firestoreProgress(patient, personDb).commit(op('linked-result'));
+  const until = Date.now() + 86400000;
+  const seatPath = `professionals/${professional}/seats/${seatId}`;
+  const accessPath = `users/${patient}/access/main`;
+  const linkPath = `professionals/${professional}/patients/${patient}`;
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, seatPath), { status: 'active', expiresAt: until, occupantUid: patient });
+    await setDoc(doc(db, accessPath), { kind: 'invitation', professionalId: professional, seatId, expiresAt: until });
+    await setDoc(doc(db, linkPath), { patientId: patient, seatId });
+  });
+  const progress = doc(owner, `users/${patient}/progress/main`);
+  await assertSucceeds(getDoc(progress));
+  await assertSucceeds(getDoc(doc(owner, `users/${patient}/results/linked-result`)));
+  await assertFails(getDoc(doc(owner, `users/${patient}/operations/result%3Alinked-result`)));
+  await assertFails(getDoc(doc(owner, accessPath)));
+  await assertFails(updateDoc(progress, { 'data.profile.name': 'Not allowed', updatedAt: serverTimestamp() }));
+  await assertFails(updateDoc(doc(owner, `users/${patient}/results/linked-result`), { accuracy: 0 }));
+  await assertFails(getDoc(doc(env.authenticatedContext('another-professional').firestore(), `users/${patient}/progress/main`)));
+  await assertFails(setDoc(doc(personDb, accessPath), { kind: 'revoked', leftAt: serverTimestamp() }));
+  await assertFails(deleteDoc(doc(personDb, linkPath)));
+  await env.withSecurityRulesDisabled(async context => { await updateDoc(doc(context.firestore(), seatPath), { expiresAt: 1 }); });
+  await assertFails(getDoc(progress));
+  await env.withSecurityRulesDisabled(async context => { await updateDoc(doc(context.firestore(), seatPath), { expiresAt: until }); await deleteDoc(doc(context.firestore(), linkPath)); });
+  await assertFails(getDoc(progress));
+  await assertSucceeds(getDoc(doc(personDb, `users/${patient}/progress/main`)));
+});
+
+test('seat invitations respect expiry while the permanent invitation remains compatible', async () => {
+  const uid = 'seat-expiry'; const db = env.authenticatedContext(uid).firestore();
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), `users/${uid}/access/main`), { kind: 'invitation', invitationCode: 'NIA-TEST', seatId: 'seat', expiresAt: 1 });
+  });
+  assert.equal((await firestoreAccess(uid, db).load()).active, false);
+  await env.withSecurityRulesDisabled(async context => { await updateDoc(doc(context.firestore(), `users/${uid}/access/main`), { expiresAt: Date.now() + 60000 }); });
+  assert.equal((await firestoreAccess(uid, db).load()).active, true);
+});

@@ -128,8 +128,8 @@ Place encouragement, minutes
 and the achievements link below a separator. On narrow screens the cards stack
 and size naturally to their content. Do not restore the flame icon.
 
-The therapist entry belongs in the top navigation once professional access is
-authorized. It is currently unavailable while roles and care links are pending.
+Professional owners enter a separate free workspace through the professional
+login; do not add the retained clinical therapist view to personal navigation.
 Do not add back the duplicate
 “Acompañamos tu progreso” card at the bottom. “Tu recorrido” uses the available
 width. The home links to achievements rather than displaying the badge collection.
@@ -277,13 +277,25 @@ spacing on both sides of the footer divider, without a trailing paragraph margin
 Content scrolls with the close button accessible, including large text and short
 landscape screens. Do not reduce text to make controls fit.
 
-### Therapist view
+### Professional workspace
 
-Maintain the same brand and soft surfaces with a more restrained hierarchy.
-Prioritize real patient context, prescribed areas, guidance, notes, domain
-performance, and session history. Preserve editing and print behavior. Clinical
-labels belong here when useful; do not transplant the professional dashboard's
-density into patient games.
+Use the same brand, palette and pill controls as the personal app. The dashboard
+is free and opens without a personal subscription or trial modal. Lead with
+“Personas a las que acompañas” and “Comprar un asiento”. Show honest empty states
+for both linked people and seats. Keep paid participant seats distinct from the
+free professional account. One monthly subscription funds one participant.
+
+People show their supplied name and an action to open the existing activity charts
+and table in read-only mode. Use “Volver al panel” and identify whose activity is
+being shown. Seats show pending/active/inactive state, paid-through date, renewal
+when confirmed, and a selectable/copyable code only when paid and unoccupied.
+After assignment show the participant, not the code. Pending purchases can be
+resumed or canceled; subscription management uses the Stripe portal. Never imply
+that a return from Checkout proves payment or invent prices, people or results.
+
+The retained therapist component is not the professional dashboard and remains
+unwired for clinical writes. There are no diagnosis, notes or prescribed activities
+in this workspace. Access and purchase contracts are in [PROFESSIONALS.md](PROFESSIONALS.md).
 
 ## Illustration workflow
 
@@ -388,7 +400,9 @@ professional copy comes before the image. “Volver al acceso personal” restor
 personal entry. Focus the heading after either switch and disable switching while
 Google sign-in is pending. The professional panel keeps only the audience label,
 heading and Google action; omit supporting paragraphs and availability notices.
-Signing in currently opens the same personal account flow.
+Professional sign-in opens the free professional workspace; personal sign-in
+keeps the existing account access flow, while returning professional owners go
+directly to their workspace.
 Quiet “Sobre NeuroIA” and “Aviso
 legal” links below the card open the supplied product information in the shared
 dialog; signed-in users find these links in the settings footer. Keep long copy
