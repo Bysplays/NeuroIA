@@ -44,9 +44,9 @@ the current introduction uses the cover paragraph without that claim instead.
 
 The login offers “¿Eres un profesional?” and a reversible professional presentation.
 It addresses professionals who want to follow other people's exercise activity.
-This is an audience introduction, not a new authorization flow: the copy explicitly
-says professional tracking is in preparation and Google still opens the existing
-personal account flow. Do not imply that selecting this view grants cross-account
+Keep only “Para profesionales”, the heading and the Google action in its panel;
+omit the explanatory and availability paragraphs. This is an audience introduction,
+not a new authorization flow: Google still opens the existing personal account flow. Do not imply that selecting this view grants cross-account
 access or verified professional status.
 
 ## Editorial rules

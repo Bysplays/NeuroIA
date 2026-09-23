@@ -695,7 +695,6 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 .login-screen-professional .login-paper-edge { left: -1px; right: auto; transform: scaleX(-1); }
 .login-professional-art { mix-blend-mode: multiply; }
 .login-audience { font-size: .75rem; color: var(--color-text-muted); }
-.login-professional-copy { font-size: .85rem; color: var(--color-text-muted); }
 .google-login-button { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 56px; width: 100%; padding: 12px 18px; border: 1px solid var(--color-border-subtle); border-radius: 99px; background: var(--color-surface); color: var(--color-text-main); font-size: .88rem; cursor: pointer; }
 .google-login-button:hover { background: var(--color-surface-hover); }
 .google-login-mark { font-weight: 700; font-size: 1.2rem; }

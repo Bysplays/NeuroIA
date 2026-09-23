@@ -386,9 +386,9 @@ clipboard companion (`public/images/headers/therapist.png`) on lilac paper on th
 right. Mirror only the curved separator, not the illustration. On narrow screens,
 professional copy comes before the image. “Volver al acceso personal” restores the
 personal entry. Focus the heading after either switch and disable switching while
-Google sign-in is pending. The professional copy addresses people who want to
-follow others' exercise activity and clearly says that this capability is still
-in preparation; signing in currently opens the same personal account flow.
+Google sign-in is pending. The professional panel keeps only the audience label,
+heading and Google action; omit supporting paragraphs and availability notices.
+Signing in currently opens the same personal account flow.
 Quiet “Sobre NeuroIA” and “Aviso
 legal” links below the card open the supplied product information in the shared
 dialog; signed-in users find these links in the settings footer. Keep long copy

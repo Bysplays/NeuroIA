@@ -22,10 +22,9 @@ export function LoginScreen({ onSignIn, busy, error }: { onSignIn: () => void; b
   const actions = <div className="login-actions" key="actions">
     {professional && <p className="login-audience">Para profesionales</p>}
     <h1 id="login-title" ref={titleRef} tabIndex={-1}>{professional ? 'Acompaña la práctica de otras personas' : 'Jugar también puede ser una forma de entrenar'}</h1>
-    {professional && <p className="login-professional-copy">Para quienes quieren llevar la cuenta de los ejercicios y la actividad de las personas a las que acompañan.</p>}
-    <button className="google-login-button" onClick={onSignIn} disabled={busy} aria-describedby="login-disclaimer"><span className="google-login-mark" aria-hidden="true">G</span>{busy ? 'Conectando con Google…' : 'Continuar con Google'}</button>
+    <button className="google-login-button" onClick={onSignIn} disabled={busy} aria-describedby={professional ? undefined : 'login-disclaimer'}><span className="google-login-mark" aria-hidden="true">G</span>{busy ? 'Conectando con Google…' : 'Continuar con Google'}</button>
     {error && <p className="entry-note" role="alert">{error}</p>}
-    <p id="login-disclaimer" className="entry-note">{professional ? 'El seguimiento profesional está en preparación. Por ahora, puedes acceder a tu cuenta personal.' : 'Tu progreso, contigo en cada dispositivo.'}</p>
+    {!professional && <p id="login-disclaimer" className="entry-note">Tu progreso, contigo en cada dispositivo.</p>}
   </div>;
 
   return <main className={`login-screen${professional ? ' login-screen-professional' : ''}`}>
