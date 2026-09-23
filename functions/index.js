@@ -3,7 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import { defineSecret, defineString } from 'firebase-functions/params';
 import Stripe from 'stripe';
-import { hasAccess } from './access.js';
+import { hasAccess, subscriptionAccessPatch } from './access.js';
 
 initializeApp();
 const db = getFirestore();
@@ -38,7 +38,7 @@ export const createCheckout = onCall({ region, secrets: [stripeKey] }, async req
   // Persistent attempt id makes parallel calls and network retries use the same Checkout.
   const billing = await db.runTransaction(async tx => {
     const [access, stored] = await Promise.all([tx.get(accessRef(uid)), tx.get(ref)]);
-    if (hasAccess(access.data(), Date.now()) && access.data()?.kind !== 'trial') {
+    if (access.data()?.kind === 'invitation' || (hasAccess(access.data(), Date.now()) && access.data()?.kind === 'subscription')) {
       throw new HttpsError('already-exists', 'Tu cuenta ya tiene acceso.');
     }
     const data = stored.data() ?? {};
@@ -115,11 +115,9 @@ export const stripeWebhook = onRequest({ region, secrets: [stripeKey, webhookSec
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
       if (billing?.subscriptionId !== subscription.id && !(billing?.attempt && billing.attempt === subscription.metadata.attempt)) return;
       const expiresAt = Math.max(...subscription.items.data.map(item => item.current_period_end ?? subscription.current_period_end ?? 0)) * 1000;
-      // A late event must not overwrite a professional invitation.
-      if (access?.kind !== 'invitation' && !(access?.kind === 'trial' && subscription.status !== 'active')) tx.set(accessRef(uid), {
-        kind: 'subscription', expiresAt: subscription.status === 'active' ? expiresAt : 0,
-        subscriptionStatus: subscription.status,
-      }, { merge: true });
+      // Only the subscription matched to the stored checkout attempt reaches this point.
+      const patch = subscriptionAccessPatch(access, subscription.status, expiresAt);
+      if (patch) tx.set(accessRef(uid), patch, { merge: true });
       tx.set(ref, { customerId: subscription.customer, subscriptionId: ['canceled', 'incomplete_expired'].includes(subscription.status) ? null : subscription.id,
         checkoutId: null, attempt: null }, { merge: true });
     });

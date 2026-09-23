@@ -85,13 +85,17 @@ service cloud.firestore {
           && request.resource.data.linkedAt == request.time
           && matchingPatient(uid, request.resource.data.linkedAt)));
       allow update: if owns(uid) && noBilling(uid)
-        && resource.data.kind in ['trial', 'invitation']
+        && resource.data.kind in ['trial', 'invitation', 'revoked']
         && resource.data.get('professionalId', 'ceoaberto') == 'ceoaberto'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'kind', 'invitationCode', 'professionalId', 'professionalName', 'expiresAt', 'linkedAt'])
         && invitation(request.resource.data) && reservedProfessional()
         && request.resource.data.linkedAt == resource.data.get('linkedAt', request.time)
         && matchingPatient(uid, request.resource.data.linkedAt);
+      allow update: if owns(uid) && noBilling(uid) && resource.data.kind == 'invitation'
+        && request.resource.data.keys().hasOnly(['kind', 'leftAt'])
+        && request.resource.data.kind == 'revoked' && request.resource.data.leftAt == request.time
+        && !existsAfter(/databases/$(database)/documents/professionals/ceoaberto/patients/$(uid));
     }
     match /professionals/ceoaberto {
       allow get: if request.auth != null;
@@ -106,6 +110,10 @@ service cloud.firestore {
           getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/access/main).data.linkedAt);
       match /patients/{uid} {
         allow get: if owns(uid);
+        allow delete: if owns(uid) && noBilling(uid)
+          && get(/databases/$(database)/documents/users/$(uid)/access/main).data.kind == 'invitation'
+          && getAfter(/databases/$(database)/documents/users/$(uid)/access/main).data.kind == 'revoked'
+          && getAfter(/databases/$(database)/documents/users/$(uid)/access/main).data.leftAt == request.time;
         allow create: if owns(uid) && noBilling(uid) && reservedProfessional()
           && request.resource.data.keys().hasOnly(['patientId', 'linkedAt'])
           && request.resource.data.patientId == uid

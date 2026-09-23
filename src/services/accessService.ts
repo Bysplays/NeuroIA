@@ -9,7 +9,7 @@ export interface AccountAccess {
   checkoutAvailable: boolean;
   pendingCheckout?: boolean;
   canManageSubscription?: boolean;
-  kind?: 'trial' | 'subscription' | 'invitation';
+  kind?: 'trial' | 'subscription' | 'invitation' | 'revoked';
   trialStartedAt?: number;
   expiresAt?: number | null;
   professionalName?: string;
@@ -30,6 +30,10 @@ export const accessService = {
   },
   async trial() { await accountAccess().trial(); },
   async invite(code: string) { await accountAccess().invite(code); },
+  async leaveInvitation() {
+    await accountAccess().leaveInvitation();
+    window.dispatchEvent(new Event('neuroia-access-changed'));
+  },
   async cancelCheckout() { await httpsCallable(functions, 'cancelCheckout')(); },
   async checkout() { return (await httpsCallable<void, { url: string }>(functions, 'createCheckout')()).data.url; },
   async portal() { return (await httpsCallable<void, { url: string }>(functions, 'createBillingPortal')()).data.url; },

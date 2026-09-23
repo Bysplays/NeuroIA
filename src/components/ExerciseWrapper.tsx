@@ -168,7 +168,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                           item: `Ejercicio de ${currentDomain.name}`,
                           userAction: `Se registraron ${result.totalQuestions - result.correctAnswers} error(es) en este ejercicio.`,
                           correctSolution: 'Puedes pulsar en Reintentar para practicar y afianzar la precisión.',
-                          explanation: result.feedbackMessage,
+                          explanation: 'Puedes revisar esta actividad y volver a practicar.',
                         },
                       ]
                   ).map((m, idx) => (

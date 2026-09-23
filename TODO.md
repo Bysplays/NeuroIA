@@ -3,6 +3,13 @@
 Keep this checklist current when completing work. See [AGENTS.md](AGENTS.md)
 and [DESIGN.md](DESIGN.md) for development and design guidance.
 
+## Public text availability
+
+- [ ] Revisit the PDF's professional, AI and EEG sections when those features ship,
+  or when future-feature wording is explicitly chosen. See `CONTENT.md`.
+- New neutral completion messages use the existing speech fallback if narrated;
+  do not regenerate or reintroduce obsolete clinical-claim audio to fill gaps.
+
 ## Complete the ElevenLabs audio collection
 
 - 279 of 370 clips are available in `public/audio/elevenlabs-v3/`.

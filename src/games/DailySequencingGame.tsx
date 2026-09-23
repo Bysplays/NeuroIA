@@ -396,7 +396,7 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
         correctAnswers: finalCorrect,
         totalQuestions: total,
         feedbackMessage:
-          '¡Magnífica planificación! Reentrenar las secuencias de la vida diaria fortalece tu autonomía personal.',
+          'Has completado el juego de secuencias. Gracias por practicar.',
         mistakesList,
       };
 

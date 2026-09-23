@@ -20,3 +20,11 @@ export function invitationPatch(invitation, professional, uid, now) {
   return { kind: 'invitation', professionalId: invitation.professionalId,
     professionalName: professional.name, linkedAt: now, expiresAt: null };
 }
+
+/** Invitation and paid access are mutually exclusive. */
+export function subscriptionAccessPatch(access, status, expiresAt) {
+  if (access?.kind === 'invitation') return null;
+  if (status === 'active') return { kind: 'subscription', expiresAt, subscriptionStatus: status };
+  if (access?.kind === 'trial') return null;
+  return { kind: 'subscription', expiresAt: 0, subscriptionStatus: status };
+}

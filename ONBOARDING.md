@@ -90,3 +90,14 @@ fixture users. Normal local development always uses real Google authentication.
 
 References: [Firestore atomic validation](https://firebase.google.com/docs/firestore/security/rules-conditions)
 and [Stripe Checkout subscriptions](https://docs.stripe.com/payments/checkout/build-subscriptions).
+
+### Separate invitation and paid access
+
+Invited accounts cannot start Checkout. Settings offers “Abandonar” with confirmation.
+Leaving atomically replaces access with `{kind: 'revoked', leftAt: serverTimestamp()}`
+and deletes the owner's reciprocal care link. Progress remains intact and trials
+cannot restart. The access gate immediately checks the new state. Publish the updated
+`firestore.rules` for this operation; a frontend build does not deploy rules.
+Users can then redeem an invitation or subscribe when billing is enabled. CEOABERTO
+remains the explicit permanent, reusable exception and can be redeemed again.
+Trials may subscribe directly. Billing events never turn invited accounts into paid accounts.

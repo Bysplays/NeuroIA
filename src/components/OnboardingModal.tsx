@@ -11,7 +11,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
 }) {
   const [code, setCode] = useState('');
   const codeError = invitationIssue?.code === code ? invitationIssue.message : '';
-  const expired = access?.trialStartedAt != null;
+  const expired = access?.trialStartedAt != null || access?.kind === 'revoked';
   return <ModalFrame labelledBy="onboarding-title" onClose={() => {}} dismissOnBackdrop={false}>
     <section className="onboarding">
       <header className="onboarding-heading">

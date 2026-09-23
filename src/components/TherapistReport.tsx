@@ -79,12 +79,8 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
 
   const domains = Object.entries(profile.domainProgress) as [CognitiveDomain, typeof profile.domainProgress[CognitiveDomain]][];
 
-  const strokeDate = profile.strokeDate
-    ? new Date(profile.strokeDate + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
-    : 'Sin especificar';
-  const affectedSide = { izquierda: 'Izquierdo', derecha: 'Derecho', bilateral: 'Bilateral', ninguno: 'Ninguno' };
   const resetProgress = () => {
-    if (!window.confirm('¿Reiniciar el progreso y el historial del paciente? Esta acción no se puede deshacer.')) return;
+    if (!window.confirm('¿Reiniciar el progreso y el historial del usuario? Esta acción no se puede deshacer.')) return;
     const fresh = StorageService.resetProgress();
     onProfileUpdated(fresh);
     setPrescribedDomains(fresh.prescribedDomains);
@@ -95,15 +91,14 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
   return (
     <div className="therapist-container clinical-dashboard">
       <header className="clinical-heading">
-        <div><span className="clinical-eyebrow">Espacio profesional</span><h1>El progreso de {profile.name}</h1><p>Una mirada a su actividad y al siguiente paso.</p></div>
+        <div><span className="clinical-eyebrow">Espacio profesional</span><h1>La actividad de {profile.name}</h1><p>Información sobre el uso y el rendimiento dentro del juego.</p></div>
         <HeaderIllustration scene="therapist" className="menu-header-art" />
         <button className="touch-btn touch-btn-secondary" onClick={() => window.print()}><Printer size={18} /> Exportar informe</button>
       </header>
 
       <div className="clinical-overview">
         <section className="patient-summary">
-          <div className="patient-identity"><span className="patient-avatar" aria-hidden="true">{profile.name.slice(0, 1).toUpperCase()}</span><div><span>Paciente</span><h2>{profile.name}</h2></div></div>
-          <dl><div><dt>Fecha del ictus</dt><dd>{strokeDate}</dd></div><div><dt>Lado afectado</dt><dd>{profile.affectedSide ? affectedSide[profile.affectedSide] : 'Sin especificar'}</dd></div></dl>
+          <div className="patient-identity"><span className="patient-avatar" aria-hidden="true">{profile.name.slice(0, 1).toUpperCase()}</span><div><span>Usuario</span><h2>{profile.name}</h2></div></div>
         </section>
         <section className="clinical-stat stat-lilac"><span>Ejercicios completados</span><strong>{profile.totalSessions}</strong><small>Actividad acumulada</small></section>
         <section className="clinical-stat stat-sage"><span>Tiempo de práctica</span><strong>{profile.totalMinutes}<small> min</small></strong><small>Tiempo acumulado</small></section>
@@ -127,7 +122,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
           </fieldset>
           <label className="clinical-label" htmlFor="patient-guidance">Mensaje para {profile.name}</label>
           <textarea id="patient-guidance" className="prescription-textarea" rows={3} value={guidanceText} onChange={e => { setGuidanceText(e.target.value); setPrescribeSaved(false); }} placeholder="Escribe una pauta breve para su próximo entrenamiento." />
-          <div className="treatment-footer"><span role="status">{prescribeSaved ? 'Cambios guardados' : 'La pauta aparecerá en el inicio del paciente.'}</span><button className="touch-btn touch-btn-primary" onClick={handleSavePrescription}>Guardar pauta</button></div>
+          <div className="treatment-footer"><span role="status">{prescribeSaved ? 'Cambios guardados' : 'La pauta aparecerá en el inicio del usuario.'}</span><button className="touch-btn touch-btn-primary" onClick={handleSavePrescription}>Guardar pauta</button></div>
         </section>
 
         <section className="clinical-panel performance-panel" aria-labelledby="performance-title">
@@ -174,7 +169,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
                   id="note-author"
                   type="text"
                   required
-                  placeholder="Ej: Marcos (Terapeuta Ocupacional)"
+                  placeholder="Ej: Marcos (Profesional)"
                   value={author}
                   onChange={e => setAuthor(e.target.value)}
                   className="text-input"
@@ -203,7 +198,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
                   className="text-input"
                 >
                   <option value="attention">Atención y Rastreo Visual</option>
-                  <option value="language">Lenguaje y Afasia</option>
+                  <option value="language">Lenguaje</option>
                   <option value="memory">Memoria de Trabajo</option>
                   <option value="executive">Funciones Ejecutivas</option>
                   <option value="motor">Coordinación Visomotora</option>
@@ -273,7 +268,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
             <thead>
               <tr>
                 <th>Fecha</th>
-                <th>Área Cognitiva</th>
+                <th>Área de juego</th>
                 <th>Duración</th>
                 <th>Aciertos</th>
                 <th>Precisión</th>
@@ -318,7 +313,7 @@ export const TherapistReport: React.FC<TherapistReportProps> = ({
                         </span>
                       </td>
                       <td className="feedback-col">
-                        <span>{item.feedbackMessage}</span>
+                        <span>Actividad completada</span>
                       </td>
                     </tr>
                   );

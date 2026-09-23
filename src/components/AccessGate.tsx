@@ -1,3 +1,4 @@
+import { AppLoading } from './AppLoading';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { accessService, accessError, type AccountAccess } from '../services/accessService';
 import { OnboardingModal } from './OnboardingModal';
@@ -36,7 +37,9 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     const interval = window.setInterval(() => { if (!locked.current) void refresh(); }, 30000);
     const onFocus = () => { if (!locked.current) void refresh(); };
     window.addEventListener('focus', onFocus);
-    return () => { alive.current = false; clearTimeout(initial); clearInterval(interval); window.removeEventListener('focus', onFocus); };
+    const onAccessChanged = () => { version.current++; setAccess(null); void refresh(); };
+    window.addEventListener('neuroia-access-changed', onAccessChanged);
+    return () => { alive.current = false; clearTimeout(initial); clearInterval(interval); window.removeEventListener('focus', onFocus); window.removeEventListener('neuroia-access-changed', onAccessChanged); };
   }, [refresh]);
   useEffect(() => {
     if (!access?.active || !access.expiresAt) return;
@@ -65,6 +68,16 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     if (url.protocol !== 'https:' || !['checkout.stripe.com', 'billing.stripe.com'].includes(url.hostname)) throw new Error('invalid-checkout');
     window.location.assign(url.href);
   };
+  // Unknown entitlement is not a denied entitlement: never show purchase options yet.
+  if (!access) {
+    if (!error) return <AppLoading />;
+    return <main className="cloud-entry">
+      <h1>No hemos podido abrir tu espacio</h1>
+      <p role="alert">Comprueba la conexión y vuelve a intentarlo.</p>
+      <button className="touch-btn touch-btn-primary" onClick={() => { setError(''); void refresh(); }}>Reintentar</button>
+      <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
+    </main>;
+  }
   if (access?.active) return <>
     {access.canManageSubscription && <div className="access-membership"><button className="paper-nav-button" disabled={busy} onClick={() => { void run(() => redirect('portal')); }}>Gestionar suscripción</button>{error && <p role="alert">{error}</p>}</div>}
     {children}

@@ -12,8 +12,9 @@ English; the application speaks Spanish.
 
 ## Purpose and tone
 
-Support people practicing cognitive and motor skills, including people recovering
-from stroke. Make the next action easy to understand without making the interface
+Present NeuroIA as entertainment, training and serious play, following the supplied
+copy in [CONTENT.md](CONTENT.md). Describe practice and in-game activity without
+disease, rehabilitation or medical efficacy positioning. Make the next action easy to understand without making the interface
 feel like a clinical report or an exam. Warmth must not obscure a task or make
 recognition harder.
 
@@ -74,7 +75,9 @@ than color. Game colors that convey a clue must remain identifiable.
 
 Use DM Sans with the existing system fallback. Headings use moderate weight and
 compact line height; body copy has room to breathe. Use the existing font-size
-settings and relative units for text. Do not force a smaller fixed font simply to
+settings and relative units for text. Apply the selected scale at the document
+root so rem-based text responds throughout the interface (normal 100%, large
+118%, very large 135%); changing the body font size alone is insufficient. Do not force a smaller fixed font simply to
 make a layout fit.
 
 ## Composition and spacing
@@ -197,6 +200,36 @@ the viewport; align its inner content independently. Avoid redundant wrappers,
 competing width rules, oversized icons, and unexplained gaps above or below
 content. Long content must scroll without losing access to dismissal.
 
+### Preferences
+
+Settings use one neutral surface, a compact sticky blue-paper header and a clear
+close button. Show text size and page style, followed by subscription status. Text size uses three segmented
+choices; the sole style offered for now is “Cozy”, the existing standard paper
+palette. Represent Cozy with a miniature home layout: blue hero with text and button shapes,
+pink side panel and five pastel activity tiles. Use literal Cozy
+colors inside the miniature so it remains recognizable in legacy contrast themes.
+Do not use mascots or a letter sample for the style preview. Keep the explicit selected check. Preserve stored contrast,
+hand-position and speech preferences for compatibility, but do not expose their
+controls here. Voice attribution lives in “Sobre NeuroIA”. The subscription section reads real
+account access, shows invitation/trial/monthly status and uses Stripe checkout or
+the customer portal only when billing is enabled. Show the plan type and its end date on separate lines, without a redundant
+subscription heading or status badge. Trials can subscribe via a pill-shaped “Mejorar” action; keep it disabled while
+Stripe is unavailable, without a coming-soon notice. Invited accounts show only
+“Abandonar”, with a confirmation explaining loss of access and the professional
+link while preserving progress. Invitation and paid access are mutually exclusive. Cancellation and any available plan changes are confirmed in Stripe; do
+not invent prices, upgrade plans or successful cancellation. Changes apply
+immediately through the existing settings service. Apply appearance attributes
+before browser paint so the selected control and the page update together, without
+a frame in the previous theme or text size. Keep locally edited settings stable
+through background saves for the rest of the session. Dismiss using the header
+close button; omit the redundant “Listo” action. Place “Cerrar sesión” at the
+bottom of settings, separated by a fine rule; omit it from the main header. Place
+“Sobre NeuroIA” and “Aviso legal” to its right in the same footer row. Allow the
+links to wrap within their right-hand group on narrow screens. Keep 22px of section
+spacing on both sides of the footer divider, without a trailing paragraph margin.
+Content scrolls with the close button accessible, including large text and short
+landscape screens. Do not reduce text to make controls fit.
+
 ### Therapist view
 
 Maintain the same brand and soft surfaces with a more restrained hierarchy.
@@ -246,15 +279,15 @@ label or generation prompt alone does not establish that pronunciation. Avoid br
 voice qualities; a slow pace must not turn into an affected or whispered reading.
 Prefer natural/enhanced Spain voices and recognize accented voice names. Do not
 select a Latin American voice merely because it appears first. Keep pitch natural,
-preserve the user’s pace setting, and offer a short voice preview in accessibility
-settings. Browser speech quality still depends on the installed voices. Recorded narration uses Alejandro Castellanos with
+preserve the user’s pace setting, and keep the existing prerecorded and browser speech playback. Voice preview and
+pace controls are currently hidden from settings. Browser speech quality still depends on the installed voices. Recorded narration uses Alejandro Castellanos with
 Eleven v3 and Spanish explicitly selected. Generate recognition words in short
 lists, as in the accepted pronunciation sample; isolated v2 requests produced
 unacceptable pronunciation. Validate each new clip before adoption. The local
 `public/audio/elevenlabs-v3/` collection supplies available narration; missing or
 unplayable files fall back to browser speech. Audio effects and narration remain
 independent. Playback rate follows the voice setting without shifting pitch.
-Show a quiet ElevenLabs attribution in accessibility settings. The recordings
+Show a quiet ElevenLabs attribution in “Sobre NeuroIA”. The recordings
 retain their free-plan non-commercial license.
 
 Motion and sound should reassure, not startle. Reuse the gentle tap sound and
@@ -281,6 +314,15 @@ Use this review before finishing a visual change:
 
 ### Entry and landscape requirement
 
+Use the same centered brand mark, “Preparando tu espacio…” and restrained loading
+dots while restoring authentication, checking access, loading lazy code and reading
+initial progress. This transient loader uses fixed text and artwork dimensions so
+restoring the account's text-size preference cannot shift it; the rest of the UI
+continues to respect that preference. Respect reduced motion. Do not mount login until authentication
+resolves as signed out, or onboarding until a successful access read confirms no
+active entitlement. Failed initial access reads show retry/logout recovery, not a
+purchase modal. Background access refreshes keep the mounted workspace visible.
+
 Center the login card vertically in the viewport with balanced flexible space
 above and below; keep the brand at the top. On short screens let the page scroll
 without clipping controls. A soft curved edge with a subtle paper-layer echo
@@ -288,15 +330,18 @@ separates the illustration and action panels, rather than a straight vertical cu
 Use a decorative inline SVG colored with the existing surface token.
 
 The initial screen has a blue paper illustration panel and one heading,
-“Tu espacio, a tu ritmo”, beside the “Continuar con Google” action. Use
+“Jugar también puede ser una forma de entrenar”, beside the “Continuar con Google” action. Use
 `public/images/headers/login-transparent.png`, a true-alpha cutout derived from
 the home scene, without blend modes or an opaque image backing. Keep only one
-short note explaining account-linked progress; omit introductory paragraphs,
+short note explaining account-linked progress. Quiet “Sobre NeuroIA” and “Aviso
+legal” links below the card open the supplied product information in the shared
+dialog; signed-in users find these links in the settings footer. Keep long copy
+scrollable, selectable and readable in all themes. Omit introductory paragraphs,
 secondary headings and account badges. Show pending
 and recoverable error states without replacing the screen. A closed popup does
 not prove intentional cancellation: use neutral copy and suggest an external
 browser if an embedded browser closes the window automatically. Cloud saving is tied to the signed-in account; show an actionable notice only when saving remains pending or fails. The
-header offers “Cerrar sesión”; signing out preserves cloud progress and pending account-local work. Existing
+settings footer offers “Cerrar sesión”; signing out preserves cloud progress and pending account-local work. Existing
 unscoped demo data is never silently assigned to the first person who signs in.
 
 All interactive views require a landscape viewport. In portrait, a blocking

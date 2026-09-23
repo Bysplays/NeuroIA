@@ -10,11 +10,12 @@ Explicit user instructions take precedence over this local guidance.
 
 ## Product and language
 
-NeuroIA is a Spanish-language cognitive rehabilitation app with nine exercises
+NeuroIA is a Spanish-language entertainment, training and serious-play app with nine exercises
 across attention, language, memory, organization, and coordination. The app also
 includes a daily plan, achievements, accessibility settings, and a therapist view.
 
-Keep patient-facing copy in Spanish. Write project guidance in English. Use short,
+Keep user-facing copy in Spanish. Follow [CONTENT.md](CONTENT.md) for the supplied
+public wording, non-medical positioning and feature-availability limits. Write project guidance in English. Use short,
 warm instructions and concrete action labels. Do not add medical efficacy claims
 or invent patient activity, results, diagnoses, or professional guidance.
 
@@ -37,11 +38,13 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 
 | Location | Responsibility |
 | --- | --- |
+| `src/components/AppLoading.tsx` | Shared initial loading presentation for auth, access, lazy chunks and progress |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Mandatory account entry before progress and games |
-| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption; see `ONBOARDING.md` |
+| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `ONBOARDING.md` |
 | `functions/` | Future Stripe billing backend and administrator-only professional ownership script |
 | `src/App.tsx` | View state, profile refresh, game dispatch, daily-plan progression |
 | `src/types/index.ts` | Domain, exercise, profile, result, and settings contracts |
+| `src/services/productCopy.ts` and `src/components/ProductInformation.tsx` | Supplied public presentation and notice, accessible from login and dashboard |
 | `src/components/Dashboard.tsx` | Home, entry points to areas and all exercises |
 | `src/components/ExerciseCatalog.tsx` | Nine-game catalog and area filters |
 | `src/services/exerciseCatalog.ts` | Canonical exercise definitions and short summaries |
@@ -53,8 +56,10 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
 | `src/services/storageService.ts` | Account-scoped cache/outbox, legacy local operations and daily plan |
 | `src/services/progressData.ts` | Pure cloud progress reducer and patient-only import sanitation |
-| `src/services/progressSync.ts` | Durable operation queue, retries and session cancellation |
+| `src/services/progressSync.ts` | Durable operation queue, local settings overlay, retries and session cancellation |
+| `src/services/appearance.ts` | Applies restored and live appearance settings before paint |
 | `src/services/firestoreProgress.ts` | Firestore transactions, retry receipts and live updates |
+| `src/services/progressSnapshot.ts` | Orders server snapshots by timestamp to reject delayed older data |
 | `src/components/CloudProgress.tsx` | Cloud loading, import choice and save-status boundary |
 | `src/services/soundService.ts` and `speechVoice.ts` | Shared audio, narrator controls, and Spain-voice selection |
 | `src/services/achievements.ts` | Cumulative achievement conditions |
@@ -156,6 +161,10 @@ authenticated browser caches append `:<encoded Firebase UID>` to each key.
 `neuroia_outbox_v1:<encoded UID>:<encoded operation ID>` stores pending work;
 `neuroia_local_backup_v1:<encoded UID>` preserves the pre-cloud account cache.
 Existing unscoped data is preserved and never imported automatically.
+Settings expose text size, the Cozy style (`contrast: standard`) and a subscription
+section (`SubscriptionSettings`) using the existing access service and Stripe portal.
+Legacy speech, hand-position and contrast values remain compatible; their controls
+are hidden. Audio attribution is in “Sobre NeuroIA”.
 Narrator preference remains device-wide and managed by the sound service. Preserve compatibility with existing profiles and history. `leftSideAnchor` is
 a legacy persisted setting, defaults to false, and is neither rendered nor
 configurable; keep the field for compatibility without restoring its visual guide. Use
@@ -232,8 +241,11 @@ the clock, alongside the existing speech-voice tests.
 `App` observes Firebase Authentication before mounting the cloud progress boundary.
 Configuration and session persistence are in `src/services/firebase.ts`; Analytics
 is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy.
-The user has confirmed Google login. Firebase manages the tab session with an
-in-memory fallback. `StorageService.setAccount` is set by the auth observer; cache
+The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
+localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the
+auth session through the bottom of Settings (not the home header). Entry and
+recovery screens retain their logout exits. After Firebase restores the UID, cached appearance is applied from
+that account before cloud loading; cached identity never grants access. `StorageService.setAccount` is set by the auth observer; cache
 and pending writes are scoped to the UID. Auth changes unmount the old boundary,
 unsubscribe listeners, and prevent late callbacks from touching the next account.
 
@@ -251,7 +263,16 @@ Use `ProgressSync.enqueue` for authenticated result/settings changes. Do not cal
 legacy `StorageService.addExerciseResult`/`updateSettings` from the signed-in UI.
 Transactions apply operations to the latest server state and write permanent
 receipts atomically. Results are idempotent by their existing exercise-result ID;
-settings patch individual fields, with the last committed same-field change winning.
+settings patch individual fields, with the last committed same-field change winning
+in the backend. Locally edited fields stay pinned in the current `ProgressSync`
+session, including after acknowledgment, to prevent server responses or another
+device from changing appearance mid-use. Untouched settings and progress continue
+to update live. A new session adopts the latest cloud settings and overlays any
+persisted pending operations. The existing account cache stores the displayed
+settings; no additional settings store is used.
+The Firestore adapter orders server reads and listener snapshots by `updatedAt`
+(seconds and nanoseconds) per account session. Delayed older snapshots must not
+revert a newer confirmed setting or progress state.
 Recent profile/domain histories are bounded at 60; cumulative totals remain intact.
 There is no automated receipt pruning. The cloud streak changes on completed
 activity, not profile reads. Imported historical totals are preserved.
@@ -268,7 +289,7 @@ are not synced; accessibility settings in the profile are synced.
 Professional navigation remains unavailable pending verified roles and care links.
 The retained therapist component is not wired to cloud mutations. Current rules
 allow only the owner's patient progress, append-only results and immutable retry
-receipts; all client role, cross-account, clinical and delete paths stay denied. Strict Firestore rules allow only the permanent CEOABERTO invitation, the reserved unclaimed CeoAberto profile and reciprocal owner-specific care links; ownership changes remain admin-only and no clinical access is granted. Totals
+receipts; all client role, cross-account, clinical and delete paths stay denied. Strict Firestore rules allow only the permanent CEOABERTO invitation, the reserved unclaimed CeoAberto profile and reciprocal owner-specific care links; owners may atomically revoke their invitation and delete their matching care link; ownership changes remain admin-only and no clinical access is granted. Totals
 are self-reported client data, not medically verified records. Publish the exact
 reviewed `firestore.rules` before using the real project. No rules are deployed
 by a frontend build. See `AUTHENTICATION.md` and `TODO.md`.

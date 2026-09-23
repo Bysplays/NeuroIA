@@ -143,3 +143,25 @@ test('Spark: pending billing prevents free redemption and inactive professionals
     await updateDoc(doc(context.firestore(), 'professionals/ceoaberto'), {active:true});
   });
 });
+
+test('Spark: leaving removes both access and care link atomically, preserves progress and allows explicit re-entry', async () => {
+  const uid = 'spark-leave'; const db = env.authenticatedContext(uid).firestore();
+  const adapter = firestoreAccess(uid, db);
+  await adapter.invite('CEOABERTO');
+  const progress = firestoreProgress(uid, db);
+  await progress.initialize(fresh());
+  const ref = doc(db, `users/${uid}/access/main`);
+  const patient = doc(db, `professionals/ceoaberto/patients/${uid}`);
+  await assertFails(setDoc(ref, {kind:'revoked',leftAt:serverTimestamp()}));
+  await assertFails(deleteDoc(patient));
+  await assertFails(firestoreAccess(uid, env.authenticatedContext('other-leaver').firestore()).leaveInvitation());
+  await adapter.leaveInvitation();
+  assert.equal((await adapter.load()).active, false);
+  assert.equal((await getDoc(patient)).exists(), false);
+  assert.ok(await progress.load());
+  await assert.rejects(adapter.trial());
+  await assert.rejects(adapter.leaveInvitation());
+  await adapter.invite('CEOABERTO');
+  assert.equal((await adapter.load()).active, true);
+  assert.equal((await getDoc(patient)).exists(), true);
+});

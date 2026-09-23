@@ -4,8 +4,6 @@ import type { UserProfile } from '../types';
 import { soundService } from '../services/soundService';
 
 interface HeaderProps {
-  onSignOut: () => void;
-  signingOut: boolean;
   profile: UserProfile;
   sessionMinutes: number;
   activeView: 'dashboard' | 'therapist' | 'game';
@@ -15,8 +13,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onSignOut,
-  signingOut,
   profile,
   activeView,
   onNavigate,
@@ -45,7 +41,6 @@ export const Header: React.FC<HeaderProps> = ({
       </button>
 
       <div className="header-right">
-        <button className="header-btn" disabled={signingOut} onClick={onSignOut}>{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}</button>
         <span className="header-context">{activeView === 'therapist' ? 'ESPACIO PROFESIONAL' : 'MI ESPACIO'}</span>
         {/* Professional navigation stays unavailable until verified roles and care links exist. */}
 

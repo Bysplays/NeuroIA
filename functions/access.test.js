@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { hasAccess, trialPatch, invitationPatch, normalizeCode, TRIAL_MS } from './access.js';
+import { hasAccess, trialPatch, invitationPatch, normalizeCode, TRIAL_MS, subscriptionAccessPatch } from './access.js';
 test('trial grants exactly seven days and cannot be restarted after expiry', () => {
   const data = trialPatch({}, 1000);
   assert.equal(data.expiresAt, 1000 + TRIAL_MS);
@@ -29,4 +29,15 @@ test('invitation links the professional and rejects inactive, expired or consume
   assert.equal(hasAccess(data, Number.MAX_SAFE_INTEGER), true);
   for (const invalid of [{...invite, active:false},{...invite,expiresAt:1000},{...invite,usedBy:'other'}]) assert.throws(() => invitationPatch(invalid,professional,'patient',1000));
   assert.throws(() => invitationPatch(invite,{...professional,active:false},'patient',1000));
+});
+
+test('billing events never convert an invitation into paid access', () => {
+  for (const status of ['active', 'canceled', 'incomplete']) {
+    assert.equal(subscriptionAccessPatch({kind:'invitation'}, status, 5000), null);
+  }
+  assert.equal(hasAccess({kind:'revoked'}, 1000), false);
+});
+test('failed checkout preserves trials and unpaid subscriptions do not gain access', () => {
+  assert.equal(subscriptionAccessPatch({kind:'trial'}, 'incomplete', 5000), null);
+  assert.equal(subscriptionAccessPatch({kind:'subscription'}, 'past_due', 5000).expiresAt, 0);
 });

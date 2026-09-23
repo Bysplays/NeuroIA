@@ -42,8 +42,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     {
       id: 'attention' as CognitiveDomain,
       title: 'Atención y Rastreo Visual',
-      subtitle: 'Heminegligencia y Exploración',
-      desc: 'Localiza estímulos en toda la pantalla para estimular el barrido de izquierda a derecha.',
+      subtitle: 'Atención y concentración',
+      desc: 'Localiza objetivos e identifica elementos en la pantalla.',
       icon: <Eye size={36} />,
       color: 'var(--color-attention)',
       bgColor: 'var(--color-attention-bg)',
@@ -52,8 +52,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     {
       id: 'language' as CognitiveDomain,
       title: 'Lenguaje y Vocabulario',
-      subtitle: 'Afasia y Anomia',
-      desc: 'Recupera palabras y nombres de objetos cotidianos con apoyo fonológico y de voz.',
+      subtitle: 'Palabras y conceptos',
+      desc: 'Nombra imágenes y relaciona conceptos a través del juego.',
       icon: <MessageSquare size={36} />,
       color: 'var(--color-language)',
       bgColor: 'var(--color-language-bg)',
@@ -63,7 +63,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       id: 'memory' as CognitiveDomain,
       title: 'Memoria de Trabajo',
       subtitle: 'Secuencias y Recuerdos',
-      desc: 'Retén secuencias visuales paso a paso para reforzar la memoria inmediata.',
+      desc: 'Recuerda posiciones, secuencias, imágenes, palabras u objetos.',
       icon: <Brain size={36} />,
       color: 'var(--color-memory)',
       bgColor: 'var(--color-memory-bg)',
@@ -73,7 +73,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       id: 'executive' as CognitiveDomain,
       title: 'Funciones Ejecutivas',
       subtitle: 'Vida Diaria y Lógica',
-      desc: 'Ordena temporalmente acciones cotidianas (higiene, cocina, seguridad) para tu autonomía.',
+      desc: 'Organiza acciones y resuelve pequeños retos de lógica.',
       icon: <ListOrdered size={36} />,
       color: 'var(--color-executive)',
       bgColor: 'var(--color-executive-bg)',
@@ -83,7 +83,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       id: 'motor' as CognitiveDomain,
       title: 'Coordinación Visomotora',
       subtitle: 'Precisión Táctil y Mano',
-      desc: 'Toca dianas en pantalla a tu propio ritmo para reentrenar la motricidad fina.',
+      desc: 'Toca, arrastra o sigue recorridos a tu ritmo.',
       icon: <Hand size={36} />,
       color: 'var(--color-motor)',
       bgColor: 'var(--color-motor-bg)',
@@ -109,8 +109,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <section className="daily-session-card">
               <div className="daily-session-copy">
                 <span className="soft-label"><span className="status-dot" /> Tu sesión de hoy</span>
-                <h2>Un rato para ti.<br />Un paso más.</h2>
-                <p>Tres ejercicios para activar tu mente.<br />Sin prisas. A tu manera.</p>
+                <h2>Juega. Practica.<br />Progresa a tu ritmo.</h2>
+                <p>Tres juegos para practicar.<br />Sin prisas. A tu manera.</p>
               </div>
               <HeaderIllustration scene="home" className="wellness-characters" />
               <div className="session-actions">
@@ -179,6 +179,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }}
         />
       )}
+
 
       {/* Modal para elegir entre los ejercicios del área */}
       {selectedDomainForModal && (

@@ -442,8 +442,8 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
         totalQuestions: total,
         feedbackMessage:
           accuracy >= 80
-            ? '¡Excelente razonamiento y clasificación! Has organizado los elementos con gran autonomía mental.'
-            : '¡Buen ejercicio de flexibilidad cognitiva! Agrupar y clasificar refuerza las funciones de tu lóbulo frontal.',
+            ? '¡Buen trabajo! Has clasificado los elementos con precisión.'
+            : 'Has practicado agrupando objetos por categorías. Puedes volver a jugar.',
         mistakesList,
       };
 

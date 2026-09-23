@@ -1,13 +1,22 @@
-import { doc, getDocFromServer, onSnapshot, runTransaction, serverTimestamp, type Firestore } from 'firebase/firestore';
+import { doc, getDocFromServer, onSnapshot, runTransaction, serverTimestamp, type Firestore, type DocumentSnapshot } from 'firebase/firestore';
+import { ProgressSnapshotOrder } from './progressSnapshot.ts';
 import { applyProgressOperation, patientProgress, type ProgressData, type ProgressOperation } from './progressData.ts';
 
 export function firestoreProgress(uid: string, db: Firestore) {
   const ref = doc(db, 'users', uid, 'progress', 'main');
+  const snapshots = new ProgressSnapshotOrder();
+  const accept = (snapshot: DocumentSnapshot) => {
+    if (!snapshot.exists()) return false;
+    const value = snapshot.data();
+    return snapshots.accept(value.data as ProgressData, value.updatedAt);
+  };
   const clean = (value: unknown) => JSON.parse(JSON.stringify(value));
   return {
     async load(): Promise<ProgressData | null> {
       const snapshot = await getDocFromServer(ref);
-      return snapshot.exists() ? snapshot.data().data as ProgressData : null;
+      if (!snapshot.exists()) return null;
+      accept(snapshot);
+      return snapshots.data;
     },
     async initialize(initial: ProgressData): Promise<ProgressData> {
       return runTransaction(db, async tx => {
@@ -37,7 +46,7 @@ export function firestoreProgress(uid: string, db: Firestore) {
     },
     watch(next: (data: ProgressData) => void, error: (error: unknown) => void) {
       return onSnapshot(ref, { includeMetadataChanges: true }, snapshot => {
-        if (snapshot.exists() && !snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites) next(snapshot.data().data as ProgressData);
+        if (!snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites && accept(snapshot)) next(snapshots.data!);
       }, error);
     },
   };

@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { browserPopupRedirectResolver, browserSessionPersistence, inMemoryPersistence, initializeAuth } from 'firebase/auth';
+import { browserPopupRedirectResolver, indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, initializeAuth } from 'firebase/auth';
 
 // Public web configuration. Authorization must be enforced by server-side rules.
 const app = initializeApp({
@@ -11,9 +11,9 @@ const app = initializeApp({
   appId: '1:1049872074432:web:59858bb2b50b9e1f58cf25',
 });
 
-// Shared-device friendly: restore on reload, not after closing the tab.
+// Firebase restores the signed-in account across reloads and browser restarts.
 export const auth = initializeAuth(app, {
-  persistence: [browserSessionPersistence, inMemoryPersistence],
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence],
   popupRedirectResolver: browserPopupRedirectResolver,
 });
 auth.languageCode = 'es';

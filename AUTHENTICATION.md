@@ -54,7 +54,8 @@ The aggregate profile includes counters, achievements' source activity and
 accessibility settings. Each operation transaction reads the current profile and
 its receipt, updates totals/settings, and writes the receipt atomically. Concurrent
 completions add independently; settings patch individual fields. The last committed
-edit to the same setting wins. Existing result IDs are the idempotency keys.
+edit to the same setting wins in Firestore; locally edited fields stay stable
+for the active session (see Stable local preferences below). Existing result IDs are the idempotency keys.
 Recent profile/domain histories are capped at 60; new individual result documents
 are retained separately. No permanent receipt pruning is implemented.
 
@@ -110,8 +111,9 @@ cloud verification remains pending publication of the rules.
 
 ## Popup and orientation restrictions
 
-Firebase Google popup sign-in uses tab-scoped auth persistence with an in-memory
-fallback. A closed popup does not prove intentional cancellation. If it closes
+Firebase Google popup sign-in persists across browser restarts using IndexedDB,
+with localStorage, sessionStorage and in-memory fallbacks. The user can end the
+session explicitly with “Cerrar sesión”. A closed popup does not prove intentional cancellation. If it closes
 immediately in an embedded browser, use external Safari or Chrome. Do not spoof
 browser identity or automatically restart sign-in via redirect after cancellation.
 Google restricts OAuth in embedded user agents; cross-domain redirects also need
@@ -133,3 +135,15 @@ Authentication now precedes a mandatory server-validated access gate. See
 provisioning and required rule publication. Local development keeps real Google
 authentication; emulator identities are only for automated testing.
 Professional links do not yet authorize clinical access.
+
+### Stable local preferences
+
+After Firebase restores an account, its existing cached appearance is applied
+while cloud access and progress load. The cache does not authorize entry or replace
+the initial progress server check. Settings changes update the current view and
+account cache immediately and use the durable operation queue for background sync.
+Locally edited fields remain pinned for that session, even after acknowledgment;
+untouched fields and exercise progress still receive live cloud updates. On a new
+session, load current server settings and overlay any unsent operations. This
+avoids mid-session appearance bounces without repeatedly writing local preferences
+over changes from another device.

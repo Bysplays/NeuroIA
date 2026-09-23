@@ -21,7 +21,7 @@ export function firestoreAccess(uid: string, db: Firestore) {
         ? trialStartedAt + TRIAL_DURATION : data?.expiresAt ?? null;
       return {
         active: data?.kind === 'invitation' || (['trial', 'subscription'].includes(data?.kind) && typeof expiresAt === 'number' && expiresAt > now),
-        kind: data?.kind as 'trial' | 'subscription' | 'invitation' | undefined,
+        kind: data?.kind as 'trial' | 'subscription' | 'invitation' | 'revoked' | undefined,
         serverNow: now, expiresAt, trialStartedAt,
         professionalId: data?.professionalId as string | undefined,
         professionalName: data?.professionalName as string | undefined,
@@ -56,6 +56,14 @@ export function firestoreAccess(uid: string, db: Firestore) {
           professionalName: 'CeoAberto', expiresAt: null, linkedAt,
         }, { merge: true });
         if (!patient.exists()) tx.set(patientRef, { patientId: uid, linkedAt });
+      });
+    },
+    async leaveInvitation() {
+      await runTransaction(db, async tx => {
+        const current = await tx.get(accessRef);
+        if (current.data()?.kind !== 'invitation') throw failure('invitation/not-active', 'Tu cuenta ya no tiene una invitación activa.');
+        tx.set(accessRef, { kind: 'revoked', leftAt: serverTimestamp() });
+        tx.delete(patientRef);
       });
     },
     async trial() {

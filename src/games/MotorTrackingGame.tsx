@@ -188,8 +188,8 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
       totalQuestions: REQUIRED_CONTACT_SECONDS,
       feedbackMessage:
         accuracy >= 85
-          ? '¡Excelente precisión visomotora! Has mantenido el seguimiento continuo de forma impecable.'
-          : '¡Buen entrenamiento de coordinación! Seguir objetivos móviles fortalece la propiocepción de tu mano.',
+          ? '¡Buen trabajo! Has seguido la diana con precisión.'
+          : 'Has practicado siguiendo una diana en movimiento. Cada intento cuenta.',
       mistakesList,
     };
 
