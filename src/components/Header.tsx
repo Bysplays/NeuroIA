@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { ChartNoAxesCombined, Settings, Volume2, VolumeX } from 'lucide-react';
+import { ChartNoAxesCombined, House, Settings, Volume2, VolumeX } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { soundService } from '../services/soundService';
 
 interface HeaderProps {
   profile: UserProfile;
   sessionMinutes: number;
-  activeView: 'dashboard' | 'therapist' | 'game';
+  activeView: 'dashboard' | 'therapist' | 'statistics' | 'game';
   onNavigate: (view: 'dashboard' | 'therapist') => void;
   onOpenStatistics: () => void;
   onOpenAccessibility: () => void;
@@ -46,7 +46,14 @@ export const Header: React.FC<HeaderProps> = ({
         <span className="header-context">{activeView === 'therapist' ? 'ESPACIO PROFESIONAL' : 'MI ESPACIO'}</span>
         {/* Professional navigation stays unavailable until verified roles and care links exist. */}
 
-        <button className="header-icon-btn" onClick={onOpenStatistics} aria-label="Ver estadísticas" title="Ver estadísticas"><ChartNoAxesCombined size={20} /></button>
+        <button
+          className="header-icon-btn"
+          onClick={activeView === 'statistics' ? () => onNavigate('dashboard') : onOpenStatistics}
+          aria-label={activeView === 'statistics' ? 'Volver al inicio' : 'Ver estadísticas'}
+          title={activeView === 'statistics' ? 'Volver al inicio' : 'Ver estadísticas'}
+        >
+          {activeView === 'statistics' ? <House size={20} /> : <ChartNoAxesCombined size={20} />}
+        </button>
         {/* Botón de Sonido */}
         <button
           className="header-icon-btn"

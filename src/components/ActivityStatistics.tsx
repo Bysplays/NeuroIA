@@ -25,7 +25,7 @@ function LineChart({ results, metric }: { results: ExerciseResult[]; metric: 'ac
   const start = dayTime(days[0]); const end = dayTime(days.at(-1)!);
   const x = (day: string) => days.length === 1 ? 330 : 55 + (dayTime(day) - start) / (end - start) * 555;
   const y = (value: number) => 215 - value / max * 180;
-  return <section className="stats-card stats-chart"><h2>{metric === 'accuracy' ? 'Precisión media' : 'Velocidad media'}</h2>
+  return <section className={`stats-card stats-chart stats-chart-${metric}`}><h2>{metric === 'accuracy' ? 'Precisión media' : 'Velocidad media'}</h2>
     <p>{metric === 'accuracy' ? 'Porcentaje de aciertos · media diaria por ejercicio' : 'Segundos por pregunta · media diaria por ejercicio'}</p>
     {!points.length ? <p className="stats-empty">Todavía no hay datos para esta gráfica.</p> : <>
       <svg viewBox="0 0 650 265" role="img" aria-label={`${metric === 'accuracy' ? 'Precisión' : 'Segundos por pregunta'} por día. Valores disponibles en la tabla inferior.`}>
@@ -42,7 +42,7 @@ function CategoryRadar({ results }: { results: ExerciseResult[] }) {
   const counts = domains.map(([id]) => results.filter(r => r.domain === id).length);
   const max = Math.max(1, ...counts);
   const point = (i: number, radius: number) => { const a = i * 2 * Math.PI / 5 - Math.PI / 2; return [160 + Math.cos(a) * radius, 125 + Math.sin(a) * radius]; };
-  return <section className="stats-card"><h2>Áreas que practicas</h2><p>Ejercicios completados en la selección</p><svg className="stats-radar" viewBox="0 0 320 260" role="img" aria-label={domains.map(([, name], i) => `${name}: ${counts[i]}`).join(', ')}>
+  return <section className="stats-card stats-radar-card"><h2>Áreas que practicas</h2><p>Ejercicios completados en la selección</p><svg className="stats-radar" viewBox="0 0 320 260" role="img" aria-label={domains.map(([, name], i) => `${name}: ${counts[i]}`).join(', ')}>
     {[.25, .5, .75, 1].map(scale => <polygon key={scale} points={domains.map((_, i) => point(i, 83 * scale).join(',')).join(' ')} className="stats-grid-line" fill="none" />)}
     {domains.map(([, name], i) => { const [x, y] = point(i, 110); const [ax, ay] = point(i, 83); return <g key={name}><line x1="160" y1="125" x2={ax} y2={ay} className="stats-grid-line"/><text x={x} y={y} textAnchor="middle">{name}<tspan x={x} dy="17">{counts[i]}</tspan></text></g>; })}
     <polygon points={counts.map((n, i) => point(i, n / max * 83).join(',')).join(' ')} className="stats-radar-fill" />

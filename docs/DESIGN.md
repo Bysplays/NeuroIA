@@ -453,7 +453,9 @@ production prerequisites are documented in `docs/ONBOARDING.md`.
 
 ### Activity statistics
 
-A chart icon beside sound and settings opens the account activity view. Keep the
+A chart icon beside sound and settings opens the account activity view. While
+that view is open, the same button shows a house, is labelled “Volver al inicio”,
+and returns to the home. Keep the
 category radar at the upper left, showing completion counts rather than ability.
 Two daily charts use one consistent color per exercise: mean accuracy and mean
 seconds per question (session duration divided by question count, then averaged
@@ -465,7 +467,10 @@ explicitly offer more archived records and disclose partial coverage. Preserve
 empty/error/retry states and use real activity only.
 
 Place the category radar beside the filter panel, then the two daily charts and
-the full-width history. Omit the activity-summary text card. Activity filters sit
+the full-width history. Cozy uses blue paper for the radar, sage for filters,
+lilac for accuracy and peach for speed, with white controls and history. Default
+retains neutral surfaces. Use shared theme tokens so live style changes apply
+immediately and legacy contrast modes retain priority. Omit the activity-summary text card. Activity filters sit
 in a padded panel with a separate heading and reset action; use two columns on
 desktop and tablet and one on narrow screens. Stack the radar and filters on
 narrow screens. Use controls at least 48px high, equally sized rounded fields and outlined pill

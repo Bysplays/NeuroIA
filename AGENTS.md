@@ -344,6 +344,9 @@ profile creation/import and is never updated by the settings input.
 ## Account activity statistics
 
 `ActivityStatistics` is a React-state workspace view opened from Header.
+Pass the statistics view state to Header so its chart button becomes a home
+button using the existing dashboard navigation callback. Activity surfaces use
+the shared `data-style` attribute and palette tokens; no separate theme state.
 `activityStats.ts` deduplicates results and computes local-day per-exercise means.
 It maps historical result IDs `visual-scan`, `daily-seq` and `motor-coord` to
 `visual-scanning`, `daily-sequencing` and `motor-target` in the read-only activity

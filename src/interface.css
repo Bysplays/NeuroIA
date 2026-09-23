@@ -951,6 +951,11 @@ body[data-contrast="high-contrast"] #invitation-error:not(:empty) { color: var(-
 .stats-filters label { display: grid; gap: 8px; font-weight: 500; font-size: .85rem; min-width: 0; }
 .stats-filters select, .stats-filters input { height: max(52px, 2.6rem); min-height: 48px; width: 100%; min-width: 0; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); color: var(--color-text-main); font: inherit; }
 .stats-card { min-width: 0; padding: 26px; border-radius: 28px; background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-text-main) 12%, transparent); }
+/* Cozy uses the same paper palette as the home; contrast modes override these tokens. */
+body[data-style="cozy"] .stats-radar-card { background: var(--panel-blue); }
+body[data-style="cozy"] .stats-filter-panel { background: var(--panel-sage); }
+body[data-style="cozy"] .stats-chart-accuracy { background: var(--panel-lilac); }
+body[data-style="cozy"] .stats-chart-speed { background: var(--panel-peach); }
 .stats-card h2 { font-size: 1.1rem; margin: 0 0 8px; }
 .stats-card p { margin: 0 0 12px; font-size: .85rem; line-height: 1.6; color: var(--color-text-muted); }
 .stats-overview { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); gap: 24px; }

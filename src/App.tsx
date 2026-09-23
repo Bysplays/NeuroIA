@@ -214,11 +214,12 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
         <Header
           profile={profile}
           sessionMinutes={sessionMinutes}
-          activeView={activeView === 'therapist' ? 'therapist' : 'dashboard'}
+          activeView={activeView === 'statistics' ? 'statistics' : activeView === 'therapist' ? 'therapist' : 'dashboard'}
           onNavigate={view => {
             soundService.stopSpeaking();
             setDailyPlanSession(null);
             setActiveView(view);
+            window.scrollTo(0, 0);
           }}
           onOpenStatistics={() => { setActiveView('statistics'); window.scrollTo(0, 0); }}
           onOpenAccessibility={() => setIsAccessibilityOpen(true)}
