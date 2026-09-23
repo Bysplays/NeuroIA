@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dailyActivity, localDay, mergeActivity, secondsPerQuestion } from '../src/services/activityStats.ts';
+import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion } from '../src/services/activityStats.ts';
 import type { ExerciseResult } from '../src/types/index.ts';
 const result = (id: string, overrides: Partial<ExerciseResult> = {}): ExerciseResult => ({ id, exerciseId: 'categorization', domain: 'executive', date: '2026-09-21T12:00:00Z', durationSeconds: 60, accuracy: 80, score: 0, correctAnswers: 4, totalQuestions: 5, feedbackMessage: '', ...overrides });
 test('daily averages separate exercises, skip missing days and average per-session speed', () => {
@@ -38,4 +38,24 @@ test('legacy result IDs share catalog names, filters and daily series without mu
  assert.equal(points[0].value, 80);
  assert.equal(points[0].exerciseId, 'visual-scanning');
  assert.equal(merged[0].id, 'scan-old');
+});
+
+test('date-only history never invents a time or shifts its saved day across time zones', () => {
+ const previousTZ = process.env.TZ;
+ try {
+  for (const zone of ['Europe/Madrid', 'America/Los_Angeles']) {
+   process.env.TZ = zone;
+   assert.deepEqual(formatActivityDate('2026-09-23'), { day: '23/9/2026', time: null });
+   assert.equal(localDay('2026-09-23'), '2026-09-23');
+   assert.equal(dailyActivity([result('old', { date: '2026-09-23' })], 'accuracy')[0].day, '2026-09-23');
+  }
+  process.env.TZ = 'Europe/Madrid';
+  assert.deepEqual(formatActivityDate('2026-09-23T13:45:00.000Z'), { day: '23/9/2026', time: '15:45' });
+  assert.deepEqual(formatActivityDate('2026-09-23T22:30:00.000Z'), { day: '24/9/2026', time: '00:30' });
+  assert.equal(localDay('2026-09-23T22:30:00.000Z'), '2026-09-24');
+  assert.equal(formatActivityDate('2026-01-23T13:45:00.000Z').time, '14:45');
+ } finally {
+  if (previousTZ === undefined) delete process.env.TZ;
+  else process.env.TZ = previousTZ;
+ }
 });

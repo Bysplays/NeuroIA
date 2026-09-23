@@ -348,7 +348,10 @@ profile creation/import and is never updated by the settings input.
 It maps historical result IDs `visual-scan`, `daily-seq` and `motor-coord` to
 `visual-scanning`, `daily-sequencing` and `motor-target` in the read-only activity
 view, keeping names, filters and chart series consistent without rewriting saved
-records. New game results use the canonical catalog IDs.
+records. New game results use the canonical catalog IDs and full ISO completion
+timestamps. Historical date-only results retain their recorded calendar day in
+activity filters/charts and display no time; never infer midnight as a known
+completion time. Full timestamps display in the device timezone.
 Speed is seconds per question, not reaction time; exclude zero-question sessions
 from speed averages. `activityHistory.ts` reads owner-only result archives in
 explicit 200-document pages ordered by document ID. Merge pages with current

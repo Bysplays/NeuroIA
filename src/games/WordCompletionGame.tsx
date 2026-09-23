@@ -377,7 +377,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
         id: 'res-' + clock.now(),
         exerciseId: 'word-completion',
         domain: 'language',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString(),
         durationSeconds: elapsedSeconds,
         accuracy,
         score: finalCorrect * 100,

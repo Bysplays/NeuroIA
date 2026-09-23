@@ -239,7 +239,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       id: 'res-' + clock.now(),
       exerciseId: 'memory-pairs',
       domain: 'memory',
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
       accuracy,
       score: 300 + Math.max(0, 200 - (finalAttempts - 3) * 30),

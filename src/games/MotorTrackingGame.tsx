@@ -180,7 +180,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
       id: 'res-' + clock.now(),
       exerciseId: 'motor-tracking',
       domain: 'motor',
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
       accuracy,
       score: Math.round(accuracy * 5),

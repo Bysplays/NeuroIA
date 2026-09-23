@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import type { CognitiveDomain, ExerciseResult } from '../types';
 import { ALL_EXERCISES } from '../services/exerciseCatalog';
-import { dailyActivity, localDay, mergeActivity, secondsPerQuestion } from '../services/activityStats';
+import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion } from '../services/activityStats';
 import { loadActivityPage } from '../services/activityHistory';
 
 const domains: [CognitiveDomain, string][] = [['attention', 'Atención'], ['language', 'Lenguaje'], ['memory', 'Memoria'], ['executive', 'Organización'], ['motor', 'Coordinación']];
@@ -10,6 +10,11 @@ const colors = ['#247f89', '#a85578', '#6656ac', '#ac661f', '#427639', '#b34245'
 const title = (id: string) => ALL_EXERCISES.find(e => e.id === id)?.title ?? id;
 const color = (id: string) => colors[Math.max(0, ALL_EXERCISES.findIndex(e => e.id === id)) % colors.length];
 const number = (n: number | null) => n === null || !Number.isFinite(n) ? '—' : n.toLocaleString('es-ES', { maximumFractionDigits: 1 });
+
+function ActivityTimestamp({ date }: { date: string }) {
+  const formatted = formatActivityDate(date);
+  return <time dateTime={date}><span>{formatted.day}</span>{formatted.time !== null && <small>{formatted.time}</small>}</time>;
+}
 
 function LineChart({ results, metric }: { results: ExerciseResult[]; metric: 'accuracy' | 'speed' }) {
   const points = dailyActivity(results, metric);
@@ -83,7 +88,7 @@ export function ActivityStatistics({ uid, history, onBack }: { uid: string; hist
     {from && to && from > to && <p role="alert">La fecha inicial debe ser anterior a la final.</p>}
     <div className="stats-lines"><LineChart results={results} metric="accuracy"/><LineChart results={results} metric="speed"/></div>
     <section className="stats-card stats-history" aria-labelledby="stats-history-title"><div className="stats-section-heading"><div><h2 id="stats-history-title">Ejercicios resueltos</h2><p>{more ? 'Historial reciente · Puedes cargar más registros' : 'Todo el historial disponible'}</p></div><span className="stats-count" role="status">{results.length} registros</span></div>
-      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * 20, (currentPage + 1) * 20).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><time dateTime={r.date}><span>{new Date(r.date).toLocaleDateString('es-ES')}</span><small>{new Date(r.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</small></time></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
+      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * 20, (currentPage + 1) * 20).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><ActivityTimestamp date={r.date}/></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
       {!results.length && <p className="stats-empty">No hay ejercicios registrados con estos filtros.</p>}
       <div className="stats-history-footer"><div className="stats-pagination"><button className="stats-quiet-button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><span>Página {currentPage + 1} de {Math.max(1, Math.ceil(results.length / 20))}</span><button className="stats-quiet-button" disabled={(currentPage + 1) * 20 >= results.length} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
       {more && <button className="stats-quiet-button stats-load" disabled={busy} onClick={loadMore}>{busy ? 'Cargando historial…' : error ? 'Reintentar' : 'Cargar más historial'}</button>}</div>

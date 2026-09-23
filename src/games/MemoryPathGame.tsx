@@ -180,7 +180,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       id: 'res-' + clock.now(),
       exerciseId: 'memory-path',
       domain: 'memory',
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
       accuracy,
       score: finalScore,

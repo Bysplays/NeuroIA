@@ -472,5 +472,6 @@ narrow screens. Use controls at least 48px high, equally sized rounded fields an
 buttons for navigation, reset, pagination and archive loading. Keep page
 gutters and a bounded content width. The history has a count badge, a softly
 tinted table header, right-aligned metrics and separate date/time lines (hours
-and minutes). Omit the device-local-time caption; retain date and time values. Group
+and minutes). Historical records with only a date show that day without a time;
+do not invent a completion hour. Omit the device-local-time caption. Group
 pagination and archive loading in a padded footer with comfortable touch buttons.

@@ -434,7 +434,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
         id: 'res-' + clock.now(),
         exerciseId: 'categorization',
         domain: 'executive',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString(),
         durationSeconds: elapsedSeconds,
         accuracy,
         score: finalCorrect * 100,

@@ -1,7 +1,18 @@
 import type { ExerciseResult } from '../types/index.ts';
 
+const isDateOnly = (date: string) => /^\d{4}-\d{2}-\d{2}$/.test(date);
+const activityDate = (date: string) => new Date(isDateOnly(date) ? `${date}T12:00:00` : date);
+
+export function formatActivityDate(date: string) {
+  const d = activityDate(date);
+  return {
+    day: d.toLocaleDateString('es-ES'),
+    time: isDateOnly(date) ? null : d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+  };
+}
+
 export function localDay(date: string) {
-  const d = new Date(date);
+  const d = activityDate(date);
   if (!Number.isFinite(d.getTime())) return '';
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }

@@ -104,7 +104,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
         id: 'res-' + clock.now(),
         exerciseId: 'motor-target',
         domain: 'motor',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString(),
         durationSeconds: elapsedSeconds,
         accuracy: avgAccuracy,
         score: finalScore,

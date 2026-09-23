@@ -438,7 +438,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
         id: 'res-' + clock.now(),
         exerciseId: 'language-naming',
         domain: 'language',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString(),
         durationSeconds: elapsedSeconds,
         accuracy,
         score,
