@@ -254,7 +254,10 @@ the clock, alongside the existing speech-voice tests.
 
 `App` observes Firebase Authentication before mounting the cloud progress boundary.
 Configuration and session persistence are in `src/services/firebase.ts`; Analytics
-is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy.
+is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy. Its local
+personal/professional presentation switch reuses the same sign-in callback and
+adds a text action through `ProductInformation`'s optional children slot. It does
+not persist a role, grant professional access or change account onboarding.
 The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
 localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the
 auth session through the bottom of Settings (not the home header). Entry and

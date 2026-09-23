@@ -380,7 +380,16 @@ The initial screen has a blue paper illustration panel and one heading,
 “Jugar también puede ser una forma de entrenar”, beside the “Continuar con Google” action. Use
 `public/images/headers/login-transparent.png`, a true-alpha cutout derived from
 the home scene, without blend modes or an opaque image backing. Keep only one
-short note explaining account-linked progress. Quiet “Sobre NeuroIA” and “Aviso
+short note explaining account-linked progress. The “Eres un profesional?” text action beside the information links switches to a
+professional introduction: copy and Google action on the left, the existing
+clipboard companion (`public/images/headers/therapist.png`) on lilac paper on the
+right. Mirror only the curved separator, not the illustration. On narrow screens,
+professional copy comes before the image. “Volver al acceso personal” restores the
+personal entry. Focus the heading after either switch and disable switching while
+Google sign-in is pending. The professional copy addresses people who want to
+follow others' exercise activity and clearly says that this capability is still
+in preparation; signing in currently opens the same personal account flow.
+Quiet “Sobre NeuroIA” and “Aviso
 legal” links below the card open the supplied product information in the shared
 dialog; signed-in users find these links in the settings footer. Keep long copy
 scrollable, selectable and readable in all themes. Omit introductory paragraphs,

@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { ModalFrame } from './ModalFrame';
 import { PRODUCT_INTRO, PRODUCT_NOTICE, PRODUCT_SECTIONS } from '../services/productCopy';
 
-export function ProductInformation() {
+export function ProductInformation({ children }: { children?: ReactNode }) {
   const [open, setOpen] = useState<'about' | 'notice' | null>(null);
   return <>
     <nav className="product-information-links" aria-label="Información de NeuroIA">
       <button onClick={() => setOpen('about')}>Sobre NeuroIA</button>
       <button onClick={() => setOpen('notice')}>Aviso legal</button>
+      {children}
     </nav>
     {open && <ModalFrame labelledBy="product-information-title" onClose={() => setOpen(null)}>
       <article className="product-information">

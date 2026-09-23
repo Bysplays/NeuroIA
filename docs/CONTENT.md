@@ -40,6 +40,15 @@ published when implemented or when the owner explicitly chooses future-feature
 wording. The PDF's short introduction and “Entrena jugando” claim mention AI;
 the current introduction uses the cover paragraph without that claim instead.
 
+## Professional entry preview
+
+The login offers “Eres un profesional?” and a reversible professional presentation.
+It addresses professionals who want to follow other people's exercise activity.
+This is an audience introduction, not a new authorization flow: the copy explicitly
+says professional tracking is in preparation and Google still opens the existing
+personal account flow. Do not imply that selecting this view grants cross-account
+access or verified professional status.
+
 ## Editorial rules
 
 Use “persona”, “usuario”, “actividad”, “juego”, “práctica” and “rendimiento dentro

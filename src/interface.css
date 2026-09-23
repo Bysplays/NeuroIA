@@ -659,7 +659,7 @@ body:not([data-contrast="standard"]) .achievement-art { mix-blend-mode: normal; 
 
 /* Decorative scenes share one renderer and never act as exercise stimuli. */
 .header-illustration { display: block; object-fit: contain; pointer-events: none; }
-body:not([data-contrast="standard"]) img.header-illustration { mix-blend-mode: normal; background: #fff; border-radius: 18px; opacity: 1; }
+body:is([data-contrast="high-contrast"], [data-contrast="soft-dark"]) img.header-illustration { mix-blend-mode: normal; background: #fff; border-radius: 18px; opacity: 1; }
 .menu-header-art { width: 150px; height: 150px; flex-shrink: 0; mix-blend-mode: multiply; }
 .achievement-heading { flex-wrap: wrap; }
 .achievement-heading-copy { flex: 1; min-width: 0; }
@@ -691,6 +691,11 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 .login-actions > p { line-height: 1.6; }
 .login-welcome .login-art { display: block; width: min(100%, 340px); height: auto; margin: 0; }
 .login-actions { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 20px; padding: 40px; min-width: 0; }
+.login-screen-professional .login-welcome { background: var(--panel-lilac); }
+.login-screen-professional .login-paper-edge { left: -1px; right: auto; transform: scaleX(-1); }
+.login-professional-art { mix-blend-mode: multiply; }
+.login-audience { font-size: .75rem; color: var(--color-text-muted); }
+.login-professional-copy { font-size: .85rem; color: var(--color-text-muted); }
 .google-login-button { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 56px; width: 100%; padding: 12px 18px; border: 1px solid var(--color-border-subtle); border-radius: 99px; background: var(--color-surface); color: var(--color-text-main); font-size: .88rem; cursor: pointer; }
 .google-login-button:hover { background: var(--color-surface-hover); }
 .google-login-mark { font-weight: 700; font-size: 1.2rem; }
@@ -816,6 +821,7 @@ body[data-contrast="high-contrast"] .onboarding-option input { border-color: var
 
 .product-information-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; padding: 16px; }
 .product-information-links button { min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--color-text-muted); font-size: .75rem; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.product-information-links button:disabled { opacity: .6; cursor: wait; }
 .product-information .modal-header { display: flex; justify-content: space-between; }
 .product-information-body { padding: 0 28px 28px; font-size: .85rem; line-height: 1.7; }
 .product-information-body h3 { margin: 24px 0 12px; font-size: 1rem; }
