@@ -1,6 +1,8 @@
 # NeuroIA — approved Eleven v3 voice direction
 
-The user approved `approved-words.mp3`, reading Taza, Zapato, Tijeras, Cepillo,
+Asset paths in this guide refer to `public/audio/elevenlabs-v3/` unless a repository-relative path is given.
+
+The user approved `public/audio/elevenlabs-v3/approved-words.mp3`, reading Taza, Zapato, Tijeras, Cepillo,
 Bicicleta and Girasol together. That approval supersedes the v2 pronunciation
 trials; it is not a listening review of every newly generated file.
 
@@ -14,8 +16,8 @@ trials; it is not a listening review of every newly generated file.
 - The shared narrator now uses available clips, with browser speech fallback for
   pending or unplayable files. Attribution appears in accessibility settings.
 
-`texts.json` is the full speech inventory. `blocks.json` maps generation requests
-to clips. `manifest.json` lists available and pending individual recordings.
+`public/audio/elevenlabs-v3/texts.json` is the full speech inventory. `public/audio/elevenlabs-v3/blocks.json` maps generation requests
+to clips. `public/audio/elevenlabs-v3/manifest.json` lists available and pending individual recordings.
 The collection contains audio files and metadata only; no preview page is shipped.
 The indexer also regenerates `src/services/speechRecordings.json`, the compact
 runtime lookup. Regenerate it whenever the audio inventory changes.
@@ -29,7 +31,7 @@ Ambiguous lists are reported in `segmentationIssues` instead of assigning
 potentially incorrect clips. Timing and file checks do not validate pronunciation;
 listen to the new words and phonetic hints before final adoption.
 
-To continue, compare `blocks.json` against saved MP3 files, use the visible
+To continue, compare `public/audio/elevenlabs-v3/blocks.json` against saved MP3 files, use the visible
 ElevenLabs browser with the settings above, and generate only missing blocks.
 Confirm the displayed voice after changing models: ElevenLabs can select a
 different default voice. Stop on quota restrictions and inspect History before
@@ -42,8 +44,8 @@ an explicit request.
 
 Generation stopped when ElevenLabs showed 6 credits and an upgrade screen for
 the next 57-character UI request. 279 of 370 inventory clips are available; 91
-feedback clips remain in `pending.json`. All instructions, vocabulary words and
-hints are present. `generation-status.json` records the stop. No subscription
+feedback clips remain in `public/audio/elevenlabs-v3/pending.json`. All instructions, vocabulary words and
+hints are present. `public/audio/elevenlabs-v3/generation-status.json` records the stop. No subscription
 upgrade was made. Resume only after credits become available, skipping existing
 blocks. Refresh pending.json and this status when continuing.
 

@@ -11,7 +11,7 @@ real Firebase project before production-mode access will work:
 
 1. Open Firestore Database > Rules in the Firebase console.
 2. Replace the editor with the complete contents of the repository's
-   [`firestore.rules`](firestore.rules), then publish.
+   [`vendor/firebase/firestore.rules`](../vendor/firebase/firestore.rules), then publish.
 3. Reload the app and sign in. If local activity exists and the cloud account is
    empty, choose whether to import it. Finish an exercise, ensure there is no pending-save notice, and sign in from
    another browser/device to verify the result appears. Successful saves are silent.

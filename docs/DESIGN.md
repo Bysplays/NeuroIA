@@ -8,7 +8,7 @@ companions. Both use generous rounded sections and clear, unhurried actions.
 Changing colors alone does not establish this style; composition, imagery,
 typography, and interaction states must work together.
 
-This is a living guide to the current product direction. Read [AGENTS.md](AGENTS.md)
+This is a living guide to the current product direction. Read [AGENTS.md](../AGENTS.md)
 for implementation, verification, and maintenance practices. Keep this guide in
 English; the application speaks Spanish.
 
@@ -33,7 +33,7 @@ Use the actual home screen and these repository assets as the visual references:
   companions; reference for character proportions, expression, and paper texture.
 - `public/images/headers/`: individual scenes for all nine exercise headers and
   results, home, catalog, achievements, therapist view, and the fatigue dialog.
-  See `public/images/headers/README.md` for prompts and provenance.
+  See `docs/assets/images/headers/README.md` for prompts and provenance.
 - `public/images/achievement-badges.png` and `achievement-badges-extended.png`:
   the collectible illustration family.
 - `public/images/paper-play-tokens.png`: the smiling paper target and companion
@@ -45,7 +45,10 @@ Use the actual home screen and these repository assets as the visual references:
 - `public/brand/neuroia-mark.svg` and `neuroia-logo.svg`: a soft turquoise/lilac
   paper-leaf sprout with dark ink veins, echoing the plant in the home illustration.
   This compact vector brand symbol is distinct from the raster mascots. See
-  `public/brand/README.md` for construction and usage.
+  `docs/assets/brand/README.md` for construction and usage. The browser favicon uses
+  `neuroia-favicon.svg`, the same mark on a pale rounded tile for tab contrast.
+  The repository README uses a centered wordmark, restrained badges and the
+  existing transparent login companions, with practical management links below.
 
 The mascots have soft organic bodies, imperfect dark ink features, small limbs,
 and visible paper grain. Keep the same characters across screens. Avoid neon
@@ -277,7 +280,7 @@ density into patient games.
    require it. For a sprite sheet, specify row/column count, exact reading order, safe margins,
    recognizable object identity, and no accidental labels or neighboring art.
 4. Save the final asset in `public/images/`. Record the final prompt, generation
-   tool, reference asset, and grid layout in an adjacent Markdown file.
+   tool, reference asset, and grid layout in a Markdown file under the matching `docs/assets/` directory.
 5. Integrate it through the existing renderer or a small shared component. Keep
    source images intact and adjust display crops in CSS where appropriate.
 6. Inspect every mapping and crop at actual display size. Check for clipped limbs,
@@ -429,4 +432,4 @@ Longer messages scroll within that slot. Keep other invitation validation in tha
 automatic recovery states; do not expose a technical “Comprobar acceso” action.
 Never imply that returning from Stripe proves payment. The active
 subscription offers a customer-portal action. Technical setup and remaining
-production prerequisites are documented in `ONBOARDING.md`.
+production prerequisites are documented in `docs/ONBOARDING.md`.

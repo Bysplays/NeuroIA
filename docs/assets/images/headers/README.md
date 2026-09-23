@@ -1,6 +1,8 @@
 # Header illustrations
 
-Generated with the built-in `image_gen` tool on 2026-09-14. Reference: `../wellness-companions.png` (character identity and paper style). Each file is a separate square scene, not a sprite sheet; no grid or crop coordinates. Full original canvas retained. These are decorative, never answer stimuli. Organization now renders the true-alpha shared `organization.png` sheet; see `organization.md` for its final prompt, references and layout. Its old individual PNGs remain provenance references only.
+Asset paths in this guide refer to `public/images/headers/` unless a repository-relative path is given.
+
+Generated with the built-in `image_gen` tool on 2026-09-14. Reference: `public/images/wellness-companions.png` (character identity and paper style). Each file is a separate square scene, not a sprite sheet; no grid or crop coordinates. Full original canvas retained. These are decorative, never answer stimuli. Organization now renders the true-alpha shared `public/images/headers/organization.png` sheet; see `organization.md` for its final prompt, references and layout. Its old individual PNGs remain provenance references only.
 
 ## Generation prompts
 

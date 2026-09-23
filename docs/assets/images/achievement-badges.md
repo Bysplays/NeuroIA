@@ -1,4 +1,6 @@
 # Chapas de logros
+
+Asset paths in this guide refer to `public/images/` unless a repository-relative path is given.
 Asset: achievement-badges.png. Generado con la herramienta integrada de imágenes.
 Seis chapas en una cuadrícula 3 × 2, presentadas individualmente mediante CSS.
 

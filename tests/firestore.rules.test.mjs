@@ -9,7 +9,7 @@ import { patientProgress } from '../src/services/progressData.ts';
 
 let env;
 before(async () => {
-  env = await initializeTestEnvironment({ projectId: 'demo-neuroia', firestore: { rules: await readFile(new URL('../firestore.rules', import.meta.url), 'utf8') } });
+  env = await initializeTestEnvironment({ projectId: 'demo-neuroia', firestore: { rules: await readFile(new URL('../vendor/firebase/firestore.rules', import.meta.url), 'utf8') } });
   await env.clearFirestore();
 });
 after(async () => { await env?.cleanup(); });

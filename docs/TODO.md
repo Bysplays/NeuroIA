@@ -1,12 +1,12 @@
 # NeuroIA — remaining work
 
-Keep this checklist current when completing work. See [AGENTS.md](AGENTS.md)
+Keep this checklist current when completing work. See [AGENTS.md](../AGENTS.md)
 and [DESIGN.md](DESIGN.md) for development and design guidance.
 
 ## Public text availability
 
 - [ ] Revisit the PDF's professional, AI and EEG sections when those features ship,
-  or when future-feature wording is explicitly chosen. See `CONTENT.md`.
+  or when future-feature wording is explicitly chosen. See `docs/CONTENT.md`.
 - New neutral completion messages use the existing speech fallback if narrated;
   do not regenerate or reintroduce obsolete clinical-claim audio to fill gaps.
 
@@ -137,7 +137,7 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
 - [x] Google sign-in confirmed by the project owner.
 - [x] Implement Firestore profile/settings/results synchronization, transaction
   receipts, local pending queue, initial import choice and emulator tests.
-- [ ] Publish the reviewed `firestore.rules` in the real Firebase project. Local
+- [ ] Publish the reviewed `vendor/firebase/firestore.rules` in the real Firebase project. Local
   CLI has no authorized account; the production-mode default still needs replacing.
 - [ ] Verify real-account cloud saving from two devices after publishing rules.
 - [ ] Authorize the final deployment hostname in Firebase Authentication.
@@ -154,7 +154,7 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
   permanent and reusable. Other codes remain disabled until professional profiles.
 - [x] Add Stripe Checkout, signed webhook and customer portal integration code.
 - [ ] Supply monthly Stripe Price ID, configure secrets, APP_URL, webhook and
-  portal; run the payment lifecycle in Stripe test mode. See `ONBOARDING.md`.
+  portal; run the payment lifecycle in Stripe test mode. See `docs/ONBOARDING.md`.
 - [ ] Assign CeoAberto's actual Firebase owner UID before enabling professional
   account access. The code now links to a reserved unclaimed professional record.
 - [ ] Publish reviewed Spark-compatible rules for real-account invitation/trial
@@ -175,4 +175,4 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
 
 - [ ] Redeploy the renewal-aware Worker and enable Cron `*/5 * * * *`; verify
   daily reconciliation and Stripe test-clock failed renewal/recovery/cancellation.
-  See `worker/README.md` for bounded batches and checkpoint monitoring.
+  See `vendor/cloudflare/README.md` for bounded batches and checkpoint monitoring.

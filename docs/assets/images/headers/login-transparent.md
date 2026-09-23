@@ -1,7 +1,9 @@
 # Login illustration
 
-- Asset: `login-transparent.png`, a single 1254 × 1254 RGBA illustration, no sheet.
-- Reference/edit target: `home.png` in this directory.
+Asset paths in this guide refer to `public/images/headers/` unless a repository-relative path is given.
+
+- Asset: `public/images/headers/login-transparent.png`, a single 1254 × 1254 RGBA illustration, no sheet.
+- Reference/edit target: `public/images/headers/home.png` in this directory.
 - Tool: built-in `image_gen`, background-extraction edit, 2026-09-16.
 - Use: simplified login only. Preserve the original home asset for other screens.
 - Render directly with alpha; no multiply blending or opaque backing.

@@ -1,5 +1,7 @@
 # Chapas adicionales
 
+Asset paths in this guide refer to `public/images/` unless a repository-relative path is given.
+
 Archivo: achievement-badges-extended.png. Lámina única de 14 chapas (7 × 2), generada con la herramienta integrada image_gen. Referencia: achievement-badges.png. Se presenta mediante recortes CSS, sin modificar la lámina original. Las seis chapas anteriores se conservan.
 
 ## Prompt final

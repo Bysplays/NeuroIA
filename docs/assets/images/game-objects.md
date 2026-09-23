@@ -1,5 +1,7 @@
 # Ilustraciones de juegos
 
+Asset paths in this guide refer to `public/images/` unless a repository-relative path is given.
+
 Tres láminas generadas con la herramienta integrada image_gen. Referencia: achievement-badges.png. Cada lámina contiene una cuadrícula de 8 × 5; el manifiesto src/services/gameArtwork.json asigna los 117 estímulos originales sin alterar las reglas. Recorte mediante CSS, archivos originales conservados.
 
 ## game-objects-0.png

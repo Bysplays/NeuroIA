@@ -1,6 +1,6 @@
 {
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "vendor/firebase/firestore.rules"
   },
   "emulators": {
     "firestore": {
@@ -13,7 +13,7 @@
     "singleProjectMode": true
   },
   "functions": {
-    "source": "functions",
+    "source": "vendor/firebase/functions",
     "runtime": "nodejs22"
   }
 }
