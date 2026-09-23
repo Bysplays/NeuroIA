@@ -401,8 +401,11 @@ personal entry. Focus the heading after either switch and disable switching whil
 Google sign-in is pending. The professional panel keeps only the audience label,
 heading and Google action; omit supporting paragraphs and availability notices.
 Professional sign-in opens the free professional workspace; personal sign-in
-keeps the existing account access flow, while returning professional owners go
-directly to their workspace.
+keeps the existing account access flow even if a professional profile exists.
+Restored sessions offer “Jugador” and “Profesional” profiles for the same account.
+Place “Cambiar de perfil” in player settings, entry/recovery screens and the
+professional header. Use two descriptive buttons in the profile choice, stacked
+on phones. Switching preserves saved activity and independent subscriptions.
 Quiet “Sobre NeuroIA” and “Aviso
 legal” links below the card open the supplied product information in the shared
 dialog; signed-in users find these links in the settings footer. Keep long copy

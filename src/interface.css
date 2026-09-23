@@ -1018,3 +1018,12 @@ body[data-style="cozy"] .stats-chart-speed { background: var(--panel-peach); }
 .professional-code input { min-width: 0; width: 100%; font: inherit; font-size: .7rem; padding: 12px; color: var(--color-text-main); background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 16px; }
 body[data-style="cozy"] .professional-people { background: var(--panel-blue); }
 @media (max-width: 650px) { .professional-panel { padding: 16px; } .professional-heading .touch-btn { width: 100%; } .professional-code { max-width: 100%; } .professional-code > div { flex-wrap: wrap; } }
+
+/* Account profiles share authentication, with independent workspaces. */
+.profile-choice { max-width: 760px; margin-inline: auto; }
+.profile-choice-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; margin-block: 16px; }
+.profile-choice-options button { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px; text-align: left; white-space: normal; }
+.profile-choice-options strong { font-size: 1.3rem; }
+.profile-choice-options span { color: var(--color-text-muted); line-height: 1.5; }
+.professional-account-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; }
+@media (max-width: 600px) { .profile-choice-options { grid-template-columns: 1fr; } }

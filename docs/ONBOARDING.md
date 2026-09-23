@@ -1,8 +1,9 @@
 # Account entry and invitations (Firebase Spark)
 
-After Google sign-in, `AccountEntry` opens an existing professional workspace or
-registers one for explicit professional entry. Professional owners bypass personal
-entitlement checks; see [PROFESSIONALS.md](PROFESSIONALS.md). For personal accounts,
+After Google sign-in, `AccountEntry` honors the selected player/professional profile and
+registers a professional workspace only when that profile is selected. The same
+account may retain its player subscription and progress. The professional profile
+bypasses personal entitlement checks; see [PROFESSIONALS.md](PROFESSIONALS.md). For personal accounts,
 `AccessGate` loads the owner's entitlement directly from
 Firestore before mounting `CloudProgress` and games. Invitation redemption and
 trials use `src/services/firestoreAccess.ts` and server-enforced Firestore rules.

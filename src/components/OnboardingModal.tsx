@@ -1,3 +1,4 @@
+import { ProfileSwitch } from './ProfileSwitch';
 import { useState } from 'react';
 import { ModalFrame } from './ModalFrame';
 import type { AccountAccess } from '../services/accessService';
@@ -48,6 +49,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
       <footer className="onboarding-footer">
         {busy && <span role="status">Un momento…</span>}
         {(checkoutReturn || access?.pendingCheckout) && <button className="paper-nav-button" disabled={busy} onClick={onCancelCheckout}>Cancelar pago pendiente</button>}
+        <ProfileSwitch disabled={busy} />
         <button className="paper-nav-button" disabled={busy} onClick={onSignOut}>Cerrar sesión</button>
       </footer>
     </section>

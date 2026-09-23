@@ -50,7 +50,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | Location | Responsibility |
 | --- | --- |
 | `src/components/AppLoading.tsx` | Shared initial loading presentation for auth, access, lazy chunks and progress |
-| `src/components/AccountEntry.tsx` | Resolves or registers the free professional workspace before personal access checks |
+| `src/components/AccountEntry.tsx` | Selects independent player/professional workspaces for the same authenticated account |
 | `src/components/ProfessionalDashboard.tsx` and `src/services/firestoreProfessional.ts` | Free professional panel, sponsored seats and read-only linked activity; see `docs/PROFESSIONALS.md` |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Personal account entry before progress and games |
 | `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
@@ -258,8 +258,11 @@ the clock, alongside the existing speech-voice tests.
 Configuration and session persistence are in `src/services/firebase.ts`; Analytics
 is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy. Its local
 personal/professional switch passes the selected intent through the Google sign-in
-callback. `AccountEntry` loads a self-owned professional workspace or registers it
-for explicit professional entry; returning owners bypass personal onboarding.
+callback. `AccountEntry` honors explicit player/professional entry and offers both profiles
+on restored sessions. Professional registration never replaces player progress
+or subscription. `ProfileSwitchContext` provides navigation from settings, entry
+recovery and the professional header; switching unmounts the old workspace.
+Player entry does not depend on professional reads.
 `ProductInformation` provides the switch through its optional children slot.
 The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
 localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the

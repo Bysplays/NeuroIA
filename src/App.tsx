@@ -44,7 +44,7 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [professionalEntry, setProfessionalEntry] = useState(false);
+  const [professionalEntry, setProfessionalEntry] = useState<boolean | null>(null);
 
   useEffect(() => onAuthStateChanged(auth, nextUser => {
     soundService.stopSpeaking();
@@ -78,7 +78,7 @@ export const App: React.FC = () => {
     setBusy(true);
     setError('');
     soundService.stopSpeaking();
-    try { await signOut(auth); setProfessionalEntry(false); }
+    try { await signOut(auth); setProfessionalEntry(null); }
     catch { setError('No hemos podido cerrar la sesión. Vuelve a intentarlo.'); }
     finally { setBusy(false); }
   };

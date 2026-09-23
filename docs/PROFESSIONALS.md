@@ -1,9 +1,14 @@
 # Professional workspace and sponsored seats
 
 Professional entry is free. Selecting the professional Google login registers a
-self-owned `professionals/{uid}` workspace; returning owners go directly to that
-workspace. `AccountEntry` resolves this before the personal `AccessGate` or
-`CloudProgress` mounts. There is no professional trial, personal purchase modal,
+self-owned `professionals/{uid}` workspace. The same Google account can also
+have a player profile, personal subscription and progress. Explicit personal login
+opens the player flow without reading professional records. Restored sessions
+show a profile choice; Checkout return parameters select the matching workspace.
+“Cambiar de perfil” is available in player settings, entry/recovery screens and
+the professional header. Switching unmounts the previous workspace, preserves
+queued progress and never changes either subscription. Only professional entry
+registers/loads the professional profile; failures never block player entry. There is no professional trial, personal purchase modal,
 or fabricated patient list. Registration identifies the account owner, not a
 verified healthcare qualification.
 

@@ -1,3 +1,4 @@
+import { ProfileSwitch } from './ProfileSwitch';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getFirestore } from 'firebase/firestore';
 import { Copy, Plus, Users } from 'lucide-react';
@@ -68,7 +69,7 @@ export function ProfessionalDashboard({ uid, profile, onSignOut }: { uid: string
   return <div className="professional-workspace">
     <header className="main-header">
       <button className="header-left" onClick={returnToPanel} aria-label="NeuroIA, volver al panel profesional"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="32" height="40"/><span className="header-title">Neuro<span className="brand-light">IA</span></span></button>
-      <button className="stats-quiet-button" onClick={onSignOut}>Cerrar sesión</button>
+      <div className="professional-account-actions"><ProfileSwitch /><button className="stats-quiet-button" onClick={onSignOut}>Cerrar sesión</button></div>
     </header>
     {currentSeat ? <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main className="professional-panel">
       <div className="professional-heading"><div><p>Espacio profesional · {profile.name}</p><h1>Personas a las que acompañas</h1></div>

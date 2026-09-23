@@ -229,3 +229,28 @@ test('seat invitations respect expiry while the permanent invitation remains com
   await env.withSecurityRulesDisabled(async context => { await updateDoc(doc(context.firestore(), `users/${uid}/access/main`), { expiresAt: Date.now() + 60000 }); });
   assert.equal((await firestoreAccess(uid, db).load()).active, true);
 });
+
+test('a subscribed player can also register a professional profile without changing personal access or progress', async () => {
+  const uid = 'dual-profile';
+  const db = env.authenticatedContext(uid).firestore();
+  const access = { kind: 'subscription', expiresAt: Date.now() + 86400000, autoRenew: true };
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'users/' + uid + '/access/main'), access);
+    await setDoc(doc(context.firestore(), 'billing/' + uid), { customerId: 'personal-customer', subscriptionId: 'personal-subscription' });
+  });
+  const progress = firestoreProgress(uid, db);
+  await progress.initialize(fresh());
+  await progress.commit(op('dual-before'));
+  const before = await progress.load();
+  const professional = firestoreProfessional(uid, db);
+  await professional.register('Perfil profesional');
+  assert.equal((await professional.load()).ownerUid, uid);
+  assert.deepEqual((await getDoc(doc(db, 'users/' + uid + '/access/main'))).data(), access);
+  assert.deepEqual(await progress.load(), before);
+  await progress.commit(op('dual-after'));
+  assert.equal((await progress.load()).history.length, 2);
+  await env.withSecurityRulesDisabled(async context => {
+    assert.deepEqual((await getDoc(doc(context.firestore(), 'billing/' + uid))).data(), { customerId: 'personal-customer', subscriptionId: 'personal-subscription' });
+    assert.equal((await getDoc(doc(context.firestore(), 'professionalBilling/' + uid))).exists(), false);
+  });
+});
