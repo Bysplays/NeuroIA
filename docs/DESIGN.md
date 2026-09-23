@@ -464,8 +464,13 @@ in a horizontally scrollable, paginated table. Start with recent account history
 explicitly offer more archived records and disclose partial coverage. Preserve
 empty/error/retry states and use real activity only.
 
-Activity filters sit in a padded panel with a separate heading and reset action;
-use four columns on desktop, two on tablet and one on narrow screens. Keep page
+Place the category radar beside the filter panel, then the two daily charts and
+the full-width history. Omit the activity-summary text card. Activity filters sit
+in a padded panel with a separate heading and reset action; use two columns on
+desktop and tablet and one on narrow screens. Stack the radar and filters on
+narrow screens. Use controls at least 48px high, equally sized rounded fields and outlined pill
+buttons for navigation, reset, pagination and archive loading. Keep page
 gutters and a bounded content width. The history has a count badge, a softly
-tinted table header, right-aligned metrics and separate date/time lines. Group
+tinted table header, right-aligned metrics and separate date/time lines (hours
+and minutes). Omit the device-local-time caption; retain date and time values. Group
 pagination and archive loading in a padded footer with comfortable touch buttons.

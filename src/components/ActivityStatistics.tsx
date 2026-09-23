@@ -67,7 +67,8 @@ export function ActivityStatistics({ uid, history, onBack }: { uid: string; hist
   };
   const resetPage = () => setPage(0);
   return <div className="activity-statistics">
-    <div className="stats-heading"><button className="result-text-action" onClick={onBack}><ArrowLeft size={20}/> Volver al inicio</button><h1>Tu actividad</h1></div>
+    <div className="stats-heading"><button className="stats-quiet-button" onClick={onBack}><ArrowLeft size={20}/> Volver al inicio</button><h1>Tu actividad</h1></div>
+    <div className="stats-overview"><CategoryRadar results={results}/>
     <section className="stats-card stats-filter-panel" aria-labelledby="stats-filter-title">
       <div className="stats-section-heading"><div><h2 id="stats-filter-title">Explora tu actividad</h2><p>Filtra las gráficas y el historial.</p></div>
         <button className="stats-quiet-button" onClick={() => { setDomain(''); setExercise(''); setFrom(''); setTo(''); resetPage(); }}>Limpiar filtros</button>
@@ -78,15 +79,14 @@ export function ActivityStatistics({ uid, history, onBack }: { uid: string; hist
       <label>Desde<input aria-label="Desde" type="date" value={from} max={to || undefined} onChange={e => setFrom(e.target.value)}/></label>
       <label>Hasta<input aria-label="Hasta" type="date" value={to} min={from || undefined} onChange={e => setTo(e.target.value)}/></label>
       </div>
-    </section>
+    </section></div>
     {from && to && from > to && <p role="alert">La fecha inicial debe ser anterior a la final.</p>}
-    <div className="stats-overview"><CategoryRadar results={results}/><section className="stats-card stats-summary"><p>Tu práctica, día a día</p><strong>{results.length}</strong><h2>ejercicios completados</h2><p>{new Set(results.map(r => localDay(r.date))).size} días de actividad · {number(results.reduce((n, r) => n + r.durationSeconds, 0) / 60)} minutos</p><p>Las gráficas y la tabla muestran los registros cargados y respetan los filtros. Los días sin actividad no se cuentan como cero.</p><p>La velocidad se estima dividiendo el tiempo de cada ejercicio entre sus preguntas. No mide el tiempo de reacción.</p></section></div>
     <div className="stats-lines"><LineChart results={results} metric="accuracy"/><LineChart results={results} metric="speed"/></div>
     <section className="stats-card stats-history" aria-labelledby="stats-history-title"><div className="stats-section-heading"><div><h2 id="stats-history-title">Ejercicios resueltos</h2><p>{more ? 'Historial reciente · Puedes cargar más registros' : 'Todo el historial disponible'}</p></div><span className="stats-count" role="status">{results.length} registros</span></div>
-      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><caption>Fecha y hora locales del dispositivo</caption><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 's/pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * 20, (currentPage + 1) * 20).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><time dateTime={r.date}><span>{new Date(r.date).toLocaleDateString('es-ES')}</span><small>{new Date(r.date).toLocaleTimeString('es-ES')}</small></time></td><td>{r.correctAnswers}/{r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
+      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * 20, (currentPage + 1) * 20).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><time dateTime={r.date}><span>{new Date(r.date).toLocaleDateString('es-ES')}</span><small>{new Date(r.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</small></time></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
       {!results.length && <p className="stats-empty">No hay ejercicios registrados con estos filtros.</p>}
       <div className="stats-history-footer"><div className="stats-pagination"><button className="stats-quiet-button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><span>Página {currentPage + 1} de {Math.max(1, Math.ceil(results.length / 20))}</span><button className="stats-quiet-button" disabled={(currentPage + 1) * 20 >= results.length} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
-      {more && <button className="touch-btn touch-btn-primary stats-load" disabled={busy} onClick={loadMore}>{busy ? 'Cargando historial…' : error ? 'Reintentar' : 'Cargar más historial'}</button>}</div>
+      {more && <button className="stats-quiet-button stats-load" disabled={busy} onClick={loadMore}>{busy ? 'Cargando historial…' : error ? 'Reintentar' : 'Cargar más historial'}</button>}</div>
       {error && <p role="alert">No hemos podido consultar el historial. Puedes volver a intentarlo.</p>}
     </section>
   </div>;
