@@ -1,5 +1,7 @@
 # Personajes de NeuroIA
 
+Asset paths in this guide refer to `public/images/` unless a repository-relative path is given.
+
 Asset: wellness-companions.png
 Generated with the built-in image generation tool for the wellness interface.
 

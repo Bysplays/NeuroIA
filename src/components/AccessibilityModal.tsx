@@ -1,7 +1,7 @@
 import { ProductInformation } from './ProductInformation';
 import { SubscriptionSettings } from './SubscriptionSettings';
 import { ModalFrame } from './ModalFrame';
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Check, Type, Contrast, LogOut } from 'lucide-react';
 import type { AccessibilitySettings } from '../types';
 import { soundService } from '../services/soundService';
@@ -11,12 +11,14 @@ interface AccessibilityModalProps {
   onSignOut: () => void;
   signingOut: boolean;
   settings: AccessibilitySettings;
+  name: string;
+  onUpdateName: (name: string) => void;
   onClose: () => void;
   onUpdateSettings: (newSettings: Partial<AccessibilitySettings>) => void;
 }
 
 export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
-  isOpen, settings, onClose, onUpdateSettings, onSignOut, signingOut,
+  isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut,
 }) => {
   if (!isOpen) return null;
 
@@ -37,6 +39,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
         </header>
 
         <div className="preferences-body">
+          <ProfileName name={name} onSave={onUpdateName} />
           <section className="preferences-section" aria-labelledby="pref-text">
             <h3 id="pref-text"><Type size={20} aria-hidden="true" />Tamaño del texto</h3>
             <div className="preferences-segment" role="group" aria-labelledby="pref-text">
@@ -88,3 +91,15 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
     </ModalFrame>
   );
 };
+
+function ProfileName({ name, onSave }: { name: string; onSave: (name: string) => void }) {
+  const [draft, setDraft] = useState(name);
+  const value = draft.trim();
+  return <section className="preferences-section" aria-labelledby="pref-name-title">
+    <h3 id="pref-name-title"><label htmlFor="pref-name">Tu nombre</label></h3>
+    <form className="preferences-name" onSubmit={event => { event.preventDefault(); if (value && value.length <= 200 && value !== name) { onSave(value); setDraft(value); } }}>
+      <input id="pref-name" name="displayName" autoComplete="given-name" value={draft} maxLength={200} required onChange={event => setDraft(event.target.value)} />
+      <button className="paper-nav-button" type="submit" disabled={!value || value === name}>Guardar</button>
+    </form>
+  </section>;
+}

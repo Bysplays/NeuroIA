@@ -3,13 +3,18 @@ import type { AccessibilitySettings, ExerciseResult, UserProfile } from '../type
 export interface ProgressData { profile: UserProfile; history: ExerciseResult[] }
 export type ProgressOperation =
   | { id: string; kind: 'result'; result: ExerciseResult }
-  | { id: string; kind: 'settings'; settings: Partial<AccessibilitySettings> };
+  | { id: string; kind: 'settings'; settings: Partial<AccessibilitySettings>; name?: string };
 
 /** Same exercise counters as local storage; safe to call repeatedly in a transaction. */
 export function applyProgressOperation(data: ProgressData, operation: ProgressOperation): ProgressData {
   const next = structuredClone(data);
   const profile = next.profile;
   if (operation.kind === 'settings') {
+    if (operation.name !== undefined) {
+      const name = operation.name.trim();
+      if (!name || name.length > 200) throw new Error('invalid-profile-name');
+      profile.name = name;
+    }
     profile.settings = { ...profile.settings, ...operation.settings };
     return next;
   }

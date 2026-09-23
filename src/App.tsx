@@ -348,6 +348,8 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
         onSignOut={onSignOut}
         signingOut={signingOut}
         isOpen={isAccessibilityOpen}
+        name={profile.name}
+        onUpdateName={name => sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings: {}, name })}
         settings={profile.settings}
         onClose={() => setIsAccessibilityOpen(false)}
         onUpdateSettings={handleUpdateSettings}

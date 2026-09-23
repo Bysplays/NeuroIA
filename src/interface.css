@@ -82,7 +82,7 @@ body:not([data-contrast="standard"]) .wellness-characters { mix-blend-mode: norm
 .consistency-card { background: var(--panel-pink); color: var(--panel-ink); border-radius: 24px; padding: 22px; display: flex; flex-direction: column; align-self: stretch; justify-self: center; width: 100%; max-width: 360px; text-align: center; }
 .consistency-heading { display: flex; justify-content: center; align-items: center; gap: 16px; }
 .consistency-heading h2 { font-size: 1rem; font-weight: 500; }
-.streak-number { font-size: 2.8rem; font-weight: 500; line-height: 1; letter-spacing: -0.07em; margin: 20px 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; align-items: center; }
+.streak-number { flex: 1; font-size: 2.8rem; font-weight: 500; line-height: 1; letter-spacing: -0.07em; margin: 20px 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; align-items: center; }
 .streak-number span { font-size: 0.8rem; font-weight: 400; letter-spacing: 0; }
 .consistency-footer { margin-top: auto; padding-top: 14px; border-top: 1px solid currentColor; }
 .consistency-footer > p { color: inherit; font-size: 0.73rem; line-height: 1.6; margin-bottom: 14px; }
@@ -374,12 +374,12 @@ body:has(.dashboard-area-selection-active),
 .modal-shell .rest-breathe-status { font-size: 0.7rem; font-weight: 400; color: var(--panel-ink); }
 .modal-shell .rest-progress-bar-wrap { width: 210px; height: 5px; }
 .modal-shell .rest-progress-bar-fill { background: var(--color-primary); }
-.modal-shell .rest-tips-grid { grid-template-columns: 1fr; gap: 8px; margin-bottom: 20px; }
-.modal-shell .rest-tip-card { display: flex; align-items: center; gap: 12px; background: var(--color-surface); border: 0; border-radius: 17px; padding: 13px 16px; }
+.modal-shell .rest-tips-grid { grid-template-columns: 1fr; gap: 16px; margin: 0 0 24px; padding-left: 20px; list-style: disc; }
+.modal-shell .rest-tip-card { display: list-item; background: transparent; border: 0; border-radius: 0; padding: 0 0 0 4px; box-shadow: none; color: var(--color-text-main); }
 .modal-shell .rest-tip-icon-box { width: 30px; height: 30px; background: transparent; flex-shrink: 0; }
 .modal-shell .rest-tip-icon-box svg { width: 20px; color: var(--color-primary); }
 .modal-shell .rest-tip-card strong { font-size: 0.78rem; font-weight: 500; }
-.modal-shell .rest-tip-card p { font-size: 0.68rem; line-height: 1.5; }
+.modal-shell .rest-tip-card p { font-size: 0.68rem; line-height: 1.5; margin: 3px 0 0; color: var(--color-text-muted); }
 .modal-shell .rest-modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .modal-shell .rest-completed-notice { background: var(--panel-sage); padding: 24px; border: 0; }
 .modal-shell .rest-completed-notice h3 { font-size: 1.2rem; }
@@ -456,10 +456,6 @@ body:has(.dashboard-area-selection-active),
 .modal-shell .fatigue-tips { background: transparent; padding: 0; text-align: center; }
 .modal-shell .fatigue-tip-item { justify-content: center; font-size: 0.75rem; }
 .modal-shell .fatigue-actions .touch-btn svg { display: none; }
-.modal-shell .rest-tip-card:nth-child(1) { background: var(--panel-blue); }
-.modal-shell .rest-tip-card:nth-child(2) { background: var(--panel-lilac); }
-.modal-shell .rest-tip-card:nth-child(3) { background: var(--panel-sage); }
-.modal-shell .rest-tip-card, .modal-shell .rest-tip-card p { color: var(--panel-ink); }
 .modal-shell .rest-breathe-ring { border-radius: 46% 54% 55% 45% / 53% 43% 57% 47%; }
 .modal-shell .mistake-item-card { background: var(--color-surface); }
 body:not([data-contrast="standard"]) .rest-character-art img,
@@ -907,6 +903,8 @@ body:not([data-style="cozy"]):not([data-contrast="high-contrast"]):not([data-con
 body:not([data-style="cozy"]) .consistency-stats { border-color: currentColor; }
 body:not([data-style="cozy"]):not([data-contrast="high-contrast"]):not([data-contrast="soft-dark"]) .practice-card,
 body:not([data-style="cozy"]):not([data-contrast="high-contrast"]):not([data-contrast="soft-dark"]) .header-icon-btn { background: var(--color-surface-card); }
+body:not([data-style="cozy"]):not([data-contrast="high-contrast"]):not([data-contrast="soft-dark"]) .practice-card { border-width: 1px; }
+body:not([data-style="cozy"]):not([data-contrast="high-contrast"]):not([data-contrast="soft-dark"]) .practice-card:not(:hover) { border-color: color-mix(in srgb, var(--color-action-bg) 22%, transparent); }
 body:not([data-style="cozy"]):not([data-contrast="high-contrast"]):not([data-contrast="soft-dark"]) .progress-summary { background: rgba(180, 210, 205, .52); border-radius: 24px; }
 .preferences-default-preview { background: linear-gradient(110deg, #f8f8f4, #c7dfdc); }
 .preferences-default-preview .cozy-preview-main { grid-template-columns: 1.48fr 1fr; }
@@ -940,3 +938,7 @@ body[data-companions="hidden"] .achievement-symbol-pending { border-style: dashe
 
 .onboarding-actions #invitation-error { width: 100%; min-width: 0; height: 1.5em; flex-shrink: 0; overflow-y: auto; overflow-wrap: anywhere; margin: 0; padding: 0; font-size: .75rem; line-height: 1.5; text-align: center; color: #b76a78; }
 body[data-contrast="high-contrast"] #invitation-error:not(:empty) { color: var(--color-text-main); }
+
+.preferences-name { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.preferences-name input { flex: 1; min-width: 0; width: 100%; padding: 12px 16px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg); color: var(--color-text-main); font: inherit; }
+.preferences-name button:disabled { opacity: .6; cursor: default; }

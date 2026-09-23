@@ -150,32 +150,20 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
           )}
         </div>
 
-        {/* Consejos clínicos activos durante el descanso */}
-        <div className="rest-tips-grid">
-          <div className="rest-tip-card">
-
-            <div>
-              <strong>Bebe agua</strong>
-              <p>Toma un poco de agua si te apetece.</p>
-            </div>
-          </div>
-
-          <div className="rest-tip-card">
-
-            <div>
-              <strong>Descansa la vista</strong>
-              <p>Mira un momento lejos de la pantalla.</p>
-            </div>
-          </div>
-
-          <div className="rest-tip-card">
-
-            <div>
-              <strong>Ponte cómodo</strong>
-              <p>Busca una postura cómoda para descansar.</p>
-            </div>
-          </div>
-        </div>
+        <ul className="rest-tips-grid" aria-label="Consejos para la pausa">
+          <li className="rest-tip-card">
+            <strong>Bebe agua</strong>
+            <p>Toma un poco de agua si te apetece.</p>
+          </li>
+          <li className="rest-tip-card">
+            <strong>Descansa la vista</strong>
+            <p>Mira un momento lejos de la pantalla.</p>
+          </li>
+          <li className="rest-tip-card">
+            <strong>Ponte cómodo</strong>
+            <p>Busca una postura cómoda para descansar.</p>
+          </li>
+        </ul>
 
         {/* Botonera de control táctil */}
         <div className="rest-modal-actions">

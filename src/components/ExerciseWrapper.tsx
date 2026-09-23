@@ -1,8 +1,7 @@
 import { useGameSession } from './GameSession';
 import { HeaderIllustration } from './HeaderIllustration';
-import { ModalFrame } from './ModalFrame';
-import React, { useEffect, useState } from 'react';
-import { CheckCircle2, RotateCcw, ArrowRight, ClipboardCheck, X } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { RotateCcw, ArrowRight } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { CognitiveDomain, ExerciseId, ExerciseResult } from '../types';
 import { soundService } from '../services/soundService';
@@ -43,19 +42,9 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 }) => {
   const session = useGameSession();
   useEffect(() => { session.finish(isCompleted); }, [isCompleted, session.finish]);
-  const domainData: Record<CognitiveDomain, { name: string; color: string; bg: string }> = {
-    attention: { name: 'Atención', color: 'var(--color-attention)', bg: 'var(--color-attention-bg)' },
-    language: { name: 'Lenguaje', color: 'var(--color-language)', bg: 'var(--color-language-bg)' },
-    memory: { name: 'Memoria', color: 'var(--color-memory)', bg: 'var(--color-memory-bg)' },
-    executive: { name: 'Organización', color: 'var(--color-executive)', bg: 'var(--color-executive-bg)' },
-    motor: { name: 'Coordinación', color: 'var(--color-motor)', bg: 'var(--color-motor-bg)' },
-  };
-
-  const currentDomain = domainData[domain];
-  const [showMistakesModal, setShowMistakesModal] = useState(false);
-
   useEffect(() => {
     if (isCompleted) {
+      window.scrollTo(0, 0);
       soundService.playCompletionFanfare();
       try {
         confetti({
@@ -68,13 +57,11 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
       } catch {
         // Silencioso
       }
-    } else {
-      setShowMistakesModal(false);
     }
   }, [isCompleted]);
 
   return (
-    <div className="exercise-container" data-domain={domain}>
+    <div className={`exercise-container${isCompleted && result ? ' exercise-container-completed' : ''}`} data-domain={domain}>
       {!isCompleted && <h1 className="game-task-title">{title}</h1>}
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}
       <div className="exercise-viewport">
@@ -108,9 +95,6 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                 <ArrowRight size={20} aria-hidden="true" />
               </button>
               <div className="result-secondary-actions">
-                <button className="result-text-action" onClick={() => { soundService.playTap(); setShowMistakesModal(true); }}>
-                  <ClipboardCheck size={18} aria-hidden="true" /> Ver respuestas
-                </button>
                 <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
                   onRestart(); }}>
                   <RotateCcw size={18} aria-hidden="true" /> Repetir
@@ -123,111 +107,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
         )}
       </div>
 
-      {/* Modal accesible de Repasamos juntos */}
-      {showMistakesModal && result && (
-        <ModalFrame onClose={() => setShowMistakesModal(false)} labelledBy="review-title">
-          <div
-            className="modal-card mistakes-modal-card"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <div className="modal-title-with-icon">
-                <ClipboardCheck size={28} className="text-primary" />
-                <div>
-                  <h3 id="review-title" className="modal-title">Repasamos juntos</h3>
-                  <p className="modal-subtitle">
-                    Mira las respuestas y prueba de nuevo cuando quieras.
-                  </p>
-                </div>
-              </div>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowMistakesModal(false)}
-                aria-label="Cerrar ventana de fallos"
-              >
-                <X size={24} />
-              </button>
-            </div>
 
-            <div className="mistakes-modal-body">
-              {(!result.mistakesList || result.mistakesList.length === 0) &&
-              result.correctAnswers === result.totalQuestions ? (
-                <div className="no-mistakes-box card">
-                  <CheckCircle2 size={54} className="text-green" />
-                  <h4>Todo correcto</h4>
-                  <p>
-                    Has completado todos los pasos y objetivos de este ejercicio con un 100% de aciertos.
-                  </p>
-                </div>
-              ) : (
-                <div className="mistakes-list">
-                  {(result.mistakesList && result.mistakesList.length > 0
-                    ? result.mistakesList
-                    : [
-                        {
-                          item: `Ejercicio de ${currentDomain.name}`,
-                          userAction: `Se registraron ${result.totalQuestions - result.correctAnswers} error(es) en este ejercicio.`,
-                          correctSolution: 'Puedes pulsar en Reintentar para practicar y afianzar la precisión.',
-                          explanation: 'Puedes revisar esta actividad y volver a practicar.',
-                        },
-                      ]
-                  ).map((m, idx) => (
-                    <div key={idx} className="card mistake-item-card">
-                      <div className="mistake-item-header">
-                        <span className="mistake-badge-num">Paso {idx + 1}</span>
-                        <strong className="mistake-item-title">{m.item}</strong>
-                      </div>
-
-                      <div className="mistake-comparison-row">
-                        <div className="comparison-col comparison-wrong">
-                          <span className="col-label">Tu respuesta</span>
-                          <p className="col-val">{m.userAction}</p>
-                        </div>
-                        <div className="comparison-col comparison-correct">
-                          <span className="col-label">Respuesta correcta</span>
-                          <p className="col-val">{m.correctSolution}</p>
-                        </div>
-                      </div>
-
-                      {m.explanation && (
-                        <div className="mistake-hint-box">
-                          <strong>Una pista: </strong>
-                          <span>{m.explanation}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="touch-btn touch-btn-secondary touch-btn-large"
-                onClick={() => {
-                  soundService.playTap();
-                  setShowMistakesModal(false);
-                  session.restart();
-                  onRestart();
-                }}
-              >
-                <RotateCcw size={22} />
-                <span>Volver a practicar</span>
-              </button>
-
-              <button
-                className="touch-btn touch-btn-primary touch-btn-large"
-                onClick={() => {
-                  soundService.playTap();
-                  setShowMistakesModal(false);
-                }}
-              >
-                <span>Listo</span>
-              </button>
-            </div>
-          </div>
-        </ModalFrame>
-      )}
     </div>
   );
 };

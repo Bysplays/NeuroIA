@@ -1,5 +1,7 @@
 # Fichas de papel para juegos motores
 
+Asset paths in this guide refer to `public/images/` unless a repository-relative path is given.
+
 Archivo: paper-play-tokens.png. Lámina única generada con la herramienta integrada image_gen; referencia de estilo: achievement-badges.png. Dos recortes CSS para diana y seguimiento, sin alterar la imagen original.
 
 ## Prompt final

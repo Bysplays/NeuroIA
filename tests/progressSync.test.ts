@@ -144,3 +144,30 @@ test('restored pending settings and rapid edits preserve the last local choice',
   assert.equal(remote.data().profile.settings.fontSize, 'large');
   sync.stop();
 });
+
+test('custom names survive offline replay, later results and a new account session', async () => {
+  const remote = backend();
+  let pending: ProgressOperation[] = [];
+  const sync = new ProgressSync(initial(), [], remote.api, queue => { pending = structuredClone(queue); }, () => {});
+  sync.setOnline(false);
+  sync.enqueue({ id: 'rename', kind: 'settings', settings: {}, name: '  Ana María  ' });
+  assert.equal(pending.length, 1);
+  sync.stop();
+  let shown = initial();
+  const resumed = new ProgressSync(initial(), pending, remote.api, () => {}, data => { shown = data; });
+  resumed.start(); await settle();
+  resumed.enqueue(result('after-rename')); await settle();
+  assert.equal(shown.profile.name, 'Ana María');
+  assert.equal(remote.data().profile.name, 'Ana María');
+  assert.equal(remote.data().profile.totalSessions, 1);
+  const nextSession = new ProgressSync((await remote.api.load())!, [], remote.api, () => {}, data => { shown = data; });
+  nextSession.start(); assert.equal(shown.profile.name, 'Ana María');
+  resumed.stop(); nextSession.stop();
+});
+
+test('invalid custom names cannot enter the durable queue', () => {
+  const remote = backend(); let persisted = false;
+  const sync = new ProgressSync(initial(), [], remote.api, () => { persisted = true; }, () => {});
+  for (const name of ['   ', 'x'.repeat(201)]) assert.throws(() => sync.enqueue({ id: name, kind: 'settings', settings: {}, name }), /invalid-profile-name/);
+  assert.equal(persisted, false); assert.equal(sync.hasPendingWork, false);
+});

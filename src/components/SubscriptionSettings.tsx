@@ -53,8 +53,7 @@ export function SubscriptionSettings() {
       <div className="subscription-status">
         <div>
           <h3>{invitation ? 'Acceso gratuito por invitación' : subscription ? 'Plan mensual' : access.kind === 'trial' ? 'Prueba gratuita de 7 días' : 'Sin plan activo'}</h3>
-          <p className="subscription-date">{invitation ? 'Sin fecha de caducidad' : until ? `${access.active ? 'Hasta el' : 'Finalizó el'} ${until}` : access.active ? 'Fecha no disponible' : 'Sin acceso activo'}</p>
-          {subscription && <p className="subscription-date">Renovación automática</p>}
+          <p className="subscription-date">{invitation ? 'Sin fecha de caducidad' : until ? `${access.active ? 'Hasta el' : 'Finalizó el'} ${until}` : access.active ? 'Fecha no disponible' : 'Sin acceso activo'}{subscription && access.autoRenew === true && '. Renovación automática'}</p>
         </div>
       {subscription && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable || !access.canManageSubscription} onClick={() => void openBilling('portal')}>{busy ? 'Abriendo Stripe…' : 'Gestionar'}</button>}
         {invitation && <button className="subscription-upgrade" onClick={() => { setError(''); setConfirmLeave(true); }}>Abandonar</button>}

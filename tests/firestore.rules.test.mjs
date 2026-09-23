@@ -9,7 +9,7 @@ import { patientProgress } from '../src/services/progressData.ts';
 
 let env;
 before(async () => {
-  env = await initializeTestEnvironment({ projectId: 'demo-neuroia', firestore: { rules: await readFile(new URL('../firestore.rules', import.meta.url), 'utf8') } });
+  env = await initializeTestEnvironment({ projectId: 'demo-neuroia', firestore: { rules: await readFile(new URL('../vendor/firebase/firestore.rules', import.meta.url), 'utf8') } });
   await env.clearFirestore();
 });
 after(async () => { await env?.cleanup(); });
@@ -28,6 +28,10 @@ test('owner can initialize, save, and reload from another device; retries are id
   assert.equal(remote.history.length, 2);
   await first.commit({ id: 'settings-a', kind: 'settings', settings: { contrast: 'high-contrast' } });
   assert.equal((await second.load()).profile.settings.contrast, 'high-contrast');
+  await first.commit({ id: 'rename-a', kind: 'settings', settings: {}, name: 'Ana María' });
+  await second.commit(op('after-name'));
+  assert.equal((await first.load()).profile.name, 'Ana María');
+  assert.equal((await second.load()).profile.totalSessions, 3);
 });
 
 test('anonymous users and another patient cannot read or write patient progress or results', async () => {

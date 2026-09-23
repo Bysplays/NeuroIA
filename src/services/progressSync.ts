@@ -15,6 +15,7 @@ export class ProgressSync {
   private queue: ProgressOperation[];
   // Keep locally edited fields stable for this session while cloud progress updates.
   private localSettings: Partial<AccessibilitySettings> = {};
+  private localName: string | undefined;
   private stopped = false;
   private running = false;
   private online = true;
@@ -35,7 +36,10 @@ export class ProgressSync {
     this.data = structuredClone(initial);
     this.queue = pending;
     for (const operation of pending) {
-      if (operation.kind === 'settings') Object.assign(this.localSettings, operation.settings);
+      if (operation.kind === 'settings') {
+        Object.assign(this.localSettings, operation.settings);
+        if (operation.name !== undefined) this.localName = operation.name.trim();
+      }
       this.data = applyProgressOperation(this.data, operation);
     }
   }
@@ -53,11 +57,15 @@ export class ProgressSync {
   enqueue(operation: ProgressOperation) {
     if (this.stopped) throw new Error('closed-session');
     if (this.queue.some(item => item.id === operation.id)) return;
+    const next = applyProgressOperation(this.data, operation);
     const queue = [...this.queue, operation];
     try { this.persist(queue); } catch { /* Keep in memory and try the cloud; pending UI warns against closing. */ }
     this.queue = queue;
-    if (operation.kind === 'settings') Object.assign(this.localSettings, operation.settings);
-    this.data = applyProgressOperation(this.data, operation);
+    if (operation.kind === 'settings') {
+      Object.assign(this.localSettings, operation.settings);
+      if (operation.name !== undefined) this.localName = operation.name.trim();
+    }
+    this.data = next;
     this.changed(this.data, 'saving');
     void this.retry();
   }
@@ -100,7 +108,7 @@ export class ProgressSync {
   private withLocalSettings(data: ProgressData): ProgressData {
     return {
       ...data,
-      profile: { ...data.profile, settings: { ...data.profile.settings, ...this.localSettings } },
+      profile: { ...data.profile, ...(this.localName !== undefined ? { name: this.localName } : {}), settings: { ...data.profile.settings, ...this.localSettings } },
     };
   }
   stop() { this.stopped = true; this.unwatch(); }

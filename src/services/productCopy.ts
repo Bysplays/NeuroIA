@@ -1,4 +1,4 @@
-/** Adapted from the supplied NeuroIA-textos-web-final.pdf; see CONTENT.md. */
+/** Adapted from the supplied NeuroIA-textos-web-final.pdf; see docs/CONTENT.md. */
 export const PRODUCT_INTRO = 'NeuroIA es una plataforma de serious play que combina juegos, retos interactivos y tecnología para trabajar capacidades como la atención, la memoria, el lenguaje, la coordinación o la velocidad de respuesta.';
 
 export const PRODUCT_SECTIONS = [

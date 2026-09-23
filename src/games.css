@@ -231,6 +231,7 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .exercise-container .sequencing-option-card.card-warning { background: #f4dfc9; border-color: #a17a40; }
 
 /* Completion: one calm surface, unboxed metrics and one next action. */
+.exercise-container.exercise-container-completed { min-height: 100dvh; justify-content: center; padding-block: 24px; }
 .exercise-result { width: 100%; max-width: 860px; margin: 8px auto; padding: clamp(24px, 4vw, 48px); border-radius: 32px; background: var(--game-paper); color: var(--panel-ink); }
 .result-heading { display: grid; grid-template-columns: minmax(0, 1fr) 180px; align-items: center; gap: 24px; }
 .result-eyebrow { font-size: .72rem; margin: 0 0 14px; }
@@ -241,7 +242,7 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .result-summary dt { font-size: .72rem; margin-bottom: 8px; }
 .result-summary dd { margin: 0; font-size: 1.5rem; font-weight: 550; font-variant-numeric: tabular-nums; }
 .result-summary dd span { font-size: .8rem; font-weight: 400; }
-.result-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.result-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .result-primary { gap: 24px; justify-content: space-between; min-width: 250px; }
 .result-secondary-actions { display: flex; flex-wrap: wrap; column-gap: 24px; }
 .result-text-action { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; border: 0; padding: 8px 0; color: inherit; background: transparent; font: inherit; font-size: .75rem; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
@@ -252,7 +253,7 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
   .game-completion-art { width: 80px; height: 100px; }
   .result-summary { gap: 12px; margin: 24px 0; }
   .result-summary dd { font-size: 1.2rem; }
-  .result-primary { width: 100%; min-width: 0; }
+  .result-primary { min-width: 0; max-width: 100%; }
   .result-actions { align-items: stretch; }
   .result-secondary-actions { justify-content: space-between; gap: 8px; }
 }

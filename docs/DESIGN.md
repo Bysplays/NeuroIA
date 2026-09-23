@@ -8,7 +8,7 @@ companions. Both use generous rounded sections and clear, unhurried actions.
 Changing colors alone does not establish this style; composition, imagery,
 typography, and interaction states must work together.
 
-This is a living guide to the current product direction. Read [AGENTS.md](AGENTS.md)
+This is a living guide to the current product direction. Read [AGENTS.md](../AGENTS.md)
 for implementation, verification, and maintenance practices. Keep this guide in
 English; the application speaks Spanish.
 
@@ -33,7 +33,7 @@ Use the actual home screen and these repository assets as the visual references:
   companions; reference for character proportions, expression, and paper texture.
 - `public/images/headers/`: individual scenes for all nine exercise headers and
   results, home, catalog, achievements, therapist view, and the fatigue dialog.
-  See `public/images/headers/README.md` for prompts and provenance.
+  See `docs/assets/images/headers/README.md` for prompts and provenance.
 - `public/images/achievement-badges.png` and `achievement-badges-extended.png`:
   the collectible illustration family.
 - `public/images/paper-play-tokens.png`: the smiling paper target and companion
@@ -45,7 +45,10 @@ Use the actual home screen and these repository assets as the visual references:
 - `public/brand/neuroia-mark.svg` and `neuroia-logo.svg`: a soft turquoise/lilac
   paper-leaf sprout with dark ink veins, echoing the plant in the home illustration.
   This compact vector brand symbol is distinct from the raster mascots. See
-  `public/brand/README.md` for construction and usage.
+  `docs/assets/brand/README.md` for construction and usage. The browser favicon uses
+  `neuroia-favicon.svg`, the same mark on a pale rounded tile for tab contrast.
+  The repository README uses a centered wordmark, restrained badges and the
+  existing transparent login companions, with practical management links below.
 
 The mascots have soft organic bodies, imperfect dark ink features, small limbs,
 and visible paper grain. Keep the same characters across screens. Avoid neon
@@ -106,6 +109,10 @@ size against the importance of the text and action.
 
 ### Home
 
+Default home exercise cards use a fine 1px pale teal border to separate their
+white surfaces from the background. Keep the stronger hover and keyboard focus
+feedback; Cozy and legacy contrast themes retain their own treatment.
+
 The daily-session panel is the main entry point. Keep its text, companions, and
 start action in a deliberate responsive grid. Illustrations must not overlap the
 copy or squeeze the button, particularly on mobile.
@@ -115,7 +122,9 @@ Omit supporting session paragraphs. The button reads “Completa tu sesión de h
 until the daily plan is complete, then “Haz otra sesión adicional”.
 
 “Cada día suma” matches the session panel's height when side by side. Center its
-title, streak number and day label on separate lines. Place encouragement, minutes
+title, streak number and day label on separate lines. Let the number-and-label
+block fill and vertically center within the space between the heading and footer.
+Place encouragement, minutes
 and the achievements link below a separator. On narrow screens the cards stack
 and size naturally to their content. Do not restore the flame icon.
 
@@ -175,12 +184,15 @@ blending. Never crop limbs to hide a backdrop.
 - Use the illustrated paper target and companion for motor games. Their visible
   boundary should agree with the hit area. Keep the entire token inside the arena
   on phones as well as desktop, and show contact feedback without neon effects.
+- Completion uses at least the dynamic viewport height with symmetric vertical
+  padding and a centered result panel. Tall content grows and scrolls without
+  clipping controls; completion resets the previous game scroll position.
 - Results use one pastel surface with the exercise illustration beside a short
   completion heading. Show correct answers, accuracy, and time in an unboxed
   definition list separated from the heading/actions by quiet horizontal rules.
   Give only one action a filled button: return home for a standalone exercise,
-  continue for a daily plan, or finish the last plan exercise. Review and repeat
-  remain text actions below it; home navigation remains available above. Avoid
+  continue for a daily plan, or finish the last plan exercise. Repeat remains a text action beside the primary button, aligned to the right.
+  Omit the answer-review action and dialog; home navigation remains available above. Avoid
   nested cards, a separate feedback banner, repeated return buttons, and medical
   efficacy claims. Do not bring back points as the visible reward system.
 
@@ -212,10 +224,16 @@ the viewport; align its inner content independently. Avoid redundant wrappers,
 competing width rules, oversized icons, and unexplained gaps above or below
 content. Long content must scroll without losing access to dismissal.
 
+Rest-break tips are an informational bulleted list with short headings and
+secondary text, without colored tiles, borders or button-like backgrounds.
+Reserve filled surfaces for the actual pause/resume and return actions.
+
 ### Preferences
 
 Settings use one neutral surface, a compact sticky blue-paper header and a clear
-close button. Show text size and page style, followed by subscription status. Text size uses three segmented
+close button. Start with a labeled name input and “Guardar” action; trim names,
+reject blank values and limit them to 200 characters. This edits the NeuroIA
+profile, not the Google account. Show text size and page style, followed by subscription status. Text size uses three segmented
 choices; show “Default” first and “Cozy” second. Default uses the supplied
 September 23 reference: soft
 translucent surfaces and teal accents. Preserve all real activity data, approved
@@ -241,7 +259,9 @@ Stripe is unavailable, without a coming-soon notice. Invited accounts show only
 “Abandonar”, with a confirmation explaining loss of access and the professional
 link while preserving progress. Invitation and paid access are mutually exclusive. Paid accounts show a pill-shaped
 “Gestionar” in the same position as “Abandonar” and “Mejorar”, beside the plan
-details. Paid plans show the quiet informational line “Renovación automática”.
+details. Paid plans append “. Renovación automática” to the end-date paragraph
+only when Stripe-derived `autoRenew` is explicitly true. Omit that suffix for
+canceled or unknown renewal state without replacement copy; retain the end date.
 Stripe manages renewal; do not present a toggle or a local renewal setting. Do not show a subscription management banner above the workspace.
 Cancellation and any available plan changes are confirmed in Stripe; do
 not invent prices, upgrade plans or successful cancellation. Changes apply
@@ -277,7 +297,7 @@ density into patient games.
    require it. For a sprite sheet, specify row/column count, exact reading order, safe margins,
    recognizable object identity, and no accidental labels or neighboring art.
 4. Save the final asset in `public/images/`. Record the final prompt, generation
-   tool, reference asset, and grid layout in an adjacent Markdown file.
+   tool, reference asset, and grid layout in a Markdown file under the matching `docs/assets/` directory.
 5. Integrate it through the existing renderer or a small shared component. Keep
    source images intact and adjust display crops in CSS where appropriate.
 6. Inspect every mapping and crop at actual display size. Check for clipped limbs,
@@ -429,4 +449,4 @@ Longer messages scroll within that slot. Keep other invitation validation in tha
 automatic recovery states; do not expose a technical “Comprobar acceso” action.
 Never imply that returning from Stripe proves payment. The active
 subscription offers a customer-portal action. Technical setup and remaining
-production prerequisites are documented in `ONBOARDING.md`.
+production prerequisites are documented in `docs/ONBOARDING.md`.

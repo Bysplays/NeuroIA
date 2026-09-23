@@ -1,6 +1,6 @@
 # Working on NeuroIA
 
-This is the repository-wide guide for coding agents. Read [DESIGN.md](DESIGN.md)
+This is the repository-wide guide for coding agents. Read [DESIGN.md](docs/DESIGN.md)
 before changing any interface, interaction, copy, or visual asset. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) for branch, commit, and merge conventions.
 
@@ -14,7 +14,7 @@ NeuroIA is a Spanish-language entertainment, training and serious-play app with 
 across attention, language, memory, organization, and coordination. The app also
 includes a daily plan, achievements, accessibility settings, and a therapist view.
 
-Keep user-facing copy in Spanish. Follow [CONTENT.md](CONTENT.md) for the supplied
+Keep user-facing copy in Spanish. Follow [CONTENT.md](docs/CONTENT.md) for the supplied
 public wording, non-medical positioning and feature-availability limits. Write project guidance in English. Use short,
 warm instructions and concrete action labels. Do not add medical efficacy claims
 or invent patient activity, results, diagnoses, or professional guidance.
@@ -34,15 +34,26 @@ as `fix(games): keep paper targets inside the play area`. Do not add
 `Co-Authored-By` trailers. Merging requires explicit user authorization, as stated
 in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 
+## Documentation layout
+
+Keep `README.md`, `CONTRIBUTING.md` and `AGENTS.md` at the repository root.
+Project guides live in `docs/`, provider documentation beside its integration in `vendor/`, and
+asset provenance in `docs/assets/` mirroring the public asset directories.
+Cloudflare Workers live in `vendor/cloudflare/`; Firebase rules and the legacy
+Functions package live in `vendor/firebase/`; Stripe setup lives in `vendor/stripe/`.
+The root `firebase.json` remains the CLI entry point and references these paths.
+Application adapters stay in `src/`. Asset files remain in `public/`; paths in documentation prose are repository-relative,
+while Markdown links are relative to the document. Keep links current when moving guides.
+
 ## Code map
 
 | Location | Responsibility |
 | --- | --- |
 | `src/components/AppLoading.tsx` | Shared initial loading presentation for auth, access, lazy chunks and progress |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Mandatory account entry before progress and games |
-| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `ONBOARDING.md` |
-| `worker/` | Cloudflare Stripe backend, signed webhooks, daily reconciliation and Firestore REST transactions; see `worker/README.md` |
-| `functions/` | Previous Firebase billing backend and administrator-only professional ownership script |
+| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
+| `vendor/cloudflare/` | Cloudflare Stripe backend, signed webhooks, daily reconciliation and Firestore REST transactions; see `vendor/cloudflare/README.md` |
+| `vendor/firebase/functions/` | Previous Firebase billing backend and administrator-only professional ownership script |
 | `src/App.tsx` | View state, profile refresh, game dispatch, daily-plan progression |
 | `src/types/index.ts` | Domain, exercise, profile, result, and settings contracts |
 | `src/services/productCopy.ts` and `src/components/ProductInformation.tsx` | Supplied public presentation and notice, accessible from login and dashboard |
@@ -52,7 +63,7 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
-| `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and review |
+| `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and repeat |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
 | `src/services/storageService.ts` | Account-scoped cache/outbox, legacy local operations and daily plan |
@@ -69,7 +80,7 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 | `src/components/WellnessGlyph.tsx` | Distinct catalog illustrations for each game |
 | `src/components/GameObject.tsx` and `src/services/gameArtwork.json` | Sprite rendering and mapping of game stimuli; Organization opts into the transparent atlas with measured crops in `organizationArtwork.json` |
 | `src/components/PaperTarget.tsx` | Illustrated motor-game tokens |
-| `public/brand/` and `public/images/` | Brand marks, paper illustrations, and asset provenance |
+| `public/brand/` and `public/images/` | Brand marks and paper illustrations; provenance in `docs/assets/` |
 
 Navigation currently uses React state, not a routing library. Do not introduce a
 router or change persistence solely to implement a visual adjustment.
@@ -98,7 +109,7 @@ npm run build
 npm run lint
 npm test
 npm run test:firestore
-npm ci --prefix functions # when backend dependencies are needed
+npm ci --prefix vendor/firebase/functions # when backend dependencies are needed
 npm run test:onboarding
 git diff --check
 ```
@@ -190,22 +201,22 @@ avoid changing hit areas unintentionally when replacing artwork.
 
 ## Visual assets
 
-Follow the asset workflow and visual constraints in [DESIGN.md](DESIGN.md).
+Follow the asset workflow and visual constraints in [DESIGN.md](docs/DESIGN.md).
 Inspect the actual approved reference before generating replacements. The paper
 mascots are raster illustrations; thin vector approximations are not equivalent.
 Keep generated assets in `public/images/` and keep their prompt, tool, reference,
-and sheet layout documented beside them. Do not reference temporary generator
+and sheet layout documented under the matching directory in `docs/assets/`. Do not reference temporary generator
 paths from application code. Check every sprite-to-object mapping, especially
 when the image itself is a question or a target.
 
-Track incomplete deliverables in [TODO.md](TODO.md), including the exact pending
+Track incomplete deliverables in [TODO.md](docs/TODO.md), including the exact pending
 voice clips and the unresolved object-naming report. Keep it synchronized when
 resuming or completing those tasks.
 
 ## Prerecorded voice evaluation
 
 The shared narrator prefers prerecorded audio and falls back to Spain browser
-speech for missing clips or playback errors. Runtime assets are in `public/audio/elevenlabs-v3/`; its README records the approved voice/model,
+speech for missing clips or playback errors. Runtime assets are in `public/audio/elevenlabs-v3/`; `docs/assets/audio/elevenlabs-v3/README.md` records the approved voice/model,
 license, generation settings, and how to resume without duplicate credit usage.
 `scripts/collect_speech_texts.cjs` inventories literal and dynamic speech texts.
 `scripts/index_elevenlabs_v3.py` validates downloaded recordings and extracts
@@ -223,10 +234,10 @@ playback behavior, alongside voice-selection and game-clock tests.
 ## Keeping this guide alive
 
 Update this file in the same change whenever commands, architecture, persistence,
-verification practices, or the code map change. Update DESIGN.md whenever visual
+verification practices, or the code map change. Update docs/DESIGN.md whenever visual
 rules, navigation placement, assets, or interaction patterns change. When both are
 affected, update both. Replace obsolete guidance rather than appending a second,
-conflicting rule. Keep implementation details here and visual intent in DESIGN.md;
+conflicting rule. Keep implementation details here and visual intent in docs/DESIGN.md;
 link between them instead of duplicating long explanations.
 
 Before finishing, check whether the next contributor could follow these files
@@ -252,7 +263,7 @@ that account before cloud loading; cached identity never grants access. `Storage
 and pending writes are scoped to the UID. Auth changes unmount the old boundary,
 unsubscribe listeners, and prevent late callbacks from touching the next account.
 
-`AccessGate` is lazy loaded after authentication and validates server-owned access directly in Firestore before mounting `CloudProgress`. See [ONBOARDING.md](ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
+`AccessGate` is lazy loaded after authentication and validates server-owned access directly in Firestore before mounting `CloudProgress`. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
 before mounting games; an inaccessible/offline initial load shows retry/logout,
 never an empty replacement profile. First cloud initialization offers an explicit
 import of account-local activity or the older unscoped profile when present.
@@ -299,8 +310,8 @@ The retained therapist component is not wired to cloud mutations. Current rules
 allow only the owner's patient progress, append-only results and immutable retry
 receipts; all client role, cross-account, clinical and delete paths stay denied. Strict Firestore rules allow only the permanent CEOABERTO invitation, the reserved unclaimed CeoAberto profile and reciprocal owner-specific care links; owners may atomically revoke their invitation and delete their matching care link; ownership changes remain admin-only and no clinical access is granted. Totals
 are self-reported client data, not medically verified records. Publish the exact
-reviewed `firestore.rules` before using the real project. No rules are deployed
-by a frontend build. See `AUTHENTICATION.md` and `TODO.md`.
+reviewed `vendor/firebase/firestore.rules` before using the real project. No rules are deployed
+by a frontend build. See `docs/AUTHENTICATION.md` and `docs/TODO.md`.
 
 `LandscapeGate` uses the portrait viewport media query and `ModalFrame`. Its
 context in `src/services/orientation.ts` pauses `GameSession` and the workspace
@@ -312,3 +323,20 @@ explicit fullscreen button, with a manual-rotation fallback.
 and forbidden writes. Never create fixture users/results in the real project.
 Browser verification uses isolated contexts with a test-only identity adapter and
 the local Firestore emulator; no authentication bypass ships in application code.
+
+## Installable web metadata
+
+`public/manifest.webmanifest` defines standalone display, landscape preference,
+relative start URL/scope/ID and PNG icons for Android/tablets. `index.html` links
+the manifest and the 180px Apple touch icon; Vite rewrites their URLs for Pages.
+Keep manifest URLs relative so both `/app-ictus/` and custom-domain roots work.
+Installation does not enable offline access: there is no service-worker cache,
+and authentication/access/progress still require the existing online checks.
+Verify actual installation and Google sign-in on Android and iPad before release.
+
+Account name edits use the existing `settings` progress operation with an optional
+`name` field beside the settings patch. The reducer trims and validates 1–200
+characters; ProgressSync pins local name edits for the session and replays pending
+names on restart. Firestore saves `profile.name` using the existing settings receipt
+kind, so no rule deployment is required. Google display name is only used for initial
+profile creation/import and is never updated by the settings input.

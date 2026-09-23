@@ -1,14 +1,14 @@
 # NeuroIA billing on Cloudflare Workers
 
-`index.mjs` is a standalone module Worker: copy its entire content into Cloudflare's
-**Edit code** editor and deploy, or use `npx wrangler deploy --config worker/wrangler.jsonc`
+`vendor/cloudflare/index.mjs` is a standalone module Worker: copy its entire content into Cloudflare's
+**Edit code** editor and deploy, or use `npx wrangler deploy --config vendor/cloudflare/wrangler.jsonc`
 from an authenticated local CLI. It uses Fetch and Web Crypto, not Firebase Functions.
 The configured endpoint is `https://neuroia-billing.kikefontanlorenzo.workers.dev`.
 No domain purchase or Firebase Blaze deployment is required.
 
 ## Configuration
 
-Set these ordinary runtime variables on the Worker (also recorded in `wrangler.jsonc`):
+Set these ordinary runtime variables on the Worker (also recorded in `vendor/cloudflare/wrangler.jsonc`):
 
 - `APP_URL=https://bysplays.github.io/app-ictus/`
 - `FIREBASE_PROJECT_ID=ceoaberto-neuroia`
@@ -76,13 +76,13 @@ created by the automated tests.
   Checkout attempt and configured price can grant access. Paid access is never granted
   by the browser's success URL. Active subscriptions use Stripe's period end; cancellation
   at period end retains access until that date. Invitations never become paid implicitly.
-- `functions/` is retained as the previous Firebase deployment implementation and the
+- `vendor/firebase/functions/` is retained as the previous Firebase deployment implementation and the
   professional provisioning script. Do not deploy both billing backends for this setup.
 
 ## Checks
 
-`node --test worker/index.test.mjs` covers signatures, request boundaries, payment
-idempotency and subscription lifecycle with mocks. `node --test worker/firestore.test.mjs`
+`node --test vendor/cloudflare/index.test.mjs` covers signatures, request boundaries, payment
+idempotency and subscription lifecycle with mocks. `node --test vendor/cloudflare/firestore.test.mjs`
 requires the demo-neuroia Firestore emulator on 8080; it exercises real REST transactions,
 conflict retries and merge preservation. When running both Firestore suites together,
 use `--test-concurrency=1`: the rules suite clears the shared demo database.
@@ -91,8 +91,9 @@ service-account authorization and an end-to-end sandbox payment still need deplo
 
 ## Renewal and daily reconciliation
 
-Paid settings show the informational copy “Renovación automática” and a “Gestionar”
-portal action, with no renewal toggle. The backend still records Stripe renewal
+Paid settings append “. Renovación automática” to the end-date paragraph only
+when `autoRenew` is explicitly true, alongside the “Gestionar” portal action.
+Canceled or unknown renewal state omits that suffix; the end date stays visible. There is no renewal toggle. The backend still records Stripe renewal
 state for reconciliation. Scheduled
 cancellation disables renewal and keeps the paid period; canceled/unpaid/past-due
 subscriptions lose access. Only an active subscription with a paid latest invoice
@@ -100,7 +101,7 @@ can extend expiry. An open/draft invoice cannot grant the new billing period.
 The existing access gate also checks expiry locally and refreshes Firestore every
 30 seconds/on focus; it does not wait for a daily job to expire known access.
 
-Deploy the updated `index.mjs`, then add a Cron Trigger `*/5 * * * *` under the
+Deploy the updated `vendor/cloudflare/index.mjs`, then add a Cron Trigger `*/5 * * * *` under the
 Worker's Settings > Trigger Events (Wrangler deployment applies the configured
 trigger automatically). The handler processes five Stripe records per invocation,
 resumes via `billingMaintenance/daily`, and begins a new sweep daily. The frequent

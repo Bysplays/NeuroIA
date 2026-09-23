@@ -1,6 +1,8 @@
 # Organization object atlas
 
-Generated with the built-in `image_gen` tool, 2026-09-14. A single sheet combines the objects from `game-objects-0.png` and `game-objects-1.png`. The first assembly had a baked checkerboard and was rejected; the final extraction has verified alpha. Original object identities and row-major order are retained; answer keys are unchanged. The transparent option in `GameObject` is enabled only by the two Organization games.
+Asset paths in this guide refer to `public/images/` unless a repository-relative path is given.
+
+Generated with the built-in `image_gen` tool, 2026-09-14. A single sheet combines the objects from `public/images/game-objects-0.png` and `public/images/game-objects-1.png`. The first assembly had a baked checkerboard and was rejected; the final extraction has verified alpha. Original object identities and row-major order are retained; answer keys are unchanged. The transparent option in `GameObject` is enabled only by the two Organization games.
 
 Layout: 8 columns × 10 rows, 80 objects in row-major order. Rows 1–5 correspond to original sheet 0; rows 6–10 correspond to sheet 1. Existing `gameArtwork.json` cell IDs select the exact same objects. The generated positions drift slightly from a regular grid, so `src/services/organizationArtwork.json` records measured alpha bounding boxes (pixel coordinates on the unchanged 1122 × 1402 source). The renderer adds one pixel of edge padding and contains the crop inside the existing square hit-independent illustration area. Do not replace these measured crops with uniform cell cuts: those clip objects and reveal neighboring strokes.
 

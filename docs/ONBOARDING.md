@@ -30,7 +30,7 @@ redemption. Existing subscribers must manage their subscription first.
 
 The profile is a persistent professional record, not a fabricated Google account.
 Its real owner must later be assigned by an administrator using an existing
-Firebase Auth UID. `functions/seed-professional.js` supports that assignment with
+Firebase Auth UID. `vendor/firebase/functions/seed-professional.js` supports that assignment with
 Application Default Credentials and verifies the UID outside the demo emulator.
 This assignment and the future professional UI are not needed to test redemption.
 Clinical access and patient lists remain unavailable to professional clients.
@@ -47,11 +47,11 @@ saves; the public frontend and downloadable exercise assets are not a secure DRM
 boundary.
 
 Stripe Checkout, webhook and portal now use the standalone Cloudflare Worker in
-`worker/`, without deploying Firebase Cloud Functions or enabling Blaze. See
-[worker/README.md](worker/README.md) for secrets, deployment, webhook events and
+`vendor/cloudflare/`, without deploying Firebase Cloud Functions or enabling Blaze. See
+[vendor/cloudflare/README.md](../vendor/cloudflare/README.md) for secrets, deployment, webhook events and
 sandbox validation. Both `VITE_BILLING_API_URL` and `VITE_STRIPE_ENABLED=true` are
 required to expose purchase actions. Frontend configuration alone cannot activate
-billing. `functions/` retains the previous backend and professional provisioning.
+billing. `vendor/firebase/functions/` retains the previous backend and professional provisioning.
 
 ## Local development
 
@@ -63,7 +63,7 @@ patient progress are retained.
 
 ## Enable real accounts on the free plan
 
-Publish the reviewed `firestore.rules` to `ceoaberto-neuroia` using an authorized
+Publish the reviewed `vendor/firebase/firestore.rules` to `ceoaberto-neuroia` using an authorized
 Firebase administrator. No function deployment, billing account, invitation
 seeding or Stripe configuration is required for this flow:
 
@@ -97,11 +97,11 @@ Invited accounts cannot start Checkout. Settings offers “Abandonar” with con
 Leaving atomically replaces access with `{kind: 'revoked', leftAt: serverTimestamp()}`
 and deletes the owner's reciprocal care link. Progress remains intact and trials
 cannot restart. The access gate immediately checks the new state. Publish the updated
-`firestore.rules` for this operation; a frontend build does not deploy rules.
+`vendor/firebase/firestore.rules` for this operation; a frontend build does not deploy rules.
 Users can then redeem an invitation or subscribe when billing is enabled. CEOABERTO
 remains the explicit permanent, reusable exception and can be redeemed again.
 Trials may subscribe directly. Billing events never turn invited accounts into paid accounts.
 
 Paid renewal status and the daily Stripe reconciliation require the updated Worker
-and its Cron Trigger; see [renewal setup](worker/README.md#renewal-and-daily-reconciliation).
+and its Cron Trigger; see [renewal setup](../vendor/cloudflare/README.md#renewal-and-daily-reconciliation).
 The browser never grants an extra period from the Checkout return URL or an unpaid invoice.
