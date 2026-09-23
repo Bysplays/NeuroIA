@@ -380,7 +380,7 @@ The initial screen has a blue paper illustration panel and one heading,
 “Jugar también puede ser una forma de entrenar”, beside the “Continuar con Google” action. Use
 `public/images/headers/login-transparent.png`, a true-alpha cutout derived from
 the home scene, without blend modes or an opaque image backing. Keep only one
-short note explaining account-linked progress. The “Eres un profesional?” text action beside the information links switches to a
+short note explaining account-linked progress. The “¿Eres un profesional?” text action beside the information links switches to a
 professional introduction: copy and Google action on the left, the existing
 clipboard companion (`public/images/headers/therapist.png`) on lilac paper on the
 right. Mirror only the curved separator, not the illustration. On narrow screens,

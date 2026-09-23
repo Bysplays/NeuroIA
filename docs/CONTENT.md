@@ -42,7 +42,7 @@ the current introduction uses the cover paragraph without that claim instead.
 
 ## Professional entry preview
 
-The login offers “Eres un profesional?” and a reversible professional presentation.
+The login offers “¿Eres un profesional?” and a reversible professional presentation.
 It addresses professionals who want to follow other people's exercise activity.
 This is an audience introduction, not a new authorization flow: the copy explicitly
 says professional tracking is in preparation and Google still opens the existing

@@ -34,7 +34,7 @@ export function LoginScreen({ onSignIn, busy, error }: { onSignIn: () => void; b
       {professional ? [actions, illustration] : [illustration, actions]}
     </section>
     <ProductInformation>
-      <button disabled={busy} onClick={() => { changedMode.current = true; setProfessional(value => !value); }}>{professional ? 'Volver al acceso personal' : 'Eres un profesional?'}</button>
+      <button disabled={busy} onClick={() => { changedMode.current = true; setProfessional(value => !value); }}>{professional ? 'Volver al acceso personal' : '¿Eres un profesional?'}</button>
     </ProductInformation>
   </main>;
 }
