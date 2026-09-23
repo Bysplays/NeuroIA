@@ -1,3 +1,4 @@
+import { ProfileSwitch } from './ProfileSwitch';
 import { AppLoading } from './AppLoading';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { accessService, accessError, type AccountAccess } from '../services/accessService';
@@ -75,6 +76,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
       <h1>No hemos podido abrir tu espacio</h1>
       <p role="alert">Comprueba la conexión y vuelve a intentarlo.</p>
       <button className="touch-btn touch-btn-primary" onClick={() => { setError(''); void refresh(); }}>Reintentar</button>
+      <ProfileSwitch />
       <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
     </main>;
   }

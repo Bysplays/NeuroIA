@@ -128,8 +128,8 @@ Place encouragement, minutes
 and the achievements link below a separator. On narrow screens the cards stack
 and size naturally to their content. Do not restore the flame icon.
 
-The therapist entry belongs in the top navigation once professional access is
-authorized. It is currently unavailable while roles and care links are pending.
+Professional owners enter a separate free workspace through the professional
+login; do not add the retained clinical therapist view to personal navigation.
 Do not add back the duplicate
 “Acompañamos tu progreso” card at the bottom. “Tu recorrido” uses the available
 width. The home links to achievements rather than displaying the badge collection.
@@ -277,13 +277,29 @@ spacing on both sides of the footer divider, without a trailing paragraph margin
 Content scrolls with the close button accessible, including large text and short
 landscape screens. Do not reduce text to make controls fit.
 
-### Therapist view
+### Professional workspace
 
-Maintain the same brand and soft surfaces with a more restrained hierarchy.
-Prioritize real patient context, prescribed areas, guidance, notes, domain
-performance, and session history. Preserve editing and print behavior. Clinical
-labels belong here when useful; do not transplant the professional dashboard's
-density into patient games.
+Use the same brand, palette and pill controls as the personal app. The dashboard
+is free and opens without a personal subscription or trial modal. Lead with
+“Espacio profesional” and “Comprar un asiento”. Omit the owner name, introductory
+subtitle and seats subtitle. Show honest empty states
+for both linked people and seats. Keep paid participant seats distinct from the
+free professional account. One monthly subscription funds one participant.
+Place purchase and the shared settings icon in the top header. Reuse player
+settings without its subscription section; name and appearance are account-wide.
+Profile switching, logout and information links live in the settings footer.
+
+People show their supplied name and an action to open the existing activity charts
+and table in read-only mode. Use “Volver al panel” and identify whose activity is
+being shown. Seats show pending/active/inactive state, paid-through date, renewal
+when confirmed, and a selectable/copyable code only when paid and unoccupied.
+After assignment show the participant, not the code. Pending purchases can be
+resumed or canceled; subscription management uses the Stripe portal. Never imply
+that a return from Checkout proves payment or invent prices, people or results.
+
+The retained therapist component is not the professional dashboard and remains
+unwired for clinical writes. There are no diagnosis, notes or prescribed activities
+in this workspace. Access and purchase contracts are in [PROFESSIONALS.md](PROFESSIONALS.md).
 
 ## Illustration workflow
 
@@ -380,7 +396,21 @@ The initial screen has a blue paper illustration panel and one heading,
 “Jugar también puede ser una forma de entrenar”, beside the “Continuar con Google” action. Use
 `public/images/headers/login-transparent.png`, a true-alpha cutout derived from
 the home scene, without blend modes or an opaque image backing. Keep only one
-short note explaining account-linked progress. Quiet “Sobre NeuroIA” and “Aviso
+short note explaining account-linked progress. The “¿Eres un profesional?” text action beside the information links switches to a
+professional introduction: copy and Google action on the left, the existing
+clipboard companion (`public/images/headers/therapist.png`) on lilac paper on the
+right. Mirror only the curved separator, not the illustration. On narrow screens,
+professional copy comes before the image. “Volver al acceso personal” restores the
+personal entry. Focus the heading after either switch and disable switching while
+Google sign-in is pending. The professional panel keeps only the audience label,
+heading and Google action; omit supporting paragraphs and availability notices.
+Professional sign-in opens the free professional workspace; personal sign-in
+keeps the existing account access flow even if a professional profile exists.
+Restored sessions offer “Jugador” and “Profesional” profiles for the same account.
+Place “Cambiar de perfil” in player settings, entry/recovery screens and the
+professional settings. Use two descriptive buttons in the profile choice, stacked
+on phones. Switching preserves saved activity and independent subscriptions.
+Quiet “Sobre NeuroIA” and “Aviso
 legal” links below the card open the supplied product information in the shared
 dialog; signed-in users find these links in the settings footer. Keep long copy
 scrollable, selectable and readable in all themes. Omit introductory paragraphs,

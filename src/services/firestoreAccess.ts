@@ -20,11 +20,12 @@ export function firestoreAccess(uid: string, db: Firestore) {
       const expiresAt = data?.kind === 'trial' && trialStartedAt != null
         ? trialStartedAt + TRIAL_DURATION : data?.expiresAt ?? null;
       return {
-        active: data?.kind === 'invitation' || (['trial', 'subscription'].includes(data?.kind) && typeof expiresAt === 'number' && expiresAt > now),
+        active: (data?.kind === 'invitation' && data?.invitationCode === INVITATION_CODE && !data?.seatId && expiresAt === null) || (['trial', 'subscription', 'invitation'].includes(data?.kind) && typeof expiresAt === 'number' && expiresAt > now),
         kind: data?.kind as 'trial' | 'subscription' | 'invitation' | 'revoked' | undefined,
         serverNow: now, expiresAt, trialStartedAt,
         autoRenew: typeof data?.autoRenew === 'boolean' ? data.autoRenew : undefined,
         professionalId: data?.professionalId as string | undefined,
+        seatId: data?.seatId as string | undefined,
         professionalName: data?.professionalName as string | undefined,
         invitationCode: data?.invitationCode as string | undefined,
       };

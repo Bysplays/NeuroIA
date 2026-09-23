@@ -141,8 +141,9 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
   CLI has no authorized account; the production-mode default still needs replacing.
 - [ ] Verify real-account cloud saving from two devices after publishing rules.
 - [ ] Authorize the final deployment hostname in Firebase Authentication.
-- [ ] Implement verified professional roles, patient-professional care links and
-  revocation before restoring professional navigation.
+- [x] Implement free self-owned professional workspaces, paid-seat care links,
+  read-only analytics and participant departure with code rotation.
+- [ ] Verify professional credentials before adding any clinical permissions.
 - [ ] Add private clinical notes and patient-facing instructions with distinct
   permissions, account deletion, and explicit merge of retained local backups
   into an already-existing cloud account. Initial empty-account import is available.
@@ -150,17 +151,19 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
 ## Onboarding and subscriptions
 
 - [x] Mandatory modal, server-timed seven-day trial and transactional invitation
-  redemption with care links; CEOABERTO is the only accepted code for now,
-  permanent and reusable. Other codes remain disabled until professional profiles.
+  redemption with care links; CEOABERTO remains permanent and reusable. Paid-seat
+  codes are unique, single-occupant and valid only during confirmed paid access.
 - [x] Add Stripe Checkout, signed webhook and customer portal integration code.
 - [ ] Supply monthly Stripe Price ID, configure secrets, APP_URL, webhook and
   portal; run the payment lifecycle in Stripe test mode. See `docs/ONBOARDING.md`.
-- [ ] Assign CeoAberto's actual Firebase owner UID before enabling professional
-  account access. The code now links to a reserved unclaimed professional record.
+- [ ] Assign CeoAberto's actual Firebase owner UID before any migration of its
+  legacy links. New professional workspaces do not inherit those links.
 - [ ] Publish reviewed Spark-compatible rules for real-account invitation/trial
   access. No Cloud Functions or Blaze required; localhost:5173 keeps real Google login.
-- [ ] Implement verified professional profile and code creation; care-link
-  revocation and professional permissions remain unavailable.
+- [ ] Deploy the reviewed professional-seat Worker and Firestore rules before
+  publishing the `medico` frontend. Verify one sandbox purchase, unique code,
+  redemption, read-only analytics, renewal failure, portal cancellation and
+  departure/reassignment end to end. See `docs/PROFESSIONALS.md`.
 
 ## Cloudflare billing deployment
 

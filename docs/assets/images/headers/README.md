@@ -66,6 +66,10 @@ Only the lavender pebble companion proudly holding a small paper star rosette wi
 
 ### therapist.png
 
+Also reused, unchanged, on the right of the professional login introduction.
+Render through `HeaderIllustration`, with multiply on the lilac panel and the
+shared white backing in contrast modes. No new generation or crop was needed.
+
 Only the turquoise pear companion sitting on a simple stool, thoughtfully holding a clipboard with abstract strokes, with a small plant beside the stool. No medical symbols or uniform.
 
 ### rest.png

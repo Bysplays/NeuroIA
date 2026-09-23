@@ -15,12 +15,15 @@ export interface AccountAccess {
   professionalName?: string;
   professionalId?: string;
   invitationCode?: string;
+  seatId?: string;
 }
 const billingUrl = import.meta.env.VITE_BILLING_API_URL?.replace(/\/$/, '');
-async function billingRequest<T = { url: string }>(path: string): Promise<T> {
+export const billingEnabled = Boolean(billingUrl) && import.meta.env.VITE_STRIPE_ENABLED === 'true';
+export async function billingRequest<T = { url: string }>(path: string, body?: object): Promise<T> {
   if (!billingUrl || !auth.currentUser) throw new Error('billing-unavailable');
   const response = await fetch(`${billingUrl}${path}`, {
-    method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}` },
+    method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
   const result = await response.json();
   if (!response.ok) throw Object.assign(new Error(result.error || 'No hemos podido gestionar el pago.'), { code: 'billing/request-failed' });
@@ -34,7 +37,7 @@ function accountAccess() {
 export const accessService = {
   async load(): Promise<AccountAccess> {
     const access = await accountAccess().load();
-    const enabled = Boolean(billingUrl) && import.meta.env.VITE_STRIPE_ENABLED === 'true';
+    const enabled = billingEnabled;
     if (!enabled) return { ...access, checkoutAvailable: false, canManageSubscription: false };
     try {
       const billing = await billingRequest<{ pendingCheckout: boolean; canManageSubscription: boolean }>('/status');
@@ -45,9 +48,16 @@ export const accessService = {
     }
   },
   async trial() { await accountAccess().trial(); },
-  async invite(code: string) { await accountAccess().invite(code); },
+  async invite(code: string) {
+    if (/^NIA-[A-F0-9]{32}$/.test(code.trim().toUpperCase())) {
+      try { await billingRequest('/redeem-seat', { code, name: auth.currentUser?.displayName || 'Persona invitada' }); }
+      catch (error) { throw Object.assign(error instanceof Error ? error : new Error('No hemos podido usar la invitación.'), { code: 'invitation/seat' }); }
+    } else await accountAccess().invite(code);
+  },
   async leaveInvitation() {
-    await accountAccess().leaveInvitation();
+    const access = await accountAccess().load();
+    if (access.seatId) await billingRequest('/leave-seat');
+    else await accountAccess().leaveInvitation();
     window.dispatchEvent(new Event('neuroia-access-changed'));
   },
   async cancelCheckout() { await billingRequest('/cancel-checkout'); },

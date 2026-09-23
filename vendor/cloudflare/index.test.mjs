@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHandler, verifyWebhook, verifyUser, checkout, webhook, reconcileDaily } from './index.mjs';
-const env = { APP_URL:'https://bysplays.github.io/app-ictus/', FIREBASE_PROJECT_ID:'demo-neuroia', STRIPE_MONTHLY_PRICE_ID:'price_monthly', STRIPE_MODE:'test', STRIPE_WEBHOOK_SECRET:'test-secret' };
+const env = { APP_URL:'https://bysplays.github.io/NeuroIA/', FIREBASE_PROJECT_ID:'demo-neuroia', STRIPE_MONTHLY_PRICE_ID:'price_monthly', STRIPE_MODE:'test', STRIPE_WEBHOOK_SECRET:'test-secret' };
 function store(access={}, billing={}) {
   return { access, billing, async transaction(uid, callback) {
     assert.equal(uid,'user-a'); const patches=[];

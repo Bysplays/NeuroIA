@@ -50,7 +50,9 @@ while Markdown links are relative to the document. Keep links current when movin
 | Location | Responsibility |
 | --- | --- |
 | `src/components/AppLoading.tsx` | Shared initial loading presentation for auth, access, lazy chunks and progress |
-| `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Mandatory account entry before progress and games |
+| `src/components/AccountEntry.tsx` | Selects independent player/professional workspaces for the same authenticated account |
+| `src/components/ProfessionalDashboard.tsx` and `src/services/firestoreProfessional.ts` | Free professional panel, sponsored seats and read-only linked activity; see `docs/PROFESSIONALS.md` |
+| `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Personal account entry before progress and games |
 | `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
 | `vendor/cloudflare/` | Cloudflare Stripe backend, signed webhooks, daily reconciliation and Firestore REST transactions; see `vendor/cloudflare/README.md` |
 | `vendor/firebase/functions/` | Previous Firebase billing backend and administrator-only professional ownership script |
@@ -129,8 +131,8 @@ Worker bindings. The workflow passes the Pages base path to Vite, supporting bot
 repository subpaths and custom domains. Runtime references to public assets must
 use `import.meta.env.BASE_URL`; Vite handles URLs in CSS and HTML during build.
 To verify a repository deployment locally, run
-`npm run build -- --base /app-ictus/` and
-`npm run preview -- --base /app-ictus/`, then open `/app-ictus/`.
+`npm run build -- --base /NeuroIA/` and
+`npm run preview -- --base /NeuroIA/`, then open `/NeuroIA/`.
 
 ### Known tooling gap
 
@@ -254,7 +256,16 @@ the clock, alongside the existing speech-voice tests.
 
 `App` observes Firebase Authentication before mounting the cloud progress boundary.
 Configuration and session persistence are in `src/services/firebase.ts`; Analytics
-is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy.
+is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy. Its local
+personal/professional switch passes the selected intent through the Google sign-in
+callback. `AccountEntry` honors explicit player/professional entry and offers both profiles
+on restored sessions. Professional registration never replaces player progress
+or subscription. `ProfileSwitchContext` provides navigation from settings, entry
+recovery and professional settings; switching unmounts the old workspace.
+Player entry does not depend on professional reads. Professional settings reuse
+CloudProgress and its durable settings operations for account-wide name and
+appearance; the shared modal hides personal subscription controls.
+`ProductInformation` provides the switch through its optional children slot.
 The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
 localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the
 auth session through the bottom of Settings (not the home header). Entry and
@@ -305,13 +316,16 @@ next login. Successful saves and session identity have no top banner. Only pendi
 saves show a recovery notice. Cloud errors must not be labeled saved. Device-local narrator toggles
 are not synced; accessibility settings in the profile are synced.
 
-Professional navigation remains unavailable pending verified roles and care links.
-The retained therapist component is not wired to cloud mutations. Current rules
-allow only the owner's patient progress, append-only results and immutable retry
-receipts; all client role, cross-account, clinical and delete paths stay denied. Strict Firestore rules allow only the permanent CEOABERTO invitation, the reserved unclaimed CeoAberto profile and reciprocal owner-specific care links; owners may atomically revoke their invitation and delete their matching care link; ownership changes remain admin-only and no clinical access is granted. Totals
-are self-reported client data, not medically verified records. Publish the exact
-reviewed `vendor/firebase/firestore.rules` before using the real project. No rules are deployed
-by a frontend build. See `docs/AUTHENTICATION.md` and `docs/TODO.md`.
+Professional owners use a free workspace, not the retained therapist component.
+Only server-confirmed paid seats and participant redemption create analytics
+permissions. Rules allow active linked owners to read participant progress and
+results; cross-account writes, clinical fields and retry receipts remain denied.
+Self-registration grants only ownership of an empty workspace, not clinical status.
+CEOABERTO remains the permanent reusable exception with administrator-only
+ownership. See `docs/PROFESSIONALS.md` for seat paths, codes, departure and billing.
+Totals remain self-reported, not medically verified. Publish the reviewed rules
+and Worker before this frontend; frontend builds deploy neither. See
+`docs/AUTHENTICATION.md` and `docs/TODO.md` for remaining release checks.
 
 `LandscapeGate` uses the portrait viewport media query and `ModalFrame`. Its
 context in `src/services/orientation.ts` pauses `GameSession` and the workspace
@@ -329,7 +343,7 @@ the local Firestore emulator; no authentication bypass ships in application code
 `public/manifest.webmanifest` defines standalone display, landscape preference,
 relative start URL/scope/ID and PNG icons for Android/tablets. `index.html` links
 the manifest and the 180px Apple touch icon; Vite rewrites their URLs for Pages.
-Keep manifest URLs relative so both `/app-ictus/` and custom-domain roots work.
+Keep manifest URLs relative so both `/NeuroIA/` and custom-domain roots work.
 Installation does not enable offline access: there is no service-worker cache,
 and authentication/access/progress still require the existing online checks.
 Verify actual installation and Google sign-in on Android and iPad before release.
@@ -356,7 +370,7 @@ timestamps. Historical date-only results retain their recorded calendar day in
 activity filters/charts and display no time; never infer midnight as a known
 completion time. Full timestamps display in the device timezone.
 Speed is seconds per question, not reaction time; exclude zero-question sessions
-from speed averages. `activityHistory.ts` reads owner-only result archives in
+from speed averages. `activityHistory.ts` reads owner or authorized active-seat result archives in
 explicit 200-document pages ordered by document ID. Merge pages with current
 cloud history, preserving imported and pending results; disclose partial coverage.
 No new writes, authorization rules or progress storage are introduced.

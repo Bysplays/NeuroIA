@@ -1,3 +1,4 @@
+import { ProfileSwitch } from './ProfileSwitch';
 import { useState } from 'react';
 import { ModalFrame } from './ModalFrame';
 import type { AccountAccess } from '../services/accessService';
@@ -11,12 +12,12 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
 }) {
   const [code, setCode] = useState('');
   const codeError = invitationIssue?.code === code ? invitationIssue.message : '';
-  const expired = access?.trialStartedAt != null || access?.kind === 'revoked';
+  const expired = access?.kind != null;
   return <ModalFrame labelledBy="onboarding-title" onClose={() => {}} dismissOnBackdrop={false}>
     <section className="onboarding">
       <header className="onboarding-heading">
         <h1 id="onboarding-title" tabIndex={-1} autoFocus>{expired ? 'Continúa con NeuroIA' : 'Empieza con NeuroIA'}</h1>
-        {expired && <p>Tu prueba gratuita ha terminado.</p>}
+        {expired && <p>{access?.kind === 'trial' ? 'Tu prueba gratuita ha terminado.' : 'Tu acceso no está activo.'}</p>}
         <svg className="onboarding-paper-edge" viewBox="0 0 400 32" preserveAspectRatio="none" aria-hidden="true" focusable="false">
           <path d="M0 18 C100 42 170 0 250 16 C310 30 360 28 400 12 V32 H0 Z" fill="currentColor" opacity=".35" transform="translate(0 -6)" />
           <path d="M0 18 C100 42 170 0 250 16 C310 30 360 28 400 12 V32 H0 Z" fill="currentColor" />
@@ -37,7 +38,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
         </section>
         <section className="onboarding-option onboarding-invite">
           <h2><label htmlFor="invitation-code">Invitación</label></h2>
-          <p>Acceso gratuito vinculado a tu profesional.</p>
+          <p>Con un asiento, tu profesional cubre el acceso y puede consultar tu actividad.</p>
           <form className="onboarding-actions" onSubmit={event => { event.preventDefault(); onInvite(code); }}>
             <input id="invitation-code" value={code} onChange={event => setCode(event.target.value)} maxLength={64} autoCapitalize="characters" autoComplete="off" spellCheck={false} aria-invalid={Boolean(codeError)} aria-describedby={codeError ? 'invitation-error' : undefined} aria-label="Código de invitación" placeholder="Código de invitación" required disabled={busy} />
             <button className="paper-nav-button" disabled={busy || !access || !code.trim()} type="submit">Usar mi código</button>
@@ -48,6 +49,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
       <footer className="onboarding-footer">
         {busy && <span role="status">Un momento…</span>}
         {(checkoutReturn || access?.pendingCheckout) && <button className="paper-nav-button" disabled={busy} onClick={onCancelCheckout}>Cancelar pago pendiente</button>}
+        <ProfileSwitch disabled={busy} />
         <button className="paper-nav-button" disabled={busy} onClick={onSignOut}>Cerrar sesión</button>
       </footer>
     </section>

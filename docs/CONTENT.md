@@ -34,11 +34,24 @@ result feedback describes the game and avoids inferred improvement or efficacy.
 ## Deferred source sections
 
 The PDF describes professional session access, AI-driven adaptation and summaries,
-and EEG/Muse 2 interaction as existing features. These are not currently available
-in the shipped user flow and must not be advertised as available. They can be
+and EEG/Muse 2 interaction as existing features. The professional workspace now
+implements read-only activity for explicitly redeemed paid seats; it is not
+clinical session management. AI and EEG remain unavailable and must not be
+advertised as available. They can be
 published when implemented or when the owner explicitly chooses future-feature
 wording. The PDF's short introduction and “Entrena jugando” claim mention AI;
 the current introduction uses the cover paragraph without that claim instead.
+
+## Professional entry
+
+The login offers “¿Eres un profesional?” and a reversible professional presentation.
+It addresses professionals who want to follow other people's exercise activity.
+Keep only “Para profesionales”, the heading and the Google action in its panel;
+omit the explanatory and availability paragraphs. Signing in opens a free
+self-owned workspace. Selecting it alone does not grant access to anyone
+else’s data or verify professional credentials. Paid seats plus explicit participant
+redemption authorize read-only activity. Describe this as activity tracking, never
+medical follow-up or clinically verified results.
 
 ## Editorial rules
 
