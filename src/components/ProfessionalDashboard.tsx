@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase/firestore';
 import { Copy, Plus, Users } from 'lucide-react';
 import { auth } from '../services/firebase';
 import { billingEnabled, billingRequest } from '../services/accessService';
-import { firestoreProfessional, type ProfessionalProfile, type ProfessionalSeat } from '../services/firestoreProfessional';
+import { firestoreProfessional, type ProfessionalSeat } from '../services/firestoreProfessional';
 import type { ExerciseResult } from '../types';
 import { ActivityStatistics } from './ActivityStatistics';
 import { AppLoading } from './AppLoading';
@@ -21,7 +21,7 @@ function PersonActivity({ uid, seat, onBack }: { uid: string; seat: Professional
   return <ActivityStatistics uid={seat.occupantUid!} history={activity.history} heading={`Actividad de ${activity.name || seat.patientName || 'la persona invitada'}`} backLabel="Volver al panel" onBack={onBack} />;
 }
 
-export function ProfessionalDashboard({ uid, profile, onSignOut }: { uid: string; profile: ProfessionalProfile; onSignOut: () => void }) {
+export function ProfessionalDashboard({ uid, onSignOut }: { uid: string; onSignOut: () => void }) {
   const adapter = useMemo(() => firestoreProfessional(uid, getFirestore(auth.app)), [uid]);
   const [seats, setSeats] = useState<ProfessionalSeat[] | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -72,10 +72,9 @@ export function ProfessionalDashboard({ uid, profile, onSignOut }: { uid: string
       <div className="professional-account-actions"><ProfileSwitch /><button className="stats-quiet-button" onClick={onSignOut}>Cerrar sesión</button></div>
     </header>
     {currentSeat ? <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main className="professional-panel">
-      <div className="professional-heading"><div><p>Espacio profesional · {profile.name}</p><h1>Personas a las que acompañas</h1></div>
+      <div className="professional-heading"><h1>Espacio profesional</h1>
         <button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button>
       </div>
-      <p className="professional-intro">Tu panel es gratuito. Cada asiento cubre la suscripción de una persona y tiene su propio código de invitación.</p>
       {checkoutReturn && <div className="professional-notice" role="status"><p>{checkoutReturn === 'cancelled' ? 'La compra no se ha completado. Puedes retomarla o cancelarla.' : 'El código estará disponible en «Tus asientos» cuando se confirme el pago.'}</p><button className="stats-quiet-button" onClick={clearReturn}>Cerrar aviso</button></div>}
       {error && <p className="professional-notice" role="alert">{error}</p>}
       {!billingEnabled && <p className="entry-note">La compra de asientos todavía no está disponible.</p>}
@@ -83,7 +82,7 @@ export function ProfessionalDashboard({ uid, profile, onSignOut }: { uid: string
         <section className="stats-card professional-people" aria-labelledby="professional-people-title"><h2 id="professional-people-title">Personas vinculadas <span className="stats-count">{people.length}</span></h2>
           {!people.length ? <div className="professional-empty"><Users size={36} aria-hidden="true"/><h3>Aún no hay personas vinculadas</h3><p>Compra un asiento y comparte su código. Cuando una persona lo use, podrás consultar aquí su actividad.</p></div> : <ul className="professional-person-list">{people.map(seat => <li key={seat.id}><div><h3>{seat.patientName || 'Persona invitada'}</h3><p>{active(seat) ? 'Invitación activa' : 'Asiento sin acceso activo'}</p></div><button className="stats-quiet-button" disabled={!active(seat)} onClick={() => { setSelected(seat.occupantUid); window.scrollTo(0, 0); }}>Ver actividad</button></li>)}</ul>}
         </section>
-        <section className="stats-card professional-seats" aria-labelledby="professional-seats-title"><div className="stats-section-heading"><div><h2 id="professional-seats-title">Tus asientos</h2><p>Una suscripción mensual por persona. El precio se muestra en el pago.</p></div>{seats.some(seat => seat.subscriptionId) && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(() => redirect('/professional/portal'))}>Gestionar suscripciones</button>}</div>
+        <section className="stats-card professional-seats" aria-labelledby="professional-seats-title"><div className="stats-section-heading"><div><h2 id="professional-seats-title">Tus asientos</h2></div>{seats.some(seat => seat.subscriptionId) && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(() => redirect('/professional/portal'))}>Gestionar suscripciones</button>}</div>
           {!seats.length ? <p>Todavía no has comprado asientos.</p> : <ul className="professional-seat-list">{seats.map((seat, index) => <li key={seat.id}><div className="professional-seat-details"><h3>Asiento {seats.length - index}</h3><p>{seat.status === 'pending' ? 'Pago pendiente' : seat.status === 'cancelled' ? 'Compra cancelada' : active(seat) ? seat.occupantUid ? `Asignado a ${seat.patientName || 'una persona'}` : 'Disponible para invitar' : 'Suscripción inactiva'}</p>{seat.expiresAt > 0 && <p>Hasta el {new Date(seat.expiresAt).toLocaleDateString('es-ES')}{seat.autoRenew && '. Renovación automática'}</p>}</div>
             {active(seat) && !seat.occupantUid && <div className="professional-code"><label htmlFor={`seat-${seat.id}`}>Código de invitación</label><div><input id={`seat-${seat.id}`} value={seat.invitationCode} readOnly onFocus={event => event.target.select()}/><button className="stats-quiet-button" disabled={busy} onClick={() => copy(seat)} aria-label={`Copiar código del asiento ${seats.length - index}`}><Copy size={18}/>{copied === seat.id ? 'Copiado' : 'Copiar'}</button></div></div>}
             {seat.status === 'pending' && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(async () => { await billingRequest('/professional/cancel-checkout'); if (alive.current) clearReturn(); })}>Cancelar compra pendiente</button>}

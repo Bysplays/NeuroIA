@@ -281,7 +281,8 @@ landscape screens. Do not reduce text to make controls fit.
 
 Use the same brand, palette and pill controls as the personal app. The dashboard
 is free and opens without a personal subscription or trial modal. Lead with
-“Personas a las que acompañas” and “Comprar un asiento”. Show honest empty states
+“Espacio profesional” and “Comprar un asiento”. Omit the owner name, introductory
+subtitle and seats subtitle. Show honest empty states
 for both linked people and seats. Keep paid participant seats distinct from the
 free professional account. One monthly subscription funds one participant.
 

@@ -51,5 +51,5 @@ function ProfessionalEntry({ user, onSignOut, onChangeProfile }: {
     <button className="paper-nav-button" onClick={onChangeProfile}>Cambiar de perfil</button>
     <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
   </main> : <AppLoading />;
-  return <ProfessionalDashboard uid={user.uid} profile={profile} onSignOut={onSignOut} />;
+  return <ProfessionalDashboard uid={user.uid} onSignOut={onSignOut} />;
 }
