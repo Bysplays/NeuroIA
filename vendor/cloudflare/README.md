@@ -10,7 +10,7 @@ No domain purchase or Firebase Blaze deployment is required.
 
 Set these ordinary runtime variables on the Worker (also recorded in `vendor/cloudflare/wrangler.jsonc`):
 
-- `APP_URL=https://bysplays.github.io/app-ictus/`
+- `APP_URL=https://bysplays.github.io/NeuroIA/`
 - `FIREBASE_PROJECT_ID=ceoaberto-neuroia`
 - `STRIPE_MONTHLY_PRICE_ID=price_1UItenAWZtSdGYThrex9dsNh`
 - `STRIPE_MODE=test`

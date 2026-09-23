@@ -3,13 +3,13 @@
   <h3>Play. Practice. Progress at your own pace.</h3>
   <p>Games and interactive challenges for a little time to yourself, every day.</p>
   <p>
-    <a href="https://github.com/Bysplays/app-ictus/actions/workflows/deploy.yml"><img src="https://github.com/Bysplays/app-ictus/actions/workflows/deploy.yml/badge.svg" alt="GitHub Pages deployment" /></a>
+    <a href="https://github.com/Bysplays/NeuroIA/actions/workflows/deploy.yml"><img src="https://github.com/Bysplays/NeuroIA/actions/workflows/deploy.yml/badge.svg" alt="GitHub Pages deployment" /></a>
     <img src="https://img.shields.io/badge/React-19-247f89?style=flat-square" alt="React 19" />
     <img src="https://img.shields.io/badge/TypeScript-6-247f89?style=flat-square" alt="TypeScript 6" />
     <img src="https://img.shields.io/badge/Vite-8-9183b5?style=flat-square" alt="Vite 8" />
   </p>
   <p>
-    <a href="https://bysplays.github.io/app-ictus/">Open NeuroIA</a> ·
+    <a href="https://bysplays.github.io/NeuroIA/">Open NeuroIA</a> ·
     <a href="#project-portals">Project portals</a> ·
     <a href="#local-development">Local development</a>
   </p>
@@ -86,7 +86,7 @@ current tooling limitations and additional backend checks.
 | :--- | :--- | :--- |
 | GitHub Pages through Actions on pushes to `main` | Cloudflare Worker deployed separately | Firestore rules published separately |
 
-The Pages build supports `/app-ictus/` and custom domains. Set
+The Pages build supports `/NeuroIA/` and custom domains. Set
 `VITE_BILLING_API_URL` and `VITE_STRIPE_ENABLED` in Actions variables to enable
 billing in that build. Publishing the frontend **does not deploy the Worker or
 Firestore rules**. Stripe is configured for testing; validate the full payment

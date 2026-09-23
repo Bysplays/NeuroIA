@@ -131,8 +131,8 @@ Worker bindings. The workflow passes the Pages base path to Vite, supporting bot
 repository subpaths and custom domains. Runtime references to public assets must
 use `import.meta.env.BASE_URL`; Vite handles URLs in CSS and HTML during build.
 To verify a repository deployment locally, run
-`npm run build -- --base /app-ictus/` and
-`npm run preview -- --base /app-ictus/`, then open `/app-ictus/`.
+`npm run build -- --base /NeuroIA/` and
+`npm run preview -- --base /NeuroIA/`, then open `/NeuroIA/`.
 
 ### Known tooling gap
 
@@ -343,7 +343,7 @@ the local Firestore emulator; no authentication bypass ships in application code
 `public/manifest.webmanifest` defines standalone display, landscape preference,
 relative start URL/scope/ID and PNG icons for Android/tablets. `index.html` links
 the manifest and the 180px Apple touch icon; Vite rewrites their URLs for Pages.
-Keep manifest URLs relative so both `/app-ictus/` and custom-domain roots work.
+Keep manifest URLs relative so both `/NeuroIA/` and custom-domain roots work.
 Installation does not enable offline access: there is no service-worker cache,
 and authentication/access/progress still require the existing online checks.
 Verify actual installation and Google sign-in on Android and iPad before release.
