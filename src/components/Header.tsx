@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Volume2, VolumeX } from 'lucide-react';
+import { ChartNoAxesCombined, Settings, Volume2, VolumeX } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { soundService } from '../services/soundService';
 
@@ -8,6 +8,7 @@ interface HeaderProps {
   sessionMinutes: number;
   activeView: 'dashboard' | 'therapist' | 'game';
   onNavigate: (view: 'dashboard' | 'therapist') => void;
+  onOpenStatistics: () => void;
   onOpenAccessibility: () => void;
   onOpenFatigueAlert: () => void;
 }
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   profile,
   activeView,
   onNavigate,
+  onOpenStatistics,
   onOpenAccessibility,
 }) => {
   const [soundActive, setSoundActive] = useState(profile.settings.soundEffects);
@@ -44,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
         <span className="header-context">{activeView === 'therapist' ? 'ESPACIO PROFESIONAL' : 'MI ESPACIO'}</span>
         {/* Professional navigation stays unavailable until verified roles and care links exist. */}
 
+        <button className="header-icon-btn" onClick={onOpenStatistics} aria-label="Ver estadísticas" title="Ver estadísticas"><ChartNoAxesCombined size={20} /></button>
         {/* Botón de Sonido */}
         <button
           className="header-icon-btn"

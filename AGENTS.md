@@ -340,3 +340,13 @@ characters; ProgressSync pins local name edits for the session and replays pendi
 names on restart. Firestore saves `profile.name` using the existing settings receipt
 kind, so no rule deployment is required. Google display name is only used for initial
 profile creation/import and is never updated by the settings input.
+
+## Account activity statistics
+
+`ActivityStatistics` is a React-state workspace view opened from Header.
+`activityStats.ts` deduplicates results and computes local-day per-exercise means.
+Speed is seconds per question, not reaction time; exclude zero-question sessions
+from speed averages. `activityHistory.ts` reads owner-only result archives in
+explicit 200-document pages ordered by document ID. Merge pages with current
+cloud history, preserving imported and pending results; disclose partial coverage.
+No new writes, authorization rules or progress storage are introduced.

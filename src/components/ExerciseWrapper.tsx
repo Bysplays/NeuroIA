@@ -83,6 +83,12 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
             </dl>
 
             <div className="result-actions">
+              <div className="result-secondary-actions">
+                <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
+                  onRestart(); }}>
+                  <RotateCcw size={18} aria-hidden="true" /> Repetir
+                </button>
+              </div>
               <button
                 className="touch-btn touch-btn-primary result-primary"
                 onClick={() => {
@@ -94,12 +100,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                 <span>{planProgress && onNextPlanExercise ? (planProgress.isLast ? 'Terminar mi sesión' : 'Siguiente ejercicio') : 'Volver al inicio'}</span>
                 <ArrowRight size={20} aria-hidden="true" />
               </button>
-              <div className="result-secondary-actions">
-                <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
-                  onRestart(); }}>
-                  <RotateCcw size={18} aria-hidden="true" /> Repetir
-                </button>
-              </div>
+
             </div>
           </section>
         ) : (

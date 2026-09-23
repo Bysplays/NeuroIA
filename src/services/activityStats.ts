@@ -1,0 +1,26 @@
+import type { ExerciseResult } from '../types/index.ts';
+
+export function localDay(date: string) {
+  const d = new Date(date);
+  if (!Number.isFinite(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+export function mergeActivity(...sources: ExerciseResult[][]): ExerciseResult[] {
+  return [...new Map(sources.flat().map(r => [r.id, r])).values()]
+    .filter(r => localDay(r.date)).sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+}
+export function secondsPerQuestion(r: ExerciseResult) {
+  return r.totalQuestions > 0 && Number.isFinite(r.durationSeconds) && r.durationSeconds >= 0 ? r.durationSeconds / r.totalQuestions : null;
+}
+export function dailyActivity(results: ExerciseResult[], metric: 'accuracy' | 'speed') {
+  const groups = new Map<string, { day: string; exerciseId: string; sum: number; count: number }>();
+  for (const r of results) {
+    const day = localDay(r.date);
+    const value = metric === 'accuracy' ? r.accuracy : secondsPerQuestion(r);
+    if (!day || value === null || !Number.isFinite(value)) continue;
+    const key = `${day}:${r.exerciseId}`;
+    const group = groups.get(key) ?? { day, exerciseId: r.exerciseId, sum: 0, count: 0 };
+    group.sum += value; group.count++; groups.set(key, group);
+  }
+  return [...groups.values()].map(g => ({ ...g, value: g.sum / g.count })).sort((a, b) => a.day.localeCompare(b.day));
+}

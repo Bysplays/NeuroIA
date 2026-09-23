@@ -191,7 +191,7 @@ blending. Never crop limbs to hide a backdrop.
   completion heading. Show correct answers, accuracy, and time in an unboxed
   definition list separated from the heading/actions by quiet horizontal rules.
   Give only one action a filled button: return home for a standalone exercise,
-  continue for a daily plan, or finish the last plan exercise. Repeat remains a text action beside the primary button, aligned to the right.
+  continue for a daily plan, or finish the last plan exercise. Repeat remains a text action on the left; the primary return/continue action sits on the right for tablet use.
   Omit the answer-review action and dialog; home navigation remains available above. Avoid
   nested cards, a separate feedback banner, repeated return buttons, and medical
   efficacy claims. Do not bring back points as the visible reward system.
@@ -450,3 +450,22 @@ automatic recovery states; do not expose a technical “Comprobar acceso” acti
 Never imply that returning from Stripe proves payment. The active
 subscription offers a customer-portal action. Technical setup and remaining
 production prerequisites are documented in `docs/ONBOARDING.md`.
+
+### Activity statistics
+
+A chart icon beside sound and settings opens the account activity view. Keep the
+category radar at the upper left, showing completion counts rather than ability.
+Two daily charts use one consistent color per exercise: mean accuracy and mean
+seconds per question (session duration divided by question count, then averaged
+per day). This is not reaction-time measurement. Missing days are not zeroes.
+Area, exercise and inclusive local-date filters apply to all charts and the table.
+Show timestamp, correct/total answers, accuracy, duration and seconds per question
+in a horizontally scrollable, paginated table. Start with recent account history;
+explicitly offer more archived records and disclose partial coverage. Preserve
+empty/error/retry states and use real activity only.
+
+Activity filters sit in a padded panel with a separate heading and reset action;
+use four columns on desktop, two on tablet and one on narrow screens. Keep page
+gutters and a bounded content width. The history has a count badge, a softly
+tinted table header, right-aligned metrics and separate date/time lines. Group
+pagination and archive loading in a padded footer with comfortable touch buttons.

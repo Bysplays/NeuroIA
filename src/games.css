@@ -243,7 +243,7 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .result-summary dd { margin: 0; font-size: 1.5rem; font-weight: 550; font-variant-numeric: tabular-nums; }
 .result-summary dd span { font-size: .8rem; font-weight: 400; }
 .result-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
-.result-primary { gap: 24px; justify-content: space-between; min-width: 250px; }
+.result-primary { margin-left: auto; gap: 24px; justify-content: space-between; min-width: 250px; }
 .result-secondary-actions { display: flex; flex-wrap: wrap; column-gap: 24px; }
 .result-text-action { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; border: 0; padding: 8px 0; color: inherit; background: transparent; font: inherit; font-size: .75rem; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
 .result-text-action:hover { text-decoration-thickness: 2px; }

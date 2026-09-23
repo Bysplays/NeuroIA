@@ -1,3 +1,4 @@
+import { ActivityStatistics } from './components/ActivityStatistics';
 import { AppLoading } from './components/AppLoading';
 import React, { useState, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
@@ -83,15 +84,15 @@ export const App: React.FC = () => {
     : user
       ? <>
         {error && <p className="account-notice" role="alert">{error}</p>}
-        <Suspense fallback={<AppLoading />}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></Suspense></>
+        <Suspense fallback={<AppLoading />}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace uid={user.uid} onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></Suspense></>
       : <LoginScreen onSignIn={handleSignIn} busy={busy} error={error} />
   }</LandscapeGate>;
 };
 
-const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: ProgressSync; data: ProgressData }> = ({ onSignOut, signingOut, sync, data }) => {
+const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: boolean; sync: ProgressSync; data: ProgressData }> = ({ uid, onSignOut, signingOut, sync, data }) => {
   const portrait = usePortrait();
   const { profile, history } = data;
-  const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | 'achievements' | CognitiveDomain | ExerciseId>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | 'achievements' | 'statistics' | CognitiveDomain | ExerciseId>('dashboard');
 
   useEffect(() => {
     if (window.location.hash === '#achievements') window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -205,7 +206,7 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
     isLast: dailyPlanSession.currentIndex + 1 >= dailyPlanSession.queue.length,
   } : null;
 
-  const isPlayingGame = activeView !== 'dashboard' && activeView !== 'therapist' && activeView !== 'achievements';
+  const isPlayingGame = activeView !== 'dashboard' && activeView !== 'therapist' && activeView !== 'achievements' && activeView !== 'statistics';
 
   return (
     <div className={`app-root ${isPlayingGame ? 'app-root-focus-mode' : ''}`}>
@@ -219,6 +220,7 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
             setDailyPlanSession(null);
             setActiveView(view);
           }}
+          onOpenStatistics={() => { setActiveView('statistics'); window.scrollTo(0, 0); }}
           onOpenAccessibility={() => setIsAccessibilityOpen(true)}
           onOpenFatigueAlert={() => setIsFatigueOpen(true)}
         />
@@ -234,6 +236,8 @@ const Workspace: React.FC<{ onSignOut: () => void; signingOut: boolean; sync: Pr
             onOpenAchievements={() => { setActiveView('achievements'); window.scrollTo(0, 0); }}
           />
         )}
+
+        {activeView === 'statistics' && <ActivityStatistics uid={uid} history={history} onBack={handleBackToDashboard} />}
 
         {activeView === 'achievements' && <AchievementShowcase profile={profile} onBack={handleBackToDashboard} />}
 
