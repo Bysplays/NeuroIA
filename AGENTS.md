@@ -258,10 +258,12 @@ the clock, alongside the existing speech-voice tests.
 Configuration and session persistence are in `src/services/firebase.ts`; Analytics
 is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy. Its local
 personal/professional switch passes the selected intent through the Google sign-in
-callback. `AccountEntry` honors explicit player/professional entry and offers both profiles
-on restored sessions. Professional registration never replaces player progress
-or subscription. `ProfileSwitchContext` provides navigation from settings, entry
-recovery and professional settings; switching unmounts the old workspace.
+callback. `AccountEntry` honors explicit player/professional login. Restored sessions use
+`StorageService.readProfessionalEntry`, stored per UID under `neuroia_entry_v1`;
+older sessions default to player. Checkout return parameters select their
+workspace only when there is no explicit login intent. This device preference
+grants no permissions and never changes progress or subscriptions. There is no
+profile selector; users sign out to choose the other login.
 Player entry does not depend on professional reads. Professional settings reuse
 CloudProgress and its durable settings operations for account-wide name and
 appearance; the shared modal hides personal subscription controls.

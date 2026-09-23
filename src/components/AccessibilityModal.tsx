@@ -1,4 +1,3 @@
-import { ProfileSwitch } from './ProfileSwitch';
 import { ProductInformation } from './ProductInformation';
 import { SubscriptionSettings } from './SubscriptionSettings';
 import { ModalFrame } from './ModalFrame';
@@ -83,7 +82,6 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
 
           {showSubscription && <SubscriptionSettings />}
           <div className="preferences-account">
-            <ProfileSwitch disabled={signingOut} />
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>
               <LogOut size={18} aria-hidden="true" />{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}
             </button>
