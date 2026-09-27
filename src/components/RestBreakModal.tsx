@@ -9,8 +9,10 @@ interface RestBreakModalProps {
   onFinishBreak: () => void;
 }
 
-export const RestBreakModal: React.FC<RestBreakModalProps> = ({
-  isOpen,
+export const RestBreakModal: React.FC<RestBreakModalProps> = props =>
+  props.isOpen ? <RestBreakSession onClose={props.onClose} onFinishBreak={props.onFinishBreak} /> : null;
+
+const RestBreakSession: React.FC<Omit<RestBreakModalProps, 'isOpen'>> = ({
   onClose,
   onFinishBreak,
 }) => {
@@ -20,16 +22,9 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
   const [breathePhase, setBreathePhase] = useState<'inhale' | 'exhale'>('inhale');
   const [isCompleted, setIsCompleted] = useState(false);
 
-  // Reiniciar estado cada vez que se abre la ventana
   useEffect(() => {
-    if (isOpen) {
-      setSecondsLeft(TOTAL_SECONDS);
-      setIsRunning(true);
-      setIsCompleted(false);
-      setBreathePhase('inhale');
-      soundService.playRelaxingChime?.();
-    }
-  }, [isOpen]);
+    soundService.playRelaxingChime?.();
+  }, []);
 
   // Manejador de fin de descanso
   const handleTimeFinished = useCallback(() => {
@@ -41,38 +36,26 @@ export const RestBreakModal: React.FC<RestBreakModalProps> = ({
 
   // Temporizador regresivo segundo a segundo
   useEffect(() => {
-    if (!isOpen || !isRunning || isCompleted) return;
+    if (!isRunning || isCompleted) return;
 
-    if (secondsLeft <= 0) {
-      handleTimeFinished();
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setSecondsLeft(prev => {
-        if (prev <= 1) {
-          handleTimeFinished();
-          return 0;
-        }
-        return prev - 1;
-      });
+    const timeout = setTimeout(() => {
+      setSecondsLeft(secondsLeft - 1);
+      if (secondsLeft === 1) handleTimeFinished();
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [isOpen, isRunning, secondsLeft, isCompleted, handleTimeFinished]);
+    return () => clearTimeout(timeout);
+  }, [isRunning, secondsLeft, isCompleted, handleTimeFinished]);
 
   // Ciclo de respiración relajante (4 segundos inhalar, 4 segundos exhalar)
   useEffect(() => {
-    if (!isOpen || !isRunning || isCompleted) return;
+    if (!isRunning || isCompleted) return;
 
     const breatheInterval = setInterval(() => {
       setBreathePhase(prev => (prev === 'inhale' ? 'exhale' : 'inhale'));
     }, 4000);
 
     return () => clearInterval(breatheInterval);
-  }, [isOpen, isRunning, isCompleted]);
-
-  if (!isOpen) return null;
+  }, [isRunning, isCompleted]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;

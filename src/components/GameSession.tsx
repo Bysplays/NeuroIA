@@ -1,22 +1,13 @@
+import { SessionContext } from '../services/gameSession';
 import { usePortrait } from '../services/orientation';
 import { HeaderIllustration } from './HeaderIllustration';
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, CircleHelp, Clock, Volume2 } from 'lucide-react';
 import { createGameClock } from '../services/gameClock';
 import { getExerciseById, getExercisesForDomain } from '../services/exerciseCatalog';
 import type { CognitiveDomain, ExerciseId } from '../types';
 import { soundService } from '../services/soundService';
 
-const SessionContext = createContext<{
-  clock: ReturnType<typeof createGameClock>;
-  finish: (completed: boolean) => void;
-  restart: () => void;
-} | null>(null);
-export function useGameSession() {
-  const session = useContext(SessionContext);
-  if (!session) throw new Error('Games must be rendered inside GameSession');
-  return session;
-}
 export function GameSession({ id, step, onBack, children }: { id: string; step?: string; onBack: () => void; children: ReactNode }) {
   const portrait = usePortrait();
   const [clock] = useState(createGameClock);

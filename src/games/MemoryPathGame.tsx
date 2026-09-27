@@ -1,6 +1,7 @@
-import { useGameSession } from '../components/GameSession';
+import { createMemorySequence } from '../services/memorySequence';
+import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Eye, RotateCcw, Play } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -59,25 +60,20 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
   const timeoutRefs = useRef<number[]>([]);
 
-  const clearTimeouts = () => {
+  const clearTimeouts = useCallback(() => {
     timeoutRefs.current.forEach(t => clock.clearTimeout(t));
     timeoutRefs.current = [];
-  };
+  }, [clock]);
 
   useEffect(() => {
     return () => clearTimeouts();
-  }, []);
+  }, [clearTimeouts]);
 
   const startCurrentRound = (roundNum: number) => {
     clearTimeouts();
     const seqLength = roundNum + 1; // Ronda 1: 2 pasos, Ronda 2: 3 pasos, Ronda 3: 4 pasos
 
-    const availableIds = activeTiles.map(t => t.id);
-    const newSeq: number[] = [];
-    for (let i = 0; i < seqLength; i++) {
-      const randomTile = availableIds[Math.floor(Math.random() * availableIds.length)];
-      newSeq.push(randomTile);
-    }
+    const newSeq = createMemorySequence(activeTiles.map(tile => tile.id), seqLength);
 
     setSequence(newSeq);
     setPlayerInput([]);

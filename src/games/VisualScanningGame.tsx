@@ -1,6 +1,6 @@
-import { useGameSession } from '../components/GameSession';
+import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Check } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -62,6 +62,58 @@ const FRUITS_BANK: SymbolDef[] = [
   { symbol: '🍈', name: 'melones' },
 ];
 
+function createRound() {
+  // 1. Elegir AL AZAR cualquier fruta del banco como objetivo diana
+  const targetIdx = Math.floor(Math.random() * FRUITS_BANK.length);
+  const targetItem = FRUITS_BANK[targetIdx];
+
+  // 2. Las demás frutas sirven como distractores en la cuadrícula
+  const distractors = FRUITS_BANK.filter((_, idx) => idx !== targetIdx).map(i => i.symbol);
+
+  // 3. Cuadrícula equilibrada para tablet (4 filas x 4 columnas)
+  const rows = 4;
+  const cols = 4;
+  const targetProbability = 0.32;
+
+  const newItems: GridItem[] = [];
+  let targetCounter = 0;
+  let idCounter = 1;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // Asegurar que al menos 2 objetivos estén en el lateral izquierdo (col 0 o 1) para distribuir los objetivos por toda la pantalla
+      const isTarget = Math.random() < targetProbability || (c === 0 && r === 0 && targetCounter === 0);
+      const symbol = isTarget
+        ? targetItem.symbol
+        : distractors[Math.floor(Math.random() * distractors.length)];
+
+      if (isTarget) targetCounter++;
+
+      newItems.push({
+        id: idCounter++,
+        symbol,
+        isTarget,
+        found: false,
+        col: c,
+        row: r,
+      });
+    }
+  }
+
+  // Garantizar que haya al menos 3 objetivos si la probabilidad generó pocos
+  if (targetCounter < 3) {
+    const candidates = newItems.filter(i => !i.isTarget);
+    for (let k = targetCounter; k < 3 && candidates.length > 0; k++) {
+      const item = candidates.pop()!;
+      item.isTarget = true;
+      item.symbol = targetItem.symbol;
+      targetCounter++;
+    }
+  }
+
+  return { target: targetItem, items: newItems, total: targetCounter };
+}
+
 export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   onBack,
   onSaveResult,
@@ -69,9 +121,10 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   onNextPlanExercise,
 }) => {
   const { clock } = useGameSession();
-  const [currentTarget, setCurrentTarget] = useState<SymbolDef>(FRUITS_BANK[0]);
-  const [items, setItems] = useState<GridItem[]>([]);
-  const [totalTargets, setTotalTargets] = useState(0);
+  const [initialRound] = useState(createRound);
+  const [currentTarget, setCurrentTarget] = useState<SymbolDef>(initialRound.target);
+  const [items, setItems] = useState<GridItem[]>(initialRound.items);
+  const [totalTargets, setTotalTargets] = useState(initialRound.total);
   const [foundCount, setFoundCount] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
@@ -80,66 +133,15 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
   const initRound = () => {
-    // 1. Elegir AL AZAR cualquier fruta del banco como objetivo diana
-    const targetIdx = Math.floor(Math.random() * FRUITS_BANK.length);
-    const targetItem = FRUITS_BANK[targetIdx];
-    setCurrentTarget(targetItem);
-    setMistakesList([]);
-
-    // 2. Las demás frutas sirven como distractores en la cuadrícula
-    const distractors = FRUITS_BANK.filter((_, idx) => idx !== targetIdx).map(i => i.symbol);
-
-    // 3. Cuadrícula equilibrada para tablet (4 filas x 4 columnas)
-    const rows = 4;
-    const cols = 4;
-    const targetProbability = 0.32;
-
-    const newItems: GridItem[] = [];
-    let targetCounter = 0;
-    let idCounter = 1;
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        // Asegurar que al menos 2 objetivos estén en el lateral izquierdo (col 0 o 1) para distribuir los objetivos por toda la pantalla
-        const isTarget = Math.random() < targetProbability || (c === 0 && r === 0 && targetCounter === 0);
-        const symbol = isTarget
-          ? targetItem.symbol
-          : distractors[Math.floor(Math.random() * distractors.length)];
-
-        if (isTarget) targetCounter++;
-
-        newItems.push({
-          id: idCounter++,
-          symbol,
-          isTarget,
-          found: false,
-          col: c,
-          row: r,
-        });
-      }
-    }
-
-    // Garantizar que haya al menos 3 objetivos si la probabilidad generó pocos
-    if (targetCounter < 3) {
-      const candidates = newItems.filter(i => !i.isTarget);
-      for (let k = targetCounter; k < 3 && candidates.length > 0; k++) {
-        const item = candidates.pop()!;
-        item.isTarget = true;
-        item.symbol = targetItem.symbol;
-        targetCounter++;
-      }
-    }
-
-    setItems(newItems);
-    setTotalTargets(targetCounter);
+    const next = createRound();
+    setCurrentTarget(next.target);
+    setItems(next.items);
+    setTotalTargets(next.total);
     setFoundCount(0);
     setMistakes(0);
+    setMistakesList([]);
     setStartTime(clock.now());
   };
-
-  useEffect(() => {
-    initRound();
-  }, []);
 
   const handleItemClick = (item: GridItem) => {
     if (item.found || isCompleted) return;

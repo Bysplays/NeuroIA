@@ -1,6 +1,6 @@
-import { useGameSession } from '../components/GameSession';
+import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CheckCircle2, Eye, Play } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -62,6 +62,39 @@ const ALL_MEMORY_OBJECTS = [
   { pairKey: 'toalla', emoji: '🧴', label: 'Jabón' },
 ];
 
+function createDeck(): CardItem[] {
+  // Generar 3 pares (6 cartas) barajadas
+  const deck: CardItem[] = [];
+  let idCounter = 1;
+
+  // Seleccionar 3 objetos al azar del banco de 30 objetos cotidianos
+  const selectedObjects = [...ALL_MEMORY_OBJECTS]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
+
+  selectedObjects.forEach(obj => {
+    deck.push({
+      id: idCounter++,
+      pairKey: obj.pairKey,
+      emoji: obj.emoji,
+      label: obj.label,
+      isFlipped: true, // Mantener volteadas durante el preview
+      isMatched: false,
+    });
+    deck.push({
+      id: idCounter++,
+      pairKey: obj.pairKey,
+      emoji: obj.emoji,
+      label: obj.label,
+      isFlipped: true, // Mantener volteadas durante el preview
+      isMatched: false,
+    });
+  });
+
+  const shuffled = deck.sort(() => Math.random() - 0.5);
+  return shuffled;
+}
+
 export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   onBack,
   onSaveResult,
@@ -69,7 +102,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   onNextPlanExercise,
 }) => {
   const { clock } = useGameSession();
-  const [cards, setCards] = useState<CardItem[]>([]);
+  const [cards, setCards] = useState<CardItem[]>(createDeck);
   const [selectedCards, setSelectedCards] = useState<number[]>([]); // índices de las cartas volteadas
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [attempts, setAttempts] = useState(0);
@@ -83,30 +116,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   const [previewCountdown, setPreviewCountdown] = useState(4);
   const countdownTimerRef = useRef<number | null>(null);
 
-  const startPreview = () => {
-    setIsPreviewPhase(true);
-    setPreviewCountdown(4);
-    soundService.speak('Memoriza dónde está cada pareja');
-
-    if (countdownTimerRef.current) {
-      clock.clearInterval(countdownTimerRef.current);
-    }
-
-    let remaining = 4;
-    countdownTimerRef.current = clock.setInterval(() => {
-      remaining -= 1;
-      setPreviewCountdown(remaining);
-      if (remaining <= 0) {
-        if (countdownTimerRef.current) {
-          clock.clearInterval(countdownTimerRef.current);
-          countdownTimerRef.current = null;
-        }
-        endPreview();
-      }
-    }, 1000);
-  };
-
-  const endPreview = () => {
+  const endPreview = useCallback(() => {
     if (countdownTimerRef.current) {
       clock.clearInterval(countdownTimerRef.current);
       countdownTimerRef.current = null;
@@ -116,46 +126,27 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     soundService.playGentlePrompt();
     soundService.speak('¡Encuentra las parejas!');
     setStartTime(clock.now());
-  };
+  }, [clock]);
 
+  const [previewVersion, setPreviewVersion] = useState(0);
+  const mismatchTimerRef = useRef<number | undefined>(undefined);
   useEffect(() => {
+    soundService.speak('Memoriza dónde está cada pareja');
+    let remaining = 4;
+    const timer = clock.setInterval(() => {
+      remaining -= 1;
+      setPreviewCountdown(remaining);
+      if (remaining <= 0) endPreview();
+    }, 1000);
+    countdownTimerRef.current = timer;
     return () => {
-      if (countdownTimerRef.current) {
-        clock.clearInterval(countdownTimerRef.current);
-      }
+      clock.clearInterval(timer);
+      clock.clearTimeout(mismatchTimerRef.current);
     };
-  }, []);
+  }, [clock, endPreview, previewVersion]);
 
   const initGame = () => {
-    // Generar 3 pares (6 cartas) barajadas
-    const deck: CardItem[] = [];
-    let idCounter = 1;
-
-    // Seleccionar 3 objetos al azar del banco de 30 objetos cotidianos
-    const selectedObjects = [...ALL_MEMORY_OBJECTS]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3);
-
-    selectedObjects.forEach(obj => {
-      deck.push({
-        id: idCounter++,
-        pairKey: obj.pairKey,
-        emoji: obj.emoji,
-        label: obj.label,
-        isFlipped: true, // Mantener volteadas durante el preview
-        isMatched: false,
-      });
-      deck.push({
-        id: idCounter++,
-        pairKey: obj.pairKey,
-        emoji: obj.emoji,
-        label: obj.label,
-        isFlipped: true, // Mantener volteadas durante el preview
-        isMatched: false,
-      });
-    });
-
-    const shuffled = deck.sort(() => Math.random() - 0.5);
+    const shuffled = createDeck();
     setCards(shuffled);
     setSelectedCards([]);
     setIsEvaluating(false);
@@ -163,20 +154,17 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     setMistakesList([]);
     setIsCompleted(false);
     setResult(null);
-    startPreview();
+    setIsPreviewPhase(true);
+    setPreviewCountdown(4);
+    setPreviewVersion(version => version + 1);
   };
-
-  useEffect(() => {
-    initGame();
-  }, []);
 
   const handleCardClick = (index: number) => {
     if (isPreviewPhase || isEvaluating || cards[index].isFlipped || cards[index].isMatched) return;
 
     soundService.playTap();
 
-    const newCards = [...cards];
-    newCards[index].isFlipped = true;
+    const newCards = cards.map((card, i) => i === index ? { ...card, isFlipped: true } : card);
     setCards(newCards);
 
     const newSelected = [...selectedCards, index];
@@ -194,14 +182,14 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
         // ¡Coincidencia!
         soundService.playSuccess();
         soundService.speak(`¡Pareja de ${cardA.label}!`);
-        cardA.isMatched = true;
-        cardB.isMatched = true;
-        setCards([...newCards]);
+        const matchedCards = newCards.map((card, i) =>
+          i === firstIdx || i === secondIdx ? { ...card, isMatched: true } : card);
+        setCards(matchedCards);
         setSelectedCards([]);
         setIsEvaluating(false);
 
         // Comprobar si todas las cartas están resueltas
-        const allMatched = newCards.every(c => c.isMatched);
+        const allMatched = matchedCards.every(c => c.isMatched);
         if (allMatched) {
           handleGameFinish(attempts + 1, mistakesList);
         }
@@ -219,10 +207,9 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
           },
         ]);
 
-        clock.setTimeout(() => {
-          newCards[firstIdx].isFlipped = false;
-          newCards[secondIdx].isFlipped = false;
-          setCards([...newCards]);
+        mismatchTimerRef.current = clock.setTimeout(() => {
+          setCards(current => current.map((card, i) =>
+            i === firstIdx || i === secondIdx ? { ...card, isFlipped: false } : card));
           setSelectedCards([]);
           setIsEvaluating(false);
         }, 1300);

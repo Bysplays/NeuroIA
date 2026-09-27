@@ -1,6 +1,6 @@
-import { useGameSession } from '../components/GameSession';
+import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CheckCircle2, ArrowRight, Volume2 } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -362,16 +362,17 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   onNextPlanExercise,
 }) => {
   const { clock } = useGameSession();
-  const [sessionItems, setSessionItems] = useState<ItemToClassify[]>([]);
+  const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => [...CLASSIFICATION_ITEMS].sort(() => Math.random() - 0.5).slice(0, 5));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime] = useState<number>(clock.now());
+  const [startTime, setStartTime] = useState<number>(() => clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
   const initGame = () => {
+    setStartTime(clock.now());
     const shuffled = [...CLASSIFICATION_ITEMS].sort(() => Math.random() - 0.5).slice(0, 5);
     setSessionItems(shuffled);
     setCurrentIdx(0);
@@ -381,14 +382,6 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
     setIsCompleted(false);
     setResult(null);
   };
-
-  useEffect(() => {
-    initGame();
-  }, []);
-
-  useEffect(() => {
-    setSelectedCategory(null);
-  }, [currentIdx]);
 
   if (sessionItems.length === 0) return null;
 
@@ -424,6 +417,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
     soundService.playTap();
     if (currentIdx + 1 < sessionItems.length) {
       setCurrentIdx(prev => prev + 1);
+      setSelectedCategory(null);
     } else {
       const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
       const total = sessionItems.length;

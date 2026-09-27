@@ -4,10 +4,11 @@ Professional entry is free. Selecting the professional Google login registers a
 self-owned `professionals/{uid}` workspace. The same Google account can also
 have a player profile, personal subscription and progress. Explicit personal login
 opens the player flow without reading professional records. Restored sessions
-show a profile choice; Checkout return parameters select the matching workspace.
-“Cambiar de perfil” is available in player settings, entry/recovery screens and
-professional settings. Switching unmounts the previous workspace, preserves
-queued progress and never changes either subscription. Only professional entry
+reuse the last successful entry mode stored per UID on the device; old sessions
+default to player. Explicit login takes priority over Checkout return parameters,
+which otherwise restore the matching workspace. There is no profile chooser or
+switch button: sign out and use the other login to change workspaces.
+Only professional entry
 registers/loads the professional profile; failures never block player entry. Professional entry mounts the existing CloudProgress boundary for account-wide
 name and appearance settings, without an AccessGate. It preserves existing
 progress and import choice and uses the durable settings queue; it grants no

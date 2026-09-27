@@ -1,7 +1,100 @@
-# NeuroIA — remaining work
+# NeuroIA — implementation backlog
 
-Keep this checklist current when completing work. See [AGENTS.md](../AGENTS.md)
-and [DESIGN.md](DESIGN.md) for development and design guidance.
+This is the canonical TODO. The [SDD](SDD.md) defines the target behavior,
+architecture, dependencies and acceptance criteria. Existing code is not proof
+of a production deployment. Keep project guidance in English and UI copy in Spanish.
+
+## Product priorities
+
+The order below follows the owner's priorities. Dependencies can be implemented
+first; waiting for the EEG SDK must not block independent work. No model, SDK,
+voice provider or new illustration set has been selected by this planning work.
+
+| Order / ID | Deliverable | Current state | Completion gate |
+| --- | --- | --- | --- |
+| 1 / EEG | Bluetooth EEG headband | Awaiting owner-supplied SDK and hardware details | Real-device connection, signal quality, disconnect/reconnect and supported-device matrix |
+| 2 / SEATS | Monthly professional seats and code validity | Checkout, Worker, redemption and rules implemented; production lifecycle unverified | Unused and redeemed codes follow paid entitlement; expired access blocks games and linked reads |
+| 3 / AI | Browser-local report/note assistance | No runtime integration; professional view is read-only | Spanish evidence-linked drafts, human review, supported-device benchmark and non-AI fallback |
+| 4 / SESSIONS | Professional-assigned game sequences | No assignment service; legacy therapist fields are not a permission system | Named participant, ordered exercises, delivery, completion and strict owner/participant rules |
+| 5 / EMAIL | Email authentication | Google only | Enable chosen Firebase provider; sign-up, sign-in, verification/recovery and account linking |
+| 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
+| 7 / BRAND | Supplied new logo | [Reference retained](assets/brand/supplied-mark.png); existing sprout still active | Integrate exact reference across app, favicon, installation icons and README |
+| 8 / ART | More realistic illustrated/pictogram game objects | Existing paper atlases | Approved style sample and verified one-to-one stimulus mappings |
+| 9 / LEVELS | Difficulty 1–10 | Legacy domain levels 1–3; games do not consume a shared difficulty configuration | Versioned per-game parameters, saved difficulty and bounded adaptation |
+| 10 / PLACEMENT | Guided initial level assessment | Access onboarding exists; placement does not | New/unassessed accounts complete resumable guided trials before ordinary play |
+| 11 / RETIRE | Remove daily action sequencing | Still selectable and mounted | Eight playable games, Organization uses categorization, old results remain readable |
+
+### EEG
+
+- [ ] Receive SDK, device model, protocol/transport details, license and sample data.
+- [ ] Implement an optional adapter and explicit connect/disconnect flow; measure
+  quality and handle dropped packets, reconnect, permission denial and unsupported browsers.
+- [ ] Define the EEG use case and data retention before persisting signals or
+  using them for adaptation. Ship ordinary play without requiring the headband.
+
+### Seats and expiry
+
+- [ ] Complete the deployment and sandbox checklist below for both unused and
+  occupied seats; test expiry while the app is already open, sleep/resume and offline recovery.
+- [ ] Replace client-clock entitlement decisions with an authoritative validity
+  contract. `firestoreAccess.load()` currently labels `Date.now()` as `serverNow`;
+  `AccessGate` preserves previously active access after refresh errors. Define a
+  bounded verified-access lifetime so stale state cannot grant indefinite play.
+- [ ] Preserve CEOABERTO as the explicitly documented permanent exception unless
+  the owner separately changes that contract; paid `NIA-` codes are never permanent.
+
+### Reports, notes and assigned sessions
+
+- [ ] Define separate storage and permissions for private professional notes,
+  reviewed reports and participant-visible instructions; implement manual use first.
+- [ ] Evaluate small Llama/Gemma-style browser models, runtimes, Spanish quality,
+  device memory, download size and licenses before selecting a model.
+- [ ] Implement local draft generation, cancellation, explicit review and save;
+  never manufacture diagnoses, activity or prescriptions from empty histories.
+- [ ] Implement versioned session assignments to an actively linked person,
+  ordered game IDs/levels, progress/resume, cancellation and completion receipts.
+- [ ] Test cross-account isolation, seat expiry, departure and historical ownership.
+
+### Authentication, identity and artwork
+
+- [ ] Decide email/password versus email-link sign-in; enable that provider in
+  Firebase and implement its complete recovery/account-linking flow, retaining Google.
+- [ ] Integrate the supplied logo reference, preserve its proportions, and verify
+  wordmark, loading, header, card backs, favicon and PWA icons on both themes.
+- [ ] Approve realistic illustrated/pictogram samples, inventory all stimuli and
+  replace atlases without changing answer keys or recognition identities.
+
+### Difficulty, placement and game retirement
+
+- [ ] Define ten bounded configurations for each of the eight retained games.
+- [ ] Add versioned placement/level state; existing `domainProgress.level = 1`
+  is a default, not evidence that placement has been completed.
+- [ ] Build short guided trials with the existing companions, pause/help,
+  accessible instructions and resumable progress. Respect hidden companions.
+- [ ] Persist the actual level/configuration used per result; adapt between
+  exercises from sufficient recent evidence, with easier play and reassessment.
+- [ ] Remove daily action sequencing from catalog, dispatch and daily plans;
+  keep memory beacon sequencing. Preserve `daily-seq` / `daily-sequencing`
+  history, achievements and cumulative totals.
+- [ ] Verify catalog, Organization, daily plan, completion and historical filters
+  at phone, tablet and desktop sizes with keyboard/touch input.
+
+## Engineering and release gates
+
+- [x] Resolve the 28 Oxlint warnings without disabling rules: lazy game
+  initialization, event-driven resets, immutable card updates, timer cleanup and
+  session hook separation. Keep the strict zero-warning merge check.
+- [x] Reconcile CONTRIBUTING's missing `check*` scripts and its Biome/Knip
+  references with actual npm/TypeScript/Oxlint commands; retain the zero-warning
+  merge gate and explicit merge authorization.
+- [ ] Review the production build's chunk-size warning (bundle over 500 kB).
+- [ ] Complete the production checks below; local tests do not verify live Stripe,
+  deployed Firestore rules, browser hardware support or physical-device installation.
+
+## Existing release and audio detail
+
+The following inventory is retained so no exact audio filenames or unresolved
+release issue is lost during prioritization.
 
 ## Public text availability
 
@@ -161,7 +254,7 @@ and [DESIGN.md](DESIGN.md) for development and design guidance.
 - [ ] Publish reviewed Spark-compatible rules for real-account invitation/trial
   access. No Cloud Functions or Blaze required; localhost:5173 keeps real Google login.
 - [ ] Deploy the reviewed professional-seat Worker and Firestore rules before
-  publishing the `medico` frontend. Verify one sandbox purchase, unique code,
+  publishing the professional frontend. Verify one sandbox purchase, unique code,
   redemption, read-only analytics, renewal failure, portal cancellation and
   departure/reassignment end to end. See `docs/PROFESSIONALS.md`.
 

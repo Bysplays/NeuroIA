@@ -1,6 +1,6 @@
-import { useGameSession } from '../components/GameSession';
+import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Volume2, HelpCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -263,7 +263,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   onNextPlanExercise,
 }) => {
   const { clock } = useGameSession();
-  const [sessionItems, setSessionItems] = useState<CompletionItem[]>([]);
+  const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => [...COMPLETION_BANK].sort(() => Math.random() - 0.5).slice(0, 5));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -271,13 +271,14 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime] = useState<number>(clock.now());
+  const [startTime, setStartTime] = useState<number>(() => clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
   const draggedLetterRef = useRef<string | null>(null);
 
   const initGame = () => {
+    setStartTime(clock.now());
     const shuffled = [...COMPLETION_BANK].sort(() => Math.random() - 0.5).slice(0, 5);
     setSessionItems(shuffled);
     setCurrentIdx(0);
@@ -291,18 +292,6 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
     setIsCompleted(false);
     setResult(null);
   };
-
-  useEffect(() => {
-    initGame();
-  }, []);
-
-  useEffect(() => {
-    setSelectedLetter(null);
-    setIsCorrect(null);
-    setShowHint(false);
-    setIsDragOver(false);
-    draggedLetterRef.current = null;
-  }, [currentIdx]);
 
   if (sessionItems.length === 0) return null;
 
@@ -367,6 +356,11 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
     soundService.playTap();
     if (currentIdx + 1 < sessionItems.length) {
       setCurrentIdx(prev => prev + 1);
+      setSelectedLetter(null);
+      setIsCorrect(null);
+      setShowHint(false);
+      setIsDragOver(false);
+      draggedLetterRef.current = null;
     } else {
       const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
       const total = sessionItems.length;

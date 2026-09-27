@@ -54,6 +54,17 @@ export class StorageService {
     this.knownOutbox = new Set();
   }
 
+  // Navigation preference only; Firebase and Firestore still enforce access.
+  public static readProfessionalEntry(uid: string): boolean {
+    try { return localStorage.getItem('neuroia_entry_v1:' + encodeURIComponent(uid)) === 'professional'; }
+    catch { return false; }
+  }
+
+  public static saveProfessionalEntry(uid: string, professional: boolean): void {
+    try { localStorage.setItem('neuroia_entry_v1:' + encodeURIComponent(uid), professional ? 'professional' : 'player'); }
+    catch { /* Login remains usable when device storage is unavailable. */ }
+  }
+
   public static freshAccountProgress(): ProgressData {
     return { profile: this.initialProfile(), history: [] };
   }

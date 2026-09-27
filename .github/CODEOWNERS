@@ -1,0 +1,6 @@
+* @bysplays
+/vendor/ @bysplays @cosasdepuma
+/firebase.json @bysplays @cosasdepuma
+/src/services/firebase.ts @bysplays @cosasdepuma
+/src/services/firestoreAccess.ts @bysplays @cosasdepuma
+/src/services/firestoreProgress.ts @bysplays @cosasdepuma

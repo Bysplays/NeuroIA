@@ -1,6 +1,6 @@
-import { useGameSession } from '../components/GameSession';
+import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Volume2, HelpCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -342,18 +342,19 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 }) => {
   const { clock } = useGameSession();
   // Preguntas seleccionadas al azar para esta sesión
-  const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>([]);
+  const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>(() => [...VOCABULARY_BANK].sort(() => Math.random() - 0.5).slice(0, 5));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hintType, setHintType] = useState<'none' | 'semantic' | 'phonetic'>('none');
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
-  const [startTime] = useState<number>(clock.now());
+  const [startTime, setStartTime] = useState<number>(() => clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
   const initQuestions = () => {
+    setStartTime(clock.now());
     const shuffled = [...VOCABULARY_BANK].sort(() => Math.random() - 0.5);
     setSessionQuestions(shuffled.slice(0, 5));
     setCurrentIdx(0);
@@ -365,15 +366,6 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
     setIsCompleted(false);
     setResult(null);
   };
-
-  useEffect(() => {
-    initQuestions();
-  }, []);
-
-  useEffect(() => {
-    setSelectedOption(null);
-    setHintType('none');
-  }, [currentIdx]);
 
   if (sessionQuestions.length === 0) return null;
 
@@ -428,6 +420,8 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
     soundService.playTap();
     if (currentIdx + 1 < sessionQuestions.length) {
       setCurrentIdx(prev => prev + 1);
+      setSelectedOption(null);
+      setHintType('none');
     } else {
       const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
       const total = sessionQuestions.length;

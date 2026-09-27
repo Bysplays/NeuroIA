@@ -37,8 +37,10 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 ## Documentation layout
 
 Keep `README.md`, `CONTRIBUTING.md` and `AGENTS.md` at the repository root.
-Project guides live in `docs/`, provider documentation beside its integration in `vendor/`, and
-asset provenance in `docs/assets/` mirroring the public asset directories.
+Project guides live in `docs/`; `docs/TODO.md` is the canonical implementation
+backlog and `docs/SDD.md` specifies planned behavior and acceptance criteria, not
+shipped capabilities. Provider documentation lives beside its integration in
+`vendor/`, and asset provenance lives in `docs/assets/` mirroring the public asset directories.
 Cloudflare Workers live in `vendor/cloudflare/`; Firebase rules and the legacy
 Functions package live in `vendor/firebase/`; Stripe setup lives in `vendor/stripe/`.
 The root `firebase.json` remains the CLI entry point and references these paths.
@@ -65,6 +67,8 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
+| `src/services/gameSession.ts` | Shared session context and `useGameSession` hook, separate from component exports |
+| `src/services/memorySequence.ts` | Memory-round sequence generation, called only on round start |
 | `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and repeat |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
@@ -134,17 +138,17 @@ To verify a repository deployment locally, run
 `npm run build -- --base /NeuroIA/` and
 `npm run preview -- --base /NeuroIA/`, then open `/NeuroIA/`.
 
-### Known tooling gap
+### Tooling and merge checks
 
-As of 2026-09-14, `package.json` does not define `check`, `check:test`,
-`check:types`, `check:lint`, `check:format`, or `check:deadcode`, although
-CONTRIBUTING.md lists them. Focused unit tests run through `npm test` (Node 22+). `npm run test:firestore`
-runs the real Firestore adapter and rules against the demo-only emulator; it
-requires Java 21+ on PATH and downloads Firebase CLI 15.30.1 with npx. Existing game
-code also produces React-related lint warnings. Report actual command results;
-do not claim that missing checks ran or that a zero exit code means zero warnings.
-This documents the gap, not an exemption from the merge requirements. Reconcile
-it when tooling is updated, and update this paragraph in the same change.
+`package.json` intentionally exposes the commands above rather than `check*`
+aliases. CONTRIBUTING.md lists the actual required checks, including combined
+Firestore adapter/rules and Worker REST coverage. Focused unit tests require
+Node 22+; the demo Firestore emulator requires Java 21+ and Firebase CLI 15.30.1.
+No Biome/Knip formatter or dead-code check is configured. The current lint baseline
+has no warnings. `npm run lint` may exit zero with warnings; use
+`npm run lint -- --deny-warnings` for the zero-warning merge gate. Report actual
+results and keep unresolved warnings in docs/TODO.md. This is not an exemption
+from merge requirements.
 
 ### Verify what changed
 
@@ -246,8 +250,12 @@ Before finishing, check whether the next contributor could follow these files
 without relying on the conversation history. Do not add a chronological task log
 or promise an automated documentation monitor that does not exist.
 
-Games use `useGameSession().clock` for durations, timeouts, intervals and animation
-frames. Help pauses scheduled activity without discarding answers. GameSession
+Games import `useGameSession` from `src/services/gameSession.ts` and use its
+`clock` for durations, timeouts, intervals and animation frames. Initialize decks
+and question sets with lazy state, and reset answers in the next/restart handlers.
+State updater functions must remain pure: do not mutate existing card objects,
+schedule work or save results from an updater. Timer effects own their cleanup;
+frame callbacks read committed state and stop after a single completion. Help pauses scheduled activity without discarding answers. GameSession
 mounts games only after Start and is keyed by exercise and daily-plan position.
 Run `node --experimental-strip-types --test tests/gameClock.test.ts` to verify
 the clock, alongside the existing speech-voice tests.
@@ -258,10 +266,12 @@ the clock, alongside the existing speech-voice tests.
 Configuration and session persistence are in `src/services/firebase.ts`; Analytics
 is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy. Its local
 personal/professional switch passes the selected intent through the Google sign-in
-callback. `AccountEntry` honors explicit player/professional entry and offers both profiles
-on restored sessions. Professional registration never replaces player progress
-or subscription. `ProfileSwitchContext` provides navigation from settings, entry
-recovery and professional settings; switching unmounts the old workspace.
+callback. `AccountEntry` honors explicit player/professional login. Restored sessions use
+`StorageService.readProfessionalEntry`, stored per UID under `neuroia_entry_v1`;
+older sessions default to player. Checkout return parameters select their
+workspace only when there is no explicit login intent. This device preference
+grants no permissions and never changes progress or subscriptions. There is no
+profile selector; users sign out to choose the other login.
 Player entry does not depend on professional reads. Professional settings reuse
 CloudProgress and its durable settings operations for account-wide name and
 appearance; the shared modal hides personal subscription controls.

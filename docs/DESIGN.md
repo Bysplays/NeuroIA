@@ -12,6 +12,11 @@ This is a living guide to the current product direction. Read [AGENTS.md](../AGE
 for implementation, verification, and maintenance practices. Keep this guide in
 English; the application speaks Spanish.
 
+The planned replacement logo, realistic illustrated game objects and guided
+placement flow are specified in [SDD.md](SDD.md). They remain pending; the
+current implementation and visual references below are still authoritative until
+each feature is integrated and verified.
+
 ## Purpose and tone
 
 Present NeuroIA as entertainment, training and serious play, following the supplied
@@ -287,7 +292,7 @@ for both linked people and seats. Keep paid participant seats distinct from the
 free professional account. One monthly subscription funds one participant.
 Place purchase and the shared settings icon in the top header. Reuse player
 settings without its subscription section; name and appearance are account-wide.
-Profile switching, logout and information links live in the settings footer.
+Logout and information links live in the settings footer.
 
 People show their supplied name and an action to open the existing activity charts
 and table in read-only mode. Use “Volver al panel” and identify whose activity is
@@ -406,10 +411,9 @@ Google sign-in is pending. The professional panel keeps only the audience label,
 heading and Google action; omit supporting paragraphs and availability notices.
 Professional sign-in opens the free professional workspace; personal sign-in
 keeps the existing account access flow even if a professional profile exists.
-Restored sessions offer “Jugador” and “Profesional” profiles for the same account.
-Place “Cambiar de perfil” in player settings, entry/recovery screens and the
-professional settings. Use two descriptive buttons in the profile choice, stacked
-on phones. Switching preserves saved activity and independent subscriptions.
+Restored sessions reuse the selected login for that account on this device.
+Omit the profile selector and change-profile actions. To enter the other workspace,
+sign out and use the corresponding login. Both profiles keep their saved data.
 Quiet “Sobre NeuroIA” and “Aviso
 legal” links below the card open the supplied product information in the shared
 dialog; signed-in users find these links in the settings footer. Keep long copy

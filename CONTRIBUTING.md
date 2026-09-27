@@ -59,27 +59,33 @@ Before even asking for a merge, **every available check must be green**.
 This is not optional. A branch that does not pass all checks is not ready to
 merge, period.
 
-Run the full suite locally and fix everything before requesting the merge:
+Run the available suite locally and fix everything before merging:
 
-```bash
-npm run check:test      # unit + integration tests — 0 failures required
-npm run check:types     # TypeScript — zero type errors
-npm run check:lint      # Biome linter — zero warnings
-npm run check:format    # Biome formatter — no diffs
-npm run check:deadcode  # Knip — no unused exports or files
+```sh
+npm run build                 # TypeScript and production build
+npm run lint -- --deny-warnings # Oxlint; zero warnings/errors required for merge
+npm test                      # focused unit coverage
+node --test vendor/cloudflare/index.test.mjs vendor/cloudflare/seats.test.mjs
+npx --yes firebase-tools@15.30.1 emulators:exec --only firestore --project demo-neuroia \
+  "node --experimental-strip-types --test --test-concurrency=1 tests/firestore.rules.test.mjs vendor/cloudflare/firestore.test.mjs"
+git diff --check
 ```
 
-Or run them all at once:
+Use Node 22+ and Java 21+ for the emulator. `npm run test:firestore` runs the
+frontend adapter/rules subset; `npm run test:onboarding` is its alias. The combined
+command above also covers Worker REST transactions. Never use a production project
+for automated fixture tests.
 
-```bash
-npm run check
-```
+There are no `check`, `check:test`, `check:types`, `check:lint`, `check:format` or
+`check:deadcode` scripts, and no configured Biome or Knip checks. Do not report
+those checks as run. `npm run lint` alone can exit successfully with warnings;
+the stricter command above enforces the existing merge requirement.
 
-If **any** of these commands exits with a non-zero code, the branch is not
-mergeable. Fix the issues, commit the fixes on the same branch, and re-run
-until everything is clean. Do not ask for a merge with known failures, do not
-ask for exceptions, and do not skip a check because it "is not related to my
-change". All checks, always.
+If any required command exits with a non-zero code, the branch is not mergeable.
+Fix issues on the same branch and rerun affected checks. Do not suppress warnings,
+weaken rules, request exceptions or skip failures because they predate the change.
+UI changes also require the rendered checks in AGENTS.md. Remote deployment and
+real-account payment validation are separate from local merge verification.
 
 ---
 
@@ -192,7 +198,7 @@ git merge --no-ff feat/ssl-detection -m "Merge branch 'feat/ssl-detection' into 
     git commit -m "feat(scope): do something specific"
 
 4.  Run all checks — fix until green
-    npm run check && npm run check:test
+    # Run every command in the checks section above
 
 5.  Push the branch (never main) and ask for a merge
     git push origin feat/my-feature
