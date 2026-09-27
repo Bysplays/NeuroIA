@@ -28,7 +28,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
         }
       }
     } catch (error) {
-      if (alive.current && request === version.current) { setError(accessError(error)); setAccess(current => current?.active ? current : null); }
+      if (alive.current && request === version.current) { setError(accessError(error)); setAccess(null); }
     }
   }, []);
   useEffect(() => {
@@ -37,17 +37,22 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     const interval = window.setInterval(() => { if (!locked.current) void refresh(); }, 30000);
     const onFocus = () => { if (!locked.current) void refresh(); };
     window.addEventListener('focus', onFocus);
+    const invalidate = () => { version.current++; setAccess(null); setError('Comprueba la conexión y vuelve a intentarlo.'); };
+    const onVisibility = () => { if (document.visibilityState === 'visible') { invalidate(); onFocus(); } };
+    window.addEventListener('offline', invalidate);
+    window.addEventListener('online', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
     const onAccessChanged = () => { version.current++; setAccess(null); void refresh(); };
     window.addEventListener('neuroia-access-changed', onAccessChanged);
-    return () => { alive.current = false; clearTimeout(initial); clearInterval(interval); window.removeEventListener('focus', onFocus); window.removeEventListener('neuroia-access-changed', onAccessChanged); };
+    return () => { alive.current = false; clearTimeout(initial); clearInterval(interval); window.removeEventListener('focus', onFocus); window.removeEventListener('offline', invalidate); window.removeEventListener('online', onFocus); document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('neuroia-access-changed', onAccessChanged); };
   }, [refresh]);
   useEffect(() => {
-    if (!access?.active || !access.expiresAt) return;
-    const remaining = access.expiresAt - access.serverNow;
+    if (!access?.active) return;
+    const remaining = Math.max(0, Math.min(access.validForMs ?? 0, access.expiresAt ? access.expiresAt - access.serverNow : Infinity));
     const timeout = window.setTimeout(() => {
-      if (remaining <= 2147483647) setAccess(value => value ? { ...value, active: false } : null);
+      setAccess(null);
       void refresh();
-    }, Math.max(0, Math.min(remaining, 2147483647)));
+    }, remaining);
     return () => clearTimeout(timeout);
   }, [access, refresh]);
   useEffect(() => { if (!access?.active) soundService.stopSpeaking(); }, [access?.active]);

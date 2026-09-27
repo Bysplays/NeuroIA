@@ -62,7 +62,7 @@ const FRUITS_BANK: SymbolDef[] = [
   { symbol: '🍈', name: 'melones' },
 ];
 
-function createRound() {
+function createRound(config: import('../services/difficulty').GameConfig) {
   // 1. Elegir AL AZAR cualquier fruta del banco como objetivo diana
   const targetIdx = Math.floor(Math.random() * FRUITS_BANK.length);
   const targetItem = FRUITS_BANK[targetIdx];
@@ -71,8 +71,8 @@ function createRound() {
   const distractors = FRUITS_BANK.filter((_, idx) => idx !== targetIdx).map(i => i.symbol);
 
   // 3. Cuadrícula equilibrada para tablet (4 filas x 4 columnas)
-  const rows = 4;
-  const cols = 4;
+  const rows = config.scanRows;
+  const cols = config.scanCols;
   const targetProbability = 0.32;
 
   const newItems: GridItem[] = [];
@@ -120,8 +120,8 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
-  const [initialRound] = useState(createRound);
+  const { clock, config } = useGameSession();
+  const [initialRound] = useState(() => createRound(config));
   const [currentTarget, setCurrentTarget] = useState<SymbolDef>(initialRound.target);
   const [items, setItems] = useState<GridItem[]>(initialRound.items);
   const [totalTargets, setTotalTargets] = useState(initialRound.total);
@@ -133,7 +133,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
   const initRound = () => {
-    const next = createRound();
+    const next = createRound(config);
     setCurrentTarget(next.target);
     setItems(next.items);
     setTotalTargets(next.total);
@@ -178,12 +178,15 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   const finishGame = (currentMistakes: number) => {
     const elapsedSeconds = Math.max(10, Math.round((clock.now() - startTime) / 1000));
-    const accuracy = Math.max(60, Math.round((totalTargets / (totalTargets + currentMistakes)) * 100));
+    const accuracy = Math.max(0, Math.round((totalTargets / (totalTargets + currentMistakes)) * 100));
     const baseScore = totalTargets * 80;
     const score = Math.max(120, baseScore - currentMistakes * 10);
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + clock.now(),
+      id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      practice: config.mode !== 'normal',
       exerciseId: 'visual-scanning',
       domain: 'attention',
       date: new Date().toISOString(),
@@ -234,7 +237,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
     >
       <div className="scanning-game-container">
         {/* Cuadrícula de búsqueda táctil (4x4) ocupando el espacio completo sin scroll */}
-        <div className="scanning-grid">
+        <div className="scanning-grid" style={{ gridTemplateColumns: `repeat(${config.scanCols}, minmax(0, 1fr))` }}>
           {items.map(item => (
             <button
               key={item.id}

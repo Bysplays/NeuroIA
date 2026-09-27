@@ -262,11 +262,12 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
-  const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => [...COMPLETION_BANK].sort(() => Math.random() - 0.5).slice(0, 5));
+  const { clock, config } = useGameSession();
+  const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => [...COMPLETION_BANK.slice(0, config.vocabularySize)].sort(() => Math.random() - 0.5).slice(0, config.rounds));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
@@ -279,7 +280,8 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
 
   const initGame = () => {
     setStartTime(clock.now());
-    const shuffled = [...COMPLETION_BANK].sort(() => Math.random() - 0.5).slice(0, 5);
+    setHintsUsed(0);
+    const shuffled = [...COMPLETION_BANK.slice(0, config.vocabularySize)].sort(() => Math.random() - 0.5).slice(0, config.rounds);
     setSessionItems(shuffled);
     setCurrentIdx(0);
     setSelectedLetter(null);
@@ -299,7 +301,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   const targetLetter = currentItem.word[currentItem.missingIndex];
 
   // Opciones barajadas con la letra correcta
-  const letterOptions = [targetLetter, ...currentItem.distractorLetters].sort();
+  const letterOptions = [targetLetter, ...currentItem.distractorLetters.slice(0, config.choices - 1)].sort();
 
   const handleSelectLetter = (letter: string) => {
     if (selectedLetter !== null) return;
@@ -368,7 +370,11 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
       const accuracy = Math.min(100, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + clock.now(),
+        id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      hintsUsed,
+      practice: config.mode !== 'normal',
         exerciseId: 'word-completion',
         domain: 'language',
         date: new Date().toISOString(),
@@ -467,7 +473,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
           <div className="completion-audio-helpers">
             <button
               className="touch-btn touch-btn-secondary"
-              onClick={() => soundService.speak(currentItem.word)}
+              onClick={() => { setHintsUsed(value => value + 1); soundService.speak(currentItem.word); }}
               title="Escuchar la palabra completa"
             >
               <Volume2 size={22} />
@@ -478,6 +484,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
               className="touch-btn touch-btn-secondary"
               onClick={() => {
                 soundService.playGentlePrompt();
+                setHintsUsed(value => value + 1);
                 setShowHint(true);
                 soundService.speak(currentItem.hint);
               }}

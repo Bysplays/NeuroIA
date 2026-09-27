@@ -25,15 +25,9 @@ import { EmailVerification } from './components/EmailVerification';
 import { accountDisplayName, needsEmailVerification, submitEmailAuth, type EmailAction } from './services/emailAuth';
 import { RestBreakModal } from './components/RestBreakModal';
 
-// Juegos disponibles de serious play
-import { VisualScanningGame } from './games/VisualScanningGame';
-import { LanguageNamingGame } from './games/LanguageNamingGame';
-import { WordCompletionGame } from './games/WordCompletionGame';
-import { MemoryPathGame } from './games/MemoryPathGame';
-import { MemoryPairsGame } from './games/MemoryPairsGame';
-import { CategorizationGame } from './games/CategorizationGame';
-import { MotorCoordinationGame } from './games/MotorCoordinationGame';
-import { MotorTrackingGame } from './games/MotorTrackingGame';
+import { GameExercise } from './components/GameExercise';
+import { PlacementOnboarding } from './components/PlacementOnboarding';
+import { assignedLevel, hasPlacement } from './services/difficulty';
 
 const AccessGate = lazy(() => import('./components/AccessGate'));
 const CloudProgress = lazy(() => import('./components/CloudProgress'));
@@ -110,6 +104,7 @@ export const App: React.FC = () => {
 const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: boolean; sync: ProgressSync; data: ProgressData }> = ({ uid, onSignOut, signingOut, sync, data }) => {
   const portrait = usePortrait();
   const { profile, history } = data;
+  const [placementOpen, setPlacementOpen] = useState(() => !hasPlacement(profile));
   const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | 'achievements' | 'statistics' | CognitiveDomain | ExerciseId>('dashboard');
 
   useEffect(() => {
@@ -226,9 +221,12 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
 
   const isPlayingGame = activeView !== 'dashboard' && activeView !== 'therapist' && activeView !== 'achievements' && activeView !== 'statistics';
 
+  const exerciseId = getExercisesForDomain(activeView as CognitiveDomain)[0]?.id ?? activeView as ExerciseId;
+  const placement = !hasPlacement(profile) || placementOpen;
+
   return (
     <div className={`app-root ${isPlayingGame ? 'app-root-focus-mode' : ''}`}>
-      {!isPlayingGame && (
+      {!placement && !isPlayingGame && (
         <Header
           profile={profile}
           sessionMinutes={sessionMinutes}
@@ -245,7 +243,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
         />
       )}
 
-      <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
+      {placement ? <PlacementOnboarding profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} onSignOut={onSignOut} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
         {activeView === 'dashboard' && (
           <Dashboard
             profile={profile}
@@ -269,93 +267,10 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
           />
         )}
 
-        {isPlayingGame && <GameSession key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={activeView} onBack={handleBackToDashboard}>
-        {/* 1. ATENCIÓN */}
-        {(activeView === 'attention' || activeView === 'visual-scanning') && (
-          <VisualScanningGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {/* 2. LENGUAJE */}
-        {(activeView === 'language' || activeView === 'language-naming') && (
-          <LanguageNamingGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {activeView === 'word-completion' && (
-          <WordCompletionGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {/* 3. MEMORIA */}
-        {(activeView === 'memory' || activeView === 'memory-path') && (
-          <MemoryPathGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {activeView === 'memory-pairs' && (
-          <MemoryPairsGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {/* 4. FUNCIONES EJECUTIVAS */}
-        {(activeView === 'executive' || activeView === 'categorization') && (
-          <CategorizationGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {/* 5. COORDINACIÓN VISOMOTORA */}
-        {(activeView === 'motor' || activeView === 'motor-target') && (
-          <MotorCoordinationGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {activeView === 'motor-tracking' && (
-          <MotorTrackingGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
+        {isPlayingGame && <GameSession key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
+          <GameExercise id={exerciseId} profile={profile} onBack={handleBackToDashboard} onSaveResult={handleSaveExerciseResult} planProgress={planProgress} onNextPlanExercise={handleNextPlanExercise} />
         </GameSession>}
-      </main>
+      </main>}
 
       <AccessibilityModal
         onSignOut={onSignOut}

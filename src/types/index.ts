@@ -1,3 +1,4 @@
+import type { GameLevels, Placement } from '../services/difficulty';
 export type CognitiveDomain = 'attention' | 'language' | 'memory' | 'executive' | 'motor';
 
 export type ExerciseId =
@@ -59,6 +60,8 @@ export interface TherapistNote {
 }
 
 export interface UserProfile {
+  placement?: Placement;
+  gameLevels?: Partial<GameLevels>;
   name: string;
   strokeDate?: string;
   affectedSide?: 'izquierda' | 'derecha' | 'bilateral' | 'ninguno';
@@ -95,6 +98,10 @@ export interface ExerciseResult {
   correctAnswers: number;
   totalQuestions: number;
   difficulty?: string;
+  level?: number;
+  configVersion?: number;
+  hintsUsed?: number;
+  practice?: boolean;
   feedbackMessage: string;
   notes?: string;
   mistakesList?: MistakeDetail[];

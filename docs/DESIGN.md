@@ -12,8 +12,7 @@ This is a living guide to the current product direction. Read [AGENTS.md](../AGE
 for implementation, verification, and maintenance practices. Keep this guide in
 English; the application speaks Spanish.
 
-The planned realistic illustrated game objects and guided placement flow are
-specified in [SDD.md](SDD.md). They remain pending; the
+The planned realistic illustrated game objects are specified in [SDD.md](SDD.md). They remain pending; the
 current implementation and visual references below are still authoritative until
 each feature is integrated and verified.
 
@@ -267,7 +266,9 @@ link while preserving progress. Invitation and paid access are mutually exclusiv
 “Gestionar” in the same position as “Abandonar” and “Mejorar”, beside the plan
 details. Paid plans append “. Renovación automática” to the end-date paragraph
 only when Stripe-derived `autoRenew` is explicitly true. Omit that suffix for
-canceled or unknown renewal state without replacement copy; retain the end date.
+unknown renewal state; retain the end date. A still-active plan with renewal
+disabled shows “No se renovará” and “Reactivar suscripción” instead of “Gestionar”.
+This opens the customer portal, where the customer confirms renewal.
 Stripe manages renewal; do not present a toggle or a local renewal setting. Do not show a subscription management banner above the workspace.
 Cancellation and any available plan changes are confirmed in Stripe; do
 not invent prices, upgrade plans or successful cancellation. Changes apply
@@ -299,8 +300,15 @@ People show their supplied name and an action to open the existing activity char
 and table in read-only mode. Use “Volver al panel” and identify whose activity is
 being shown. Seats show pending/active/inactive state, paid-through date, renewal
 when confirmed, and a selectable/copyable code only when paid and unoccupied.
+New codes use the short `NIA-XXXX-XX` format for easy copying or typing.
 After assignment show the participant, not the code. Pending purchases can be
-resumed or canceled; subscription management uses the Stripe portal. Never imply
+resumed or canceled; subscription management uses the Stripe portal. Each renewing
+seat offers “Cancelar suscripción”, opening Stripe confirmation for that seat.
+Paid seats with scheduled cancellation show “No se renovará” and a “Reactivar
+suscripción” action that opens the professional customer portal for confirmation.
+Expired seats do not offer reactivation. If validity cannot
+be confirmed, hide codes and disable activity with a retry notice; do not label
+unknown access as an expired subscription. Never imply
 that a return from Checkout proves payment or invent prices, people or results.
 
 The retained therapist component is not the professional dashboard and remains
@@ -547,3 +555,21 @@ tinted table header, right-aligned metrics and separate date/time lines (hours
 and minutes). Historical records with only a date show that day without a time;
 do not invent a completion hour. Omit the device-local-time caption. Group
 pagination and archive loading in a padded footer with comfortable touch buttons.
+
+### Guided game placement and difficulty
+
+After player access and cloud loading, unassessed accounts see one calm companion
+panel with progress, one instruction, optional listening and a primary Continue.
+Use the existing per-game illustrations, a level-1 example and a short level-3
+trial. A pause preserves the active game; returning or restarting the app repeats
+only the unfinished trial. The explicit inaccessible-trial action starts that game
+at level 1 and labels it as unmeasured in the summary. Do not call this a diagnosis
+or an ability score. Professional entry has no placement flow.
+
+Show all eight starting levels at completion, then “Ir a mis juegos”. Settings and
+logout remain accessible. Respect hidden companions, large text and contrast.
+Ordinary instructions show the recommendation and a 1–10 selector; the chosen level
+stays fixed during play and repeats and is shown in the game bar and result. Help
+and portrait continue pausing the existing clock. Tracking offers holding Space as
+a keyboard alternative and remains manually adjusted. See SDD for scoring and
+provisional calibration limits.

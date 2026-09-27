@@ -19,8 +19,6 @@ interface MotorTrackingGameProps {
   onNextPlanExercise?: () => void;
 }
 
-const REQUIRED_CONTACT_SECONDS = 12; // 12 segundos acumulados de contacto continuo
-const TARGET_SIZE = 140; // Diana significativamente más grande (140px)
 
 export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   onBack,
@@ -28,12 +26,16 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
+  const { clock, config } = useGameSession();
+  const REQUIRED_CONTACT_SECONDS = config.contactSeconds;
+  const TARGET_SIZE = config.targetSize;
+  const pointer = useRef<{ x: number; y: number } | null>(null);
+  const keyboard = useRef(false);
   const arenaRef = useRef<HTMLDivElement | null>(null);
 
   // Posición del objetivo (porcentajes de 0 a 100)
   const [targetPos, setTargetPos] = useState<{ x: number; y: number }>({ x: 50, y: 50 });
-  const [velocity, setVelocity] = useState<{ vx: number; vy: number }>({ vx: 0.16, vy: 0.13 });
+  const [velocity, setVelocity] = useState<{ vx: number; vy: number }>({ vx: config.trackingSpeed, vy: config.trackingSpeed * 0.8 });
   const [isHoveringOrTouching, setIsHoveringOrTouching] = useState(false);
   const [contactTime, setContactTime] = useState(0); // en segundos
   const [isCompleted, setIsCompleted] = useState(false);
@@ -45,23 +47,29 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   // Iniciar / reiniciar juego
   const initGame = () => {
     setTargetPos({ x: 50, y: 50 });
-    setVelocity({ vx: 0.16, vy: 0.13 });
+    setVelocity({ vx: config.trackingSpeed, vy: config.trackingSpeed * 0.8 });
     setIsHoveringOrTouching(false);
     setContactTime(0);
     setIsCompleted(false);
     setResult(null);
     startTimeRef.current = clock.now();
     isTouchingRef.current = false;
+    keyboard.current = false;
+    pointer.current = null;
   };
 
   const handlePointerDownTarget = (e: React.PointerEvent) => {
     e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    pointer.current = { x: e.clientX, y: e.clientY };
     isTouchingRef.current = true;
     setIsHoveringOrTouching(true);
     soundService.playTap();
   };
 
   const handlePointerUp = () => {
+    pointer.current = null;
+    keyboard.current = false;
     isTouchingRef.current = false;
     setIsHoveringOrTouching(false);
   };
@@ -69,21 +77,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   const handlePointerMoveArena = (e: React.PointerEvent) => {
     if (!isTouchingRef.current || !arenaRef.current) return;
 
-    const arenaRect = arenaRef.current.getBoundingClientRect();
-    const touchX = ((e.clientX - arenaRect.left) / arenaRect.width) * 100;
-    const touchY = ((e.clientY - arenaRect.top) / arenaRect.height) * 100;
-
-    // Comprobar distancia al objetivo
-    const dx = touchX - targetPos.x;
-    const dy = touchY - targetPos.y;
-    const distancePercent = Math.sqrt(dx * dx + dy * dy);
-
-    // Margen amplio de tolerancia táctil acorde a la diana grande
-    if (distancePercent < 18) {
-      setIsHoveringOrTouching(true);
-    } else {
-      setIsHoveringOrTouching(false);
-    }
+    pointer.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleCompleteGame = () => {
@@ -94,7 +88,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
 
     const elapsedSeconds = Math.max(REQUIRED_CONTACT_SECONDS, Math.round((clock.now() - startTimeRef.current) / 1000));
     // Precisión calculada por ratio de contacto mantenido
-    const accuracy = Math.min(100, Math.max(70, Math.round((REQUIRED_CONTACT_SECONDS / elapsedSeconds) * 100)));
+    const accuracy = Math.min(100, Math.max(0, Math.round((REQUIRED_CONTACT_SECONDS / elapsedSeconds) * 100)));
 
     const mistakesList: MistakeDetail[] = [];
     if (elapsedSeconds > REQUIRED_CONTACT_SECONDS + 6) {
@@ -103,12 +97,15 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
         item: 'Mantenimiento del contacto continuo',
         userAction: `Completado en ${elapsedSeconds}s`,
         correctSolution: `Meta ideal: ${REQUIRED_CONTACT_SECONDS}s de contacto continuo`,
-        explanation: 'En ocasiones el dedo se desvió del círculo móvil. El reentrenamiento progresivo mejorará la estabilidad.',
+        explanation: 'Se acumuló tiempo sin contacto. Puedes volver a practicar a tu ritmo.',
       });
     }
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + clock.now(),
+      id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      practice: config.mode !== 'normal',
       exerciseId: 'motor-tracking',
       domain: 'motor',
       date: new Date().toISOString(),
@@ -116,7 +113,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
       accuracy,
       score: Math.round(accuracy * 5),
       correctAnswers: REQUIRED_CONTACT_SECONDS,
-      totalQuestions: REQUIRED_CONTACT_SECONDS,
+      totalQuestions: elapsedSeconds,
       feedbackMessage:
         accuracy >= 85
           ? '¡Buen trabajo! Has seguido la diana con precisión.'
@@ -144,7 +141,11 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     else if (newY > 100 - marginY) { newY = 100 - marginY; newVy = -Math.abs(newVy); }
     setTargetPos({ x: newX, y: newY });
     setVelocity({ vx: newVx, vy: newVy });
-    if (isTouchingRef.current) {
+    const point = pointer.current;
+    const contact = keyboard.current || (!!arena && !!point && isTouchingRef.current
+      && Math.hypot(point.x - (arena.left + newX / 100 * arena.width), point.y - (arena.top + newY / 100 * arena.height)) <= TARGET_SIZE / 2);
+    setIsHoveringOrTouching(contact);
+    if (contact) {
       const next = contactTime + deltaMs / 1000;
       setContactTime(next);
       if (next >= REQUIRED_CONTACT_SECONDS) {
@@ -209,7 +210,12 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
           onPointerMove={handlePointerMoveArena}
         >
           {/* Diana móvil */}
-          <div
+          <button
+            type="button"
+            aria-label="Mantén pulsado para acompañar al personaje; con teclado, mantén Espacio"
+            onKeyDown={event => { if (event.code === 'Space' || event.code === 'Enter') { event.preventDefault(); keyboard.current = true; } }}
+            onKeyUp={handlePointerUp}
+            onBlur={handlePointerUp}
             className={`tracking-target ${isHoveringOrTouching ? 'target-contacted' : ''}`}
             style={{
               left: `${targetPos.x}%`,
@@ -221,7 +227,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
           >
             <PaperTarget variant="companion" />
             {isHoveringOrTouching && <div className="tracking-target-halo" />}
-          </div>
+          </button>
         </div>
       </div>
     </ExerciseWrapper>

@@ -35,12 +35,12 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | --- | --- | --- |
 | App | React/TypeScript/Vite, React-state navigation, shared game clock and dialogs | No new router required |
 | Identity | Google and email/password entry, verification/recovery and same-UID password setup | Provider activated; frontend publication and live delivery remain unverified |
-| Progress | Firestore authority, transactional receipts, durable per-account outbox | No placement or versioned difficulty contract |
+| Progress | Firestore authority, transactional receipts, durable per-account outbox; versioned placement | Physical-device/release verification |
 | Games | Eight catalog entries; daily actions retired with history preserved | Parameterize eight games |
-| Levels | Domain reducer can increase a legacy level from 1 to 3 | Game components do not read a shared level configuration |
+| Levels | Eight games consume versioned levels 1–10; guided initial trials and bounded adaptation | User calibration, tracking adaptation and explicit reassessment |
 | Professionals | Free workspace, paid-seat links, read-only charts/history | No authorized note-writing or assigned sessions |
 | Billing | Worker Checkout, signed webhooks, reconciliation, portal, seat redemption/rotation | Production deployment and sandbox lifecycle not fully verified |
-| Access | Server-owned entitlement records; browser refresh on focus/every 30 seconds | Browser expiry uses local time; failed refresh can retain active state |
+| Access | Server-owned entitlement records; browser refresh on focus/every 30 seconds | Worker-confirmed time and expiry; 60-second lease, fail-closed refresh; Worker deployed, real-account lifecycle pending |
 | Narration | Shared recorded-player service and browser fallback | 91/370 clips missing; full audition and commercial rights unresolved |
 | EEG / AI | No connected SDK or browser inference | Discovery, implementation and validation required |
 | Brand / objects | Supplied mint mark integrated; existing paper sprite atlases | New object style pending integration |
@@ -127,10 +127,9 @@ out-of-order events cannot extend unpaid access, resurrect old codes or relink
 someone who left. Preserve the separate CEOABERTO permanent reusable exception;
 changing it requires an explicit migration decision.
 
-Close the current stale-access gap: define an authenticated server validity
-response with server time and confirmed expiry, plus a bounded verification
-lease. Proposed maximum lease: 30 seconds, capped by paid expiry; validate this
-against operational constraints before implementation. Use monotonic elapsed time
+Use the authenticated Worker `/access` response with server time and confirmed
+expiry. The implemented maximum lease is 60 seconds, capped by paid expiry, with
+refresh every 30 seconds; a failed refresh closes access immediately. Use monotonic elapsed time
 for the local lease, revalidate on focus/resume, and pause access when the lease
 cannot be renewed. A device clock rollback must not extend permission. Preserve
 pending legitimate result writes without treating those writes as permission to play.
@@ -249,65 +248,71 @@ visibility must respect existing theme and companion settings.
 Acceptance: all crops/mappings, transparent edges, small-size legibility, both
 styles, contrast, large text, app install icons and Pages base paths.
 
-### LEVELS — game difficulty 1–10
+### LEVELS — game difficulty 1–10 (implemented, calibration provisional)
 
-Introduce a validated integer level 1–10 per exercise, with a documented provisional
-area/global summary if needed for presentation. One global number must not silently
-force equally difficult tasks across unrelated areas. The legacy level field is
-not the new placement contract and old difficulty strings remain readable.
+`difficulty.ts` version 1 supplies ten bounded parameter rows for all eight games.
+`GameSession` initializes from the per-game recommendation and lets the player choose
+1–10 before starting. It freezes the choice for play and repeat; no mid-game changes.
+Every new result records `level`, `configVersion`, `hintsUsed` when relevant and
+`practice`. Legacy domain levels and old results remain readable and unchanged.
 
-| Retained game | Candidate difficulty controls to calibrate |
+| Game | Version 1 controls, level 1 → 10 |
 | --- | --- |
-| Visual scanning | Board density, distractor similarity, target count |
-| Object naming | Vocabulary familiarity, distractor similarity, available hints |
-| Word completion | Missing letters, word length, distractor choices |
-| Memory beacons | Sequence length, board size, presentation duration |
-| Memory pairs | Pair count, preview duration, similarity |
-| Categorization | Category/choice count, object ambiguity, hints |
-| Static targets | Safe target size, target count and spacing |
-| Moving target | Safe speed/path and required contact duration |
+| Visual scanning | 2×3 → 6×6 board, existing target identity and at least three targets |
+| Object naming | 3 → 8 questions; 8 → 30-item pool; gentle/moderate/challenge distractors; 2–3 choices |
+| Word completion | 3 → 8 questions; 8 → full 28-item pool; 2 → 4 letter choices; one missing letter |
+| Memory beacons | 2 → 6 steps per sequence; 1300 → 800 ms per step; three rounds |
+| Memory pairs | 2 → 6 pairs; 8 → 3-second preview |
+| Categorization | 3 → 8 questions; 8 → full 28-item pool; existing two unambiguous groups |
+| Static targets | 5 → 14 targets; 160 → 88 px diameter, clamped inside arena |
+| Moving target | 0.06 → 0.24 percentage-points/16 ms; 6 → 15 seconds of accumulated contact; 160 → 88 px |
 
-Ten parameter rows per game must be reviewed and measured before enabling them.
-Do not reduce touch targets below accessibility bounds or introduce time pressure
-merely to create ten labels. Freeze the configuration at exercise start and save
-its level and version in the result.
+Exact intermediate rows live in the pure configuration function and are covered by
+bounds/distinctness tests. These are initial game-design settings, not validated
+ability measures. Review vocabulary ordering, pacing and physical-device comfort
+with users before considering calibration complete.
 
-Proposed adaptation for initial testing: evaluate windows of three eligible completed
-sessions of the same game/configuration family; move at most one level between
-exercises. Candidate thresholds: promote at >=85% mean accuracy with limited hints,
-reduce at <60%, otherwise retain. These are calibration hypotheses, not validated
-ability measures. Motor games need a separately reviewed comparable success metric.
-Track evidence consumed by each decision so a retry cannot apply it twice. Exclude
-aborted/placement sessions from ordinary adaptation and allow easier practice.
-No mid-question changes or inactivity penalties; reassessment is explicit.
+Three eligible normal results at the current recommended level consume one evidence
+window. Mean accuracy ≥85% promotes one level; <60% reduces one; otherwise retain.
+Hints or answer-revealing audio cap a session's promotion evidence at 84%. Require
+at least three answers/attempts (two for pairs). Easier/harder manual sessions,
+older configuration versions, placement, duplicates and aborted games do not change
+the recommendation. Receipts protect replay across the bounded history window.
+Memory pairs use matched pairs / attempts, not a fabricated perfect result.
+A repeat-preview action counts as a hint; larger decks use more columns on wider
+viewports, and preview time counts as active game time.
+New scanning, memory and motor results no longer floor accuracy at a positive value.
+Historical records are untouched. Moving-target adaptation is deliberately manual:
+contact ratios across keyboard/pointer methods are not comparable enough to infer
+an automatic recommendation. Keyboard holding is an explicit accessible alternative.
 
-Acceptance: every level is solvable, lower/upper bounds, insufficient evidence,
-retries, stale snapshots, manual easier play, old profiles, paused clocks and
-cross-device consistency. Log enough configuration evidence to explain changes.
+### PLACEMENT — initial guided level assessment (implemented)
 
-### PLACEMENT — initial guided level assessment
+Player entry after access and cloud loading requires version-1 completed placement
+and valid per-game levels. Professional entry has no placement gate. The shared game
+renderer supplies an unscored level-1 example then a short level-3 trial for each of
+the eight games. Naming, words and categories have three questions; beacons three
+rounds; pairs three pairs; scanning a 3×3 board; static targets six; tracking six
+seconds accumulated contact. Instructions, help, optional narration, companions,
+landscape pauses and settings use the existing systems.
 
-Trigger after cloud progress loads when no valid completed placement version exists,
-including old accounts whose legacy domain level happens to be 1. Do not rerun on
-every sign-in. Keep payment/access onboarding and game placement distinct.
+A completed trial queues a durable `placement` operation. Its evidence and provisional
+game level are written in the progress transaction; the eighth trial atomically
+marks the full set complete. The first committed evidence for each game wins;
+retries and another device cannot overwrite it. Placement never writes result
+archives or increments ordinary activity, achievements, streaks or daily plans.
+Pausing preserves the mounted trial and its clock. Returning/reloading resumes the
+first unfinished game; only that incomplete trial restarts.
 
-Use simple screens, one instruction/trial at a time, companion encouragement and
-optional narration. Respect companion visibility, large text, contrast, landscape,
-help and pause. Provide practice examples before scored trials. Offer “Continuar”,
-“Pausar” and “Volver”; incomplete placement resumes and does not unlock normal play.
-For an inaccessible trial, provide an explicit alternative assessment path; never
-pretend an omitted task supplied measured evidence.
+Trial accuracy ≥85% without hints assigns level 4, ≥60% assigns level 3, otherwise
+level 1. Require at least three attempts. An explicit inaccessible-trial action
+records `skipped`, no measured evidence and level 1. Tracking always starts at level
+1 with a manual selector. The final screen discloses skipped games and shows all
+levels. Completed placement does not repeat on sign-in. Local imports intentionally
+omit placement; only existing cloud placement bypasses it. A separate explicit
+reassessment flow remains a follow-up; choosing a different single-game level is
+already available.
 
-Persist versioned progress after each completed trial. Choose a reviewed bounded
-trial set across the five areas; exact trial counts and duration are open until
-usability testing. Use deterministic scoring with minimum-evidence requirements;
-record provisional levels and missing coverage honestly. Completion writes levels
-and completed placement atomically. Placement trials do not inflate achievements,
-ordinary exercise counters or daily-plan completion.
-
-Acceptance: fresh/legacy accounts, interrupted flow, duplicate completion,
-logout/restart, active-seat expiry, accessibility, stable assigned levels and
-clear explanation that levels describe game practice.
 
 ### RETIRE — daily action sequencing
 
@@ -329,7 +334,7 @@ These are proposed additions, not existing paths or permissions:
 
 | Data | Proposed location / contents | Authority |
 | --- | --- | --- |
-| Placement | Account-owned assessment document: version, status, trial cursor, evidence, resulting levels | Participant via validated durable operations |
+| Placement | Optional progress.profile.placement: version, completed, per-game trial evidence; cursor derived from first missing game | Participant via validated durable operations |
 | Difficulty | Versioned per-exercise level/evidence map in progress; legacy fields retained | Progress transaction/reducer |
 | Results | Optional numeric level, configuration version, assignment/revision/step IDs | Participant; existing result ID/receipt semantics |
 | Assignments | Separate professional-owned session collection with participant UID and immutable revisions | Active linked owner authors; participant step receipts only |

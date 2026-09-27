@@ -4,16 +4,18 @@ After Google sign-in, `AccountEntry` honors the selected player/professional pro
 registers a professional workspace only when that profile is selected. The same
 account may retain its player subscription and progress. The professional profile
 bypasses personal entitlement checks; see [PROFESSIONALS.md](PROFESSIONALS.md). For personal accounts,
-`AccessGate` loads the owner's entitlement directly from
-Firestore before mounting `CloudProgress` and games. Invitation redemption and
-trials use `src/services/firestoreAccess.ts` and server-enforced Firestore rules.
+`AccessGate` confirms the owner's Firestore entitlement through the authenticated
+Worker `/access` endpoint before mounting `CloudProgress` and games. The API URL
+is required even when purchases are disabled. Server time, a maximum 60-second
+lease and fail-closed refresh prevent device-clock or stale-access bypasses.
+The permanent invitation and trials use `src/services/firestoreAccess.ts` and server-enforced Firestore rules.
 They do not call Cloud Functions and require no Blaze plan.
 
 ## CEOABERTO
 
 `CEOABERTO` is the permanent, reusable exception. Leading/trailing spaces and
-lowercase are normalized. Paid seat codes (`NIA-` plus 32 hexadecimal characters)
-are redeemed by the Worker and expire with the confirmed subscription. Other
+lowercase are normalized. New paid seat codes use `NIA-XXXX-XX`; legacy `NIA-` plus 32 hexadecimal
+characters remain accepted. Codes are redeemed by the Worker and expire with the confirmed subscription. Other
 codes are rejected, even if an old invitation document exists.
 
 One transaction creates or updates:
@@ -116,3 +118,13 @@ The browser never grants an extra period from the Checkout return URL or an unpa
 Paid-seat departure uses the Worker to revoke access and the care link and rotate
 the code atomically. A paid invitation expires; settings shows its paid-through
 date rather than “Sin fecha de caducidad”. See [PROFESSIONALS.md](PROFESSIONALS.md).
+
+## Game placement after access
+
+Access onboarding still controls payment/trials/invitations. Once access and cloud
+progress load, player entry now runs the separate eight-game placement flow when
+no valid completed version exists. Examples and placement trials do not count as
+ordinary activity. Existing cloud placement resumes; new/local-imported profiles
+need assessment. The version-1 progress/rules contract is deployed to
+`ceoaberto-neuroia`; see [SDD.md](SDD.md#placement--initial-guided-level-assessment-implemented)
+for scoring, manual tracking and calibration limits. This does not deploy the frontend.

@@ -72,7 +72,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
               <div>
                 <p className="result-eyebrow">{planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total} completado` : 'Ejercicio completado'}</p>
                 <h1 id="result-title">Un paso más. Bien hecho.</h1>
-                <p className="result-message">Gracias por dedicarte este rato.</p>
+                <p className="result-message">Gracias por dedicarte este rato.{result.level ? ` Has jugado en el nivel ${result.level}.` : ''}</p>
               </div>
               <HeaderIllustration scene={exerciseId} className="game-completion-art" />
             </div>

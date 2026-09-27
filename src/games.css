@@ -33,7 +33,7 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 
 /* Attention: stable square board with the same target image as the prompt. */
 .scanning-game-container { overflow: visible; padding: 20px; border-radius: 30px; background: var(--game-second); }
-.scanning-grid { flex: none; height: auto; max-width: 860px; margin: 0 auto; grid-template-rows: repeat(4, auto); gap: 12px; }
+.scanning-grid { flex: none; height: auto; max-width: 860px; margin: 0 auto; grid-template-rows: none; gap: 12px; }
 .scanning-cell { aspect-ratio: 1.7; height: auto; border: 2px solid transparent; border-radius: 22px; background: var(--color-surface); box-shadow: none; }
 .scanning-cell:hover { transform: none; border-color: var(--color-primary); }
 .cell-emoji { display: flex; font-size: clamp(48px, 7vw, 88px); }
@@ -144,6 +144,8 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .exercise-container .large-object-emoji, .exercise-container .seq-card-emoji { filter: none; }
 .exercise-container .seq-card-emoji-wrap { background: transparent; padding: 14px; }
 .pairs-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (min-width: 600px) { .pairs-grid-expanded { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .pairs-grid-expanded { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 .exercise-container .memory-card-tile { min-width: 0; padding: 8px; }
 .tile-front { max-width: 100%; }
 .tile-label { overflow-wrap: anywhere; }
@@ -278,3 +280,5 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 .game-session-time { display: flex; align-items: center; gap: 10px; font-size: 1rem; font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
 .game-task-title { font-size: 1.15rem; font-weight: 500; line-height: 1.4; text-align: center; }
 @media (max-width: 600px) { .game-instruction-screen { padding: 16px; } .game-instruction-paper { padding: 24px; } .game-instruction-paper .game-instruction-art { width: 100px; height: 100px; } .game-session-bar { padding: 12px 16px 0; } }
+
+.scanning-grid .cell-emoji { font-size: clamp(32px, 5vw, 64px); }

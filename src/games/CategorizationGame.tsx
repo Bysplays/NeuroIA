@@ -361,8 +361,8 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
-  const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => [...CLASSIFICATION_ITEMS].sort(() => Math.random() - 0.5).slice(0, 5));
+  const { clock, config } = useGameSession();
+  const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => [...CLASSIFICATION_ITEMS.slice(0, config.vocabularySize)].sort(() => Math.random() - 0.5).slice(0, config.rounds));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
@@ -373,7 +373,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
   const initGame = () => {
     setStartTime(clock.now());
-    const shuffled = [...CLASSIFICATION_ITEMS].sort(() => Math.random() - 0.5).slice(0, 5);
+    const shuffled = [...CLASSIFICATION_ITEMS.slice(0, config.vocabularySize)].sort(() => Math.random() - 0.5).slice(0, config.rounds);
     setSessionItems(shuffled);
     setCurrentIdx(0);
     setSelectedCategory(null);
@@ -425,7 +425,10 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
       const accuracy = Math.min(100, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + clock.now(),
+        id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      practice: config.mode !== 'normal',
         exerciseId: 'categorization',
         domain: 'executive',
         date: new Date().toISOString(),
@@ -498,12 +501,12 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
               }
 
               return (
-                <div
+                <button
+                  type="button"
                   key={cat.id}
                   className={`card card-interactive ${binClass}`}
                   onClick={() => handleSelectCategory(cat.id)}
-                  role="button"
-                  tabIndex={0}
+                  disabled={selectedCategory !== null}
                 >
                   <div
                     className="bin-icon-circle"
@@ -519,7 +522,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
                       <span>¡Aquí va!</span>
                     </div>
                   )}
-                </div>
+                </button>
               );
             })}
           </div>

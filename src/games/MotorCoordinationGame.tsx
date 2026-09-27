@@ -31,9 +31,9 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
-  const totalTargets = 8;
-  const targetSize = 140; // Diana ampliada para máxima accesibilidad y visibilidad
+  const { clock, config } = useGameSession();
+  const totalTargets = config.targets;
+  const targetSize = config.targetSize; // Diana ampliada para máxima accesibilidad y visibilidad
 
   // Generar secuencia de posiciones aleatorias seguras
   const generateRandomTargets = (count: number, size: number): TargetPosition[] => {
@@ -93,11 +93,14 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
       setTargetIdx(prev => prev + 1);
     } else {
       const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
-      const avgAccuracy = Math.max(50, Math.round((targets.length / (targets.length + misses)) * 100));
+      const avgAccuracy = Math.max(0, Math.round((targets.length / (targets.length + misses)) * 100));
       const finalScore = Math.round(avgAccuracy * 5);
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + clock.now(),
+        id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      practice: config.mode !== 'normal',
         exerciseId: 'motor-target',
         domain: 'motor',
         date: new Date().toISOString(),
@@ -165,7 +168,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
             className="motor-target-circle pulse-target"
             style={{
               left: `clamp(${currentTarget.size / 2 + 8}px, ${currentTarget.x}%, calc(100% - ${currentTarget.size / 2 + 8}px))`,
-              top: `${currentTarget.y}%`,
+              top: `clamp(${currentTarget.size / 2 + 8}px, ${currentTarget.y}%, calc(100% - ${currentTarget.size / 2 + 8}px))`,
               width: `${currentTarget.size}px`,
               height: `${currentTarget.size}px`,
             }}

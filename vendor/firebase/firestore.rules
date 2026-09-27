@@ -24,6 +24,48 @@ service cloud.firestore {
         && seat.status == 'active' && seat.expiresAt > request.time.toMillis()
         && seat.occupantUid == uid && link.patientId == uid && link.seatId == seatId;
     }
+    function validGameLevel(value) {
+      let level = value.level;
+      let evidence = value.evidence;
+      return value is map && value.keys().hasOnly(['level', 'evidence'])
+        && level is int && level >= 1 && level <= 10
+        && evidence is list && evidence.size() < 3
+        && (evidence.size() < 1 || (evidence[0] is int && evidence[0] >= 0 && evidence[0] <= 100))
+        && (evidence.size() < 2 || (evidence[1] is int && evidence[1] >= 0 && evidence[1] <= 100));
+    }
+    function validTrial(value) {
+      return value is map && value.keys().hasOnly(['accuracy', 'questions', 'hints', 'skipped'])
+        && value.accuracy is number && value.accuracy >= 0 && value.accuracy <= 100
+        && value.questions is int && value.questions >= 0 && value.questions <= 1000
+        && value.hints is int && value.hints >= 0 && value.hints <= 1000 && value.skipped is bool;
+    }
+    function validLevels(value) {
+      let previous = resource == null ? {} : resource.data.data.profile.get('gameLevels', {});
+      return value is map && value.keys().hasOnly(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking'])
+        && (!('visual-scanning' in value) || value['visual-scanning'] == previous.get('visual-scanning', null) || validGameLevel(value['visual-scanning']))
+        && (!('language-naming' in value) || value['language-naming'] == previous.get('language-naming', null) || validGameLevel(value['language-naming']))
+        && (!('word-completion' in value) || value['word-completion'] == previous.get('word-completion', null) || validGameLevel(value['word-completion']))
+        && (!('memory-path' in value) || value['memory-path'] == previous.get('memory-path', null) || validGameLevel(value['memory-path']))
+        && (!('memory-pairs' in value) || value['memory-pairs'] == previous.get('memory-pairs', null) || validGameLevel(value['memory-pairs']))
+        && (!('categorization' in value) || value['categorization'] == previous.get('categorization', null) || validGameLevel(value['categorization']))
+        && (!('motor-target' in value) || value['motor-target'] == previous.get('motor-target', null) || validGameLevel(value['motor-target']))
+        && (!('motor-tracking' in value) || value['motor-tracking'] == previous.get('motor-tracking', null) || validGameLevel(value['motor-tracking']));
+    }
+    function validPlacement(value) {
+      let previous = resource == null ? {} : resource.data.data.profile.get('placement', {}).get('trials', {});
+      return value is map && value.keys().hasOnly(['version', 'completed', 'trials'])
+        && value.version == 1 && value.completed is bool && value.trials is map
+        && value.trials.keys().hasOnly(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking'])
+        && (!value.completed || value.trials.keys().hasAll(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking']))
+        && (!('visual-scanning' in value.trials) || value.trials['visual-scanning'] == previous.get('visual-scanning', null) || validTrial(value.trials['visual-scanning']))
+        && (!('language-naming' in value.trials) || value.trials['language-naming'] == previous.get('language-naming', null) || validTrial(value.trials['language-naming']))
+        && (!('word-completion' in value.trials) || value.trials['word-completion'] == previous.get('word-completion', null) || validTrial(value.trials['word-completion']))
+        && (!('memory-path' in value.trials) || value.trials['memory-path'] == previous.get('memory-path', null) || validTrial(value.trials['memory-path']))
+        && (!('memory-pairs' in value.trials) || value.trials['memory-pairs'] == previous.get('memory-pairs', null) || validTrial(value.trials['memory-pairs']))
+        && (!('categorization' in value.trials) || value.trials['categorization'] == previous.get('categorization', null) || validTrial(value.trials['categorization']))
+        && (!('motor-target' in value.trials) || value.trials['motor-target'] == previous.get('motor-target', null) || validTrial(value.trials['motor-target']))
+        && (!('motor-tracking' in value.trials) || value.trials['motor-tracking'] == previous.get('motor-tracking', null) || validTrial(value.trials['motor-tracking']));
+    }
     function validProgress() {
       let value = request.resource.data;
       let profile = value.data.profile;
@@ -35,7 +77,10 @@ service cloud.firestore {
         && value.data.history is list && value.data.history.size() <= 60
         && profile.keys().hasOnly(['name', 'streakDays', 'lastActiveDate', 'totalMinutes',
           'totalSessions', 'totalScore', 'domainProgress', 'dailyPlanCompletedToday',
-          'settings', 'therapistNotes', 'prescribedDomains', 'therapistGuidanceNote'])
+          'settings', 'therapistNotes', 'prescribedDomains', 'therapistGuidanceNote', 'placement', 'gameLevels'])
+        && (!('placement' in profile) || (resource != null && profile.placement == resource.data.data.profile.get('placement', null)) || validPlacement(profile.placement))
+        && (!('gameLevels' in profile) || (resource != null && profile.gameLevels == resource.data.data.profile.get('gameLevels', null)) || validLevels(profile.gameLevels))
+        && (!('placement' in profile) || !profile.placement.completed || ('gameLevels' in profile && profile.gameLevels.keys().hasAll(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking'])))
         && profile.name is string && profile.name.size() <= 200
         && profile.totalSessions is int && profile.totalSessions >= 0
         && profile.totalMinutes is int && profile.totalMinutes >= 0
@@ -56,7 +101,7 @@ service cloud.firestore {
       allow get: if owns(uid);
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['kind', 'createdAt'])
-        && request.resource.data.kind in ['result', 'settings']
+        && request.resource.data.kind in ['result', 'settings', 'placement']
         && request.resource.data.createdAt == request.time;
     }
     match /users/{uid}/results/{resultId} {
@@ -64,7 +109,11 @@ service cloud.firestore {
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['id', 'exerciseId', 'domain', 'date',
           'durationSeconds', 'accuracy', 'score', 'correctAnswers', 'totalQuestions',
-          'difficulty', 'feedbackMessage', 'notes', 'mistakesList'])
+          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice'])
+        && (!('level' in request.resource.data) || (request.resource.data.level is int && request.resource.data.level >= 1 && request.resource.data.level <= 10))
+        && (!('configVersion' in request.resource.data) || request.resource.data.configVersion == 1)
+        && (!('hintsUsed' in request.resource.data) || (request.resource.data.hintsUsed is int && request.resource.data.hintsUsed >= 0))
+        && (!('practice' in request.resource.data) || request.resource.data.practice == false)
         && request.resource.data.id is string
         && request.resource.data.exerciseId is string
         && request.resource.data.domain in ['attention', 'language', 'memory', 'executive', 'motor']

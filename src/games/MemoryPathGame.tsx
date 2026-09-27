@@ -41,9 +41,9 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
+  const { clock, config } = useGameSession();
   const activeTiles = ALL_TILES;
-  const maxRounds = 3;
+  const maxRounds = config.mode === 'practice' ? 1 : 3;
 
   const [round, setRound] = useState(1);
   const [sequence, setSequence] = useState<number[]>([]);
@@ -53,6 +53,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   const [statusMessage, setStatusMessage] = useState('Pulsa "Comenzar Secuencia" para observar');
   const [score, setScore] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const [errorsCount, setErrorsCount] = useState(0);
   const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
@@ -69,9 +70,9 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     return () => clearTimeouts();
   }, [clearTimeouts]);
 
-  const startCurrentRound = (roundNum: number) => {
+  const startCurrentRound = () => {
     clearTimeouts();
-    const seqLength = roundNum + 1; // Ronda 1: 2 pasos, Ronda 2: 3 pasos, Ronda 3: 4 pasos
+    const seqLength = config.sequenceLength; // Fixed for this level throughout the session.
 
     const newSeq = createMemorySequence(activeTiles.map(tile => tile.id), seqLength);
 
@@ -85,8 +86,8 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     setStatusMessage('Observa atentamente el orden de las fichas...');
     soundService.speak('Observa y memoriza.');
 
-    const delayBetweenSteps = 950;
-    const highlightDuration = 550;
+    const delayBetweenSteps = config.sequenceStepMs;
+    const highlightDuration = config.sequenceStepMs * 0.6;
 
     seq.forEach((tileId, idx) => {
       const t1 = clock.setTimeout(() => {
@@ -150,11 +151,12 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       setScore(newScore);
 
       if (round < maxRounds) {
-        setStatusMessage(`¡Fantástico! Ronda ${round} superada. Avanzamos a una ficha más.`);
-        soundService.speak('¡Muy bien! Añadimos una ficha más.');
+        setIsPlayingDemo(true);
+        setStatusMessage(`Ronda ${round} completada. Vamos con otra secuencia.`);
+        soundService.speak('Vamos con otra secuencia.');
         clock.setTimeout(() => {
           setRound(prev => prev + 1);
-          startCurrentRound(round + 1);
+          startCurrentRound();
         }, 1500);
       } else {
         finishGame(newScore);
@@ -163,6 +165,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   };
 
   const handleRepeatDemo = () => {
+    setHintsUsed(value => value + 1);
     if (isPlayingDemo || sequence.length === 0) return;
     soundService.playGentlePrompt();
     playSequenceDemo(sequence);
@@ -170,10 +173,14 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
   const finishGame = (finalScore: number) => {
     const elapsedSeconds = Math.max(20, Math.round((clock.now() - startTime) / 1000));
-    const accuracy = Math.max(50, Math.round((maxRounds / (maxRounds + errorsCount)) * 100));
+    const accuracy = Math.max(0, Math.round((maxRounds / (maxRounds + errorsCount)) * 100));
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + clock.now(),
+      id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      hintsUsed,
+      practice: config.mode !== 'normal',
       exerciseId: 'memory-path',
       domain: 'memory',
       date: new Date().toISOString(),
@@ -193,6 +200,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   };
 
   const handleRestart = () => {
+    setHintsUsed(0);
     setRound(1);
     setScore(0);
     setSequence([]);
@@ -230,7 +238,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
             {sequence.length === 0 ? (
               <button
                 className="touch-btn touch-btn-primary touch-btn-large gentle-bounce"
-                onClick={() => startCurrentRound(round)}
+                onClick={() => startCurrentRound()}
               >
                 <Play size={24} />
                 <span>Comenzar Secuencia</span>

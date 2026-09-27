@@ -1082,3 +1082,32 @@ body[data-style="cozy"] .professional-people { background: var(--panel-blue); }
   .professional-account-actions { width: 100%; flex-wrap: nowrap; }
   .professional-account-actions > .touch-btn { flex: 1; min-width: 0; }
 }
+
+/* Guided placement shares workspace panels and controls. */
+.placement-screen { max-width: 1120px; margin: auto; padding: 24px; }
+.placement-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; color: var(--color-text-muted); }
+.placement-card { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr); align-items: center; gap: 32px; padding: 32px; margin: 20px 0; border: 1px solid var(--color-border); border-radius: 32px; background: var(--color-surface); }
+.placement-art { width: 100%; max-height: 340px; object-fit: contain; }
+.placement-content h1 { font-size: clamp(1.7rem, 3vw, 2.5rem); line-height: 1.15; margin: 16px 0; }
+.placement-content p { line-height: 1.6; }
+.placement-content progress { width: 100%; height: 8px; accent-color: var(--color-action-bg); }
+.placement-actions { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin-top: 20px; }
+.placement-levels { list-style: none; padding: 0; margin: 20px 0; }
+.placement-levels li { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.placement-levels strong { white-space: nowrap; }
+.placement-play > .placement-toolbar { padding: 8px 24px; }
+.game-level-choice { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+.game-level-choice select { min-height: 48px; border: 1px solid var(--color-border); border-radius: 16px; padding: 8px 16px; font: inherit; color: var(--color-text-main); background: var(--color-surface); }
+@media (max-width: 650px) {
+  .placement-screen { padding: 16px; }
+  .placement-card { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 20px; }
+  .placement-art { max-height: 150px; }
+}
+
+.placement-content h1:focus { outline: none; }
+body[data-contrast="standard"] .placement-art { mix-blend-mode: multiply; }
+.placement-content progress { appearance: none; border: 0; border-radius: 8px; overflow: hidden; background: var(--color-bg); }
+.placement-content progress::-webkit-progress-bar { background: var(--color-bg); }
+.placement-content progress::-webkit-progress-value { background: var(--color-action-bg); }
+.placement-content progress::-moz-progress-bar { background: var(--color-action-bg); }
+body[data-companions="hidden"] .placement-card { grid-template-columns: minmax(0, 1fr); }

@@ -299,7 +299,7 @@ that account before cloud loading; cached identity never grants access. `Storage
 and pending writes are scoped to the UID. Auth changes unmount the old boundary,
 unsubscribe listeners, and prevent late callbacks from touching the next account.
 
-`AccessGate` is lazy loaded after authentication and validates server-owned access directly in Firestore before mounting `CloudProgress`. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
+`AccessGate` is lazy loaded after authentication and validates server-owned access through the authenticated Worker `/access` endpoint before mounting `CloudProgress`. Its server-time confirmation lasts at most 60 seconds, capped by expiry, with 30-second refresh; failure, offline or unconfirmed resume closes play. The Worker API URL is required independently of the purchase feature flag. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
 before mounting games; an inaccessible/offline initial load shows retry/logout,
 never an empty replacement profile. First cloud initialization offers an explicit
 import of account-local activity or the older unscoped profile when present.
@@ -346,7 +346,7 @@ Only server-confirmed paid seats and participant redemption create analytics
 permissions. Rules allow active linked owners to read participant progress and
 results; cross-account writes, clinical fields and retry receipts remain denied.
 Self-registration grants only ownership of an empty workspace, not clinical status.
-CEOABERTO remains the permanent reusable exception with administrator-only
+New paid seat codes use `NIA-XXXX-XX` (six unambiguous random characters); legacy UUID codes remain valid. The Worker reserves codes transactionally and limits redemption attempts in server-only `seatRedemptions/{uid}` records. CEOABERTO remains the permanent reusable exception with administrator-only
 ownership. See `docs/PROFESSIONALS.md` for seat paths, codes, departure and billing.
 Totals remain self-reported, not medically verified. Publish the reviewed rules
 and Worker before this frontend; frontend builds deploy neither. See
@@ -407,3 +407,25 @@ from speed averages. `activityHistory.ts` reads owner or authorized active-seat 
 explicit 200-document pages ordered by document ID. Merge pages with current
 cloud history, preserving imported and pending results; disclose partial coverage.
 No new writes, authorization rules or progress storage are introduced.
+
+## Game difficulty and placement
+
+`difficulty.ts` owns version-1 per-game rows, placement scoring and bounded adaptation.
+`GameSession` freezes the selected level at start and exposes config in session context.
+`GameExercise` dispatches the same eight implementations for ordinary and placement play.
+`PlacementOnboarding` gates only player Workspace after access/cloud load. It runs
+unscored examples and short trials, using durable `placement` operations in ProgressSync.
+`profile.placement` records bounded per-game evidence; optional `profile.gameLevels`
+contains provisional levels/evidence until the final trial marks placement complete.
+The reducer, adapter and Firestore rules use the existing atomic progress/receipt
+transaction; there is no separate local assessment store or result archive for trials.
+First committed trials win across devices; imported local placement is discarded.
+
+New exercise results carry numeric level/configVersion and optional hint usage.
+Adaptation consumes three eligible results at the current recommended level, capped
+at one level change in 1–10. Manual different-level play cannot change recommendations.
+Tracking remains manual because its input methods are not comparable; actual pointer
+contact is checked against the moving circle on every frame. Preserve historical
+results and legacy domain levels. Run difficulty/progress tests and the real demo
+Firestore adapter/rules suite together when changing these contracts. Publish rules
+before frontend release; see docs/TODO.md for calibration and reassessment gaps.

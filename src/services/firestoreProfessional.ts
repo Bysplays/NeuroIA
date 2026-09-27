@@ -35,9 +35,11 @@ export function firestoreProfessional(uid: string, db: Firestore) {
       });
     },
     subscribeSeats(onData: (seats: ProfessionalSeat[]) => void, onError: () => void) {
+      let confirmed = false;
       return onSnapshot(collection(db, 'professionals', uid, 'seats'), { includeMetadataChanges: true }, snapshot => {
         // Do not present a cached list as a confirmed professional relationship.
-        if (snapshot.metadata.fromCache) return;
+        if (snapshot.metadata.fromCache) { if (confirmed) onError(); return; }
+        confirmed = true;
         onData(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ProfessionalSeat)).sort((a, b) => b.createdAt - a.createdAt));
       }, onError);
     },

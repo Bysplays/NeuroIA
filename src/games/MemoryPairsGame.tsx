@@ -62,7 +62,7 @@ const ALL_MEMORY_OBJECTS = [
   { pairKey: 'toalla', emoji: '🧴', label: 'Jabón' },
 ];
 
-function createDeck(): CardItem[] {
+function createDeck(pairs: number): CardItem[] {
   // Generar 3 pares (6 cartas) barajadas
   const deck: CardItem[] = [];
   let idCounter = 1;
@@ -70,7 +70,7 @@ function createDeck(): CardItem[] {
   // Seleccionar 3 objetos al azar del banco de 30 objetos cotidianos
   const selectedObjects = [...ALL_MEMORY_OBJECTS]
     .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
+    .slice(0, pairs);
 
   selectedObjects.forEach(obj => {
     deck.push({
@@ -101,10 +101,11 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
-  const [cards, setCards] = useState<CardItem[]>(createDeck);
+  const { clock, config } = useGameSession();
+  const [cards, setCards] = useState<CardItem[]>(() => createDeck(config.pairs));
   const [selectedCards, setSelectedCards] = useState<number[]>([]); // índices de las cartas volteadas
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
   const [startTime, setStartTime] = useState<number>(clock.now());
@@ -113,7 +114,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
   // Fase de memorización inicial (4 segundos)
   const [isPreviewPhase, setIsPreviewPhase] = useState(true);
-  const [previewCountdown, setPreviewCountdown] = useState(4);
+  const [previewCountdown, setPreviewCountdown] = useState(config.previewSeconds);
   const countdownTimerRef = useRef<number | null>(null);
 
   const endPreview = useCallback(() => {
@@ -125,14 +126,13 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     setCards(prev => prev.map(c => ({ ...c, isFlipped: false })));
     soundService.playGentlePrompt();
     soundService.speak('¡Encuentra las parejas!');
-    setStartTime(clock.now());
   }, [clock]);
 
   const [previewVersion, setPreviewVersion] = useState(0);
   const mismatchTimerRef = useRef<number | undefined>(undefined);
   useEffect(() => {
     soundService.speak('Memoriza dónde está cada pareja');
-    let remaining = 4;
+    let remaining = config.previewSeconds;
     const timer = clock.setInterval(() => {
       remaining -= 1;
       setPreviewCountdown(remaining);
@@ -143,10 +143,12 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       clock.clearInterval(timer);
       clock.clearTimeout(mismatchTimerRef.current);
     };
-  }, [clock, endPreview, previewVersion]);
+  }, [clock, endPreview, previewVersion, config.previewSeconds]);
 
   const initGame = () => {
-    const shuffled = createDeck();
+    setStartTime(clock.now());
+    setHintsUsed(0);
+    const shuffled = createDeck(config.pairs);
     setCards(shuffled);
     setSelectedCards([]);
     setIsEvaluating(false);
@@ -155,7 +157,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     setIsCompleted(false);
     setResult(null);
     setIsPreviewPhase(true);
-    setPreviewCountdown(4);
+    setPreviewCountdown(config.previewSeconds);
     setPreviewVersion(version => version + 1);
   };
 
@@ -220,18 +222,22 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   const handleGameFinish = (finalAttempts: number, mistakes: MistakeDetail[]) => {
     const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
     // Precisión basada en intentos óptimos (3 intentos perfectos)
-    const accuracy = Math.min(100, Math.max(65, Math.round((3 / Math.max(3, finalAttempts)) * 100)));
+    const accuracy = Math.min(100, Math.max(0, Math.round((config.pairs / Math.max(config.pairs, finalAttempts)) * 100)));
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + clock.now(),
+      id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      hintsUsed,
+      practice: config.mode !== 'normal',
       exerciseId: 'memory-pairs',
       domain: 'memory',
       date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
       accuracy,
-      score: 300 + Math.max(0, 200 - (finalAttempts - 3) * 30),
-      correctAnswers: 3,
-      totalQuestions: 3,
+      score: 300 + Math.max(0, 200 - (finalAttempts - config.pairs) * 30),
+      correctAnswers: config.pairs,
+      totalQuestions: finalAttempts,
       feedbackMessage:
         accuracy >= 80
           ? '¡Buen trabajo! Has encontrado las parejas con precisión.'
@@ -289,12 +295,20 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
             </div>
           ) : (
             <div className="pairs-status-bar animate-fade-in">
-              <span className="pairs-stat-pill">Parejas encontradas: <strong>{matchedCount} de 3</strong></span>
+              <span className="pairs-stat-pill">Parejas encontradas: <strong>{matchedCount} de {config.pairs}</strong></span>
               <span className="pairs-stat-pill">Intentos: <strong>{attempts}</strong></span>
+              <button className="paper-nav-button" onClick={() => {
+                clock.clearTimeout(mismatchTimerRef.current);
+                setSelectedCards([]); setIsEvaluating(false);
+                setHintsUsed(value => value + 1);
+                setCards(previous => previous.map(card => ({ ...card, isFlipped: true })));
+                setIsPreviewPhase(true); setPreviewCountdown(config.previewSeconds);
+                setPreviewVersion(value => value + 1);
+              }}>Volver a ver las cartas</button>
             </div>
           )}
 
-          <div className="pairs-grid">
+          <div className={`pairs-grid${config.pairs > 3 ? ' pairs-grid-expanded' : ''}`}>
             {cards.map((card, idx) => (
               <button
                 key={card.id}

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {database, redeemSeat, leaveSeat, syncSeatSubscription} from './index.mjs';
+import {database, confirmedAccess, redeemSeat, leaveSeat, syncSeatSubscription} from './index.mjs';
 
 test('real REST transactions retry conflicts and preserve unrelated document fields in demo emulator',async()=>{
  const nativeFetch=globalThis.fetch;
@@ -39,7 +39,9 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  await syncSeatSubscription(professional, seatId, 'sub_rest', {}, db, async () => ({ id: 'sub_rest', metadata: { uid: professional, kind: 'seat', seatId, attempt: 'rest-attempt' }, customer: 'cus_rest', status: 'active', latest_invoice: { status: 'paid' }, items: { data: [{ quantity: 1, price: { id: 'price_seat' }, current_period_end: 2000000000 }] } }));
  const access = await db.runTransaction(tx => tx.get(`users/${seat.occupantUid}/access/main`));
  assert.equal(access.expiresAt, 2000000000000);
+ assert.equal((await confirmedAccess(seat.occupantUid, db)).active, true);
  await leaveSeat(seat.occupantUid, db);
+ assert.equal((await confirmedAccess(seat.occupantUid, db)).active, false);
  const afterLeave = await db.runTransaction(tx => tx.getMany([seatPath, `users/${seat.occupantUid}/access/main`, `professionals/${professional}/patients/${seat.occupantUid}`]));
  assert.equal(afterLeave[0].occupantUid, null); assert.equal(afterLeave[1].kind, 'revoked'); assert.equal(afterLeave[2], null);
  await assert.rejects(redeemSeat(people[1], { code }, db));

@@ -20,8 +20,8 @@ voice provider or new illustration set has been selected by this planning work.
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Existing paper atlases | Approved style sample and verified one-to-one stimulus mappings |
-| 9 / LEVELS | Difficulty 1–10 | Legacy domain levels 1–3; games do not consume a shared difficulty configuration | Versioned per-game parameters, saved difficulty and bounded adaptation |
-| 10 / PLACEMENT | Guided initial level assessment | Access onboarding exists; placement does not | New/unassessed accounts complete resumable guided trials before ordinary play |
+| 9 / LEVELS | Difficulty 1–10 | Versioned 1–10 configuration for all games, saved level and three-session adaptation | User calibration and physical-device checks; tracking stays manual |
+| 10 / PLACEMENT | Guided initial level assessment | Resumable eight-game placement before ordinary play, separate from access onboarding | Physical-device checks, explicit reassessment |
 | 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
 
 ### Current implementation sequence
@@ -43,10 +43,13 @@ Frontend publication and real email-delivery checks remain open below. The produ
 
 - [ ] Complete the deployment and sandbox checklist below for both unused and
   occupied seats; test expiry while the app is already open, sleep/resume and offline recovery.
-- [ ] Replace client-clock entitlement decisions with an authoritative validity
-  contract. `firestoreAccess.load()` currently labels `Date.now()` as `serverNow`;
-  `AccessGate` preserves previously active access after refresh errors. Define a
-  bounded verified-access lifetime so stale state cannot grant indefinite play.
+- [x] Implement authoritative Worker access checks with server time, reciprocal
+  seat validation and a 60-second maximum lease; failed refresh/offline/resume
+  closes play until confirmed. Professional codes/activity use confirmed time.
+- [x] Deploy Worker `/access`, `/professional/status` and the per-seat portal flow;
+  verify health, localhost CORS and unauthenticated/unsigned-request rejection.
+- [ ] Configure period-end cancellation in the Stripe portal and finish the
+  authenticated sandbox purchase, redemption and cancellation checklist.
 - [ ] Preserve CEOABERTO as the explicitly documented permanent exception unless
   the owner separately changes that contract; paid `NIA-` codes are never permanent.
 
@@ -81,13 +84,18 @@ Frontend publication and real email-delivery checks remain open below. The produ
 
 ### Difficulty, placement and game retirement
 
-- [ ] Define ten bounded configurations for each of the eight retained games.
-- [ ] Add versioned placement/level state; existing `domainProgress.level = 1`
+- [x] Define ten bounded configurations for each of the eight retained games.
+- [x] Add versioned placement/level state; existing `domainProgress.level = 1`
   is a default, not evidence that placement has been completed.
-- [ ] Build short guided trials with the existing companions, pause/help,
+- [x] Build short guided trials with the existing companions, pause/help,
   accessible instructions and resumable progress. Respect hidden companions.
-- [ ] Persist the actual level/configuration used per result; adapt between
-  exercises from sufficient recent evidence, with easier play and reassessment.
+- [x] Persist actual level/configuration and hint usage per result; adapt between
+  exercises using three-session windows and allow manual level selection.
+- [ ] Validate level pacing and vocabulary ordering with users on physical tablets;
+  review memory preview visibility in short landscape viewports.
+- [ ] Add explicit reassessment; calibrate moving-target adaptation separately.
+- [x] Publish the placement/difficulty Firestore rules; the local frontend can save
+  trials and levels. Frontend publication remains separate.
 - [x] Remove daily action sequencing from catalog, dispatch and daily plans;
   keep memory beacon sequencing. Preserve `daily-seq` / `daily-sequencing`
   history, achievements and cumulative totals.

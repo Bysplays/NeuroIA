@@ -340,11 +340,12 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
+  const { clock, config } = useGameSession();
   // Preguntas seleccionadas al azar para esta sesión
-  const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>(() => [...VOCABULARY_BANK].sort(() => Math.random() - 0.5).slice(0, 5));
+  const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>(() => [...VOCABULARY_BANK.slice(0, config.vocabularySize)].sort(() => Math.random() - 0.5).slice(0, config.rounds));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const [hintType, setHintType] = useState<'none' | 'semantic' | 'phonetic'>('none');
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -355,8 +356,9 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
   const initQuestions = () => {
     setStartTime(clock.now());
-    const shuffled = [...VOCABULARY_BANK].sort(() => Math.random() - 0.5);
-    setSessionQuestions(shuffled.slice(0, 5));
+    setHintsUsed(0);
+    const shuffled = [...VOCABULARY_BANK.slice(0, config.vocabularySize)].sort(() => Math.random() - 0.5);
+    setSessionQuestions(shuffled.slice(0, config.rounds));
     setCurrentIdx(0);
     setSelectedOption(null);
     setHintType('none');
@@ -371,7 +373,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
   const currentQ = sessionQuestions[currentIdx];
 
-  const distractors = currentQ.distractorsGentle;
+  const distractors = (config.level <= 3 ? currentQ.distractorsGentle : config.level <= 6 ? currentQ.distractorsModerate : currentQ.distractorsChallenge).slice(0, config.choices - 1);
   const currentOptions = [currentQ.word, ...distractors].sort();
 
   const handleSelectOption = (option: string) => {
@@ -402,10 +404,12 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   };
 
   const handleHearWord = () => {
+    setHintsUsed(value => value + 1);
     soundService.speak(currentQ.word);
   };
 
   const handleGiveHint = () => {
+    setHintsUsed(value => value + 1);
     soundService.playGentlePrompt();
     if (hintType === 'none') {
       setHintType('semantic');
@@ -429,7 +433,11 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
       const accuracy = Math.min(100, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + clock.now(),
+        id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      hintsUsed,
+      practice: config.mode !== 'normal',
         exerciseId: 'language-naming',
         domain: 'language',
         date: new Date().toISOString(),

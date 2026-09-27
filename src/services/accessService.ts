@@ -5,6 +5,7 @@ import { auth } from './firebase';
 export interface AccountAccess {
   active: boolean;
   serverNow: number;
+  validForMs?: number;
   checkoutAvailable: boolean;
   pendingCheckout?: boolean;
   canManageSubscription?: boolean;
@@ -22,7 +23,7 @@ export const billingEnabled = Boolean(billingUrl) && import.meta.env.VITE_STRIPE
 export async function billingRequest<T = { url: string }>(path: string, body?: object): Promise<T> {
   if (!billingUrl || !auth.currentUser) throw new Error('billing-unavailable');
   const response = await fetch(`${billingUrl}${path}`, {
-    method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
+    method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
   const result = await response.json();
@@ -36,20 +37,19 @@ function accountAccess() {
 }
 export const accessService = {
   async load(): Promise<AccountAccess> {
-    const access = await accountAccess().load();
-    const enabled = billingEnabled;
-    if (!enabled) return { ...access, checkoutAvailable: false, canManageSubscription: false };
-    try {
-      const billing = await billingRequest<{ pendingCheckout: boolean; canManageSubscription: boolean }>('/status');
-      return { ...access, ...billing, checkoutAvailable: true };
-    } catch {
-      // A billing outage must never remove already-confirmed Firestore access.
-      return { ...access, checkoutAvailable: false, canManageSubscription: false };
-    }
+    const started = performance.now();
+    const access = await billingRequest<AccountAccess>('/access');
+    const elapsed = performance.now() - started;
+    const lifetime = Math.min(access.validForMs ?? 0, 60000) - elapsed;
+    if (!Number.isFinite(access.serverNow) || !Number.isFinite(lifetime) || lifetime <= 0) throw new Error('access-confirmation-expired');
+    const serverNow = access.serverNow + elapsed;
+    return { ...access, serverNow, active: access.active && (access.expiresAt == null || access.expiresAt > serverNow),
+      validForMs: lifetime,
+      checkoutAvailable: billingEnabled, canManageSubscription: billingEnabled && access.canManageSubscription };
   },
   async trial() { await accountAccess().trial(); },
   async invite(code: string) {
-    if (/^NIA-[A-F0-9]{32}$/.test(code.trim().toUpperCase())) {
+    if (/^NIA-(?:[A-Z2-9]{4}-[A-Z2-9]{2}|[A-F0-9]{32})$/.test(code.trim().toUpperCase())) {
       try { await billingRequest('/redeem-seat', { code, name: auth.currentUser?.displayName || 'Persona invitada' }); }
       catch (error) { throw Object.assign(error instanceof Error ? error : new Error('No hemos podido usar la invitación.'), { code: 'invitation/seat' }); }
     } else await accountAccess().invite(code);

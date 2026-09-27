@@ -36,7 +36,14 @@ charge. Unknown attempts older than 23 hours require operator reconciliation.
 - `professionalBilling/{uid}`: server-only Stripe customer and pending seat ID;
   separate from personal billing so buying a seat never changes personal access.
 - `seatInvitations/{code}`: server-only mapping to professional and seat. Codes
-  have a `NIA-` prefix and a random UUID payload, and cannot be enumerated by clients.
+  use `NIA-XXXX-XX`, with six cryptographically random characters from
+  `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`. Codes are reserved atomically at purchase
+  creation, including pending purchases; collisions retry and old mappings remain
+  reserved after rotation. Pending mappings never grant access. Previously issued
+  `NIA-` plus 32 hexadecimal characters remain accepted. Clients cannot enumerate codes.
+- `seatRedemptions/{uid}`: server-only fixed-window attempt counter (ten attempts
+  per minute per verified account, including failed lookups). One overwritten record
+  per account; no automatic pruning.
 - `professionals/{uid}/patients/{participantUid}`: server-only reciprocal link
   with participant UID, seat ID and link time.
 - `users/{participantUid}/access/main`: sponsored invitation with professional ID,
@@ -72,13 +79,36 @@ payment recovery but blocks games and professional reads until active again.
 administrator-owned profile. It does not automatically grant this new workspace
 access to its historical participants. Do not claim its ownership from the client.
 
+## Continuous access checks
+
+The configured Worker API is required for player entry, independently of the purchase
+feature flag. `/access` returns server time, the effective expiry and a maximum
+60-second confirmation. The frontend subtracts request elapsed time, checks every
+30 seconds, and closes play on failure, offline notification, lease expiry or
+unconfirmed resume. Unknown access shows retry/logout, not a purchase decision.
+Saved pending results remain in the existing account outbox.
+
+The professional panel uses server time plus monotonic elapsed time (and a wall-clock
+forward jump to detect sleep) to hide expired codes and activity. Failed confirmations
+or a server-confirmed Firestore list falling back to cache remove access to those
+actions until renewed. Firestore rules remain the authorization boundary for linked
+reads; redemption always checks paid expiry in the Worker, including unused codes.
+A cancellation scheduled at period end shows “No se renovará” and “Reactivar
+suscripción” while paid access lasts. Reactivation opens the professional customer
+portal; the owner selects the subscription and confirms renewal there. Personal
+subscription settings offer the same action through the separate personal portal.
+The app never flips renewal locally or claims success from a portal return.
+
 ## Billing lifecycle
 
 The standalone Cloudflare Worker adds authenticated POST routes:
 
 - `/professional/checkout` with `{seatId}`.
 - `/professional/cancel-checkout` for the owner's pending purchase.
-- `/professional/portal` for the professional Stripe customer.
+- `/professional/portal` for the professional Stripe customer; optional `{seatId}`
+  opens Stripe’s cancellation confirmation for that owner’s stored subscription.
+- `/professional/status` confirms the owner and provides server time with a 60-second lease.
+- `/access` confirms player entitlement, reciprocal seat occupancy and expiry.
 - `/redeem-seat` with `{code, name}` and `/leave-seat` for the signed-in participant.
 
 Stripe subscription metadata carries `kind: seat`, owner UID, seat UUID and the
@@ -94,7 +124,8 @@ Duplicate/out-of-order events do not create extra codes or relink departed peopl
 frontend does not invent a price: Checkout displays the configured amount.
 Keep the existing billing feature flag and API URL. The professional panel remains
 accessible if billing is disabled; its purchase action is unavailable. Enable
-cancellation in the Stripe customer portal. Do not enable quantity/price changes
+cancellation at period end in the Stripe customer portal. The per-seat action opens
+Stripe confirmation; it does not cancel directly or change access on return. Do not enable quantity/price changes
 for seats: a changed price/quantity deliberately fails entitlement validation.
 
 ## Deployment and verification

@@ -171,3 +171,21 @@ test('invalid custom names cannot enter the durable queue', () => {
   for (const name of ['   ', 'x'.repeat(201)]) assert.throws(() => sync.enqueue({ id: name, kind: 'settings', settings: {}, name }), /invalid-profile-name/);
   assert.equal(persisted, false); assert.equal(sync.hasPendingWork, false);
 });
+
+test('placement evidence survives offline restart and conflicting device trials keep the first commit', async () => {
+  const remote = backend(); remote.offline(true);
+  let stored: ProgressOperation[] = [];
+  const operation: ProgressOperation = { id:'placement-offline', kind:'placement', exerciseId:'memory-path', trial:{ accuracy:100, questions:3, hints:0, skipped:false } };
+  const first = new ProgressSync(initial(), [], remote.api, queue => { stored = structuredClone(queue); }, () => {});
+  first.enqueue(operation); await settle(); first.stop();
+  assert.equal(stored.length, 1);
+  remote.offline(false);
+  const resumed = new ProgressSync(remote.data(), stored, remote.api, queue => { stored = queue; }, () => {});
+  resumed.start(); await settle();
+  await remote.api.commit({ ...operation, id:'other-device', trial:{ accuracy:0, questions:0, hints:0, skipped:true } });
+  assert.equal(remote.data().profile.placement?.trials['memory-path']?.accuracy, 100);
+  assert.equal(remote.data().profile.placement?.completed, false);
+  assert.equal(remote.data().profile.totalSessions, 0);
+  assert.equal(stored.length, 0);
+  resumed.stop();
+});

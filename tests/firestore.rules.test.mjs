@@ -268,3 +268,32 @@ test('a subscribed player can also register a professional profile without chang
     assert.equal((await getDoc(doc(context.firestore(), 'professionalBilling/' + uid))).exists(), false);
   });
 });
+
+test('placement is durable, atomic with levels, isolated and does not create exercise history', async () => {
+  const uid = 'placement-owner';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  await backend.initialize(fresh());
+  const ids = ['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
+  const trial = { accuracy: 90, questions: 3, hints: 0, skipped: false };
+  const first = { id:'placement:1:visual-scanning', kind:'placement', exerciseId:ids[0], trial };
+  await backend.commit(first);
+  await backend.commit(first);
+  for (const id of ids.slice(1)) await backend.commit({ ...first, id:`placement:1:${id}`, exerciseId:id });
+  const saved = await backend.load();
+  assert.equal(saved.profile.placement.completed, true);
+  assert.equal(saved.profile.gameLevels['memory-path'].level, 4);
+  assert.equal(saved.profile.totalSessions, 0);
+  assert.deepEqual(saved.history, []);
+  await assertFails(getDoc(doc(env.authenticatedContext('other-placement').firestore(), `users/${uid}/progress/main`)));
+  const invalid = structuredClone(saved); invalid.profile.gameLevels['memory-path'].level = 11;
+  await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), { schemaVersion:1, data:invalid, updatedAt:serverTimestamp() }));
+  await assertSucceeds(backend.commit({ ...op('leveled'), result:{ ...op('leveled').result, level:4, configVersion:1, hintsUsed:0, practice:false } }));
+  await assertFails(backend.commit({ ...op('invalid-level'), result:{ ...op('invalid-level').result, level:0, configVersion:1 } }));
+  for (let i = 0; i < 3; i++) {
+    const operation = op(`adapt-${i}`);
+    await assertSucceeds(backend.commit({ ...operation, result: { ...operation.result, level:4, configVersion:1, practice:false, correctAnswers:3, totalQuestions:3 } }));
+  }
+  assert.equal((await backend.load()).profile.gameLevels['visual-scanning'].level, 5);
+
+});

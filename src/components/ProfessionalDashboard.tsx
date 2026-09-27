@@ -36,17 +36,51 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
-  const [now, setNow] = useState(Date.now);
+  const [now, setNow] = useState<number | null>(null);
+  const [clockError, setClockError] = useState(false);
   const [checkoutReturn, setCheckoutReturn] = useState(() => new URLSearchParams(location.search).get('seatCheckout'));
   const locked = useRef(false);
   const alive = useRef(true);
   useEffect(() => {
     alive.current = true;
     const unsubscribe = adapter.subscribeSeats(values => { setSeats(values); setLoadError(false); }, () => { setSeats(null); setLoadError(true); });
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => { alive.current = false; unsubscribe(); clearInterval(timer); };
+    let current = true;
+    let request = 0;
+    let anchor: { server: number; monotonic: number; wall: number; lifetime: number } | null = null;
+    const tick = () => {
+      if (!anchor) return;
+      const elapsed = Math.max(performance.now() - anchor.monotonic, Date.now() - anchor.wall);
+      if (elapsed >= anchor.lifetime) { anchor = null; setNow(null); setClockError(true); }
+      else setNow(anchor.server + elapsed);
+    };
+    const confirmTime = async () => {
+      const version = ++request;
+      const started = performance.now();
+      try {
+        const value = await billingRequest<{ serverNow: number; validForMs: number }>('/professional/status');
+        const elapsed = performance.now() - started;
+        if (!current || version !== request) return;
+        if (!Number.isFinite(value.serverNow) || !Number.isFinite(value.validForMs) || value.validForMs <= elapsed) throw new Error('expired-confirmation');
+        anchor = { server: value.serverNow + elapsed, monotonic: performance.now(), wall: Date.now(), lifetime: Math.min(60000, value.validForMs) - elapsed };
+        setClockError(false); tick();
+      } catch { if (current && version === request) { anchor = null; setNow(null); setClockError(true); } }
+    };
+    const invalidate = () => { request++; anchor = null; setNow(null); setClockError(true); };
+    const resume = () => { invalidate(); void confirmTime(); };
+    const visible = () => { if (document.visibilityState === 'visible') resume(); };
+    void confirmTime();
+    const timer = window.setInterval(tick, 1000);
+    const refresh = window.setInterval(() => { void confirmTime(); }, 30000);
+    window.addEventListener('offline', invalidate);
+    window.addEventListener('online', resume);
+    window.addEventListener('focus', resume);
+    document.addEventListener('visibilitychange', visible);
+    return () => {
+      current = false; alive.current = false; unsubscribe(); clearInterval(timer); clearInterval(refresh);
+      window.removeEventListener('offline', invalidate); window.removeEventListener('online', resume); window.removeEventListener('focus', resume); document.removeEventListener('visibilitychange', visible);
+    };
   }, [adapter, retry]);
-  const active = (seat: ProfessionalSeat) => seat.status === 'active' && seat.expiresAt > now;
+  const active = (seat: ProfessionalSeat) => now !== null && seat.status === 'active' && seat.expiresAt > now;
   const pending = seats?.find(seat => seat.status === 'pending');
   const people = seats?.filter(seat => seat.occupantUid) || [];
   const currentSeat = seats?.find(seat => seat.occupantUid === selected && seat.occupantUid && active(seat));
@@ -80,16 +114,19 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
     {currentSeat ? <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main className="professional-panel">
       <div className="professional-heading"><h1>Espacio profesional</h1>
       </div>
-      {checkoutReturn && <div className="professional-notice" role="status"><p>{checkoutReturn === 'cancelled' ? 'La compra no se ha completado. Puedes retomarla o cancelarla.' : 'El código estará disponible en «Tus asientos» cuando se confirme el pago.'}</p><button className="stats-quiet-button" onClick={clearReturn}>Cerrar aviso</button></div>}
+      {checkoutReturn && <div className="professional-notice" role="status"><p>{checkoutReturn === 'managed' ? 'Los cambios de tu suscripción aparecerán cuando se confirmen.' : checkoutReturn === 'cancelled' ? 'La compra no se ha completado. Puedes retomarla o cancelarla.' : 'El código estará disponible en «Tus asientos» cuando se confirme el pago.'}</p><button className="stats-quiet-button" onClick={clearReturn}>Cerrar aviso</button></div>}
+      {clockError && <div className="professional-notice" role="alert"><p>No hemos podido comprobar la validez de los asientos. Los códigos y la actividad estarán disponibles al recuperar la conexión.</p><button className="stats-quiet-button" onClick={() => setRetry(value => value + 1)}>Reintentar</button></div>}
       {error && <p className="professional-notice" role="alert">{error}</p>}
       {!billingEnabled && <p className="entry-note">La compra de asientos todavía no está disponible.</p>}
       {loadError ? <div className="professional-notice" role="alert"><p>No hemos podido cargar tus asientos.</p><button className="stats-quiet-button" onClick={() => { setLoadError(false); setRetry(value => value + 1); }}>Reintentar</button></div> : !seats ? <p role="status">Cargando tu panel…</p> : <>
         <section className="stats-card professional-people" aria-labelledby="professional-people-title"><h2 id="professional-people-title">Personas vinculadas <span className="stats-count">{people.length}</span></h2>
-          {!people.length ? <div className="professional-empty"><Users size={36} aria-hidden="true"/><h3>Aún no hay personas vinculadas</h3><p>Compra un asiento y comparte su código. Cuando una persona lo use, podrás consultar aquí su actividad.</p></div> : <ul className="professional-person-list">{people.map(seat => <li key={seat.id}><div><h3>{seat.patientName || 'Persona invitada'}</h3><p>{active(seat) ? 'Invitación activa' : 'Asiento sin acceso activo'}</p></div><button className="stats-quiet-button" disabled={!active(seat)} onClick={() => { setSelected(seat.occupantUid); window.scrollTo(0, 0); }}>Ver actividad</button></li>)}</ul>}
+          {!people.length ? <div className="professional-empty"><Users size={36} aria-hidden="true"/><h3>Aún no hay personas vinculadas</h3><p>Compra un asiento y comparte su código. Cuando una persona lo use, podrás consultar aquí su actividad.</p></div> : <ul className="professional-person-list">{people.map(seat => <li key={seat.id}><div><h3>{seat.patientName || 'Persona invitada'}</h3><p>{now === null ? 'Comprobando acceso…' : active(seat) ? 'Invitación activa' : 'Asiento sin acceso activo'}</p></div><button className="stats-quiet-button" disabled={!active(seat)} onClick={() => { setSelected(seat.occupantUid); window.scrollTo(0, 0); }}>Ver actividad</button></li>)}</ul>}
         </section>
         <section className="stats-card professional-seats" aria-labelledby="professional-seats-title"><div className="stats-section-heading"><div><h2 id="professional-seats-title">Tus asientos</h2></div>{seats.some(seat => seat.subscriptionId) && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(() => redirect('/professional/portal'))}>Gestionar suscripciones</button>}</div>
-          {!seats.length ? <p>Todavía no has comprado asientos.</p> : <ul className="professional-seat-list">{seats.map((seat, index) => <li key={seat.id}><div className="professional-seat-details"><h3>Asiento {seats.length - index}</h3><p>{seat.status === 'pending' ? 'Pago pendiente' : seat.status === 'cancelled' ? 'Compra cancelada' : active(seat) ? seat.occupantUid ? `Asignado a ${seat.patientName || 'una persona'}` : 'Disponible para invitar' : 'Suscripción inactiva'}</p>{seat.expiresAt > 0 && <p>Hasta el {new Date(seat.expiresAt).toLocaleDateString('es-ES')}{seat.autoRenew && '. Renovación automática'}</p>}</div>
+          {!seats.length ? <p>Todavía no has comprado asientos.</p> : <ul className="professional-seat-list">{seats.map((seat, index) => <li key={seat.id}><div className="professional-seat-details"><h3>Asiento {seats.length - index}</h3><p>{seat.status === 'pending' ? 'Pago pendiente' : seat.status === 'cancelled' ? 'Compra cancelada' : now === null ? 'Comprobando acceso…' : active(seat) ? seat.occupantUid ? `Asignado a ${seat.patientName || 'una persona'}` : 'Disponible para invitar' : 'Suscripción inactiva'}</p>{seat.expiresAt > 0 && <p>Hasta el {new Date(seat.expiresAt).toLocaleDateString('es-ES')}{seat.autoRenew ? '. Renovación automática' : active(seat) && seat.autoRenew === false ? '. No se renovará' : ''}</p>}</div>
             {active(seat) && !seat.occupantUid && <div className="professional-code"><label htmlFor={`seat-${seat.id}`}>Código de invitación</label><div><input id={`seat-${seat.id}`} value={seat.invitationCode} readOnly onFocus={event => event.target.select()}/><button className="stats-quiet-button" disabled={busy} onClick={() => copy(seat)} aria-label={`Copiar código del asiento ${seats.length - index}`}><Copy size={18}/>{copied === seat.id ? 'Copiado' : 'Copiar'}</button></div></div>}
+            {seat.subscriptionId && seat.autoRenew === false && active(seat) && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(() => redirect('/professional/portal'))}>Reactivar suscripción</button>}
+            {seat.subscriptionId && seat.autoRenew === true && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(() => redirect('/professional/portal', { seatId: seat.id }))}>Cancelar suscripción</button>}
             {seat.status === 'pending' && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(async () => { await billingRequest('/professional/cancel-checkout'); if (alive.current) clearReturn(); })}>Cancelar compra pendiente</button>}
           </li>)}</ul>}
         </section>
