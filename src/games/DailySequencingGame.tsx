@@ -1,6 +1,6 @@
-import { useGameSession } from '../components/GameSession';
+import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ArrowRight, RotateCcw, Check } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -244,10 +244,10 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
   onNextPlanExercise,
 }) => {
   const { clock } = useGameSession();
-  const [sessionScenarios, setSessionScenarios] = useState<Scenario[]>([]);
+  const [sessionScenarios, setSessionScenarios] = useState<Scenario[]>(() => [...ALL_SCENARIOS].sort(() => Math.random() - 0.5).slice(0, 3));
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [selectedStepIds, setSelectedStepIds] = useState<number[]>([]);
-  const [availableSteps, setAvailableSteps] = useState<Step[]>([]);
+  const [availableSteps, setAvailableSteps] = useState<Step[]>(() => [...sessionScenarios[0].stepsGentle].sort(() => Math.random() - 0.5));
   const [feedback, setFeedback] = useState<string>('Toca los pasos en el orden en que se realizan (1º, 2º y 3º).');
   const [isRoundEvaluated, setIsRoundEvaluated] = useState(false);
   const [isRoundCorrect, setIsRoundCorrect] = useState(false);
@@ -276,10 +276,6 @@ export const DailySequencingGame: React.FC<DailySequencingGameProps> = ({
     setAvailableSteps([...steps].sort(() => Math.random() - 0.5));
     setFeedback('Toca los pasos en el orden en que se realizan (1º, 2º y 3º).');
   };
-
-  useEffect(() => {
-    initGame();
-  }, []);
 
   if (sessionScenarios.length === 0) return null;
 

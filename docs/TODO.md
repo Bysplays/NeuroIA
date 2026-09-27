@@ -81,8 +81,9 @@ voice provider or new illustration set has been selected by this planning work.
 
 ## Engineering and release gates
 
-- [ ] Resolve 28 existing Oxlint warnings before merge, as required by
-  `CONTRIBUTING.md`; do not suppress them merely to obtain a green check.
+- [x] Resolve the 28 Oxlint warnings without disabling rules: lazy game
+  initialization, event-driven resets, immutable card updates, timer cleanup and
+  session hook separation. Keep the strict zero-warning merge check.
 - [x] Reconcile CONTRIBUTING's missing `check*` scripts and its Biome/Knip
   references with actual npm/TypeScript/Oxlint commands; retain the zero-warning
   merge gate and explicit merge authorization.

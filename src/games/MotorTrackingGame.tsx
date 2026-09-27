@@ -1,5 +1,5 @@
-import { useGameSession } from '../components/GameSession';
-import React, { useState, useEffect, useRef } from 'react';
+import { useGameSession } from '../services/gameSession';
+import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
 import { PaperTarget } from '../components/PaperTarget';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
@@ -40,7 +40,6 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
   const startTimeRef = useRef<number>(clock.now());
-  const animationFrameRef = useRef<number | null>(null);
   const isTouchingRef = useRef(false);
 
   // Iniciar / reiniciar juego
@@ -54,74 +53,6 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     startTimeRef.current = clock.now();
     isTouchingRef.current = false;
   };
-
-  useEffect(() => {
-    initGame();
-  }, []);
-
-  // Bucle de animación física suave del objetivo móvil
-  useEffect(() => {
-    if (isCompleted) return;
-
-    let lastTimestamp = clock.performanceNow();
-
-    const updatePhysics = (timestamp: number) => {
-      const deltaMs = timestamp - lastTimestamp;
-      lastTimestamp = timestamp;
-
-      setTargetPos(prev => {
-        let newX = prev.x + velocity.vx * (deltaMs / 16);
-        let newY = prev.y + velocity.vy * (deltaMs / 16);
-        let newVx = velocity.vx;
-        let newVy = velocity.vy;
-
-        const arena = arenaRef.current?.getBoundingClientRect();
-        const marginX = Math.min(50, Math.max(14, (TARGET_SIZE / 2 + 8) / (arena?.width || 600) * 100));
-        const marginY = Math.min(50, Math.max(14, (TARGET_SIZE / 2 + 8) / (arena?.height || 400) * 100));
-
-        // Keep the whole paper token visible, including on narrow screens.
-        if (newX < marginX) {
-          newX = marginX;
-          newVx = Math.abs(newVx);
-        } else if (newX > 100 - marginX) {
-          newX = 100 - marginX;
-          newVx = -Math.abs(newVx);
-        }
-
-        if (newY < marginY) {
-          newY = marginY;
-          newVy = Math.abs(newVy);
-        } else if (newY > 100 - marginY) {
-          newY = 100 - marginY;
-          newVy = -Math.abs(newVy);
-        }
-
-        setVelocity({ vx: newVx, vy: newVy });
-        return { x: newX, y: newY };
-      });
-
-      // Si está tocando, sumar tiempo de contacto
-      if (isTouchingRef.current) {
-        setContactTime(prev => {
-          const next = prev + deltaMs / 1000;
-          if (next >= REQUIRED_CONTACT_SECONDS) {
-            handleCompleteGame();
-          }
-          return next;
-        });
-      }
-
-      animationFrameRef.current = clock.requestAnimationFrame(updatePhysics);
-    };
-
-    animationFrameRef.current = clock.requestAnimationFrame(updatePhysics);
-
-    return () => {
-      if (animationFrameRef.current) {
-        clock.cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [isCompleted, velocity]);
 
   const handlePointerDownTarget = (e: React.PointerEvent) => {
     e.preventDefault();
@@ -196,6 +127,46 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     setResult(gameResult);
     onSaveResult(gameResult);
   };
+
+  // Timer callbacks use committed state; state updaters never save results or
+  // schedule other state updates (React may replay an updater in StrictMode).
+  const advanceFrame = useEffectEvent((deltaMs: number) => {
+    let newX = targetPos.x + velocity.vx * (deltaMs / 16);
+    let newY = targetPos.y + velocity.vy * (deltaMs / 16);
+    let newVx = velocity.vx;
+    let newVy = velocity.vy;
+    const arena = arenaRef.current?.getBoundingClientRect();
+    const marginX = Math.min(50, Math.max(14, (TARGET_SIZE / 2 + 8) / (arena?.width || 600) * 100));
+    const marginY = Math.min(50, Math.max(14, (TARGET_SIZE / 2 + 8) / (arena?.height || 400) * 100));
+    if (newX < marginX) { newX = marginX; newVx = Math.abs(newVx); }
+    else if (newX > 100 - marginX) { newX = 100 - marginX; newVx = -Math.abs(newVx); }
+    if (newY < marginY) { newY = marginY; newVy = Math.abs(newVy); }
+    else if (newY > 100 - marginY) { newY = 100 - marginY; newVy = -Math.abs(newVy); }
+    setTargetPos({ x: newX, y: newY });
+    setVelocity({ vx: newVx, vy: newVy });
+    if (isTouchingRef.current) {
+      const next = contactTime + deltaMs / 1000;
+      setContactTime(next);
+      if (next >= REQUIRED_CONTACT_SECONDS) {
+        handleCompleteGame();
+        return false;
+      }
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    if (isCompleted) return;
+    let previous = clock.performanceNow();
+    let frame: number;
+    const tick = (timestamp: number) => {
+      const delta = timestamp - previous;
+      previous = timestamp;
+      if (advanceFrame(delta)) frame = clock.requestAnimationFrame(tick);
+    };
+    frame = clock.requestAnimationFrame(tick);
+    return () => clock.cancelAnimationFrame(frame);
+  }, [clock, isCompleted]);
 
   const progressPercent = Math.min(100, Math.round((contactTime / REQUIRED_CONTACT_SECONDS) * 100));
 

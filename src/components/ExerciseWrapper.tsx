@@ -1,4 +1,4 @@
-import { useGameSession } from './GameSession';
+import { useGameSession } from '../services/gameSession';
 import { HeaderIllustration } from './HeaderIllustration';
 import React, { useEffect } from 'react';
 import { RotateCcw, ArrowRight } from 'lucide-react';
@@ -41,7 +41,8 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   children,
 }) => {
   const session = useGameSession();
-  useEffect(() => { session.finish(isCompleted); }, [isCompleted, session.finish]);
+  const { finish } = session;
+  useEffect(() => { finish(isCompleted); }, [isCompleted, finish]);
   useEffect(() => {
     if (isCompleted) {
       window.scrollTo(0, 0);

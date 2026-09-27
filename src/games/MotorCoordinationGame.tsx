@@ -1,6 +1,6 @@
-import { useGameSession } from '../components/GameSession';
+import { useGameSession } from '../services/gameSession';
 import { PaperTarget } from '../components/PaperTarget';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -72,10 +72,6 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     setResult(null);
     setStartTime(clock.now());
   };
-
-  useEffect(() => {
-    initGame();
-  }, []);
 
   if (targets.length === 0) return null;
 

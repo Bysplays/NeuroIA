@@ -77,8 +77,8 @@ npm run test:firestore
 ```
 
 Firestore tests use only the `demo-neuroia` emulator and require Java 21+.
-The linter still reports known game warnings; see [AGENTS.md](AGENTS.md) for
-current tooling limitations and additional backend checks.
+Before merging, run `npm run lint -- --deny-warnings` and the complete checks in
+[CONTRIBUTING.md](CONTRIBUTING.md), including Worker REST transaction coverage.
 
 ## Deployment
 

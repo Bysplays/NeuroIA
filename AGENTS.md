@@ -67,6 +67,8 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
+| `src/services/gameSession.ts` | Shared session context and `useGameSession` hook, separate from component exports |
+| `src/services/memorySequence.ts` | Memory-round sequence generation, called only on round start |
 | `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and repeat |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
@@ -142,8 +144,8 @@ To verify a repository deployment locally, run
 aliases. CONTRIBUTING.md lists the actual required checks, including combined
 Firestore adapter/rules and Worker REST coverage. Focused unit tests require
 Node 22+; the demo Firestore emulator requires Java 21+ and Firebase CLI 15.30.1.
-No Biome/Knip formatter or dead-code check is configured. Existing game code has
-React-related lint warnings. `npm run lint` may exit zero with warnings; use
+No Biome/Knip formatter or dead-code check is configured. The current lint baseline
+has no warnings. `npm run lint` may exit zero with warnings; use
 `npm run lint -- --deny-warnings` for the zero-warning merge gate. Report actual
 results and keep unresolved warnings in docs/TODO.md. This is not an exemption
 from merge requirements.
@@ -248,8 +250,12 @@ Before finishing, check whether the next contributor could follow these files
 without relying on the conversation history. Do not add a chronological task log
 or promise an automated documentation monitor that does not exist.
 
-Games use `useGameSession().clock` for durations, timeouts, intervals and animation
-frames. Help pauses scheduled activity without discarding answers. GameSession
+Games import `useGameSession` from `src/services/gameSession.ts` and use its
+`clock` for durations, timeouts, intervals and animation frames. Initialize decks
+and question sets with lazy state, and reset answers in the next/restart handlers.
+State updater functions must remain pure: do not mutate existing card objects,
+schedule work or save results from an updater. Timer effects own their cleanup;
+frame callbacks read committed state and stop after a single completion. Help pauses scheduled activity without discarding answers. GameSession
 mounts games only after Start and is keyed by exercise and daily-plan position.
 Run `node --experimental-strip-types --test tests/gameClock.test.ts` to verify
 the clock, alongside the existing speech-voice tests.
