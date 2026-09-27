@@ -16,7 +16,7 @@ voice provider or new illustration set has been selected by this planning work.
 | 2 / SEATS | Monthly professional seats and code validity | Checkout, Worker, redemption and rules implemented; production lifecycle unverified | Unused and redeemed codes follow paid entitlement; expired access blocks games and linked reads |
 | 3 / AI | Browser-local report/note assistance | No runtime integration; professional view is read-only | Spanish evidence-linked drafts, human review, supported-device benchmark and non-AI fallback |
 | 4 / SESSIONS | Professional-assigned game sequences | No assignment service; legacy therapist fields are not a permission system | Named participant, ordered exercises, delivery, completion and strict owner/participant rules |
-| 5 / EMAIL | Email authentication | Email/password, verification, recovery and same-UID password setup implemented locally | Publish verified-email rules/Worker, enable Firebase provider and verify real email delivery |
+| 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Release frontend and verify real email delivery; magic links deferred because Spark allows five sign-in emails/day |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Existing paper atlases | Approved style sample and verified one-to-one stimulus mappings |
@@ -28,8 +28,8 @@ voice provider or new illustration set has been selected by this planning work.
 
 The first priority/ease steps are: 0 — mergeable baseline; 1 — retire daily
 actions; 2 — supplied logo; 3 — email/password entry. Steps 0–2 are complete.
-Step 3 is implemented and locally verified; its production activation remains
-open below. The product-priority table above is separate from this sequence.
+Step 3 is implemented and locally verified; backend/provider activation is complete.
+Frontend publication and real email-delivery checks remain open below. The product-priority table above is separate from this sequence.
 
 ### EEG
 
@@ -68,10 +68,12 @@ open below. The product-priority table above is separate from this sequence.
   verification and password recovery, retaining Google and both workspaces.
 - [x] Add a password to an authenticated Google account without changing its UID
   or history. Test credentials, verification, reset and server enforcement locally.
-- [ ] Publish the verified-email Firestore rules and Worker, then enable Firebase
-  Email/Password (keep Google). Verify hosted verification/reset emails, configured
+- [x] Publish the verified-email Firestore rules and Worker, then enable Firebase
+  Email/Password, keeping Google. Spark billing remains unchanged.
+- [ ] Release the frontend and verify hosted verification/reset emails, configured
   password policy, domain restrictions and real Google/password use on one UID.
-  CLI currently has no authorized account. See `docs/AUTHENTICATION.md`.
+  Magic links need an explicit quota solution before replacing passwords: Spark
+  permits five sign-in emails/day. See `docs/AUTHENTICATION.md`.
 - [x] Integrate the supplied logo reference, preserve its proportions, and verify
   wordmark, loading, header, card backs, favicon and PWA icons on both themes.
 - [ ] Approve realistic illustrated/pictogram samples, inventory all stimuli and
@@ -250,10 +252,9 @@ release issue is lost during prioritization.
 - [x] Google sign-in confirmed by the project owner.
 - [x] Implement Firestore profile/settings/results synchronization, transaction
   receipts, local pending queue, initial import choice and emulator tests.
-- [ ] Publish the reviewed `vendor/firebase/firestore.rules` in the real Firebase project. Local
-  CLI has no authorized account; the production-mode default still needs replacing.
+- [x] Publish the reviewed `vendor/firebase/firestore.rules` in the real Firebase project.
 - [ ] Verify real-account cloud saving from two devices after publishing rules.
-- [ ] Authorize the final deployment hostname in Firebase Authentication.
+- [x] Confirm `bysplays.github.io` is authorized in Firebase Authentication; revisit if the hostname changes.
 - [x] Implement free self-owned professional workspaces, paid-seat care links,
   read-only analytics and participant departure with code rotation.
 - [ ] Verify professional credentials before adding any clinical permissions.
@@ -271,10 +272,11 @@ release issue is lost during prioritization.
   portal; run the payment lifecycle in Stripe test mode. See `docs/ONBOARDING.md`.
 - [ ] Assign CeoAberto's actual Firebase owner UID before any migration of its
   legacy links. New professional workspaces do not inherit those links.
-- [ ] Publish reviewed Spark-compatible rules for real-account invitation/trial
+- [x] Publish reviewed Spark-compatible rules for real-account invitation/trial
   access. No Cloud Functions or Blaze required; localhost:5173 keeps real Google login.
-- [ ] Deploy the reviewed professional-seat Worker and Firestore rules before
-  publishing the professional frontend. Verify one sandbox purchase, unique code,
+- [x] Deploy the reviewed professional-seat Worker and Firestore rules before
+  publishing the professional frontend.
+- [ ] Verify one sandbox purchase, unique code,
   redemption, read-only analytics, renewal failure, portal cancellation and
   departure/reassignment end to end. See `docs/PROFESSIONALS.md`.
 
@@ -289,8 +291,8 @@ release issue is lost during prioritization.
 - Measure CPU usage against the Workers Free limit before enabling the Pages
   purchase flag. No billing backend was deployed by the local frontend build.
 
-- [ ] Redeploy the renewal-aware Worker and enable Cron `*/5 * * * *`; verify
-  daily reconciliation and Stripe test-clock failed renewal/recovery/cancellation.
+- [x] Deploy the renewal-aware Worker and enable Cron `*/5 * * * *`.
+- [ ] Verify daily reconciliation and Stripe test-clock failed renewal/recovery/cancellation.
   See `vendor/cloudflare/README.md` for bounded batches and checkpoint monitoring.
 
 - [ ] Verify home-screen installation, standalone launch, landscape handling and Google sign-in on physical Android tablets and iPad; manifest and icons are provided, offline entry is not supported.

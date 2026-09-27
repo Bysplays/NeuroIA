@@ -3,7 +3,8 @@
 Status: implementation specification, not a claim that the proposed features ship.
 Baseline reviewed: 2026-09-27. Daily-action retirement and supplied-logo integration
 are implemented. Email/password entry is implemented locally with production activation
-pending; the other feature specifications below remain planned. Product priorities and remaining delivery work are
+pending for the frontend and live email delivery; backend protections and the
+Firebase email provider are deployed. The other feature specifications below remain planned. Product priorities and remaining delivery work are
 tracked in [TODO.md](TODO.md). Existing behavior is documented in [AGENTS.md](../AGENTS.md),
 [DESIGN.md](DESIGN.md), [CONTENT.md](CONTENT.md) and the linked integration guides.
 
@@ -33,7 +34,7 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | Area | Implemented baseline | Gap |
 | --- | --- | --- |
 | App | React/TypeScript/Vite, React-state navigation, shared game clock and dialogs | No new router required |
-| Identity | Google and email/password entry, verification/recovery and same-UID password setup | Email provider activation and live delivery remain unverified |
+| Identity | Google and email/password entry, verification/recovery and same-UID password setup | Provider activated; frontend publication and live delivery remain unverified |
 | Progress | Firestore authority, transactional receipts, durable per-account outbox | No placement or versioned difficulty contract |
 | Games | Eight catalog entries; daily actions retired with history preserved | Parameterize eight games |
 | Levels | Domain reducer can increase a legacy level from 1 to 3 | Game components do not read a shared level configuration |
@@ -190,7 +191,9 @@ double completion, cancellation, retirement, expiry and cross-account denial.
 
 ### EMAIL — additional authentication
 
-Implemented locally with the owner's chosen email/password method. Keep Google
+Implemented with email/password. The owner prefers magic links where practical,
+but authorized password fallback; the current Spark project allows only five
+sign-in emails per day, so links remain deferred without changing billing. Keep Google
 and existing UID/workspace semantics. Registration/sign-in preserve the chosen
 workspace before verification; recovery returns a neutral confirmation only
 after Firebase accepts the request. Password requirements are checked against
@@ -380,7 +383,7 @@ Production-only validation must remain open until actually performed.
 - EEG SDK/device/license, hardware for testing, desired signal use and retention.
 - Live backend/rules status, Stripe sandbox credentials/configuration, refund policy
   and validation of the proposed access lease.
-- Firebase Email/Password activation, real email delivery and device verification.
+- Frontend publication, real email delivery and device verification; magic-link quota decision.
 - Notes/report visibility, retention/deletion, credentials required for any future
   clinical permissions; none are inferred from self-registration.
 - Browser model/runtime/device budget; voice provider and commercial rights.

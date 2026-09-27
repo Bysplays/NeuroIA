@@ -7,8 +7,14 @@ been confirmed by the project owner. No Analytics or private service keys are us
 ## Email/password activation
 
 Email/password is implemented alongside Google for personal and professional
-entry. Its production provider and email delivery have not been verified: the
-local Firebase CLI currently has no authorized account.
+entry. Email/Password is enabled in the real project, with Google retained. The
+verified-email Firestore rules and Worker are published. Live email delivery and
+the frontend release remain unverified.
+
+Magic-link entry was evaluated but deferred under the owner's password fallback:
+the project has no billing account, and Spark permits only five sign-in emails
+per day. Switching to links needs a quota decision and a callback implementation;
+no billing plan was changed. See [Firebase limits](https://firebase.google.com/docs/auth/limits).
 
 1. Publish the reviewed Firestore rules and Cloudflare Worker first. Both reject
    password-provider tokens without `email_verified: true`, including trial,
@@ -65,8 +71,8 @@ Sources: [Firebase password authentication](https://firebase.google.com/docs/aut
 
 ## Activate cloud persistence
 
-The implementation is ready locally; the reviewed rules must be published in the
-real Firebase project before production-mode access will work:
+The reviewed rules are published in the real Firebase project. For subsequent
+authorized rule updates and end-to-end verification:
 
 1. Open Firestore Database > Rules in the Firebase console.
 2. Replace the editor with the complete contents of the repository's
@@ -83,11 +89,12 @@ npx firebase-tools@15.30.1 deploy --only firestore:rules --project ceoaberto-neu
 ```
 
 The browser configuration is not permission to administer Firebase. The local CLI
-was not authenticated during implementation, and no production rules were deployed.
+is now authenticated, and the reviewed production rules were deployed with owner authorization.
 Keep Google enabled and authorize `localhost` and the final deployment hostname.
 Use `http://localhost:5173` during local development. Authentication and progress
-can use Spark, including direct Firestore invitation redemption and trials. Only the future
-Stripe Cloud Functions backend requires a billing-enabled project when deployed. Reads/writes remain subject to quotas.
+can use Spark, including direct Firestore invitation redemption and trials. Billing
+uses the Cloudflare Worker; the retained Functions package is not deployed.
+Reads/writes remain subject to quotas.
 
 ### Local access blocked by API-key restrictions
 

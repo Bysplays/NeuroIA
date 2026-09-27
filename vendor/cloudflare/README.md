@@ -6,6 +6,12 @@ from an authenticated local CLI. It uses Fetch and Web Crypto, not Firebase Func
 The configured endpoint is `https://neuroia-billing.kikefontanlorenzo.workers.dev`.
 No domain purchase or Firebase Blaze deployment is required.
 
+The reviewed Worker is deployed with verified-email enforcement and the five-minute
+reconciliation trigger. Runtime secrets are retained, Stripe stays in test mode,
+preview URLs remain disabled and existing observability is enabled. Health,
+localhost CORS, unauthenticated access and unsigned-webhook rejection were verified;
+signed payment lifecycle and scheduled reconciliation still need live validation.
+
 ## Configuration
 
 Set these ordinary runtime variables on the Worker (also recorded in `vendor/cloudflare/wrangler.jsonc`):
@@ -14,7 +20,7 @@ Set these ordinary runtime variables on the Worker (also recorded in `vendor/clo
 - `FIREBASE_PROJECT_ID=ceoaberto-neuroia`
 - `STRIPE_MONTHLY_PRICE_ID=price_1UItenAWZtSdGYThrex9dsNh`
 - `STRIPE_MODE=test`
-- `ALLOWED_ORIGINS=http://localhost:5173` (comma-separated extra exact origins).
+- `ALLOWED_ORIGINS=http://localhost:5173,https://bysplays.github.io` (comma-separated extra exact origins).
 
 Set these **Secret** bindings directly in Cloudflare:
 
