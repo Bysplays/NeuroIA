@@ -2,6 +2,17 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { authErrorMessage } from '../src/services/authErrors.ts';
 
+test('email errors explain recovery without echoing provider details', () => {
+  assert.match(authErrorMessage({ code: 'auth/operation-not-allowed' }, 'email'), /correo y contraseña/);
+  for (const code of ['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password']) {
+    assert.equal(authErrorMessage({ code }, 'email'), authErrorMessage({ code: 'auth/invalid-credential' }, 'email'));
+  }
+  assert.match(authErrorMessage({ code: 'auth/email-already-in-use' }, 'email'), /Google.*Ajustes/);
+  assert.match(authErrorMessage({ code: 'auth/requires-recent-login' }, 'email'), /confirma tu identidad/);
+  assert.match(authErrorMessage({ code: 'auth/too-many-requests' }, 'email'), /Espera/);
+  assert.match(authErrorMessage({ code: 'auth/credential-already-in-use' }, 'email'), /no hemos combinado/);
+});
+
 test('login failures explain recovery without exposing provider internals', () => {
   assert.match(authErrorMessage({ code: 'auth/popup-blocked' }), /ventanas emergentes/);
   assert.match(authErrorMessage({ code: 'auth/popup-closed-by-user' }), /navegador habitual/);

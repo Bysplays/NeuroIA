@@ -403,13 +403,13 @@ The initial screen has a blue paper illustration panel and one heading,
 `public/images/headers/login-transparent.png`, a true-alpha cutout derived from
 the home scene, without blend modes or an opaque image backing. Keep only one
 short note explaining account-linked progress. The “¿Eres un profesional?” text action beside the information links switches to a
-professional introduction: copy and Google action on the left, the existing
+professional introduction: copy and access actions on the left, the existing
 clipboard companion (`public/images/headers/therapist.png`) on lilac paper on the
 right. Mirror only the curved separator, not the illustration. On narrow screens,
 professional copy comes before the image. “Volver al acceso personal” restores the
 personal entry. Focus the heading after either switch and disable switching while
-Google sign-in is pending. The professional panel keeps only the audience label,
-heading and Google action; omit supporting paragraphs and availability notices.
+sign-in is pending. The professional panel keeps the audience label,
+heading and Google/email actions; omit supporting paragraphs and availability notices.
 Professional sign-in opens the free professional workspace; personal sign-in
 keeps the existing account access flow even if a professional profile exists.
 Restored sessions reuse the selected login for that account on this device.
@@ -434,6 +434,27 @@ Physical rotation cannot be guaranteed by a website. Preserve mounted game state
 pause the game clock, and stop narration while the portrait gate is visible.
 Allow vertical scrolling in landscape, including short phones and large text;
 do not rotate the DOM or shrink the application to fit a fixed-height canvas.
+
+### Email and password entry
+
+Keep Google as an independent option and add “Continuar con correo” beside it.
+Reveal one form at a time: sign-in, account creation or password recovery. Keep
+visible labels, password-manager autocomplete, native email validation and Enter
+submission. Registration repeats the password; explain verification before creating
+the account. Clear passwords when switching forms or workspace. Disable all
+competing actions during requests; errors and confirmations stay in the same panel.
+Forms scroll on short landscape screens without hiding actions. Returning from a
+form restores focus to the main heading; switching forms focuses its heading.
+
+Before either workspace, unverified password accounts see “Verifica tu correo”,
+their address, send/recheck actions and logout. Do not claim an email was sent until
+Firebase confirms. Recovery uses neutral wording for unknown addresses. Verification
+and reset happen on Firebase's hosted action pages; users return to the app afterward.
+Settings contain “Acceso a tu cuenta” in both workspaces, with the account email,
+“Añadir contraseña” for Google-only accounts or a change-password email action.
+Keep these controls inside the existing settings dialog. Adding a password preserves
+the current account and Google access; a recent-login error offers a separate,
+explicit Google confirmation button.
 
 ### Cloud progress
 

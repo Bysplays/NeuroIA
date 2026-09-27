@@ -16,13 +16,20 @@ voice provider or new illustration set has been selected by this planning work.
 | 2 / SEATS | Monthly professional seats and code validity | Checkout, Worker, redemption and rules implemented; production lifecycle unverified | Unused and redeemed codes follow paid entitlement; expired access blocks games and linked reads |
 | 3 / AI | Browser-local report/note assistance | No runtime integration; professional view is read-only | Spanish evidence-linked drafts, human review, supported-device benchmark and non-AI fallback |
 | 4 / SESSIONS | Professional-assigned game sequences | No assignment service; legacy therapist fields are not a permission system | Named participant, ordered exercises, delivery, completion and strict owner/participant rules |
-| 5 / EMAIL | Email authentication | Google only | Enable chosen Firebase provider; sign-up, sign-in, verification/recovery and account linking |
+| 5 / EMAIL | Email authentication | Email/password, verification, recovery and same-UID password setup implemented locally | Publish verified-email rules/Worker, enable Firebase provider and verify real email delivery |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Existing paper atlases | Approved style sample and verified one-to-one stimulus mappings |
 | 9 / LEVELS | Difficulty 1–10 | Legacy domain levels 1–3; games do not consume a shared difficulty configuration | Versioned per-game parameters, saved difficulty and bounded adaptation |
 | 10 / PLACEMENT | Guided initial level assessment | Access onboarding exists; placement does not | New/unassessed accounts complete resumable guided trials before ordinary play |
 | 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
+
+### Current implementation sequence
+
+The first priority/ease steps are: 0 — mergeable baseline; 1 — retire daily
+actions; 2 — supplied logo; 3 — email/password entry. Steps 0–2 are complete.
+Step 3 is implemented and locally verified; its production activation remains
+open below. The product-priority table above is separate from this sequence.
 
 ### EEG
 
@@ -57,8 +64,14 @@ voice provider or new illustration set has been selected by this planning work.
 
 ### Authentication, identity and artwork
 
-- [ ] Decide email/password versus email-link sign-in; enable that provider in
-  Firebase and implement its complete recovery/account-linking flow, retaining Google.
+- [x] Implement the owner's selected email/password method, registration,
+  verification and password recovery, retaining Google and both workspaces.
+- [x] Add a password to an authenticated Google account without changing its UID
+  or history. Test credentials, verification, reset and server enforcement locally.
+- [ ] Publish the verified-email Firestore rules and Worker, then enable Firebase
+  Email/Password (keep Google). Verify hosted verification/reset emails, configured
+  password policy, domain restrictions and real Google/password use on one UID.
+  CLI currently has no authorized account. See `docs/AUTHENTICATION.md`.
 - [x] Integrate the supplied logo reference, preserve its proportions, and verify
   wordmark, loading, header, card backs, favicon and PWA icons on both themes.
 - [ ] Approve realistic illustrated/pictogram samples, inventory all stimuli and

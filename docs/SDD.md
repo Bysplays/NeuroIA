@@ -2,7 +2,8 @@
 
 Status: implementation specification, not a claim that the proposed features ship.
 Baseline reviewed: 2026-09-27. Daily-action retirement and supplied-logo integration
-are implemented; the other feature specifications below remain planned. Product priorities and remaining delivery work are
+are implemented. Email/password entry is implemented locally with production activation
+pending; the other feature specifications below remain planned. Product priorities and remaining delivery work are
 tracked in [TODO.md](TODO.md). Existing behavior is documented in [AGENTS.md](../AGENTS.md),
 [DESIGN.md](DESIGN.md), [CONTENT.md](CONTENT.md) and the linked integration guides.
 
@@ -32,7 +33,7 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | Area | Implemented baseline | Gap |
 | --- | --- | --- |
 | App | React/TypeScript/Vite, React-state navigation, shared game clock and dialogs | No new router required |
-| Identity | Firebase Google login, separate player/professional entry for one UID | No email entry |
+| Identity | Google and email/password entry, verification/recovery and same-UID password setup | Email provider activation and live delivery remain unverified |
 | Progress | Firestore authority, transactional receipts, durable per-account outbox | No placement or versioned difficulty contract |
 | Games | Eight catalog entries; daily actions retired with history preserved | Parameterize eight games |
 | Levels | Domain reducer can increase a legacy level from 1 to 3 | Game components do not read a shared level configuration |
@@ -189,14 +190,25 @@ double completion, cancellation, retirement, expiry and cross-account denial.
 
 ### EMAIL — additional authentication
 
-Keep Google and the existing UID/workspace semantics. The proposed default is
-email/password; email-link login remains an open product decision. Enable the
-selected Firebase provider and complete sign-up, sign-in, verification and recovery
-for that method. Define whether verification is required before purchases/links.
-Use recoverable Spanish errors and avoid claiming success before Firebase confirms.
+Implemented locally with the owner's chosen email/password method. Keep Google
+and existing UID/workspace semantics. Registration/sign-in preserve the chosen
+workspace before verification; recovery returns a neutral confirmation only
+after Firebase accepts the request. Password requirements are checked against
+the configured Firebase policy. Passwords stay in the form/SDK, never app storage.
 
-Link an email credential to an existing Google account through authenticated
-Firebase flows. Never merge account histories solely because email strings match.
+Unverified password accounts see an explicit send/recheck/logout screen before
+either workspace. Rechecking reloads the user and forces an ID-token refresh.
+Firestore and Worker enforcement require verified password-provider tokens before
+data access, trials, links or billing. Existing Google-provider behavior remains.
+Verification and password reset use Firebase's hosted action pages, including
+invalid/expired-code handling; the app does not consume action codes from URLs.
+
+Settings add a password to the authenticated Google user's existing email/UID
+using `updatePassword`, followed by provider/token refresh. Recent-login errors
+offer explicit Google reauthentication and a retry. Never merge account histories
+solely because email strings match. Auth emulator coverage verifies same-UID entry
+with both methods. Publish rules/Worker before enabling the real email provider;
+see [AUTHENTICATION.md](AUTHENTICATION.md) for the remaining activation checks.
 Acceptance: existing Google identity, new email identity, incorrect/expired
 credentials or links, recovery, sign-out/restoration and independent professional
 entry. Configure real authorized domains and verify on the target devices.
@@ -368,7 +380,7 @@ Production-only validation must remain open until actually performed.
 - EEG SDK/device/license, hardware for testing, desired signal use and retention.
 - Live backend/rules status, Stripe sandbox credentials/configuration, refund policy
   and validation of the proposed access lease.
-- Email/password versus email-link and verification requirements.
+- Firebase Email/Password activation, real email delivery and device verification.
 - Notes/report visibility, retention/deletion, credentials required for any future
   clinical permissions; none are inferred from self-registration.
 - Browser model/runtime/device budget; voice provider and commercial rights.

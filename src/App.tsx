@@ -21,6 +21,8 @@ import { FatigueAlertModal } from './components/FatigueAlertModal';
 import { LandscapeGate } from './components/LandscapeGate';
 import { usePortrait } from './services/orientation';
 import { LoginScreen } from './components/LoginScreen';
+import { EmailVerification } from './components/EmailVerification';
+import { needsEmailVerification, submitEmailAuth, type EmailAction } from './services/emailAuth';
 import { RestBreakModal } from './components/RestBreakModal';
 
 // Juegos disponibles de serious play
@@ -40,6 +42,7 @@ const AccountEntry = lazy(() => import('./components/AccountEntry'));
 
 export const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [verificationRequired, setVerificationRequired] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +56,7 @@ export const App: React.FC = () => {
       if (cached) applyAppearance(cached.profile.settings);
     }
     setUser(nextUser);
+    setVerificationRequired(nextUser ? needsEmailVerification(nextUser) : false);
     setLoading(false);
   }, error => {
     StorageService.setAccount(null);
@@ -68,9 +72,18 @@ export const App: React.FC = () => {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      StorageService.saveProfessionalEntry(result.user.uid, professional);
     } catch (error) {
       setError(authErrorMessage(error));
+    } finally { setBusy(false); }
+  };
+  const handleEmail = async (action: EmailAction, email: string, password: string, professional: boolean) => {
+    if (action !== 'reset') setProfessionalEntry(professional);
+    setBusy(true); setError('');
+    try {
+      const result = await submitEmailAuth(auth, action, email, password);
+      if (result) StorageService.saveProfessionalEntry(result.user.uid, professional);
     } finally { setBusy(false); }
   };
   const handleSignOut = async () => {
@@ -85,10 +98,12 @@ export const App: React.FC = () => {
   return <LandscapeGate>{loading
     ? <AppLoading />
     : user
-      ? <>
+      ? verificationRequired
+        ? <EmailVerification key={user.uid} user={user} onVerified={() => setVerificationRequired(false)} onSignOut={handleSignOut} signingOut={busy} externalError={error} />
+        : <>
         {error && <p className="account-notice" role="alert">{error}</p>}
         <Suspense fallback={<AppLoading />}><AccountEntry key={user.uid} user={user} professionalEntry={professionalEntry} onSignOut={handleSignOut}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace uid={user.uid} onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></AccountEntry></Suspense></>
-      : <LoginScreen onSignIn={handleSignIn} busy={busy} error={error} />
+      : <LoginScreen onSignIn={handleSignIn} onEmail={handleEmail} onClearError={() => setError('')} busy={busy} error={error} />
   }</LandscapeGate>;
 };
 

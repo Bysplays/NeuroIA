@@ -77,6 +77,12 @@ test('Firebase signature, audience and expiry are validated with Google JWKS',as
  async function token(payload){const body=`${part({alg:'RS256',kid:'unit-key'})}.${part(payload)}`;return `${body}.${Buffer.from(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(body))).toString('base64url')}`;}
  try {
   assert.equal(await verifyUser(await token(claims),env.FIREBASE_PROJECT_ID),'user-a');
+  const passwordClaims = {...claims, firebase: {sign_in_provider: 'password'}};
+  for (const email_verified of [false, undefined]) {
+    await assert.rejects(verifyUser(await token({...passwordClaims, email_verified}),env.FIREBASE_PROJECT_ID), error => error.status === 403);
+  }
+  assert.equal(await verifyUser(await token({...passwordClaims, email_verified: true}),env.FIREBASE_PROJECT_ID),'user-a');
+  assert.equal(await verifyUser(await token({...claims, firebase: {sign_in_provider: 'google.com'}}),env.FIREBASE_PROJECT_ID),'user-a');
   await assert.rejects(verifyUser(await token({...claims,aud:'another-project'}),env.FIREBASE_PROJECT_ID));
   await assert.rejects(verifyUser(await token({...claims,exp:now-1}),env.FIREBASE_PROJECT_ID));
   const good=await token(claims);const parts=good.split('.');parts[1]=part({...claims,sub:'victim'});

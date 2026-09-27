@@ -16,6 +16,20 @@ after(async () => { await env?.cleanup(); });
 const fresh = () => patientProgress({ profile: getInitialProfile(), history: [] });
 const op = id => ({ id: `result:${id}`, kind: 'result', result: { id, exerciseId: 'visual-scanning', domain: 'attention', date: '2026-09-16T12:00:00.000Z', durationSeconds: 60, accuracy: 100, score: 10, correctAnswers: 1, totalQuestions: 1, feedbackMessage: '' } });
 
+test('password accounts must verify email before progress, trials, invitations or professional entry', async () => {
+  const uid = 'email-account';
+  for (const email_verified of [false, undefined]) {
+    const db = env.authenticatedContext(uid, { firebase: { sign_in_provider: 'password' }, ...(email_verified === undefined ? {} : { email_verified }) }).firestore();
+    await assertFails(getDoc(doc(db, `users/${uid}/progress/main`)));
+    await assertFails(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
+    await assertFails(getDoc(doc(db, 'professionals/ceoaberto')));
+    await assertFails(setDoc(doc(db, `professionals/${uid}`), { ownerUid: uid, name: 'Persona', active: true, createdAt: serverTimestamp() }));
+  }
+  const db = env.authenticatedContext(uid, { firebase: { sign_in_provider: 'password' }, email_verified: true }).firestore();
+  await assertSucceeds(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
+  await assertSucceeds(firestoreProgress(uid, db).initialize(fresh()));
+});
+
 test('owner can initialize, save, and reload from another device; retries are idempotent', async () => {
   const first = firestoreProgress('patient-a', env.authenticatedContext('patient-a').firestore());
   const second = firestoreProgress('patient-a', env.authenticatedContext('patient-a').firestore());

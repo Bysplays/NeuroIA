@@ -53,6 +53,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | --- | --- |
 | `src/components/AppLoading.tsx` | Shared initial loading presentation for auth, access, lazy chunks and progress |
 | `src/components/AccountEntry.tsx` | Selects independent player/professional workspaces for the same authenticated account |
+| `src/components/LoginScreen.tsx`, `EmailVerification.tsx`, `AccountPassword.tsx` and `src/services/emailAuth.ts` | Google/email entry, verification, recovery and adding a password to the existing UID |
 | `src/components/ProfessionalDashboard.tsx` and `src/services/firestoreProfessional.ts` | Free professional panel, sponsored seats and read-only linked activity; see `docs/PROFESSIONALS.md` |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Personal account entry before progress and games |
 | `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
@@ -118,6 +119,7 @@ npm test
 npm run test:firestore
 npm ci --prefix vendor/firebase/functions # when backend dependencies are needed
 npm run test:onboarding
+npm run test:auth
 git diff --check
 ```
 
@@ -265,9 +267,21 @@ the clock, alongside the existing speech-voice tests.
 
 `App` observes Firebase Authentication before mounting the cloud progress boundary.
 Configuration and session persistence are in `src/services/firebase.ts`; Analytics
-is not loaded. `LoginScreen` uses Google popup sign-in and recoverable error copy. Its local
-personal/professional switch passes the selected intent through the Google sign-in
-callback. `AccountEntry` honors explicit player/professional login. Restored sessions use
+is not loaded. `LoginScreen` offers Google popup and email/password sign-in,
+registration and recovery with recoverable Spanish errors. Its local
+personal/professional switch passes the selected intent through either sign-in
+callback and persists it before email verification so reload retains the workspace.
+`EmailVerification` precedes both workspaces for unverified password accounts;
+it sends only on explicit action and reloads the user plus ID token before entry.
+Firestore rules and the Worker require `email_verified` for password-provider tokens;
+publish those changes before enabling Email/Password in the real project.
+Google access retains its existing behavior. Settings reuse `AccountPassword`
+to add a password to the current account with Firebase `updatePassword`, retaining
+email, UID, progress and Google access; reload provider data afterward. Firebase
+requires recent authentication, with explicit Google reauthentication when needed.
+Never merge accounts by matching email strings or store passwords in app storage.
+Recovery/verification links use Firebase's hosted action handler, not app query routing.
+`AccountEntry` honors explicit player/professional login. Restored sessions use
 `StorageService.readProfessionalEntry`, stored per UID under `neuroia_entry_v1`;
 older sessions default to player. Checkout return parameters select their
 workspace only when there is no explicit login intent. This device preference
@@ -348,6 +362,12 @@ explicit fullscreen button, with a manual-rotation fallback.
 and forbidden writes. Never create fixture users/results in the real project.
 Browser verification uses isolated contexts with a test-only identity adapter and
 the local Firestore emulator; no authentication bypass ships in application code.
+
+`npm run test:auth` uses the demo-only Auth emulator on 127.0.0.1:9099 to test
+registration, verification, reset and same-UID Google/password access. CLI 15.30.1
+does not implement password-policy lookup; that one read-only endpoint is stubbed
+in tests. Credentials and action codes still use the real emulator. Live email
+delivery, project password policy and physical-device OAuth remain release checks.
 
 ## Installable web metadata
 

@@ -64,9 +64,12 @@ created by the automated tests.
 - POST `/webhook`: requires a Stripe signature over unmodified bytes, with a five-minute
   timestamp tolerance. Unsigned bodies cannot reach Firestore.
 - GET `/health`: public liveness only; never returns secrets.
+- Password-provider JWTs also require `email_verified: true` before any authenticated
+  billing or seat route. Deploy this guard and the corresponding Firestore rules
+  before enabling Email/Password in Firebase; Google login behavior is unchanged.
 - Firebase JWTs are verified against Google's public keys, issuer, audience, subject,
   issued/expiry/authentication times. Subject IDs use the alphanumeric, dash and
-  underscore format of this Google-login app; custom IDs outside that format are rejected. Like default Admin token verification this does
+  underscore format of Firebase-generated account IDs; custom IDs outside that format are rejected. Like default Admin token verification this does
   not query revocation/disabled-user status on every request; tokens expire normally.
 - Firestore REST transactions bind Checkout attempts, block invitation redemption during
   pending payment, and prevent duplicate subscription creation. Stripe idempotency keys

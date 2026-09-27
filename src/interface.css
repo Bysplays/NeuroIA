@@ -698,6 +698,16 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 .google-login-button { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 56px; width: 100%; padding: 12px 18px; border: 1px solid var(--color-border-subtle); border-radius: 99px; background: var(--color-surface); color: var(--color-text-main); font-size: .88rem; cursor: pointer; }
 .google-login-button:hover { background: var(--color-surface-hover); }
 .google-login-mark { font-weight: 700; font-size: 1.2rem; }
+.email-entry-button, .email-form { width: 100%; }
+.email-form { display: flex; flex-direction: column; align-items: stretch; gap: 12px; min-width: 0; }
+.email-form h2 { font-size: 1.2rem; }
+.email-form label { font-size: .9rem; font-weight: 600; }
+.email-form input:not([hidden]) { min-height: 48px; width: 100%; min-width: 0; padding: 12px 16px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg); color: var(--color-text-main); font: inherit; }
+.email-form button { min-height: 48px; white-space: normal; }
+.email-text-button { min-height: 44px; padding: 8px 0; color: var(--color-text-main); background: transparent; border: 0; font: inherit; text-decoration: underline; cursor: pointer; text-align: left; }
+.email-text-button:disabled, .email-form button:disabled, .account-password button:disabled { opacity: .6; cursor: default; }
+.email-verification p, .account-password p { overflow-wrap: anywhere; }
+.account-password { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .entry-note { font-size: .75rem; color: var(--color-text-muted); line-height: 1.6; }
 .orientation-gate { display: grid; justify-items: center; gap: 22px; text-align: center; padding: 32px; }
 .orientation-gate h1 { font-size: 1.6rem; }

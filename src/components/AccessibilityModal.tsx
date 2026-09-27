@@ -1,5 +1,6 @@
 import { ProductInformation } from './ProductInformation';
 import { SubscriptionSettings } from './SubscriptionSettings';
+import { AccountPassword } from './AccountPassword';
 import { ModalFrame } from './ModalFrame';
 import React, { useState } from 'react';
 import { X, Check, Type, Contrast, LogOut } from 'lucide-react';
@@ -81,6 +82,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
           </section>
 
           {showSubscription && <SubscriptionSettings />}
+          <AccountPassword />
           <div className="preferences-account">
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>
               <LogOut size={18} aria-hidden="true" />{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}

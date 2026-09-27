@@ -28,8 +28,14 @@ export async function verifyUser(token, project) {
     if (!jwk) throw Error();
     const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
     if (!await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, bytes(parts[2]), encoder.encode(parts.slice(0, 2).join('.')))) throw Error();
+    if (claims.firebase?.sign_in_provider === 'password' && claims.email_verified !== true) {
+      fail(403, 'Verifica tu correo antes de continuar.');
+    }
     return claims.sub;
-  } catch { fail(401, 'Vuelve a iniciar sesión.'); }
+  } catch (error) {
+    if (error instanceof HttpError) throw error;
+    fail(401, 'Vuelve a iniciar sesión.');
+  }
 }
 async function googleToken(env) {
   if (oauth?.secret === env.FIREBASE_SERVICE_ACCOUNT && oauth.until > Date.now()) return oauth.token;
