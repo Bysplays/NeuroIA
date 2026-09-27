@@ -105,7 +105,8 @@ lifecycle before enabling live charges.
 | [Firebase](vendor/firebase/README.md) | Security rules and legacy Functions |
 | [Contributing](CONTRIBUTING.md) | Branches, commits and merges |
 | [Agent guide](AGENTS.md) | Architecture and development practices |
-| [Roadmap](docs/TODO.md) | Pending work and validation |
+| [Roadmap](docs/TODO.md) | Prioritized implementation and release backlog |
+| [Software design](docs/SDD.md) | Target behavior, architecture and acceptance criteria |
 
 See the [brand guide](docs/assets/brand/README.md) and
 [illustration provenance](docs/assets/images/headers/README.md). Reuse the existing

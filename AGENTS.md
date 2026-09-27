@@ -37,8 +37,10 @@ in CONTRIBUTING.md. A local commit is not authorization to publish or deploy.
 ## Documentation layout
 
 Keep `README.md`, `CONTRIBUTING.md` and `AGENTS.md` at the repository root.
-Project guides live in `docs/`, provider documentation beside its integration in `vendor/`, and
-asset provenance in `docs/assets/` mirroring the public asset directories.
+Project guides live in `docs/`; `docs/TODO.md` is the canonical implementation
+backlog and `docs/SDD.md` specifies planned behavior and acceptance criteria, not
+shipped capabilities. Provider documentation lives beside its integration in
+`vendor/`, and asset provenance lives in `docs/assets/` mirroring the public asset directories.
 Cloudflare Workers live in `vendor/cloudflare/`; Firebase rules and the legacy
 Functions package live in `vendor/firebase/`; Stripe setup lives in `vendor/stripe/`.
 The root `firebase.json` remains the CLI entry point and references these paths.
@@ -134,17 +136,17 @@ To verify a repository deployment locally, run
 `npm run build -- --base /NeuroIA/` and
 `npm run preview -- --base /NeuroIA/`, then open `/NeuroIA/`.
 
-### Known tooling gap
+### Tooling and merge checks
 
-As of 2026-09-14, `package.json` does not define `check`, `check:test`,
-`check:types`, `check:lint`, `check:format`, or `check:deadcode`, although
-CONTRIBUTING.md lists them. Focused unit tests run through `npm test` (Node 22+). `npm run test:firestore`
-runs the real Firestore adapter and rules against the demo-only emulator; it
-requires Java 21+ on PATH and downloads Firebase CLI 15.30.1 with npx. Existing game
-code also produces React-related lint warnings. Report actual command results;
-do not claim that missing checks ran or that a zero exit code means zero warnings.
-This documents the gap, not an exemption from the merge requirements. Reconcile
-it when tooling is updated, and update this paragraph in the same change.
+`package.json` intentionally exposes the commands above rather than `check*`
+aliases. CONTRIBUTING.md lists the actual required checks, including combined
+Firestore adapter/rules and Worker REST coverage. Focused unit tests require
+Node 22+; the demo Firestore emulator requires Java 21+ and Firebase CLI 15.30.1.
+No Biome/Knip formatter or dead-code check is configured. Existing game code has
+React-related lint warnings. `npm run lint` may exit zero with warnings; use
+`npm run lint -- --deny-warnings` for the zero-warning merge gate. Report actual
+results and keep unresolved warnings in docs/TODO.md. This is not an exemption
+from merge requirements.
 
 ### Verify what changed
 

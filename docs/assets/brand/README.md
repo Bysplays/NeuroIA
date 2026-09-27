@@ -28,3 +28,13 @@ no new mascot artwork or external font dependency is introduced.
 are Chromium rasterizations of the existing `neuroia-mark.svg`, centered at 70%
 of the square canvas on solid #edf5f3. Device scale factor is 1. The 512px icon
 keeps the mark inside Android's maskable safe zone. No generated artwork was used.
+
+## Supplied replacement reference (pending integration)
+
+The owner supplied [supplied-mark.png](supplied-mark.png) on 2026-09-27: a mint
+organic branching mark on a white background. This is an unmodified copy of the
+provided 277 × 441 PNG, retained here so implementation does not depend on a
+temporary clipboard path. No generator, prompt, tracing or transformation was used.
+It is a reference, not an active runtime asset; the SVG sprout and installation
+icons described above remain in use. Integration and variant checks are tracked
+in [TODO](../../TODO.md) and [SDD](../../SDD.md). Preserve the supplied proportions.

@@ -12,6 +12,11 @@ This is a living guide to the current product direction. Read [AGENTS.md](../AGE
 for implementation, verification, and maintenance practices. Keep this guide in
 English; the application speaks Spanish.
 
+The planned replacement logo, realistic illustrated game objects and guided
+placement flow are specified in [SDD.md](SDD.md). They remain pending; the
+current implementation and visual references below are still authoritative until
+each feature is integrated and verified.
+
 ## Purpose and tone
 
 Present NeuroIA as entertainment, training and serious play, following the supplied
