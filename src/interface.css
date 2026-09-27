@@ -698,6 +698,26 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 .google-login-button { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 56px; width: 100%; padding: 12px 18px; border: 1px solid var(--color-border-subtle); border-radius: 99px; background: var(--color-surface); color: var(--color-text-main); font-size: .88rem; cursor: pointer; }
 .google-login-button:hover { background: var(--color-surface-hover); }
 .google-login-mark { font-weight: 700; font-size: 1.2rem; }
+.login-options { display: grid; gap: 12px; width: 100%; }
+.modal-shell:has(.email-login-dialog) { width: min(480px, calc(100vw - 32px)); background: var(--color-surface); scrollbar-gutter: auto; }
+.email-login-heading { position: relative; padding: 28px 32px 24px; background: var(--panel-blue); color: var(--panel-ink); }
+.email-login-icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 18px; border-radius: 18px; background: var(--color-surface); color: var(--color-text-main); }
+.email-login-heading h2 { font-size: 1.5rem; font-weight: 500; line-height: 1.25; letter-spacing: -.035em; }
+.email-login-heading p { margin-top: 8px; font-size: .85rem; line-height: 1.5; }
+.email-login-close { position: absolute; top: 20px; right: 20px; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid currentColor; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; }
+.email-login-close:hover { background: var(--color-surface-hover); color: var(--color-text-main); }
+.email-login-close:disabled { opacity: .6; cursor: wait; }
+.email-login-dialog .email-login-form { padding: 28px 32px; gap: 10px; }
+.email-login-form label:not(:first-child) { margin-top: 8px; }
+.email-login-form .touch-btn { margin-top: 14px; }
+.email-login-form .email-text-button { text-align: center; font-size: .8rem; text-underline-offset: 4px; }
+.email-feedback { padding: 14px 16px; border-radius: 16px; background: var(--panel-sage); color: var(--panel-ink); font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
+.email-feedback[role="alert"] { background: var(--panel-peach); }
+@media (max-width: 600px), (max-height: 500px) {
+  .email-login-heading { padding: 22px 24px 20px; }
+  .email-login-icon { width: 44px; height: 44px; margin-bottom: 12px; }
+  .email-login-dialog .email-login-form { padding: 20px 24px; }
+}
 .email-entry-button, .email-form { width: 100%; }
 .email-form { display: flex; flex-direction: column; align-items: stretch; gap: 12px; min-width: 0; }
 .email-form h2 { font-size: 1.2rem; }

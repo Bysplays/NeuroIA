@@ -437,14 +437,18 @@ do not rotate the DOM or shrink the application to fit a fixed-height canvas.
 
 ### Email and password entry
 
-Keep Google as an independent option and add “Continuar con correo” beside it.
-Reveal one form at a time: sign-in, account creation or password recovery. Keep
+Keep Google and “Continuar con correo” as matching full-width pill buttons, each
+with its own icon. Email opens a compact shared native dialog with a tinted
+header, mail icon, title, short introduction and close button. Reveal one form at
+a time: sign-in, account creation or password recovery. Keep
 visible labels, password-manager autocomplete, native email validation and Enter
 submission. Registration repeats the password; explain verification before creating
 the account. Clear passwords when switching forms or workspace. Disable all
 competing actions during requests; errors and confirmations stay in the same panel.
 Forms scroll on short landscape screens without hiding actions. Returning from a
-form restores focus to the main heading; switching forms focuses its heading.
+form restores focus to the email button; switching forms focuses its heading.
+Escape and the backdrop dismiss the dialog when no request is pending. Temporarily
+hide it in portrait so the orientation gate remains on top, preserving form state.
 
 Before either workspace, unverified password accounts see “Verifica tu correo”,
 their address, send/recheck actions and logout. Do not claim an email was sent until
