@@ -19,6 +19,7 @@ import { ExerciseSelectionModal } from './ExerciseSelectionModal';
 import { getExercisesForDomain } from '../services/exerciseCatalog';
 
 interface DashboardProps {
+  proposedSessions?: React.ReactNode;
   profile: UserProfile;
   onSelectDomain: (domain: CognitiveDomain) => void;
   onSelectExercise?: (exerciseId: ExerciseId) => void;
@@ -28,6 +29,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({
   profile,
+  proposedSessions,
   onSelectDomain,
   onSelectExercise,
   onStartDailyPlan,
@@ -104,6 +106,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
             </time>
           </div>
+
+          {proposedSessions}
 
           <div className="home-feature-grid">
             <section className={`daily-session-card${profile.settings.showCompanions === false ? ' daily-session-without-art' : ''}`}>

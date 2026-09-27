@@ -31,7 +31,7 @@ export function firestoreProgress(uid: string, db: Firestore) {
     },
     async commit(operation: ProgressOperation): Promise<ProgressData> {
       const receipt = doc(db, 'users', uid, 'operations', encodeURIComponent(operation.id));
-      return runTransaction(db, async tx => {
+      try { return await runTransaction(db, async tx => {
         const current = await tx.get(ref);
         const applied = await tx.get(receipt);
         if (!current.exists()) throw new Error('missing-progress');
@@ -42,7 +42,20 @@ export function firestoreProgress(uid: string, db: Firestore) {
         tx.set(receipt, { kind: operation.kind, createdAt: serverTimestamp() });
         if (operation.kind === 'result') tx.set(doc(db, 'users', uid, 'results', encodeURIComponent(operation.result.id)), clean(operation.result));
         return data;
-      });
+      }); } catch (error) {
+        // Concurrent devices may commit the same receipt before a rules check sees
+        // the transaction conflict. Confirm the durable receipt before accepting.
+        if ((error as { code?: string }).code === 'permission-denied') {
+          try {
+            const applied = await getDocFromServer(receipt);
+            if (applied.exists() && applied.data().kind === operation.kind) {
+              const current = await getDocFromServer(ref);
+              if (current.exists()) return current.data().data as ProgressData;
+            }
+          } catch { /* Preserve the original failure unless the receipt is confirmed. */ }
+        }
+        throw error;
+      }
     },
     watch(next: (data: ProgressData) => void, error: (error: unknown) => void) {
       return onSnapshot(ref, { includeMetadataChanges: true }, snapshot => {

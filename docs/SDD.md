@@ -38,7 +38,7 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | Progress | Firestore authority, transactional receipts, durable per-account outbox; versioned placement | Physical-device/release verification |
 | Games | Eight catalog entries; daily actions retired with history preserved | Parameterize eight games |
 | Levels | Eight games consume versioned levels 1–10; guided initial trials and bounded adaptation | User calibration, tracking adaptation and explicit reassessment |
-| Professionals | Free workspace, paid-seat links, read-only charts/history | No authorized note-writing or assigned sessions |
+| Professionals | Free workspace, paid-seat links, read-only charts/history | Versioned session proposals implemented; private note-writing remains pending |
 | Billing | Worker Checkout, signed webhooks, reconciliation, portal, seat redemption/rotation | Production deployment and sandbox lifecycle not fully verified |
 | Access | Server-owned entitlement records; browser refresh on focus/every 30 seconds | Worker-confirmed time and expiry; 60-second lease, fail-closed refresh; Worker deployed, real-account lifecycle pending |
 | Narration | Shared recorded-player service and browser fallback | 91/370 clips missing; full audition and commercial rights unresolved |
@@ -176,17 +176,30 @@ bounded levels and optional neutral instructions. Preview the sequence before
 publishing. Participants see who proposed it and can start, pause, resume or leave.
 Keep assigned sessions distinct from the automatic daily plan and its counters.
 
-Proposed lifecycle: draft, assigned, in progress, completed, canceled. Starting
-pins an immutable revision; edits create a future revision rather than rewriting
-a running session. Seat expiry/departure blocks access and new assignment; recovery
-resumes only if permissions and the assignment remain valid. Retiring a game must
-invalidate or explicitly revise unstarted assignments containing it.
+Implemented lifecycle: local draft, assigned, in-progress, completed, cancelled.
+Publishing freezes the title, message, ordered games, numeric levels and configuration
+version. Changing a published proposal requires cancellation and a new proposal;
+there is no mutable revision that can replace a running game. Proposals contain
+1–8 games, including duplicates, an 80-character title and an optional 280-character
+message. Levels are fixed during the proposal and do not feed personal level adaptation.
+Seat expiry/departure blocks access and new assignments; recovery resumes only if
+the reciprocal relationship and proposal remain valid. Game retirement/version
+migration remains a release gate for future catalog changes.
 
-Only the linked owner authors/cancels assignments. Only the participant completes
-steps. Completion references ordinary idempotent exercise results; retries cannot
-double-count steps or totals. Professionals never write participant progress.
-Acceptance: ordering, duplicate games, resume across devices, competing edits,
-double completion, cancellation, retirement, expiry and cross-account denial.
+Only the linked owner authors/cancels assignments. Only the participant starts
+and advances them. Each step first saves an ordinary durable exercise result with
+a deterministic ID; a separate transaction checks that archived result against
+the expected game, level, configuration and position before advancing. Resume
+reconciles results saved before a crash. Duplicate devices cannot count the same
+step twice. Cancellation never prevents an already completed exercise from being
+saved in ordinary activity. Professionals never write participant progress.
+
+Professional history shows the latest 50 proposals. Participant entry queries up
+to 50 pending proposals, so completed history cannot hide an older pending session.
+Older professional-history pagination remains pending. Browser fixtures verify
+ordering, fixed levels, pause/resume, completion and dialogs; emulator tests cover
+concurrent devices, receipt recovery, cancellation, expiry and cross-account denial.
+Production publication and physical-device checks remain separate release gates.
 
 ### EMAIL — additional authentication
 
@@ -330,14 +343,15 @@ and speech inventories; validate daily-plan progression and saved legacy entries
 
 ## 5. Proposed data contracts and migrations
 
-These are proposed additions, not existing paths or permissions:
+Placement, difficulty, result metadata and assignments are implemented locally;
+notes, reports and EEG contracts remain proposed. Production deployment is tracked in TODO.
 
 | Data | Proposed location / contents | Authority |
 | --- | --- | --- |
 | Placement | Optional progress.profile.placement: version, completed, per-game trial evidence; cursor derived from first missing game | Participant via validated durable operations |
 | Difficulty | Versioned per-exercise level/evidence map in progress; legacy fields retained | Progress transaction/reducer |
-| Results | Optional numeric level, configuration version, assignment/revision/step IDs | Participant; existing result ID/receipt semantics |
-| Assignments | Separate professional-owned session collection with participant UID and immutable revisions | Active linked owner authors; participant step receipts only |
+| Results | Optional numeric level, configuration version, assignment/owner/seat/step IDs | Participant; existing result ID/receipt semantics |
+| Assignments | `professionals/{owner}/seats/{seat}/participants/{uid}/sessions/{id}`; immutable published body | Active linked owner authors; participant step receipts only |
 | Private notes | Separate professional-owned note documents, participant association and timestamps | Authoring owner only under active-link rules |
 | Reports | Reviewed report documents with source references, model version and sharing state | Explicit owner save/share; participant reads shared versions only |
 | EEG | Bounded transient device buffer by default | Local adapter; no cloud writes by default |

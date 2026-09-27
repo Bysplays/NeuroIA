@@ -98,6 +98,10 @@ export interface ExerciseResult {
   correctAnswers: number;
   totalQuestions: number;
   difficulty?: string;
+  assignmentId?: string;
+  assignmentStep?: number;
+  assignmentOwnerId?: string;
+  assignmentSeatId?: string;
   level?: number;
   configVersion?: number;
   hintsUsed?: number;

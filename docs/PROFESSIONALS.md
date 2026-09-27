@@ -79,6 +79,45 @@ payment recovery but blocks games and professional reads until active again.
 administrator-owned profile. It does not automatically grant this new workspace
 access to its historical participants. Do not claim its ownership from the client.
 
+## Proposed game sessions
+
+“Sesiones” beside each actively linked person opens a proposal list and composer.
+The professional selects 1–8 ordered games, including repeated games, with individual
+levels from 1 to 10, a short title and an optional accompanying message. Review
+precedes publication. Published bodies are immutable; cancel and create a new
+proposal to change them. There are no private clinical notes in these documents.
+
+`professionals/{owner}/seats/{seat}/participants/{uid}/sessions/{id}` isolates every
+proposal by owner, paid seat and participant. Rules independently validate the
+professional owner, occupied seat, invitation code, reciprocal link and server-time
+expiry on reads and writes. The owner publishes/cancels; the participant starts
+and advances. No client may delete a proposal or edit its published body. Replacing
+a seat occupant grants no access to the previous occupant's sessions. CEOABERTO
+has no paid seat and does not expose this new feature.
+
+The participant home lists pending proposals, identifying the professional and
+showing games, levels and completed steps. Instructions, help and timing reuse
+GameSession; proposed levels and repeat controls are locked. Pausing preserves
+the current game. Returning home preserves completed games; an unfinished game
+starts again on resume. Assigned sessions do not change the automatic daily plan
+or personal level recommendations. Their ordinary results still count as activity.
+
+Each result uses `assigned-{sessionId}-{zeroBasedStep}` and includes assignment,
+owner, seat and step fields. The existing ProgressSync queue saves it and its
+permanent receipt. A separate transaction advances the proposal only after the
+matching archived result exists. Resume reconciles an interrupted advancement;
+only pending confirmation polls (every three seconds while the player is open).
+Duplicate device saves/advances confirm the committed receipt/current step after
+transaction permission conflicts. No local or cached snapshot grants completion.
+Cancel/expiry/departure stops proposal access but never blocks saving ordinary
+results. Recovery requires the same valid reciprocal relationship.
+
+The professional list is limited to the latest 50 proposals; the participant query
+filters assigned/in-progress proposals before its 50-item limit. Lists disclose
+these limits. There is no composite index or new backend billing endpoint.
+Publish the reviewed Firestore rules before releasing this frontend. See TODO for
+production/physical-tablet verification and future game-retirement migration.
+
 ## Continuous access checks
 
 The configured Worker API is required for player entry, independently of the purchase

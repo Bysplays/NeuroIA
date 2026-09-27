@@ -104,24 +104,97 @@ service cloud.firestore {
         && request.resource.data.kind in ['result', 'settings', 'placement']
         && request.resource.data.createdAt == request.time;
     }
+    function validExerciseResult(value) {
+      return value.keys().hasOnly(['id', 'exerciseId', 'domain', 'date',
+          'durationSeconds', 'accuracy', 'score', 'correctAnswers', 'totalQuestions',
+          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice', 'assignmentId', 'assignmentStep', 'assignmentOwnerId', 'assignmentSeatId'])
+        && validAssignmentMetadata(value)
+        && (!('level' in value) || (value.level is int && value.level >= 1 && value.level <= 10))
+        && (!('configVersion' in value) || value.configVersion == 1)
+        && (!('hintsUsed' in value) || (value.hintsUsed is int && value.hintsUsed >= 0))
+        && (!('practice' in value) || value.practice == false)
+        && value.id is string
+        && value.exerciseId is string
+        && value.domain in ['attention', 'language', 'memory', 'executive', 'motor']
+        && value.date is string
+        && value.durationSeconds is number && value.durationSeconds >= 0
+        && value.accuracy is number && value.accuracy >= 0 && value.accuracy <= 100
+        && value.correctAnswers is int && value.correctAnswers >= 0
+        && value.totalQuestions is int && value.totalQuestions >= value.correctAnswers;
+    }
     match /users/{uid}/results/{resultId} {
       allow read: if owns(uid) || linkedProfessional(uid);
-      allow create: if owns(uid)
-        && request.resource.data.keys().hasOnly(['id', 'exerciseId', 'domain', 'date',
-          'durationSeconds', 'accuracy', 'score', 'correctAnswers', 'totalQuestions',
-          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice'])
-        && (!('level' in request.resource.data) || (request.resource.data.level is int && request.resource.data.level >= 1 && request.resource.data.level <= 10))
-        && (!('configVersion' in request.resource.data) || request.resource.data.configVersion == 1)
-        && (!('hintsUsed' in request.resource.data) || (request.resource.data.hintsUsed is int && request.resource.data.hintsUsed >= 0))
-        && (!('practice' in request.resource.data) || request.resource.data.practice == false)
-        && request.resource.data.id is string
-        && request.resource.data.exerciseId is string
-        && request.resource.data.domain in ['attention', 'language', 'memory', 'executive', 'motor']
-        && request.resource.data.date is string
-        && request.resource.data.durationSeconds is number && request.resource.data.durationSeconds >= 0
-        && request.resource.data.accuracy is number && request.resource.data.accuracy >= 0 && request.resource.data.accuracy <= 100
-        && request.resource.data.correctAnswers is int && request.resource.data.correctAnswers >= 0
-        && request.resource.data.totalQuestions is int && request.resource.data.totalQuestions >= request.resource.data.correctAnswers;
+      allow create: if owns(uid) && validExerciseResult(request.resource.data);
+    }
+    function validAssignmentMetadata(value) {
+      return !value.keys().hasAny(['assignmentId', 'assignmentStep', 'assignmentOwnerId', 'assignmentSeatId'])
+        || (value.assignmentId is string && value.assignmentId.matches('[A-Za-z0-9_-]{1,128}')
+          && value.assignmentOwnerId is string && value.assignmentOwnerId.matches('[A-Za-z0-9_-]{1,128}')
+          && value.assignmentSeatId is string && value.assignmentSeatId.matches('[A-Za-z0-9_-]{1,128}')
+          && value.assignmentStep is int && value.assignmentStep >= 0 && value.assignmentStep < 8);
+    }
+    function sessionRelationship(owner, seatId, uid) {
+      let professional = get(/databases/$(database)/documents/professionals/$(owner)).data;
+      let seat = get(/databases/$(database)/documents/professionals/$(owner)/seats/$(seatId)).data;
+      let access = get(/databases/$(database)/documents/users/$(uid)/access/main).data;
+      let link = get(/databases/$(database)/documents/professionals/$(owner)/patients/$(uid)).data;
+      return authenticated() && (request.auth.uid == owner || request.auth.uid == uid)
+        && professional.active == true && professional.ownerUid == owner
+        && seat.status == 'active' && seat.expiresAt > request.time.toMillis() && seat.occupantUid == uid
+        && access.kind == 'invitation' && access.professionalId == owner && access.seatId == seatId
+        && access.expiresAt > request.time.toMillis() && access.invitationCode == seat.invitationCode
+        && link.patientId == uid && link.seatId == seatId;
+    }
+    function validSessionStep(step) {
+      return step is map && step.keys().hasOnly(['exerciseId', 'level'])
+        && step.exerciseId in ['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking']
+        && step.level is int && step.level >= 1 && step.level <= 10;
+    }
+    function validSession(value, owner, seatId, uid) {
+      let steps = value.steps;
+      return value.keys().hasOnly(['professionalId', 'seatId', 'patientId', 'professionalName', 'title', 'note', 'steps', 'configVersion', 'status', 'completedCount', 'resultIds', 'createdAt', 'updatedAt'])
+        && value.professionalId == owner && value.seatId == seatId && value.patientId == uid
+        && value.professionalName == get(/databases/$(database)/documents/professionals/$(owner)).data.name
+        && value.title is string && value.title.size() > 0 && value.title.size() <= 80
+        && value.note is string && value.note.size() <= 280 && value.configVersion == 1
+        && value.status == 'assigned' && value.completedCount == 0 && value.resultIds == []
+        && value.createdAt == request.time && value.updatedAt == request.time
+        && steps is list && steps.size() >= 1 && steps.size() <= 8
+        && validSessionStep(steps[0])
+        && (steps.size() < 2 || validSessionStep(steps[1]))
+        && (steps.size() < 3 || validSessionStep(steps[2]))
+        && (steps.size() < 4 || validSessionStep(steps[3]))
+        && (steps.size() < 5 || validSessionStep(steps[4]))
+        && (steps.size() < 6 || validSessionStep(steps[5]))
+        && (steps.size() < 7 || validSessionStep(steps[6]))
+        && (steps.size() < 8 || validSessionStep(steps[7]));
+    }
+    function validSessionAdvance(owner, seatId, uid, sessionId) {
+      let before = resource.data;
+      let after = request.resource.data;
+      let index = before.completedCount;
+      let resultId = after.resultIds[index];
+      let result = get(/databases/$(database)/documents/users/$(uid)/results/$(resultId)).data;
+      return before.status == 'in-progress' && index < before.steps.size()
+        && after.diff(before).affectedKeys().hasOnly(['status', 'completedCount', 'resultIds', 'updatedAt'])
+        && after.completedCount == index + 1
+        && after.resultIds == before.resultIds.concat([resultId])
+        && result.assignmentId == sessionId && result.assignmentStep == index
+        && result.assignmentOwnerId == owner && result.assignmentSeatId == seatId
+        && result.exerciseId == before.steps[index].exerciseId && result.level == before.steps[index].level
+        && result.configVersion == before.configVersion && result.get('practice', false) == false
+        && after.status == (after.completedCount == before.steps.size() ? 'completed' : 'in-progress');
+    }
+    match /professionals/{owner}/seats/{seatId}/participants/{uid}/sessions/{sessionId} {
+      allow read: if sessionRelationship(owner, seatId, uid);
+      allow create: if request.auth != null && request.auth.uid == owner && sessionId.matches('[A-Za-z0-9_-]{1,128}')
+        && sessionRelationship(owner, seatId, uid) && validSession(request.resource.data, owner, seatId, uid);
+      allow update: if sessionRelationship(owner, seatId, uid) && request.resource.data.updatedAt == request.time && (
+        (request.auth.uid == owner && resource.data.status in ['assigned', 'in-progress'] && request.resource.data.status == 'cancelled'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']))
+        || (request.auth.uid == uid && resource.data.status == 'assigned' && request.resource.data.status == 'in-progress'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']))
+        || (request.auth.uid == uid && validSessionAdvance(owner, seatId, uid, sessionId)));
     }
     function noBilling(uid) {
       let path = /databases/$(database)/documents/billing/$(uid);

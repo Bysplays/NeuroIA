@@ -1,3 +1,6 @@
+import { AssignedSessionInbox, AssignedSessionPlayer } from './components/AssignedSessions';
+import { useAccountAccess } from './services/accountAccessContext';
+import type { AssignedSession } from './services/assignedSessions';
 import { ActivityStatistics } from './components/ActivityStatistics';
 import { AppLoading } from './components/AppLoading';
 import React, { useState, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
@@ -104,6 +107,10 @@ export const App: React.FC = () => {
 const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: boolean; sync: ProgressSync; data: ProgressData }> = ({ uid, onSignOut, signingOut, sync, data }) => {
   const portrait = usePortrait();
   const { profile, history } = data;
+  const access = useAccountAccess();
+  const [proposal, setProposal] = useState<AssignedSession | null>(null);
+  const sessionLink = access?.kind === 'invitation' && access.professionalId && access.seatId ? { professionalId: access.professionalId, seatId: access.seatId, patientId: uid } : null;
+  const playingProposal = proposal && sessionLink && proposal.professionalId === sessionLink.professionalId && proposal.seatId === sessionLink.seatId ? proposal : null;
   const [placementOpen, setPlacementOpen] = useState(() => !hasPlacement(profile));
   const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | 'achievements' | 'statistics' | CognitiveDomain | ExerciseId>('dashboard');
 
@@ -207,6 +214,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   };
 
   const handleBackToDashboard = () => {
+    setProposal(null);
     soundService.stopSpeaking();
     soundService.playTap();
     setDailyPlanSession(null);
@@ -219,7 +227,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
     isLast: dailyPlanSession.currentIndex + 1 >= dailyPlanSession.queue.length,
   } : null;
 
-  const isPlayingGame = activeView !== 'dashboard' && activeView !== 'therapist' && activeView !== 'achievements' && activeView !== 'statistics';
+  const isPlayingGame = !!playingProposal || activeView !== 'dashboard' && activeView !== 'therapist' && activeView !== 'achievements' && activeView !== 'statistics';
 
   const exerciseId = getExercisesForDomain(activeView as CognitiveDomain)[0]?.id ?? activeView as ExerciseId;
   const placement = !hasPlacement(profile) || placementOpen;
@@ -244,8 +252,10 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
       )}
 
       {placement ? <PlacementOnboarding profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} onSignOut={onSignOut} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
-        {activeView === 'dashboard' && (
+        {playingProposal && <AssignedSessionPlayer key={playingProposal.id} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isFatigueOpen || isRestModalOpen} />}
+        {activeView === 'dashboard' && !playingProposal && (
           <Dashboard
+            proposedSessions={sessionLink && <AssignedSessionInbox key={sessionLink.professionalId + sessionLink.seatId} link={sessionLink} onStart={value => { setDailyPlanSession(null); setProposal(value); window.scrollTo(0, 0); }} />}
             profile={profile}
             onSelectDomain={handleSelectDomain}
             onSelectExercise={handleSelectExercise}
@@ -267,7 +277,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
           />
         )}
 
-        {isPlayingGame && <GameSession key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
+        {isPlayingGame && !playingProposal && <GameSession key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
           <GameExercise id={exerciseId} profile={profile} onBack={handleBackToDashboard} onSaveResult={handleSaveExerciseResult} planProgress={planProgress} onNextPlanExercise={handleNextPlanExercise} />
         </GameSession>}
       </main>}

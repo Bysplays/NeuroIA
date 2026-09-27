@@ -1111,3 +1111,28 @@ body[data-contrast="standard"] .placement-art { mix-blend-mode: multiply; }
 .placement-content progress::-webkit-progress-value { background: var(--color-action-bg); }
 .placement-content progress::-moz-progress-bar { background: var(--color-action-bg); }
 body[data-companions="hidden"] .placement-card { grid-template-columns: minmax(0, 1fr); }
+
+/* Professional proposals share the workspace palette and native dialog. */
+.proposal-heading, .proposal-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.proposal-actions { justify-content: flex-start; }
+.proposal-heading h1, .proposal-heading h2 { margin: 0; overflow-wrap: anywhere; }
+.proposal-heading .touch-btn, .proposal-actions .touch-btn { font-size: .9rem; min-height: 48px; padding: 14px 24px; }
+.modal-shell:has(.session-composer) { width: min(760px, calc(100vw - 32px)); scrollbar-gutter: auto; }
+.session-composer { width: 100%; box-sizing: border-box; padding: 28px; border-radius: 28px; background: var(--color-surface); color: var(--color-text-main); }
+.session-composer > header { position: sticky; top: 0; z-index: 2; padding-bottom: 12px; background: var(--color-surface); }
+.session-composer form { display: grid; gap: 20px; margin-top: 24px; }
+.session-composer label { display: grid; gap: 8px; font-size: .9rem; min-width: 0; }
+.session-composer input, .session-composer textarea, .session-composer select { width: 100%; min-width: 0; box-sizing: border-box; font: inherit; padding: 12px; border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-bg); color: var(--color-text-main); }
+.session-draft-steps { display: grid; gap: 16px; list-style: none; padding: 0; margin: 0; }
+.session-draft-steps li { display: grid; grid-template-columns: minmax(0, 1fr) 90px; gap: 12px; border-top: 1px solid var(--color-border); padding-top: 16px; }
+.session-draft-steps .proposal-actions { grid-column: 1 / -1; justify-content: flex-end; }
+.session-draft-steps .stats-quiet-button { padding: 10px 14px; }
+.session-steps { padding-left: 24px; margin: 20px 0; }
+.session-steps li { padding: 10px 0 10px 8px; }
+.session-steps li > span { display: block; }
+.session-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+.session-card { min-width: 0; }
+.session-inbox { display: grid; gap: 18px; width: 100%; min-width: 0; }
+.session-player-bar { padding: 16px 24px; border-bottom: 1px solid var(--color-border); }
+.session-player-bar p { margin: 0; }
+@media (max-width: 500px) { .session-draft-steps li { grid-template-columns: minmax(0, 1fr); } .session-composer { padding: 20px; } .proposal-heading > .touch-btn { width: 100%; } .session-player-bar { padding: 16px; } }

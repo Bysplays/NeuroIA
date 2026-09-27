@@ -1,3 +1,4 @@
+import { AccountAccessContext } from '../services/accountAccessContext';
 import { AppLoading } from './AppLoading';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { accessService, accessError, type AccountAccess } from '../services/accessService';
@@ -83,7 +84,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
       <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
     </main>;
   }
-  if (access.active) return <>{children}</>;
+  if (access.active) return <AccountAccessContext.Provider value={access}>{children}</AccountAccessContext.Provider>;
   return <main className="access-entry">
     <img src={`${import.meta.env.BASE_URL}brand/neuroia-logo.svg`} alt="NeuroIA" width="160" />
     {!portrait && <OnboardingModal access={access} loadFailed={Boolean(error)} invitationIssue={invitationIssue} busy={busy}

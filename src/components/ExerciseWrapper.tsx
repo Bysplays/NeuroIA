@@ -84,14 +84,15 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
             </dl>
 
             <div className="result-actions">
-              <div className="result-secondary-actions">
+              {!session.lockedLevel && <div className="result-secondary-actions">
                 <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
                   onRestart(); }}>
                   <RotateCcw size={18} aria-hidden="true" /> Repetir
                 </button>
-              </div>
+              </div>}
               <button
                 className="touch-btn touch-btn-primary result-primary"
+                disabled={session.lockedLevel && !session.nextReady}
                 onClick={() => {
                   soundService.playTap();
                   if (planProgress && onNextPlanExercise) onNextPlanExercise();

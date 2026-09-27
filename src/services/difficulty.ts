@@ -66,7 +66,7 @@ export function applyPlacement(profile: UserProfile, id: ExerciseId, trial: Plac
 export function adaptDifficulty(profile: UserProfile, result: ExerciseResult) {
   const id = result.exerciseId as ExerciseId;
   const current = profile.gameLevels?.[id];
-  if (!current || result.configVersion !== DIFFICULTY_VERSION || result.level !== current.level
+  if (!current || result.assignmentId || result.configVersion !== DIFFICULTY_VERSION || result.level !== current.level
     || result.practice === true || result.totalQuestions < (id === 'memory-pairs' ? 2 : 3)) return;
   // Tracking contact/duration is not comparable across input methods; keep it manual.
   if (id === 'motor-tracking') return;

@@ -15,7 +15,7 @@ voice provider or new illustration set has been selected by this planning work.
 | 1 / EEG | Bluetooth EEG headband | Awaiting owner-supplied SDK and hardware details | Real-device connection, signal quality, disconnect/reconnect and supported-device matrix |
 | 2 / SEATS | Monthly professional seats and code validity | Checkout, Worker, redemption and rules implemented; production lifecycle unverified | Unused and redeemed codes follow paid entitlement; expired access blocks games and linked reads |
 | 3 / AI | Browser-local report/note assistance | No runtime integration; professional view is read-only | Spanish evidence-linked drafts, human review, supported-device benchmark and non-AI fallback |
-| 4 / SESSIONS | Professional-assigned game sequences | No assignment service; legacy therapist fields are not a permission system | Named participant, ordered exercises, delivery, completion and strict owner/participant rules |
+| 4 / SESSIONS | Professional-assigned game sequences | Versioned proposals, editor, participant entry, fixed levels, durable completion and resume implemented | Publish reviewed rules/frontend and check real paired accounts on physical tablets |
 | 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Release frontend and verify real email delivery; magic links deferred because Spark allows five sign-in emails/day |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
@@ -29,7 +29,7 @@ voice provider or new illustration set has been selected by this planning work.
 The first priority/ease steps are: 0 — mergeable baseline; 1 — retire daily
 actions; 2 — supplied logo; 3 — email/password entry. Steps 0–2 are complete.
 Step 3 is implemented and locally verified; backend/provider activation is complete.
-Frontend publication and real email-delivery checks remain open below. The product-priority table above is separate from this sequence.
+Seats, difficulty/placement and professional session proposals are also implemented. Frontend publication and real email-delivery checks remain open below. The product-priority table above is separate from this sequence.
 
 ### EEG
 
@@ -61,9 +61,15 @@ Frontend publication and real email-delivery checks remain open below. The produ
   device memory, download size and licenses before selecting a model.
 - [ ] Implement local draft generation, cancellation, explicit review and save;
   never manufacture diagnoses, activity or prescriptions from empty histories.
-- [ ] Implement versioned session assignments to an actively linked person,
+- [x] Implement versioned session assignments to an actively linked person,
   ordered game IDs/levels, progress/resume, cancellation and completion receipts.
-- [ ] Test cross-account isolation, seat expiry, departure and historical ownership.
+- [x] Test cross-account isolation, seat expiry, departure, replaced occupants,
+  duplicate games, concurrent completion and durable result recovery in the emulator.
+- [ ] Publish the session rules and frontend; verify a real professional/participant
+  pair on physical tablets. No production fixture activity is used for verification.
+- [ ] Add older professional-session pagination beyond the latest 50; participant
+  queries filter pending sessions before applying their 50-item limit.
+- [ ] Define session invalidation/migration when retiring a game or changing configuration versions.
 
 ### Authentication, identity and artwork
 

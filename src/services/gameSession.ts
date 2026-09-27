@@ -4,6 +4,8 @@ import type { createGameClock } from './gameClock';
 
 export const SessionContext = createContext<{
   config: GameConfig;
+  lockedLevel?: boolean;
+  nextReady?: boolean;
   clock: ReturnType<typeof createGameClock>;
   finish: (completed: boolean) => void;
   restart: () => void;

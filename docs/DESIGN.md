@@ -296,6 +296,19 @@ Place purchase and the shared settings icon in the top header. Reuse player
 settings without its subscription section; name and appearance are account-wide.
 Logout and information links live in the settings footer.
 
+Linked people also have a “Sesiones” action. The proposal view uses the same
+workspace cards and quiet controls. A native dialog collects a title, optional
+message and up to eight game/level rows with explicit up/down/remove controls.
+“Revisar sesión” shows the exact sequence before “Compartir sesión”. Published
+proposals show status and completed/total counts; cancellation requires confirmation.
+Between the greeting and daily plan, the participant home identifies the proposing
+professional and offers start/resume.
+Game introductions show the fixed level and sequence position. A compact toolbar
+provides pause and return; unfinished games restart after leaving, completed steps
+persist. Confirmation of the saved result enables the next exercise. Repeat and
+manual level selection are hidden for proposals. Keep these controls independent
+of the daily-plan styles; use the `proposal-` action/heading classes.
+
 People show their supplied name and an action to open the existing activity charts
 and table in read-only mode. Use “Volver al panel” and identify whose activity is
 being shown. Seats show pending/active/inactive state, paid-through date, renewal

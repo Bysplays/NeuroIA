@@ -9,7 +9,7 @@ import { getExerciseById, getExercisesForDomain } from '../services/exerciseCata
 import type { CognitiveDomain, ExerciseId } from '../types';
 import { soundService } from '../services/soundService';
 
-export function GameSession({ id, step, onBack, children, initialLevel = 1, mode = 'normal', paused = false }: { id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
+export function GameSession({ id, step, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true }: { id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
   const portrait = usePortrait();
   const [level, setLevel] = useState(initialLevel);
   const config = gameConfig(level, mode);
@@ -50,16 +50,16 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, [clock, help, completed, started, portrait, paused]);
-  return <SessionContext.Provider value={{ config, clock, finish, restart: () => { clock.reset(); setHelp(true); setSeconds(0); } }}>
+  return <SessionContext.Provider value={{ config, clock, finish, lockedLevel, nextReady, restart: () => { clock.reset(); setHelp(true); setSeconds(0); } }}>
     {help && <section className="game-instruction-screen" aria-labelledby="game-instruction-title">
-      <button className="paper-nav-button" onClick={onBack}><ArrowLeft size={20} />{mode === 'normal' ? 'Volver al inicio' : 'Volver'} </button>
+      {!lockedLevel && <button className="paper-nav-button" onClick={onBack}><ArrowLeft size={20} />{mode === 'normal' ? 'Volver al inicio' : 'Volver'} </button>}
       <div className="game-instruction-paper">
         <HeaderIllustration scene={exercise?.id ?? "home"} className="game-instruction-art" />
         <span className="soft-label">{step ?? (started ? 'Recordamos cómo jugar' : 'Antes de empezar')}</span>
         <h1 ref={heading} tabIndex={-1} id="game-instruction-title">{exercise?.title}</h1>
         <p>{instruction}</p>
         <p className="soft-label">Nivel {level} de 10{mode === 'practice' ? ' · Ejemplo sin puntuación' : ''}</p>
-        {!started && mode === 'normal' && <label className="game-level-choice">Dificultad de esta partida
+        {!started && mode === 'normal' && !lockedLevel && <label className="game-level-choice">Dificultad de esta partida
           <select value={level} onChange={event => setLevel(Number(event.target.value))}>
             {Array.from({ length: 10 }, (_, i) => <option key={i + 1} value={i + 1}>Nivel {i + 1}{i + 1 === initialLevel ? ' · recomendado' : ''}</option>)}
           </select>
