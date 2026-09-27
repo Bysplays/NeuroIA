@@ -53,11 +53,15 @@ export function AccountPassword() {
     finally { setBusy(false); }
   };
   return <section className="preferences-section account-password" aria-labelledby="account-password-title">
-    <h3 id="account-password-title">Acceso a tu cuenta</h3>
-    <p className="entry-note">{user.email}</p>
-    {linked ? <button className="paper-nav-button" disabled={busy} onClick={reset}>Cambiar contraseña por correo</button>
-      : !open ? <button className="paper-nav-button" onClick={() => setOpen(true)}>Añadir contraseña</button>
-        : <form className="email-form" onSubmit={submit} aria-busy={busy}>
+    <div className="account-password-heading">
+      <div>
+        <h3 id="account-password-title">Acceso a tu cuenta</h3>
+        <p>{user.email}</p>
+      </div>
+      {linked ? <button className="subscription-upgrade" disabled={busy} onClick={reset}>Cambiar contraseña</button>
+        : !open && <button className="paper-nav-button" onClick={() => setOpen(true)}>Añadir contraseña</button>}
+    </div>
+    {!linked && open && <form className="email-form" onSubmit={submit} aria-busy={busy}>
           <p className="entry-note">Podrás entrar con este correo y seguir usando Google. Al menos 6 caracteres.</p>
           <input type="text" name="username" autoComplete="username" value={user.email} readOnly hidden />
           <label htmlFor="account-password">Nueva contraseña</label>
@@ -66,7 +70,7 @@ export function AccountPassword() {
           <input id="account-confirmation" name="confirmation" type="password" autoComplete="new-password" required value={confirmation} onChange={event => setConfirmation(event.target.value)} disabled={busy} />
           {reauth ? <button className="paper-nav-button" type="button" disabled={busy} onClick={confirmIdentity}>Confirmar con Google</button>
             : <button className="paper-nav-button" type="submit" disabled={busy}>Guardar contraseña</button>}
-          <button className="email-text-button" type="button" disabled={busy} onClick={() => { setOpen(false); setPassword(''); setConfirmation(''); setError(''); setNotice(''); setReauth(false); }}>Cancelar</button>
+          <button className="paper-nav-button" type="button" disabled={busy} onClick={() => { setOpen(false); setPassword(''); setConfirmation(''); setError(''); setNotice(''); setReauth(false); }}>Cancelar</button>
         </form>}
     {busy && <p role="status">Un momento…</p>}
     {notice && <p className="entry-note" role="status">{notice}</p>}

@@ -22,7 +22,7 @@ import { LandscapeGate } from './components/LandscapeGate';
 import { usePortrait } from './services/orientation';
 import { LoginScreen } from './components/LoginScreen';
 import { EmailVerification } from './components/EmailVerification';
-import { needsEmailVerification, submitEmailAuth, type EmailAction } from './services/emailAuth';
+import { accountDisplayName, needsEmailVerification, submitEmailAuth, type EmailAction } from './services/emailAuth';
 import { RestBreakModal } from './components/RestBreakModal';
 
 // Juegos disponibles de serious play
@@ -50,7 +50,7 @@ export const App: React.FC = () => {
 
   useEffect(() => onAuthStateChanged(auth, nextUser => {
     soundService.stopSpeaking();
-    StorageService.setAccount(nextUser ? { uid: nextUser.uid, displayName: nextUser.displayName } : null);
+    StorageService.setAccount(nextUser ? { uid: nextUser.uid, displayName: accountDisplayName(nextUser) } : null);
     if (nextUser) {
       const cached = StorageService.readCachedProgress();
       if (cached) applyAppearance(cached.profile.settings);

@@ -6,6 +6,11 @@ import {
 
 export type EmailAction = 'signin' | 'register' | 'reset';
 
+export function accountDisplayName(user: Pick<User, 'displayName' | 'providerData'>) {
+  return user.displayName?.trim() || (user.providerData.some(provider => provider.providerId === 'password') ? 'bella persona' : '');
+}
+
+
 export function needsEmailVerification(user: Pick<User, 'emailVerified' | 'providerData'>) {
   return !user.emailVerified && user.providerData.some(provider => provider.providerId === 'password');
 }

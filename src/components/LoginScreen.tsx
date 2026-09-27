@@ -95,10 +95,10 @@ export function LoginScreen({ onSignIn, onEmail, onClearError, busy, error }: {
             <input id="login-confirmation" name="confirmation" type="password" autoComplete="new-password" value={confirmation} onChange={event => setConfirmation(event.target.value)} required disabled={busy} />
           </>}
           <button className="touch-btn touch-btn-primary" disabled={busy} type="submit">{busy ? 'Un momento…' : mode === 'register' ? 'Crear cuenta' : mode === 'reset' ? 'Enviar enlace' : 'Entrar'}</button>
-          {mode === 'signin' && <>
+          {mode === 'signin' && <div className="email-login-links">
             <button className="email-text-button" type="button" disabled={busy} onClick={() => changeMode('reset')}>He olvidado mi contraseña</button>
             <button className="email-text-button" type="button" disabled={busy} onClick={() => changeMode('register')}>Crear una cuenta</button>
-          </>}
+          </div>}
           {mode !== 'signin' && <button className="email-text-button" type="button" disabled={busy} onClick={() => changeMode('signin')}>Ya tengo cuenta: entrar</button>}
           {(error || formError) && <p className="email-feedback" role="alert">{formError || error}</p>}
           {notice && <p className="email-feedback" role="status">{notice}</p>}

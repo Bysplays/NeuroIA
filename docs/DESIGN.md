@@ -451,12 +451,19 @@ Escape and the backdrop dismiss the dialog when no request is pending. Temporari
 hide it in portrait so the orientation gate remains on top, preserving form state.
 
 Before either workspace, unverified password accounts see “Verifica tu correo”,
-their address, send/recheck actions and logout. Do not claim an email was sent until
+their address in a compact centered card with a tinted mail-icon header. Use a
+filled pill for “Enviar correo” and plain, non-underlined text for rechecking and
+logout. Space the recheck action equally between the send button and footer divider;
+keep logout small and muted in the footer. Keep 44px minimum hit areas. Do not claim an email was sent until
 Firebase confirms. Recovery uses neutral wording for unknown addresses. Verification
 and reset happen on Firebase's hosted action pages; users return to the app afterward.
 Settings contain “Acceso a tu cuenta” in both workspaces, with the account email,
 “Añadir contraseña” for Google-only accounts or a change-password email action.
-Keep these controls inside the existing settings dialog. Adding a password preserves
+Keep these controls inside the existing settings dialog. Match the other settings
+sections: shared heading and divider, muted address, compact action alongside the
+heading when space permits, and an inline form using the same input styling.
+“Cambiar contraseña” uses the filled pill button shared with subscription actions,
+without an explanatory sentence below it. Adding a password preserves
 the current account and Google access; a recent-login error offers a separate,
 explicit Google confirmation button.
 

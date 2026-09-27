@@ -215,3 +215,7 @@ untouched fields and exercise progress still receive live cloud updates. On a ne
 session, load current server settings and overlay any unsent operations. This
 avoids mid-session appearance bounces without repeatedly writing local preferences
 over changes from another device.
+
+Email/password accounts without a display name start with “bella persona” in new
+player and professional profiles. Existing saved names and Google display names
+are preserved; account settings remain the place to change the player name.
