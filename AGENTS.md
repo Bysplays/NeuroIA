@@ -421,6 +421,9 @@ contains provisional levels/evidence until the final trial marks placement compl
 The reducer, adapter and Firestore rules use the existing atomic progress/receipt
 transaction; there is no separate local assessment store or result archive for trials.
 First committed trials win across devices; imported local placement is discarded.
+The local feedback phase can render before its parent progress snapshot contains
+the trial. Guard scoring and next-game navigation until that evidence is present;
+verify both measured and skipped transitions with delayed profile delivery.
 
 New exercise results carry numeric level/configVersion and optional hint usage.
 Adaptation consumes three eligible results at the current recommended level, capped

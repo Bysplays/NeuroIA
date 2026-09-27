@@ -579,6 +579,9 @@ only the unfinished trial. The explicit inaccessible-trial action starts that ga
 at level 1 and labels it as unmeasured in the summary. Do not call this a diagnosis
 or an ability score. Professional entry has no placement flow.
 
+Between trials, keep the feedback panel visible while its progress update arrives,
+showing “Preparando el siguiente paso…” and disabling Continue until that trial is
+available. Never replace missing trial evidence with an invented level.
 Show all eight starting levels at completion, then “Ir a mis juegos”. Settings and
 logout remain accessible. Respect hidden companions, large text and contrast.
 Ordinary instructions show the recommendation and a 1–10 selector; the chosen level

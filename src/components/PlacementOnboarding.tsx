@@ -20,6 +20,9 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onSignO
   const complete = hasPlacement(profile);
   const exercise = getExerciseById(id)!;
   const count = EXERCISE_IDS.filter(key => trials[key]).length;
+  const feedbackTrial = trials[id];
+  // The parent progress snapshot can arrive after the local phase change.
+  const awaitingTrial = phase === 'feedback' && !feedbackTrial;
   const playing = phase === 'practice' || phase === 'trial';
   useEffect(() => { soundService.stopSpeaking(); heading.current?.focus(); window.scrollTo(0, 0); }, [phase, id]);
   useEffect(() => () => soundService.stopSpeaking(), []);
@@ -45,7 +48,8 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onSignO
     </GameSession></div>
   </div>;
   const message = complete ? 'Ya tenemos un punto de partida para cada juego. Los niveles describen esta práctica, no tu capacidad general. Puedes elegir otro nivel antes de jugar.'
-    : phase === 'feedback' ? trials[id]?.skipped ? 'Este juego empezará en nivel 1, sin una prueba medida. Podrás cambiarlo antes de jugar.' : id === 'motor-tracking' ? 'Este juego empieza en nivel 1. Puedes elegir otro antes de jugar; su nivel se ajusta manualmente.' : `Empezaremos este juego en nivel ${placementLevel(trials[id]!, id)}. Se irá ajustando con tus partidas.`
+    : awaitingTrial ? 'Preparando el siguiente paso…'
+    : phase === 'feedback' ? feedbackTrial?.skipped ? 'Este juego empezará en nivel 1, sin una prueba medida. Podrás cambiarlo antes de jugar.' : id === 'motor-tracking' ? 'Este juego empieza en nivel 1. Puedes elegir otro antes de jugar; su nivel se ajusta manualmente.' : `Empezaremos este juego en nivel ${placementLevel(feedbackTrial!, id)}. Se irá ajustando con tus partidas.`
     : phase === 'ready' ? 'Ya conoces el juego. Ahora haremos una prueba corta para elegir por dónde empezar. Puedes pedir ayuda siempre que lo necesites.'
     : phase === 'intro' ? 'Primero probaremos un ejemplo sin puntuación. Después haremos una prueba corta, a tu ritmo.'
     : 'Vamos a descubrir por dónde empezar. Te acompañaremos en ocho juegos cortos. No hay nota. Puedes descansar cuando quieras.';
@@ -63,10 +67,10 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onSignO
           <ul className="placement-levels">{EXERCISE_IDS.map(key => <li key={key}><span>{getExerciseById(key)!.title}{trials[key]?.skipped ? ' · sin prueba' : ''}</span><strong>Nivel {profile.gameLevels![key]!.level}</strong></li>)}</ul>
           <button className="touch-btn touch-btn-primary" onClick={onDone}>Ir a mis juegos</button>
         </> : <div className="placement-actions">
-          <button className="touch-btn touch-btn-primary" onClick={() => {
+          <button className="touch-btn touch-btn-primary" disabled={awaitingTrial} onClick={() => {
             if (phase === 'welcome' || phase === 'feedback') next();
             else setPhase(phase === 'ready' ? 'trial' : 'practice');
-          }}>{phase === 'intro' ? 'Probar un ejemplo' : phase === 'ready' ? 'Empezar la prueba' : 'Continuar'}</button>
+          }}>{awaitingTrial ? 'Un momento…' : phase === 'intro' ? 'Probar un ejemplo' : phase === 'ready' ? 'Empezar la prueba' : 'Continuar'}</button>
           {(phase === 'intro' || phase === 'ready') && <button className="paper-nav-button" onClick={() => save()}>Esta prueba no me resulta accesible: empezar en nivel 1</button>}
           {phase !== 'welcome' && phase !== 'feedback' && <button className="paper-nav-button" onClick={() => setPhase('welcome')}>Volver</button>}
         </div>}
