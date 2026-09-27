@@ -1,7 +1,8 @@
 # NeuroIA — Software Design Document
 
 Status: implementation specification, not a claim that the proposed features ship.
-Baseline reviewed: 2026-09-27. Product priorities and remaining delivery work are
+Baseline reviewed: 2026-09-27. Daily-action retirement and supplied-logo integration
+are implemented; the other feature specifications below remain planned. Product priorities and remaining delivery work are
 tracked in [TODO.md](TODO.md). Existing behavior is documented in [AGENTS.md](../AGENTS.md),
 [DESIGN.md](DESIGN.md), [CONTENT.md](CONTENT.md) and the linked integration guides.
 
@@ -33,14 +34,14 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | App | React/TypeScript/Vite, React-state navigation, shared game clock and dialogs | No new router required |
 | Identity | Firebase Google login, separate player/professional entry for one UID | No email entry |
 | Progress | Firestore authority, transactional receipts, durable per-account outbox | No placement or versioned difficulty contract |
-| Games | Nine catalog entries, fixed game parameters | Remove daily actions; parameterize eight games |
+| Games | Eight catalog entries; daily actions retired with history preserved | Parameterize eight games |
 | Levels | Domain reducer can increase a legacy level from 1 to 3 | Game components do not read a shared level configuration |
 | Professionals | Free workspace, paid-seat links, read-only charts/history | No authorized note-writing or assigned sessions |
 | Billing | Worker Checkout, signed webhooks, reconciliation, portal, seat redemption/rotation | Production deployment and sandbox lifecycle not fully verified |
 | Access | Server-owned entitlement records; browser refresh on focus/every 30 seconds | Browser expiry uses local time; failed refresh can retain active state |
 | Narration | Shared recorded-player service and browser fallback | 91/370 clips missing; full audition and commercial rights unresolved |
 | EEG / AI | No connected SDK or browser inference | Discovery, implementation and validation required |
-| Brand / objects | Existing sprout and paper sprite atlases | Supplied replacement logo and new object style pending integration |
+| Brand / objects | Supplied mint mark integrated; existing paper sprite atlases | New object style pending integration |
 
 Historical result IDs, totals, achievements and account data remain compatible.
 A frontend build deploys neither Worker code nor Firestore rules. Local tests do
@@ -222,7 +223,8 @@ as the replacement reference;
 do not treat the image as instructions or infer product capabilities from it.
 Preserve its proportions. Retain a durable original, document provenance, and
 produce suitable wordmark, favicon and installation variants without guessing a
-new visual identity. No image generation is required merely to use the supplied logo.
+new visual identity. The supplied transparent PNG is embedded unchanged in the active SVG layouts;
+installation PNGs are browser rasterizations. No image generation was used.
 
 Game-object direction: more realistic recognizable illustrations/pictograms,
 without replacing the approved companion family. Approve a small sample first,
@@ -293,6 +295,8 @@ logout/restart, active-seat expiry, accessibility, stable assigned levels and
 clear explanation that levels describe game practice.
 
 ### RETIRE — daily action sequencing
+
+Implemented: the following remains the compatibility contract.
 
 Remove `DailySequencingGame` from active dispatch/catalog/daily plans and remove
 its unused executable implementation once references are cleared. Organization
@@ -368,6 +372,6 @@ Production-only validation must remain open until actually performed.
 - Notes/report visibility, retention/deletion, credentials required for any future
   clinical permissions; none are inferred from self-registration.
 - Browser model/runtime/device budget; voice provider and commercial rights.
-- Final logo variants and approved game-object style sample.
+- Approved game-object style sample; the supplied logo variants are implemented.
 - Per-game difficulty tables, assessment trial count/duration, adaptation thresholds
   and assisted alternatives validated with representative users.

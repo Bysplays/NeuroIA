@@ -21,7 +21,7 @@
 
 ## A space to practice
 
-NeuroIA is a **serious play** platform with nine games covering attention,
+NeuroIA is a **serious play** platform with eight games covering attention,
 memory, language, organization and coordination. Daily sessions, achievements
 and personal progress support practice without competing against other people.
 

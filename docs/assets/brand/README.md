@@ -1,40 +1,42 @@
 # NeuroIA brand mark
 
-Asset paths in this guide refer to `public/brand/` unless a repository-relative path is given.
-
-`public/brand/neuroia-mark.svg` is the compact icon; `public/brand/neuroia-logo.svg` adds the NeuroIA wordmark.
-The mark is an abstract sprout with two organic paper-like leaves, turquoise and
-lilac, with restrained layered edges and dark ink veins. It echoes the plant in
-`public/images/headers/home.png` and the app's paper palette. It is a vector brand
-symbol, not a replacement illustration of the raster companions.
-
-Authored directly as SVG paths on 2026-09-16, extending the existing vector brand
-assets. No generated raster or external font file is embedded. The wordmark uses
-DM Sans with the app's system fallback. Both files share the same leaf geometry.
-Keep the 80 × 80 viewBox and clear outer margins; test at 32–40 px and favicon size.
-The icon is used by the login, app header, favicon and memory-card backs. Consumer
-asset URLs retain the Vite base path. Do not add a medical cross, efficacy claim,
-neon outline, or a thin vector copy of the companion mascots.
-
-`public/brand/neuroia-favicon.svg` reuses the exact current mark on a pale rounded tile so its
-ink remains readable on light and dark browser tabs. The dedicated filename
-refreshes the previous favicon URL; Vite rewrites it for the Pages base path.
-The repository README reuses the wordmark and existing transparent login scene;
-no new mascot artwork or external font dependency is introduced.
-
-## Home-screen icons
-
-`public/brand/icon-192.png`, `icon-512.png` and `apple-touch-icon.png` (180px)
-are Chromium rasterizations of the existing `neuroia-mark.svg`, centered at 70%
-of the square canvas on solid #edf5f3. Device scale factor is 1. The 512px icon
-keeps the mark inside Android's maskable safe zone. No generated artwork was used.
-
-## Supplied replacement reference (pending integration)
+## Source
 
 The owner supplied [supplied-mark.png](supplied-mark.png) on 2026-09-27: a mint
-organic branching mark on a white background. This is an unmodified copy of the
-provided 277 × 441 PNG, retained here so implementation does not depend on a
-temporary clipboard path. No generator, prompt, tracing or transformation was used.
-It is a reference, not an active runtime asset; the SVG sprout and installation
-icons described above remain in use. Integration and variant checks are tracked
-in [TODO](../../TODO.md) and [SDD](../../SDD.md). Preserve the supplied proportions.
+organic branching mark with real alpha transparency. This unmodified 277 × 441
+PNG is the canonical source. Its opaque fill is approximately #85b8ae. No image
+generator, prompt, tracing or recoloring was used. The previous two-leaf sprout
+has been replaced throughout the interface; companion artwork is unchanged.
+
+## Runtime variants
+
+Paths below are repository-relative. The SVG files are layouts containing the
+exact source PNG as a base64 data URI, not vector redraws. Embedding makes each
+file self-contained, including when the README loads its wordmark as an image.
+
+- `public/brand/neuroia-mark.svg`: 80 × 80 viewBox; the source is centered in a
+  50 × 80 image box at x=15, y=0 with `preserveAspectRatio="xMidYMid meet"`.
+  Transparency, tall proportions and original pixels are preserved.
+- `public/brand/neuroia-logo.svg`: 300 × 80 viewBox; the same mark and the existing
+  NeuroIA wordmark at x=90, y=54, using DM Sans/system fallback, size 42.
+- `public/brand/neuroia-favicon.svg`: same mark on an 80 × 80 #edf5f3 tile with
+  18px rounded corners, for light/dark tab visibility.
+
+Existing consumers keep their Vite-base-aware asset URLs: login, shared header,
+professional header, loading, access recovery and memory-card backs. The README
+uses the updated wordmark and small mark. Decorative companion visibility does
+not hide the brand. Check the logo at 16/32/40px as well as larger displays.
+
+## Installation icons
+
+`public/brand/icon-192.png`, `icon-512.png` and `apple-touch-icon.png` (180px)
+are Chromium rasterizations at device scale factor 1. To reproduce, render a
+square HTML canvas with solid #edf5f3 background, centered `neuroia-mark.svg` at
+70% of both dimensions, and take a viewport-sized PNG screenshot after image
+load. The symbol stays within the Android maskable safe zone. No AI or new
+artwork is involved in these exports.
+
+The favicon, Apple icon and manifest icon URLs use `?v=2` to refresh prior cached
+artwork. Manifest URLs remain relative and HTML asset references retain Vite base
+rewriting for root and repository deployments. Verify physical-device icon refresh
+and installation as part of the existing Android/iPad release checklist.

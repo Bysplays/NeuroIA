@@ -12,8 +12,8 @@ This is a living guide to the current product direction. Read [AGENTS.md](../AGE
 for implementation, verification, and maintenance practices. Keep this guide in
 English; the application speaks Spanish.
 
-The planned replacement logo, realistic illustrated game objects and guided
-placement flow are specified in [SDD.md](SDD.md). They remain pending; the
+The planned realistic illustrated game objects and guided placement flow are
+specified in [SDD.md](SDD.md). They remain pending; the
 current implementation and visual references below are still authoritative until
 each feature is integrated and verified.
 
@@ -36,7 +36,7 @@ Use the actual home screen and these repository assets as the visual references:
 
 - `public/images/wellness-companions.png`: the turquoise pear and lavender pebble
   companions; reference for character proportions, expression, and paper texture.
-- `public/images/headers/`: individual scenes for all nine exercise headers and
+- `public/images/headers/`: individual scenes for eight active exercise headers and
   results, home, catalog, achievements, therapist view, and the fatigue dialog.
   See `docs/assets/images/headers/README.md` for prompts and provenance.
 - `public/images/achievement-badges.png` and `achievement-badges-extended.png`:
@@ -47,13 +47,14 @@ Use the actual home screen and these repository assets as the visual references:
   for Organization stimuli, preserving object identities and original map order.
 - `public/images/game-objects-0.png` through `game-objects-2.png`: recognizable
   objects and action symbols for game stimuli.
-- `public/brand/neuroia-mark.svg` and `neuroia-logo.svg`: a soft turquoise/lilac
-  paper-leaf sprout with dark ink veins, echoing the plant in the home illustration.
-  This compact vector brand symbol is distinct from the raster mascots. See
-  `docs/assets/brand/README.md` for construction and usage. The browser favicon uses
-  `neuroia-favicon.svg`, the same mark on a pale rounded tile for tab contrast.
-  The repository README uses a centered wordmark, restrained badges and the
-  existing transparent login companions, with practical management links below.
+- `public/brand/neuroia-mark.svg` and `neuroia-logo.svg`: the owner's mint
+  organic branching mark, preserving the supplied transparent PNG and its tall
+  proportions inside SVG layouts. The wordmark retains the existing typography.
+  This brand symbol is distinct from the raster companions. See
+  `docs/assets/brand/README.md` for source and variants. The browser favicon uses
+  `neuroia-favicon.svg`, the same mark on a pale rounded tile. Installation icons
+  use the same source with a solid pale backing and safe margins.
+  The repository README uses the updated wordmark and existing login companions.
 
 The mascots have soft organic bodies, imperfect dark ink features, small limbs,
 and visible paper grain. Keep the same characters across screens. Avoid neon
@@ -141,7 +142,7 @@ width. The home links to achievements rather than displaying the badge collectio
 
 ### All games
 
-“Ver ejercicios” opens the game catalog. Show the nine individual games directly,
+“Ver ejercicios” opens the game catalog. Show the eight individual games directly,
 with a distinctive illustration, brief description, and start action for each.
 Area colors help scanning: blue for attention, pink for language, lilac for
 memory, sage for organization, and peach for coordination.
@@ -150,7 +151,11 @@ Category filters have equal dimensions and centered contents, aligned in a
 regular grid: currently six columns on desktop, three on tablet, and two on
 narrow mobile. They wrap cleanly, retain an explicit selected state, and update
 the result count. Do not add back the “¿Prefieres que te guiemos?” promo card.
-The daily-plan entry remains on the home.
+The daily-plan entry remains on the home. Daily action sequencing is retired;
+Organization offers classification only. The memory beacon sequence remains.
+Historical daily-sequencing results retain their original names and chart colors;
+the activity filter labels that game “(retirado)” when its records are present.
+
 
 ### Games
 
@@ -182,10 +187,6 @@ blending. Never crop limbs to hide a backdrop.
   matching board objects must use exactly the same illustration.
 - Keep memory tiles distinct at rest and clearly highlighted during a demo.
   Hidden cards must not reveal their object through text or accessible names.
-- Show sequence order as compact paper-style “Paso 1”, “Paso 2”, “Paso 3”
-  labels in the card corner; never cover an action illustration with a giant
-  numeral, glass circle, blur or neon glow. Show correctness explicitly. Decoration must not suggest an
-  answer or interfere with selecting, dragging, or reviewing a step.
 - Use the illustrated paper target and companion for motor games. Their visible
   boundary should agree with the hit area. Keep the entire token inside the arena
   on phones as well as desktop, and show contact feedback without neon effects.

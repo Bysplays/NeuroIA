@@ -18,11 +18,11 @@ voice provider or new illustration set has been selected by this planning work.
 | 4 / SESSIONS | Professional-assigned game sequences | No assignment service; legacy therapist fields are not a permission system | Named participant, ordered exercises, delivery, completion and strict owner/participant rules |
 | 5 / EMAIL | Email authentication | Google only | Enable chosen Firebase provider; sign-up, sign-in, verification/recovery and account linking |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
-| 7 / BRAND | Supplied new logo | [Reference retained](assets/brand/supplied-mark.png); existing sprout still active | Integrate exact reference across app, favicon, installation icons and README |
+| 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Existing paper atlases | Approved style sample and verified one-to-one stimulus mappings |
 | 9 / LEVELS | Difficulty 1–10 | Legacy domain levels 1–3; games do not consume a shared difficulty configuration | Versioned per-game parameters, saved difficulty and bounded adaptation |
 | 10 / PLACEMENT | Guided initial level assessment | Access onboarding exists; placement does not | New/unassessed accounts complete resumable guided trials before ordinary play |
-| 11 / RETIRE | Remove daily action sequencing | Still selectable and mounted | Eight playable games, Organization uses categorization, old results remain readable |
+| 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
 
 ### EEG
 
@@ -59,7 +59,7 @@ voice provider or new illustration set has been selected by this planning work.
 
 - [ ] Decide email/password versus email-link sign-in; enable that provider in
   Firebase and implement its complete recovery/account-linking flow, retaining Google.
-- [ ] Integrate the supplied logo reference, preserve its proportions, and verify
+- [x] Integrate the supplied logo reference, preserve its proportions, and verify
   wordmark, loading, header, card backs, favicon and PWA icons on both themes.
 - [ ] Approve realistic illustrated/pictogram samples, inventory all stimuli and
   replace atlases without changing answer keys or recognition identities.
@@ -73,11 +73,11 @@ voice provider or new illustration set has been selected by this planning work.
   accessible instructions and resumable progress. Respect hidden companions.
 - [ ] Persist the actual level/configuration used per result; adapt between
   exercises from sufficient recent evidence, with easier play and reassessment.
-- [ ] Remove daily action sequencing from catalog, dispatch and daily plans;
+- [x] Remove daily action sequencing from catalog, dispatch and daily plans;
   keep memory beacon sequencing. Preserve `daily-seq` / `daily-sequencing`
   history, achievements and cumulative totals.
-- [ ] Verify catalog, Organization, daily plan, completion and historical filters
-  at phone, tablet and desktop sizes with keyboard/touch input.
+- [x] Verify catalog, Organization, daily plan, completion and historical filters
+  at phone, tablet and desktop sizes with keyboard and pointer input.
 
 ## Engineering and release gates
 
@@ -105,7 +105,11 @@ release issue is lost during prioritization.
 
 ## Complete the ElevenLabs audio collection
 
-- 279 of 370 clips are available in `public/audio/elevenlabs-v3/`.
+- The retained recording inventory has 279 of 370 clips available in
+  `public/audio/elevenlabs-v3/`. The current speech collector yields 365 texts;
+  the older inventory also includes three retired daily-sequencing phrases and
+  two previously removed greeting previews. Preserve those original mappings;
+  regenerate the active inventory before commissioning new recordings.
 - 91 feedback clips remain (listed below); the account last showed 6 credits.
 - Resume with Alejandro Castellanos (`WWVK6dYMrl0ZHnHT7cRj`), Eleven v3,
   Spanish override (`es`), stability 0.5. Do not regenerate existing blocks.
@@ -219,8 +223,11 @@ release issue is lost during prioritization.
   preserving narration controls, cancellation, callbacks and playback speed.
   Available clips play locally; missing files and playback failures use browser speech.
 
-## Unresolved game issue
+## Unresolved interface issues
 
+- [ ] Make the header home action close the catalog when already in the
+  dashboard view. The catalog currently keeps its internal selection state;
+  its own “Volver al inicio” action works.
 - [ ] Reproduce the reported blank background in object naming. It was not
   reproduced through the catalog; inspect the domain entry and modal/scroll
   state. Do not mark fixed without a reproduction and verification.

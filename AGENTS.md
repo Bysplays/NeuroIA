@@ -10,7 +10,7 @@ Explicit user instructions take precedence over this local guidance.
 
 ## Product and language
 
-NeuroIA is a Spanish-language entertainment, training and serious-play app with nine exercises
+NeuroIA is a Spanish-language entertainment, training and serious-play app with eight exercises
 across attention, language, memory, organization, and coordination. The app also
 includes a daily plan, achievements, accessibility settings, and a therapist view.
 
@@ -62,8 +62,9 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/types/index.ts` | Domain, exercise, profile, result, and settings contracts |
 | `src/services/productCopy.ts` and `src/components/ProductInformation.tsx` | Supplied public presentation and notice, accessible from login and dashboard |
 | `src/components/Dashboard.tsx` | Home, entry points to areas and all exercises |
-| `src/components/ExerciseCatalog.tsx` | Nine-game catalog and area filters |
-| `src/services/exerciseCatalog.ts` | Canonical exercise definitions and short summaries |
+| `src/components/ExerciseCatalog.tsx` | Eight-game catalog and area filters |
+| `src/services/exerciseCatalog.ts` | Eight active exercise definitions and short summaries |
+| `src/services/activityExercises.ts` | Historical names and stable chart styles, including retired daily sequencing |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
@@ -375,7 +376,9 @@ the shared `data-style` attribute and palette tokens; no separate theme state.
 It maps historical result IDs `visual-scan`, `daily-seq` and `motor-coord` to
 `visual-scanning`, `daily-sequencing` and `motor-target` in the read-only activity
 view, keeping names, filters and chart series consistent without rewriting saved
-records. New game results use the canonical catalog IDs and full ISO completion
+records. Daily action sequencing is retired from play; its metadata remains in
+`activityExercises.ts`. `ExerciseId` covers active games only, while saved result
+IDs remain strings. Organization and daily-plan selection use categorization. New game results use the canonical catalog IDs and full ISO completion
 timestamps. Historical date-only results retain their recorded calendar day in
 activity filters/charts and display no time; never infer midnight as a known
 completion time. Full timestamps display in the device timezone.
