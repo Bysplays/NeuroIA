@@ -53,3 +53,12 @@ Four final downloads initially contained only 0.313 seconds of audio. The comple
 recordings were recovered from History without regenerating them. For subsequent
 batches, wait for finished playback/download availability and reject implausibly
 short sentences before marking a file available. The indexer now checks this.
+
+## Active speech versus retained recordings
+
+The live collector now returns 365 texts. The retained 370-text generation ledger
+also includes the retired daily-action instructions and two feedback phrases,
+plus two previously removed greeting previews. Keep original recordings, source
+lists and mappings for provenance; do not spend credits completing obsolete copy.
+Re-inventory current source before commissioning the next batch. Retirement did
+not remove pending files from the exact 91-clip evaluation checklist.

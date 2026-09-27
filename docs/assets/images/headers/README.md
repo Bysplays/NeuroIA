@@ -38,6 +38,8 @@ Only the turquoise pear companion sitting at two pairs of paper cards, turning o
 
 ### daily-sequencing.png
 
+Retired game: retained as provenance only; no active header uses this scene.
+
 Only the lavender pebble companion arranging three blank picture cards in a neat row on a low table.
 
 ### categorization.png

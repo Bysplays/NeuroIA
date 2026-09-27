@@ -72,8 +72,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     {
       id: 'executive' as CognitiveDomain,
       title: 'Funciones Ejecutivas',
-      subtitle: 'Vida Diaria y Lógica',
-      desc: 'Organiza acciones y resuelve pequeños retos de lógica.',
+      subtitle: 'Objetos y Categorías',
+      desc: 'Agrupa objetos cotidianos según su categoría.',
       icon: <ListOrdered size={36} />,
       color: 'var(--color-executive)',
       bgColor: 'var(--color-executive-bg)',

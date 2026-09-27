@@ -3,10 +3,8 @@ import type { ExerciseId } from '../types';
 type HeaderScene = ExerciseId | 'home' | 'catalog' | 'achievements' | 'therapist' | 'rest';
 
 export function HeaderIllustration({ scene, className = '' }: { scene: HeaderScene; className?: string }) {
-  if (scene === 'daily-sequencing' || scene === 'categorization') {
-    const crop = scene === 'daily-sequencing'
-      ? { x: 27, y: 80, width: 489, height: 375 }
-      : { x: 548, y: 57, width: 466, height: 419 };
+  if (scene === 'categorization') {
+    const crop = { x: 548, y: 57, width: 466, height: 419 };
     const size = Math.max(crop.width, crop.height);
     return <span className={`header-illustration header-illustration-transparent ${className}`} aria-hidden="true">
       <span className="header-scene-crop" style={{

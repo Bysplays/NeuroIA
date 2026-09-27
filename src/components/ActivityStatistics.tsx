@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import type { CognitiveDomain, ExerciseResult } from '../types';
-import { ALL_EXERCISES } from '../services/exerciseCatalog';
+import { ACTIVITY_EXERCISES, activityExerciseTitle as title, activityExerciseStyle } from '../services/activityExercises';
 import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion } from '../services/activityStats';
 import { loadActivityPage } from '../services/activityHistory';
 
 const domains: [CognitiveDomain, string][] = [['attention', 'Atención'], ['language', 'Lenguaje'], ['memory', 'Memoria'], ['executive', 'Organización'], ['motor', 'Coordinación']];
-const colors = ['#247f89', '#a85578', '#6656ac', '#ac661f', '#427639', '#b34245', '#3570ae', '#88752a', '#8d558c'];
-const title = (id: string) => ALL_EXERCISES.find(e => e.id === id)?.title ?? id;
-const color = (id: string) => colors[Math.max(0, ALL_EXERCISES.findIndex(e => e.id === id)) % colors.length];
+const color = (id: string) => activityExerciseStyle(id).color;
 const number = (n: number | null) => n === null || !Number.isFinite(n) ? '—' : n.toLocaleString('es-ES', { maximumFractionDigits: 1 });
 
 function ActivityTimestamp({ date }: { date: string }) {
@@ -31,7 +29,7 @@ function LineChart({ results, metric }: { results: ExerciseResult[]; metric: 'ac
       <svg viewBox="0 0 650 265" role="img" aria-label={`${metric === 'accuracy' ? 'Precisión' : 'Segundos por pregunta'} por día. Valores disponibles en la tabla inferior.`}>
         {[0, 1, 2, 3, 4].map(i => <g key={i}><line x1="55" x2="610" y1={y(max * i / 4)} y2={y(max * i / 4)} className="stats-grid-line" /><text x="44" y={y(max * i / 4) + 4} textAnchor="end">{number(max * i / 4)}</text></g>)}
         {days.filter((_, i) => i === 0 || i === days.length - 1 || (days.length > 2 && i === Math.floor(days.length / 2))).map(day => <text key={day} x={x(day)} y="245" textAnchor="middle">{day.slice(8)}/{day.slice(5, 7)}/{day.slice(2, 4)}</text>)}
-        {ids.map(id => { const values = points.filter(p => p.exerciseId === id); return <g key={id} stroke={color(id)}><polyline fill="none" strokeWidth="2.5" strokeDasharray={ALL_EXERCISES.findIndex(e => e.id === id) % 2 ? '7 4' : undefined} points={values.map(p => `${x(p.day)},${y(p.value)}`).join(' ')} />{values.map(p => <circle key={p.day} cx={x(p.day)} cy={y(p.value)} r="4" fill={color(id)}><title>{title(id)} · {p.day}: {number(p.value)}{metric === 'accuracy' ? '%' : ' s/pregunta'}</title></circle>)}</g>; })}
+        {ids.map(id => { const values = points.filter(p => p.exerciseId === id); return <g key={id} stroke={color(id)}><polyline fill="none" strokeWidth="2.5" strokeDasharray={activityExerciseStyle(id).dashed ? '7 4' : undefined} points={values.map(p => `${x(p.day)},${y(p.value)}`).join(' ')} />{values.map(p => <circle key={p.day} cx={x(p.day)} cy={y(p.value)} r="4" fill={color(id)}><title>{title(id)} · {p.day}: {number(p.value)}{metric === 'accuracy' ? '%' : ' s/pregunta'}</title></circle>)}</g>; })}
       </svg>
       <ul className="stats-legend">{ids.map(id => <li key={id}><span style={{ background: color(id) }} />{title(id)}</li>)}</ul>
     </>}
@@ -80,7 +78,7 @@ export function ActivityStatistics({ uid, history, onBack, heading = 'Tu activid
       </div>
       <div className="stats-filters" onChange={resetPage}>
       <label>Área<select aria-label="Área" value={domain} onChange={e => { setDomain(e.target.value); setExercise(''); }}><option value="">Todas las áreas</option>{domains.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
-      <label>Ejercicio<select aria-label="Ejercicio" value={exercise} onChange={e => setExercise(e.target.value)}><option value="">Todos los ejercicios</option>{ALL_EXERCISES.filter(e => !domain || e.domain === domain).map(e => <option key={e.id} value={e.id}>{e.title}</option>)}</select></label>
+      <label>Ejercicio<select aria-label="Ejercicio" value={exercise} onChange={e => setExercise(e.target.value)}><option value="">Todos los ejercicios</option>{ACTIVITY_EXERCISES.filter(e => (!domain || e.domain === domain) && (!e.retired || all.some(r => r.exerciseId === e.id))).map(e => <option key={e.id} value={e.id}>{e.title}{e.retired ? ' (retirado)' : ''}</option>)}</select></label>
       <label>Desde<input aria-label="Desde" type="date" value={from} max={to || undefined} onChange={e => setFrom(e.target.value)}/></label>
       <label>Hasta<input aria-label="Hasta" type="date" value={to} min={from || undefined} onChange={e => setTo(e.target.value)}/></label>
       </div>

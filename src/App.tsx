@@ -29,7 +29,6 @@ import { LanguageNamingGame } from './games/LanguageNamingGame';
 import { WordCompletionGame } from './games/WordCompletionGame';
 import { MemoryPathGame } from './games/MemoryPathGame';
 import { MemoryPairsGame } from './games/MemoryPairsGame';
-import { DailySequencingGame } from './games/DailySequencingGame';
 import { CategorizationGame } from './games/CategorizationGame';
 import { MotorCoordinationGame } from './games/MotorCoordinationGame';
 import { MotorTrackingGame } from './games/MotorTrackingGame';
@@ -310,17 +309,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
         )}
 
         {/* 4. FUNCIONES EJECUTIVAS */}
-        {(activeView === 'executive' || activeView === 'daily-sequencing') && (
-          <DailySequencingGame
-            profile={profile}
-            onBack={handleBackToDashboard}
-            onSaveResult={handleSaveExerciseResult}
-            planProgress={planProgress}
-            onNextPlanExercise={handleNextPlanExercise}
-          />
-        )}
-
-        {activeView === 'categorization' && (
+        {(activeView === 'executive' || activeView === 'categorization') && (
           <CategorizationGame
             profile={profile}
             onBack={handleBackToDashboard}

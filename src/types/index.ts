@@ -6,7 +6,6 @@ export type ExerciseId =
   | 'word-completion'
   | 'memory-path'
   | 'memory-pairs'
-  | 'daily-sequencing'
   | 'categorization'
   | 'motor-target'
   | 'motor-tracking';

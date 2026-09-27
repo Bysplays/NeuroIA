@@ -24,7 +24,6 @@ export function GameSession({ id, step, onBack, children }: { id: string; step?:
     'word-completion': 'Mira la imagen y la palabra. Toca la letra que falta.',
     'memory-path': 'Pulsa el botón para ver la secuencia. Mira qué fichas se iluminan y después tócalas en el mismo orden.',
     'memory-pairs': 'Primero verás las cartas unos segundos. Recuerda su lugar. Después, descubre dos cartas cada vez para encontrar las parejas.',
-    'daily-sequencing': 'Mira las tarjetas. Tócalas en el orden en que harías los pasos de la actividad.',
     categorization: 'Mira el objeto y toca el grupo al que pertenece.',
     'motor-target': 'Toca el centro de cada diana. Aparecerá una nueva en otro lugar. No hay prisa.',
     'motor-tracking': 'Mantén el dedo o el puntero sobre el personaje mientras se mueve. Llena la barra acompañándolo.',
