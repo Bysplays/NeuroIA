@@ -66,14 +66,14 @@ test('publish, list, start and durable result reconciliation across devices are 
   assert.equal((await firestoreProgress(link.patientId, playerDb).load()).profile.totalSessions, 2);
   await assertFails(updateDoc(doc(playerDb, path, 'proposal'), { status: 'in-progress', updatedAt: serverTimestamp() }));
 });
-test('only owner can publish; immutable content, isolation and completion cannot be forged', async () => {
+test('only owner can publish or edit; isolation and completion cannot be forged', async () => {
   await assertFails(player.publish('forged', draft));
   await owner.publish('secured', draft);
   for (const db of [env.unauthenticatedContext().firestore(), env.authenticatedContext('stranger').firestore()]) {
     await assertFails(getDoc(doc(db, path, 'secured'))); await assertFails(getDocs(collection(db, path)));
   }
   for (const db of [ownerDb, playerDb]) {
-    await assertFails(updateDoc(doc(db, path, 'secured'), { steps: draft.steps.slice(0, 1), updatedAt: serverTimestamp() }));
+    if (db === playerDb) await assertFails(updateDoc(doc(db, path, 'secured'), { steps: draft.steps.slice(0, 1), updatedAt: serverTimestamp() }));
     await assertFails(updateDoc(doc(db, path, 'secured'), { status: 'completed', completedCount: 2, resultIds: ['fake', 'fake2'], updatedAt: serverTimestamp() }));
   }
   await assertFails(player.cancel('secured'));
@@ -115,4 +115,23 @@ test('wrong saved level cannot advance; unverified email and invalid drafts cann
   for (const steps of [[], Array(9).fill(draft.steps[0]), [{ exerciseId: 'daily-sequencing', level: 1 }]]) await assertFails(setDoc(doc(ownerDb, path, 'invalid-draft'), { ...template, status: 'assigned', steps, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
   await owner.publish('eight', { ...draft, steps: Array(8).fill(draft.steps[0]) });
   assert.equal((await player.load('eight')).steps.length, 8);
+});
+
+test('owner edits only unstarted sessions, with validation, conflict protection and stable identity', async () => {
+  await owner.publish('editable', draft);
+  const original = await owner.load('editable');
+  const changed = { ...draft, title: 'Nueva propuesta', steps: [{ exerciseId: 'memory-pairs', level: 7 }] };
+  await owner.edit(original, changed);
+  await owner.edit(original, changed); // Ambiguous acknowledgement can safely retry.
+  const updated = await owner.load('editable');
+  assert.equal(updated.title, changed.title);
+  assert.equal(updated.createdAt, original.createdAt);
+  assert.equal(updated.completedCount, 0);
+  await assert.rejects(owner.edit(original, { ...draft, title: 'Stale edit' }));
+  await assertFails(player.edit(updated, draft));
+  await assertFails(updateDoc(doc(ownerDb, path, 'editable'), { steps: [{ exerciseId: 'memory-pairs', level: 11 }], updatedAt: serverTimestamp() }));
+  await assertFails(updateDoc(doc(ownerDb, path, 'editable'), { patientId: 'another', updatedAt: serverTimestamp() }));
+  await player.start('editable');
+  await assert.rejects(owner.edit(updated, draft));
+  await assertFails(updateDoc(doc(ownerDb, path, 'editable'), { title: 'After start', updatedAt: serverTimestamp() }));
 });

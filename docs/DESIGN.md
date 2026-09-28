@@ -808,7 +808,36 @@ Professional activity and session pages use a compact back icon beside a left-al
 section title, with the participant name underneath in muted text. Avoid placing a
 large participant heading opposite an oversized back action. The session composer
 uses the shared native dialog with a tinted icon/header, compact close control,
-labelled fields, a game count and individually bordered game cards. Keep level and
-game selection together, reorder/remove actions below, and a full-width primary
+compact paired metadata fields, a game count and a flat list separated by fine rules.
+Each row has a number, game and level selectors, then inline up/down/delete icons.
+Use quiet native selectors with a consistent chevron and hover/focus surface. On
+narrow phones, wrap level and actions onto a second line without creating cards.
+Keep Añadir juego as a compact text action, and use a full-width primary
 review/share action. Long drafts scroll within the dialog; preserve Escape, focus
 return, validation and the review-before-sharing step.
+
+The professional session index is a paginated flat list (five rows) with creation date,
+name and actions, in that order. Session names use regular font weight. Center date and action headings over their content.
+Use labelled icon buttons: a chart to open analytics, a pencil to edit unstarted sessions, and a bin to request cancellation
+(with confirmation; existing results remain). The chart opens a session-specific dashboard with
+status, confirmed completion, answer-weighted accuracy, accumulated exercise time
+and an ordered game breakdown. Show prescribed levels, recorded answers and
+duration per game; keep missing/pending results distinct from zero performance.
+Use equal-width summary cards, shared surfaces, compact back navigation and
+responsive stacking. The accompanying message belongs in the detail, not the list.
+
+The professional header purchase action matches the 48px navigation controls, with
+compact text and padding. Editing reuses the prefilled session composer and review
+step; disable the pencil after starting, completion or cancellation.
+
+Professional overview and session pages start below their navigation with the
+normal section gap; do not vertically center their main content or tab panels.
+Session lists keep equal outer top/bottom insets by omitting extra bottom padding
+on the last row. Short lists leave remaining viewport space below the content.
+
+The professional overview uses labelled icon tabs, a small briefcase heading,
+section icons and restrained person avatars. Person rows keep real names and
+textual access status, with compact, accessible session-list and analytics icon
+actions on the right. Disable those actions when the seat is inactive. Retain
+clear wording for billing actions; do not replace consequential payment labels
+with unexplained icons.

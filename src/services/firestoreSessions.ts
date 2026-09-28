@@ -40,6 +40,18 @@ export function firestoreSessions(db: Firestore, link: SessionLink) {
           status: 'assigned', completedCount: 0, resultIds: [], createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
       });
     },
+    async edit(original: AssignedSession, draft: SessionDraft) {
+      const value = validateSessionDraft(draft);
+      const ref = doc(sessions, original.id);
+      await runTransaction(db, async tx => {
+        const snapshot = await tx.get(ref);
+        if (!snapshot.exists() || snapshot.data().status !== 'assigned') throw new Error('Esta sesión ya ha empezado o no está disponible para editar.');
+        const current = snapshot.data();
+        if (current.title === value.title && current.note === value.note && JSON.stringify(current.steps) === JSON.stringify(value.steps)) return;
+        if (current.title !== original.title || current.note !== original.note || JSON.stringify(current.steps) !== JSON.stringify(original.steps)) throw new Error('La sesión ha cambiado. Cierra el editor y vuelve a abrirla.');
+        tx.update(ref, { ...value, updatedAt: serverTimestamp() });
+      });
+    },
     async cancel(id: string) {
       const ref = doc(sessions, id);
       await runTransaction(db, async tx => {
@@ -85,6 +97,11 @@ export function firestoreSessions(db: Firestore, link: SessionLink) {
         }
         throw error;
       }
+    },
+    async loadResults(session: AssignedSession): Promise<ExerciseResult[]> {
+      const snapshots = await Promise.all(session.steps.slice(0, session.completedCount).map((_, index) =>
+        getDocFromServer(doc(db, 'users', link.patientId, 'results', assignedResultId(session.id, index)))));
+      return snapshots.filter(snapshot => snapshot.exists()).map(snapshot => ({ ...snapshot.data(), id: snapshot.id }) as ExerciseResult);
     },
     async load(id: string) {
       const snapshot = await getDocFromServer(doc(sessions, id));

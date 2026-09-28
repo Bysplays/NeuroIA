@@ -277,7 +277,11 @@ release issue is lost during prioritization.
   receipts, local pending queue, initial import choice and emulator tests.
 - [x] Publish the reviewed `vendor/firebase/firestore.rules` in the real Firebase project.
 - [ ] Verify real-account cloud saving from two devices after publishing rules.
-- [x] Confirm `bysplays.github.io` is authorized in Firebase Authentication; revisit if the hostname changes.
+- [x] Confirm `bysplays.github.io` is authorized in Firebase Authentication.
+- [ ] Complete the `neuroia.es` migration in [deployment](DEPLOYMENT.md): GitHub Pages
+  domain, Hostinger DNS, HTTPS, Firebase authorized domains/API-key referrers,
+  Worker `APP_URL`, frontend rebuild, Google/email login and payment returns.
+  Local configuration is prepared; provider changes and live verification remain pending.
 - [x] Implement free self-owned professional workspaces, paid-seat care links,
   read-only analytics and participant departure with code rotation.
 - [ ] Verify professional credentials before adding any clinical permissions.

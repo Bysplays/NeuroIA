@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHandler, verifyWebhook, verifyUser, checkout, webhook, reconcileDaily } from './index.mjs';
-const env = { APP_URL:'https://bysplays.github.io/NeuroIA/', FIREBASE_PROJECT_ID:'demo-neuroia', STRIPE_MONTHLY_PRICE_ID:'price_monthly', STRIPE_MODE:'test', STRIPE_WEBHOOK_SECRET:'test-secret' };
+const env = { APP_URL:'https://neuroia.es/', FIREBASE_PROJECT_ID:'demo-neuroia', STRIPE_MONTHLY_PRICE_ID:'price_monthly', STRIPE_MODE:'test', STRIPE_WEBHOOK_SECRET:'test-secret' };
 function store(access={}, billing={}) {
   return { access, billing, async transaction(uid, callback) {
     assert.equal(uid,'user-a'); const patches=[];
@@ -92,7 +92,7 @@ test('Firebase signature, audience and expiry are validated with Google JWKS',as
 test('portal uses authenticated customer and cancel expires only its pending session',async()=>{
  const db=store({}, {customerId:'cus_1',checkoutId:'cs_1',attempt:'a'});const calls=[];
  const handler=createHandler({database:()=>db,verifyUser:async()=>'user-a',stripe:()=>async(path,params)=>{calls.push([path,params]);if(path==='billing_portal/sessions')return {url:'https://billing.stripe.com/session'};return {status:'open'};}});
- const req=path=>new Request(`https://worker${path}`,{method:'POST',headers:{Authorization:'Bearer unit-token',Origin:'https://bysplays.github.io'}});
+ const req=path=>new Request(`https://worker${path}`,{method:'POST',headers:{Authorization:'Bearer unit-token',Origin:'https://neuroia.es'}});
  assert.equal((await handler(req('/portal'),env)).status,200);assert.equal(calls[0][1].customer,'cus_1');
  assert.equal((await handler(req('/cancel-checkout'),env)).status,200);assert.equal(db.billing.attempt,null);assert.ok(calls.some(([p])=>p==='checkout/sessions/cs_1/expire'));
 });
@@ -126,4 +126,32 @@ test('daily reconciliation resumes batches, retries failed pages and sleeps unti
  fail=true;await assert.rejects(reconcileDaily(env,db,stripe,2000));assert.equal(checkpoint.cursor,'sub_1');
  fail=false;await reconcileDaily(env,db,stripe,3000);assert.equal(checkpoint.cursor,null);assert.equal(checkpoint.nextRunAt,86401000);
  const before=calls;await reconcileDaily(env,db,stripe,4000);assert.equal(calls,before);
+});
+
+// Return destinations come from server configuration, never a client-supplied URL.
+test('Checkout returns to the configured production or local test app', async () => {
+ for (const APP_URL of ['https://neuroia.es/', 'http://localhost:5173/']) {
+  let created = false;
+  await checkout('user-a', {...env, APP_URL}, store(), async (path, params) => {
+   if (path.startsWith('prices/')) return price;
+   created = true;
+   assert.equal(params.success_url, `${APP_URL}?checkout=success`);
+   assert.equal(params.cancel_url, `${APP_URL}?checkout=cancelled`);
+   return {id:'cs_domain', url:'https://checkout.stripe.com/test'};
+  });
+  assert.equal(created, true);
+ }
+});
+test('HTTP payment returns are restricted to localhost:5173 in test mode', async () => {
+ for (const config of [
+  {APP_URL:'http://localhost:5173/', STRIPE_MODE:'live'},
+  {APP_URL:'http://neuroia.es/'},
+  {APP_URL:'http://localhost.evil.example:5173/'},
+  {APP_URL:'http://localhost:5174/'},
+ ]) {
+  await assert.rejects(checkout('user-a', {...env, ...config}, store(), async path => {
+   assert.ok(path.startsWith('prices/'), 'must not create a Stripe session');
+   return price;
+  }), /https-required/);
+ }
 });

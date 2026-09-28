@@ -152,15 +152,10 @@ service cloud.firestore {
         && step.exerciseId in ['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking']
         && step.level is int && step.level >= 1 && step.level <= 10;
     }
-    function validSession(value, owner, seatId, uid) {
+    function validSessionDraft(value) {
       let steps = value.steps;
-      return value.keys().hasOnly(['professionalId', 'seatId', 'patientId', 'professionalName', 'title', 'note', 'steps', 'configVersion', 'status', 'completedCount', 'resultIds', 'createdAt', 'updatedAt'])
-        && value.professionalId == owner && value.seatId == seatId && value.patientId == uid
-        && value.professionalName == get(/databases/$(database)/documents/professionals/$(owner)).data.name
-        && value.title is string && value.title.size() > 0 && value.title.size() <= 80
-        && value.note is string && value.note.size() <= 280 && value.configVersion == 1
-        && value.status == 'assigned' && value.completedCount == 0 && value.resultIds == []
-        && value.createdAt == request.time && value.updatedAt == request.time
+      return value.title is string && value.title.size() > 0 && value.title.size() <= 80
+        && value.note is string && value.note.size() <= 280
         && steps is list && steps.size() >= 1 && steps.size() <= 8
         && validSessionStep(steps[0])
         && (steps.size() < 2 || validSessionStep(steps[1]))
@@ -170,6 +165,14 @@ service cloud.firestore {
         && (steps.size() < 6 || validSessionStep(steps[5]))
         && (steps.size() < 7 || validSessionStep(steps[6]))
         && (steps.size() < 8 || validSessionStep(steps[7]));
+    }
+    function validSession(value, owner, seatId, uid) {
+      return value.keys().hasOnly(['professionalId', 'seatId', 'patientId', 'professionalName', 'title', 'note', 'steps', 'configVersion', 'status', 'completedCount', 'resultIds', 'createdAt', 'updatedAt'])
+        && value.professionalId == owner && value.seatId == seatId && value.patientId == uid
+        && value.professionalName == get(/databases/$(database)/documents/professionals/$(owner)).data.name
+        && value.configVersion == 1 && validSessionDraft(value)
+        && value.status == 'assigned' && value.completedCount == 0 && value.resultIds == []
+        && value.createdAt == request.time && value.updatedAt == request.time;
     }
     function validSessionAdvance(owner, seatId, uid, sessionId) {
       let before = resource.data;
@@ -194,6 +197,10 @@ service cloud.firestore {
       allow update: if sessionRelationship(owner, seatId, uid) && request.resource.data.updatedAt == request.time && (
         (request.auth.uid == owner && resource.data.status in ['assigned', 'in-progress'] && request.resource.data.status == 'cancelled'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']))
+        || (request.auth.uid == owner && resource.data.status == 'assigned'
+          && resource.data.completedCount == 0 && resource.data.resultIds == []
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'note', 'steps', 'updatedAt'])
+          && validSessionDraft(request.resource.data))
         || (request.auth.uid == uid && resource.data.status == 'assigned' && request.resource.data.status == 'in-progress'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']))
         || (request.auth.uid == uid && validSessionAdvance(owner, seatId, uid, sessionId)));
