@@ -112,6 +112,28 @@ size against the importance of the text and action.
 
 ## Screen patterns
 
+### Tablet layout
+
+Landscape tablets are the primary target. Center short screens vertically in the
+space remaining below their toolbar. Use content-aware layouts and pagination,
+not a scaled canvas or clipped overflow. Keep scrolling available for very large
+text, short windows, long notes and dialog forms. Native dialogs retain their
+scrolling and focus behavior. Game boards adapt to available height while
+keeping touch targets, stimuli and feedback visible.
+
+Use rounded, labelled tabs with an explicit active state and arrow-key navigation.
+Home has Hoy, Juegos, optional Para ti and Tu recorrido; settings has Texto,
+Apariencia and Tu cuenta; activity has Resumen y filtros, Gráficas and Historial;
+the professional panel has Personas and Asientos. Collections use previous/next
+controls and page counts instead of an unbounded page.
+
+A fullscreen control is available at entry, in toolbars and during play. Attempt
+fullscreen once on the first explicit game Start gesture, requesting landscape
+when supported. Rejection never blocks play; retain a manual retry and exit,
+respect Escape, and do not re-enter automatically after the user exits. Installed
+standalone apps need no redundant fullscreen request. Physical-device browser
+restrictions remain a release check.
+
 ### Home
 
 Default home exercise cards use a fine 1px pale teal border to separate their
@@ -141,14 +163,15 @@ width. The home links to achievements rather than displaying the badge collectio
 
 ### All games
 
-“Ver ejercicios” opens the game catalog. Show the eight individual games directly,
-with a distinctive illustration, brief description, and start action for each.
+The Juegos tab opens the game catalog. Show the eight individual games in
+paginated cards with distinctive illustrations, titles and start actions. The
+embedded compact layout omits descriptions to keep controls in the viewport.
 Area colors help scanning: blue for attention, pink for language, lilac for
 memory, sage for organization, and peach for coordination.
 
 Category filters have equal dimensions and centered contents, aligned in a
-regular grid: currently six columns on desktop, three on tablet, and two on
-narrow mobile. They wrap cleanly, retain an explicit selected state, and update
+regular grid: six columns on landscape tablets and desktop, three on narrow
+mobile. They wrap cleanly, retain an explicit selected state, and update
 the result count. Do not add back the “¿Prefieres que te guiemos?” promo card.
 The daily-plan entry remains on the home. Daily action sequencing is retired;
 Organization offers classification only. The memory beacon sequence remains.
@@ -174,7 +197,7 @@ shared true-alpha sheet and remain transparent in every theme, with normal
 blending. Never crop limbs to hide a backdrop.
 
 - Place written instructions, return, listen and daily-plan position in the
-  full-viewport introduction. This fills the app without forcing browser fullscreen.
+  full-viewport introduction. This fills the available app viewport; Start also attempts browser fullscreen.
 - During play, show a question-mark help button on the left and elapsed active
   time on the right. Help reopens instructions and pauses scheduled activity
   without resetting answers. Keep essential task clues, not the instruction hero.
@@ -301,7 +324,7 @@ workspace cards and quiet controls. A native dialog collects a title, optional
 message and up to eight game/level rows with explicit up/down/remove controls.
 “Revisar sesión” shows the exact sequence before “Compartir sesión”. Published
 proposals show status and completed/total counts; cancellation requires confirmation.
-Between the greeting and daily plan, the participant home identifies the proposing
+In the Para ti tab, the participant home identifies the proposing
 professional and offers start/resume.
 Game introductions show the fixed level and sequence position. A compact toolbar
 provides pause and return; unfinished games restart after leaving, completed steps
@@ -554,8 +577,8 @@ in a horizontally scrollable, paginated table. Start with recent account history
 explicitly offer more archived records and disclose partial coverage. Preserve
 empty/error/retry states and use real activity only.
 
-Place the category radar beside the filter panel, then the two daily charts and
-the full-width history. Cozy uses blue paper for the radar, sage for filters,
+Place the category radar beside the filter panel in Resumen y filtros, the two
+daily charts side by side in Gráficas and the full-width history in Historial. Cozy uses blue paper for the radar, sage for filters,
 lilac for accuracy and peach for speed, with white controls and history. Default
 retains neutral surfaces. Use shared theme tokens so live style changes apply
 immediately and legacy contrast modes retain priority. Omit the activity-summary text card. Activity filters sit

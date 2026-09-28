@@ -1,3 +1,4 @@
+import { enterFullscreen } from '../services/fullscreen';
 import { useEffect, useState, type ReactNode } from 'react';
 import { RotateCw } from 'lucide-react';
 import { ModalFrame } from './ModalFrame';
@@ -22,21 +23,9 @@ export function LandscapeGate({ children }: { children: ReactNode }) {
 
   const lockLandscape = async () => {
     setBusy(true);
-    let enteredFullscreen = false;
-    try {
-      const orientation = screen.orientation as ScreenOrientation & { lock?: (value: string) => Promise<void> };
-      if (!orientation?.lock || !document.documentElement.requestFullscreen) throw new Error('unsupported');
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-        enteredFullscreen = true;
-      }
-      await orientation.lock('landscape');
-    } catch {
-      setMessage('Este navegador no permite el giro automático. Gira el dispositivo y comprueba que la rotación automática esté activada.');
-      if (enteredFullscreen && document.fullscreenElement) await document.exitFullscreen().catch(() => {});
-    } finally {
-      setBusy(false);
-    }
+    const entered = await enterFullscreen();
+    if (!entered || window.matchMedia('(orientation: portrait)').matches) setMessage('Gira el dispositivo y comprueba que la rotación automática esté activada.');
+    setBusy(false);
   };
 
   return <PortraitContext.Provider value={portrait}>

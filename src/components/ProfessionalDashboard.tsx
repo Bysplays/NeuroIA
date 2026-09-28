@@ -1,3 +1,6 @@
+import { TabletTabs, TabletPager } from './TabletTabs';
+import { useCompactViewport, useViewportPanel } from '../services/viewport';
+import { FullscreenButton } from './FullscreenButton';
 import { ProfessionalSessions } from './ProfessionalSessions';
 import { AccessibilityModal } from './AccessibilityModal';
 import { applyAppearance } from '../services/appearance';
@@ -27,6 +30,13 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
   onUpdateSettings: (settings: Partial<AccessibilitySettings>) => void;
   onUpdateName: (name: string) => void;
 }) {
+  const panel = useViewportPanel<HTMLElement>();
+  const [section, setSection] = useState('people');
+  const [peoplePage, setPeoplePage] = useState(0);
+  const [seatsPage, setSeatsPage] = useState(0);
+  const compact = useCompactViewport();
+  const pageSize = compact ? 2 : 3;
+  const seatPageSize = compact ? 1 : 2;
   const [settingsOpen, setSettingsOpen] = useState(false);
   useLayoutEffect(() => { applyAppearance(profile.settings); }, [profile.settings]);
   const adapter = useMemo(() => firestoreProfessional(uid, getFirestore(auth.app)), [uid]);
@@ -85,6 +95,8 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
   const active = (seat: ProfessionalSeat) => now !== null && seat.status === 'active' && seat.expiresAt > now;
   const pending = seats?.find(seat => seat.status === 'pending');
   const people = seats?.filter(seat => seat.occupantUid) || [];
+  const currentPeoplePage = Math.min(peoplePage, Math.max(0, Math.ceil(people.length / pageSize) - 1));
+  const currentSeatsPage = Math.min(seatsPage, Math.max(0, Math.ceil((seats?.length ?? 0) / seatPageSize) - 1));
   const currentSeat = seats?.find(seat => seat.occupantUid === selected && seat.occupantUid && active(seat));
   const returnToPanel = () => { setSelected(null); window.scrollTo(0, 0); };
   const clearReturn = () => {
@@ -111,9 +123,9 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
   return <div className="professional-workspace">
     <header className="main-header">
       <button className="header-left" onClick={returnToPanel} aria-label="NeuroIA, volver al panel profesional"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="32" height="40"/><span className="header-title">Neuro<span className="brand-light">IA</span></span></button>
-      <div className="professional-account-actions"><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button></div>
+      <div className="professional-account-actions"><FullscreenButton/><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button></div>
     </header>
-    {currentSeat ? personView === 'sessions' ? <ProfessionalSessions key={currentSeat.id + currentSeat.occupantUid} link={{ professionalId: uid, seatId: currentSeat.id, patientId: currentSeat.occupantUid! }} name={currentSeat.patientName || 'la persona invitada'} onBack={returnToPanel}/> : <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main className="professional-panel">
+    {currentSeat ? personView === 'sessions' ? <ProfessionalSessions key={currentSeat.id + currentSeat.occupantUid} link={{ professionalId: uid, seatId: currentSeat.id, patientId: currentSeat.occupantUid! }} name={currentSeat.patientName || 'la persona invitada'} onBack={returnToPanel}/> : <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main ref={panel} className="professional-panel tablet-screen">
       <div className="professional-heading"><h1>Espacio profesional</h1>
       </div>
       {checkoutReturn && <div className="professional-notice" role="status"><p>{checkoutReturn === 'managed' ? 'Los cambios de tu suscripción aparecerán cuando se confirmen.' : checkoutReturn === 'cancelled' ? 'La compra no se ha completado. Puedes retomarla o cancelarla.' : 'El código estará disponible en «Tus asientos» cuando se confirme el pago.'}</p><button className="stats-quiet-button" onClick={clearReturn}>Cerrar aviso</button></div>}
@@ -121,17 +133,23 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
       {error && <p className="professional-notice" role="alert">{error}</p>}
       {!billingEnabled && <p className="entry-note">La compra de asientos todavía no está disponible.</p>}
       {loadError ? <div className="professional-notice" role="alert"><p>No hemos podido cargar tus asientos.</p><button className="stats-quiet-button" onClick={() => { setLoadError(false); setRetry(value => value + 1); }}>Reintentar</button></div> : !seats ? <p role="status">Cargando tu panel…</p> : <>
+        <TabletTabs label="Espacio profesional" value={section} onChange={setSection} tabs={[
+        { id: 'people', label: 'Personas', content: <>
         <section className="stats-card professional-people" aria-labelledby="professional-people-title"><h2 id="professional-people-title">Personas vinculadas <span className="stats-count">{people.length}</span></h2>
-          {!people.length ? <div className="professional-empty"><Users size={36} aria-hidden="true"/><h3>Aún no hay personas vinculadas</h3><p>Compra un asiento y comparte su código. Cuando una persona lo use, podrás consultar aquí su actividad.</p></div> : <ul className="professional-person-list">{people.map(seat => <li key={seat.id}><div><h3>{seat.patientName || 'Persona invitada'}</h3><p>{now === null ? 'Comprobando acceso…' : active(seat) ? 'Invitación activa' : 'Asiento sin acceso activo'}</p></div><div className="proposal-actions"><button className="stats-quiet-button" disabled={!active(seat)} onClick={() => { setPersonView('sessions'); setSelected(seat.occupantUid); window.scrollTo(0, 0); }}>Sesiones</button><button className="stats-quiet-button" disabled={!active(seat)} onClick={() => { setPersonView('activity'); setSelected(seat.occupantUid); window.scrollTo(0, 0); }}>Ver actividad</button></div></li>)}</ul>}
+          {!people.length ? <div className="professional-empty"><Users size={36} aria-hidden="true"/><h3>Aún no hay personas vinculadas</h3><p>Compra un asiento y comparte su código. Cuando una persona lo use, podrás consultar aquí su actividad.</p></div> : <ul className="professional-person-list">{people.slice(currentPeoplePage * pageSize, (currentPeoplePage + 1) * pageSize).map(seat => <li key={seat.id}><div><h3>{seat.patientName || 'Persona invitada'}</h3><p>{now === null ? 'Comprobando acceso…' : active(seat) ? 'Invitación activa' : 'Asiento sin acceso activo'}</p></div><div className="proposal-actions"><button className="stats-quiet-button" disabled={!active(seat)} onClick={() => { setPersonView('sessions'); setSelected(seat.occupantUid); window.scrollTo(0, 0); }}>Sesiones</button><button className="stats-quiet-button" disabled={!active(seat)} onClick={() => { setPersonView('activity'); setSelected(seat.occupantUid); window.scrollTo(0, 0); }}>Ver actividad</button></div></li>)}</ul>}
         </section>
+        <TabletPager page={currentPeoplePage} pages={Math.ceil(people.length / pageSize)} onChange={setPeoplePage} label="Páginas de personas"/>
+        </> }, { id: 'seats', label: 'Asientos', content: <>
         <section className="stats-card professional-seats" aria-labelledby="professional-seats-title"><div className="stats-section-heading"><div><h2 id="professional-seats-title">Tus asientos</h2></div>{seats.some(seat => seat.subscriptionId) && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(() => redirect('/professional/portal'))}>Gestionar suscripciones</button>}</div>
-          {!seats.length ? <p>Todavía no has comprado asientos.</p> : <ul className="professional-seat-list">{seats.map((seat, index) => <li key={seat.id}><div className="professional-seat-details"><h3>Asiento {seats.length - index}</h3><p>{seat.status === 'pending' ? 'Pago pendiente' : seat.status === 'cancelled' ? 'Compra cancelada' : now === null ? 'Comprobando acceso…' : active(seat) ? seat.occupantUid ? `Asignado a ${seat.patientName || 'una persona'}` : 'Disponible para invitar' : 'Suscripción inactiva'}</p>{seat.expiresAt > 0 && <p>Hasta el {new Date(seat.expiresAt).toLocaleDateString('es-ES')}{seat.autoRenew ? '. Renovación automática' : active(seat) && seat.autoRenew === false ? '. No se renovará' : ''}</p>}</div>
-            {active(seat) && !seat.occupantUid && <div className="professional-code"><label htmlFor={`seat-${seat.id}`}>Código de invitación</label><div><input id={`seat-${seat.id}`} value={seat.invitationCode} readOnly onFocus={event => event.target.select()}/><button className="stats-quiet-button" disabled={busy} onClick={() => copy(seat)} aria-label={`Copiar código del asiento ${seats.length - index}`}><Copy size={18}/>{copied === seat.id ? 'Copiado' : 'Copiar'}</button></div></div>}
+          {!seats.length ? <p>Todavía no has comprado asientos.</p> : <ul className="professional-seat-list">{seats.slice(currentSeatsPage * seatPageSize, (currentSeatsPage + 1) * seatPageSize).map((seat, index) => <li key={seat.id}><div className="professional-seat-details"><h3>Asiento {seats.length - currentSeatsPage * seatPageSize - index}</h3><p>{seat.status === 'pending' ? 'Pago pendiente' : seat.status === 'cancelled' ? 'Compra cancelada' : now === null ? 'Comprobando acceso…' : active(seat) ? seat.occupantUid ? `Asignado a ${seat.patientName || 'una persona'}` : 'Disponible para invitar' : 'Suscripción inactiva'}</p>{seat.expiresAt > 0 && <p>Hasta el {new Date(seat.expiresAt).toLocaleDateString('es-ES')}{seat.autoRenew ? '. Renovación automática' : active(seat) && seat.autoRenew === false ? '. No se renovará' : ''}</p>}</div>
+            {active(seat) && !seat.occupantUid && <div className="professional-code"><label htmlFor={`seat-${seat.id}`}>Código de invitación</label><div><input id={`seat-${seat.id}`} value={seat.invitationCode} readOnly onFocus={event => event.target.select()}/><button className="stats-quiet-button" disabled={busy} onClick={() => copy(seat)} aria-label={`Copiar código del asiento ${seats.length - currentSeatsPage * seatPageSize - index}`}><Copy size={18}/>{copied === seat.id ? 'Copiado' : 'Copiar'}</button></div></div>}
             {seat.subscriptionId && seat.autoRenew === false && active(seat) && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(() => redirect('/professional/portal'))}>Reactivar suscripción</button>}
             {seat.subscriptionId && seat.autoRenew === true && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(() => redirect('/professional/portal', { seatId: seat.id }))}>Cancelar suscripción</button>}
             {seat.status === 'pending' && <button className="stats-quiet-button" disabled={!billingEnabled || busy} onClick={() => void run(async () => { await billingRequest('/professional/cancel-checkout'); if (alive.current) clearReturn(); })}>Cancelar compra pendiente</button>}
           </li>)}</ul>}
         </section>
+        <TabletPager page={currentSeatsPage} pages={Math.ceil(seats.length / seatPageSize)} onChange={setSeatsPage} label="Páginas de asientos"/>
+        </> } ]}/>
       </>}
     </main>}
     <AccessibilityModal isOpen={settingsOpen} showSubscription={false} settings={profile.settings} name={profile.name} onUpdateName={onUpdateName} onUpdateSettings={onUpdateSettings} onSignOut={onSignOut} signingOut={false} onClose={() => setSettingsOpen(false)} />

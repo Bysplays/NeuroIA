@@ -1,3 +1,5 @@
+import { TabletPager } from './TabletTabs';
+import { useViewportPanel } from '../services/viewport';
 import { HeaderIllustration } from './HeaderIllustration';
 import { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { ArrowLeft, Check, LockKeyhole, X } from 'lucide-react';
@@ -29,13 +31,16 @@ export function AchievementShowcase({ profile, onBack }: { profile: UserProfile;
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus({ preventScroll: true }); }, []);
   const achievements = getAchievements(profile);
+  const panel = useViewportPanel<HTMLElement>();
+  const [page, setPage] = useState(0);
+  const pageSize = 4;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = achievements.find(achievement => achievement.id === selectedId);
   const earned = achievements.filter(achievement => achievement.unlocked).length;
   const progressText = (achievement: Achievement) => `${achievement.current} de ${achievement.target} ${achievement.unit}`;
 
   return (
-    <section className="achievement-showcase achievement-page" id="achievements" aria-labelledby="achievements-title" tabIndex={-1}>
+    <section ref={panel} className="achievement-showcase achievement-page tablet-screen" id="achievements" aria-labelledby="achievements-title" tabIndex={-1}>
       <button className="text-link achievement-back" onClick={onBack}><ArrowLeft size={18} /> Volver al inicio</button>
       <div className="achievement-heading">
         <div className="achievement-heading-copy"><span className="achievement-overline">Pequeños pasos, grandes recuerdos</span><h1 id="achievements-title" tabIndex={-1} ref={headingRef}>Tu colección de logros</h1><p>{earned ? 'Cada chapa guarda un poquito de tu recorrido.' : 'Tu primera chapa te espera al completar un ejercicio.'}</p></div>
@@ -48,7 +53,7 @@ export function AchievementShowcase({ profile, onBack }: { profile: UserProfile;
         </div>
       </div>
       <div className="badge-shelf">
-        {achievements.map(achievement => (
+        {achievements.slice(Math.min(page, Math.ceil(achievements.length / pageSize) - 1) * pageSize, (Math.min(page, Math.ceil(achievements.length / pageSize) - 1) + 1) * pageSize).map(achievement => (
           <button key={achievement.id} className={`badge-display ${achievement.unlocked ? 'badge-earned' : 'badge-pending'}`} onClick={() => setSelectedId(achievement.id)} aria-label={`${achievement.title}. ${achievement.unlocked ? 'Conseguida' : progressText(achievement)}. Ver logro`}>
             <span className="badge-illustration"><BadgeArt index={achievement.artwork} unlocked={achievement.unlocked} /><span className="badge-state" aria-hidden="true">{achievement.unlocked ? <Check size={15} /> : <LockKeyhole size={13} />}</span></span>
             <strong>{achievement.title}</strong>
@@ -56,6 +61,7 @@ export function AchievementShowcase({ profile, onBack }: { profile: UserProfile;
           </button>
         ))}
       </div>
+      <TabletPager page={Math.min(page, Math.ceil(achievements.length / pageSize) - 1)} pages={Math.ceil(achievements.length / pageSize)} onChange={setPage} label="Páginas de logros"/>
       {selected && (
         <ModalFrame onClose={() => setSelectedId(null)} labelledBy="achievement-detail-title">
           <div className="modal-container achievement-dialog">

@@ -9,6 +9,7 @@ import type { ProgressSync } from '../services/progressSync';
 import type { UserProfile, ExerciseResult } from '../types';
 import { GameSession } from './GameSession';
 import { GameExercise } from './GameExercise';
+import { TabletPager } from './TabletTabs';
 import { SessionSteps } from './ProfessionalSessions';
 
 function useAdapter({ professionalId, seatId, patientId }: SessionLink) {
@@ -20,9 +21,12 @@ export function AssignedSessionInbox({ link, onStart }: { link: SessionLink; onS
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   useEffect(() => adapter.watch(values => { setSessions(values); setError(false); }, () => { setSessions(null); setError(true); }, true), [adapter, retry]);
+  const [page, setPage] = useState(0);
   const available = sessions?.filter(session => ['assigned', 'in-progress'].includes(session.status));
+  const currentPage = Math.min(page, Math.max(0, (available?.length ?? 0) - 1));
   return <section className="session-inbox" aria-labelledby="assigned-inbox-title"><h2 id="assigned-inbox-title">Sesiones propuestas para ti</h2>
-    {error ? <div className="professional-notice" role="alert"><p>No hemos podido consultar tus sesiones propuestas.</p><button className="stats-quiet-button" onClick={() => setRetry(value => value + 1)}>Reintentar</button></div> : !sessions ? <p role="status">Buscando sesiones…</p> : !available?.length ? <p>Aún no tienes sesiones pendientes.</p> : available.map(session => <article className="stats-card session-card" key={session.id}><header className="proposal-heading"><div><span className="soft-label">Propuesta de {session.professionalName}</span><h3>{session.title}</h3></div><span className="soft-label">{session.completedCount} de {session.steps.length} completados</span></header>{session.note && <p className="session-note">{session.note}</p>}<SessionSteps session={session}/><button className="touch-btn touch-btn-primary" disabled={session.configVersion !== DIFFICULTY_VERSION} onClick={() => onStart(session)}>{session.completedCount || session.status === 'in-progress' ? 'Retomar sesión' : 'Empezar sesión'}</button>{session.configVersion !== DIFFICULTY_VERSION && <p>Actualiza la aplicación para abrir esta sesión.</p>}</article>)}
+    {error ? <div className="professional-notice" role="alert"><p>No hemos podido consultar tus sesiones propuestas.</p><button className="stats-quiet-button" onClick={() => setRetry(value => value + 1)}>Reintentar</button></div> : !sessions ? <p role="status">Buscando sesiones…</p> : !available?.length ? <p>Aún no tienes sesiones pendientes.</p> : available.slice(currentPage, currentPage + 1).map(session => <article className="stats-card session-card" key={session.id}><header className="proposal-heading"><div><span className="soft-label">Propuesta de {session.professionalName}</span><h3>{session.title}</h3></div><span className="soft-label">{session.completedCount} de {session.steps.length} completados</span></header>{session.note && <p className="session-note">{session.note}</p>}<SessionSteps session={session}/><button className="touch-btn touch-btn-primary" disabled={session.configVersion !== DIFFICULTY_VERSION} onClick={() => onStart(session)}>{session.completedCount || session.status === 'in-progress' ? 'Retomar sesión' : 'Empezar sesión'}</button>{session.configVersion !== DIFFICULTY_VERSION && <p>Actualiza la aplicación para abrir esta sesión.</p>}</article>)}
+    <TabletPager page={currentPage} pages={available?.length ?? 0} onChange={setPage} label="Sesiones propuestas"/>
     {sessions?.length === 50 && <p className="soft-label">Mostramos hasta 50 sesiones pendientes.</p>}
   </section>;
 }

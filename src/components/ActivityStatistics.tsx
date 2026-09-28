@@ -1,3 +1,5 @@
+import { TabletTabs } from './TabletTabs';
+import { useViewportPanel, useCompactViewport } from '../services/viewport';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import type { CognitiveDomain, ExerciseResult } from '../types';
@@ -26,7 +28,7 @@ function LineChart({ results, metric }: { results: ExerciseResult[]; metric: 'ac
   return <section className={`stats-card stats-chart stats-chart-${metric}`}><h2>{metric === 'accuracy' ? 'Precisión media' : 'Velocidad media'}</h2>
     <p>{metric === 'accuracy' ? 'Porcentaje de aciertos · media diaria por ejercicio' : 'Segundos por pregunta · media diaria por ejercicio'}</p>
     {!points.length ? <p className="stats-empty">Todavía no hay datos para esta gráfica.</p> : <>
-      <svg viewBox="0 0 650 265" role="img" aria-label={`${metric === 'accuracy' ? 'Precisión' : 'Segundos por pregunta'} por día. Valores disponibles en la tabla inferior.`}>
+      <svg viewBox="0 0 650 265" role="img" aria-label={`${metric === 'accuracy' ? 'Precisión' : 'Segundos por pregunta'} por día. Valores disponibles en la pestaña Historial.`}>
         {[0, 1, 2, 3, 4].map(i => <g key={i}><line x1="55" x2="610" y1={y(max * i / 4)} y2={y(max * i / 4)} className="stats-grid-line" /><text x="44" y={y(max * i / 4) + 4} textAnchor="end">{number(max * i / 4)}</text></g>)}
         {days.filter((_, i) => i === 0 || i === days.length - 1 || (days.length > 2 && i === Math.floor(days.length / 2))).map(day => <text key={day} x={x(day)} y="245" textAnchor="middle">{day.slice(8)}/{day.slice(5, 7)}/{day.slice(2, 4)}</text>)}
         {ids.map(id => { const values = points.filter(p => p.exerciseId === id); return <g key={id} stroke={color(id)}><polyline fill="none" strokeWidth="2.5" strokeDasharray={activityExerciseStyle(id).dashed ? '7 4' : undefined} points={values.map(p => `${x(p.day)},${y(p.value)}`).join(' ')} />{values.map(p => <circle key={p.day} cx={x(p.day)} cy={y(p.value)} r="4" fill={color(id)}><title>{title(id)} · {p.day}: {number(p.value)}{metric === 'accuracy' ? '%' : ' s/pregunta'}</title></circle>)}</g>; })}
@@ -48,6 +50,9 @@ function CategoryRadar({ results }: { results: ExerciseResult[] }) {
 }
 
 export function ActivityStatistics({ uid, history, onBack, heading = 'Tu actividad', backLabel = 'Volver al inicio' }: { uid: string; history: ExerciseResult[]; onBack: () => void; heading?: string; backLabel?: string }) {
+  const panel = useViewportPanel<HTMLDivElement>();
+  const [tab, setTab] = useState('overview');
+  const pageSize = useCompactViewport() ? 2 : 3;
   const [archive, setArchive] = useState<ExerciseResult[]>([]);
   const [cursor, setCursor] = useState<string>();
   const [more, setMore] = useState(true);
@@ -60,7 +65,7 @@ export function ActivityStatistics({ uid, history, onBack, heading = 'Tu activid
   const [page, setPage] = useState(0);
   const all = useMemo(() => mergeActivity(archive, history), [archive, history]);
   const results = all.filter(r => (!exercise || r.exerciseId === exercise) && (!domain || r.domain === domain) && (!from || localDay(r.date) >= from) && (!to || localDay(r.date) <= to));
-  const currentPage = Math.min(page, Math.max(0, Math.ceil(results.length / 20) - 1));
+  const currentPage = Math.min(page, Math.max(0, Math.ceil(results.length / pageSize) - 1));
   const loadMore = async () => {
     if (fetching.current) return;
     fetching.current = true; setBusy(true); setError(false);
@@ -69,8 +74,10 @@ export function ActivityStatistics({ uid, history, onBack, heading = 'Tu activid
     finally { fetching.current = false; if (mounted.current) setBusy(false); }
   };
   const resetPage = () => setPage(0);
-  return <div className="activity-statistics">
+  return <div ref={panel} className="activity-statistics tablet-screen">
     <div className="stats-heading"><button className="stats-quiet-button" onClick={onBack}><ArrowLeft size={20}/> {backLabel}</button><h1>{heading}</h1></div>
+    <TabletTabs label="Actividad" value={tab} onChange={setTab} tabs={[
+      { id: 'overview', label: 'Resumen y filtros', content: <>
     <div className="stats-overview"><CategoryRadar results={results}/>
     <section className="stats-card stats-filter-panel" aria-labelledby="stats-filter-title">
       <div className="stats-section-heading"><div><h2 id="stats-filter-title">Explora tu actividad</h2><p>Filtra las gráficas y el historial.</p></div>
@@ -84,13 +91,15 @@ export function ActivityStatistics({ uid, history, onBack, heading = 'Tu activid
       </div>
     </section></div>
     {from && to && from > to && <p role="alert">La fecha inicial debe ser anterior a la final.</p>}
+    </> }, { id: 'charts', label: 'Gráficas', content:
     <div className="stats-lines"><LineChart results={results} metric="accuracy"/><LineChart results={results} metric="speed"/></div>
-    <section className="stats-card stats-history" aria-labelledby="stats-history-title"><div className="stats-section-heading"><div><h2 id="stats-history-title">Ejercicios resueltos</h2><p>{more ? 'Historial reciente · Puedes cargar más registros' : 'Todo el historial disponible'}</p></div><span className="stats-count" role="status">{results.length} registros</span></div>
-      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * 20, (currentPage + 1) * 20).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><ActivityTimestamp date={r.date}/></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
+    }, { id: 'history', label: 'Historial', content: <section className="stats-card stats-history" aria-labelledby="stats-history-title"><div className="stats-section-heading"><div><h2 id="stats-history-title">Ejercicios resueltos</h2><p>{more ? 'Historial reciente · Puedes cargar más registros' : 'Todo el historial disponible'}</p></div><span className="stats-count" role="status">{results.length} registros</span></div>
+      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><ActivityTimestamp date={r.date}/></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
       {!results.length && <p className="stats-empty">No hay ejercicios registrados con estos filtros.</p>}
-      <div className="stats-history-footer"><div className="stats-pagination"><button className="stats-quiet-button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><span>Página {currentPage + 1} de {Math.max(1, Math.ceil(results.length / 20))}</span><button className="stats-quiet-button" disabled={(currentPage + 1) * 20 >= results.length} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
+      <div className="stats-history-footer"><div className="stats-pagination"><button className="stats-quiet-button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><span>Página {currentPage + 1} de {Math.max(1, Math.ceil(results.length / pageSize))}</span><button className="stats-quiet-button" disabled={(currentPage + 1) * pageSize >= results.length} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
       {more && <button className="stats-quiet-button stats-load" disabled={busy} onClick={loadMore}>{busy ? 'Cargando historial…' : error ? 'Reintentar' : 'Cargar más historial'}</button>}</div>
       {error && <p role="alert">No hemos podido consultar el historial. Puedes volver a intentarlo.</p>}
-    </section>
+    </section> }
+    ]}/>
   </div>;
 }

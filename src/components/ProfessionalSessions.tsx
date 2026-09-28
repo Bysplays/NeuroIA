@@ -7,6 +7,8 @@ import { sessionStatusLabel, validateSessionDraft, type AssignedSession, type Se
 import { EXERCISE_IDS } from '../services/difficulty';
 import { getExerciseById } from '../services/exerciseCatalog';
 import type { ExerciseId } from '../types';
+import { TabletPager } from './TabletTabs';
+import { useViewportPanel } from '../services/viewport';
 import { ModalFrame } from './ModalFrame';
 
 export function SessionSteps({ session }: { session: SessionDraft & { completedCount?: number } }) {
@@ -47,6 +49,8 @@ function Composer({ onClose, onPublish }: { onClose: () => void; onPublish: (id:
   </section></ModalFrame>;
 }
 export function ProfessionalSessions({ link, name, onBack }: { link: SessionLink; name: string; onBack: () => void }) {
+  const panel = useViewportPanel<HTMLElement>();
+  const [page, setPage] = useState(0);
   const { professionalId, seatId, patientId } = link;
   const adapter = useMemo(() => firestoreSessions(getFirestore(auth.app), { professionalId, seatId, patientId }), [professionalId, seatId, patientId]);
   const [sessions, setSessions] = useState<AssignedSession[] | null>(null);
@@ -57,10 +61,12 @@ export function ProfessionalSessions({ link, name, onBack }: { link: SessionLink
   const [busy, setBusy] = useState(false);
   const [cancelError, setCancelError] = useState('');
   useEffect(() => adapter.watch(values => { setSessions(values); setError(''); }, () => { setSessions(null); setError('No hemos podido consultar las sesiones. Comprueba la conexión y que la invitación siga activa.'); }), [adapter, retry]);
-  return <main className="professional-panel"><div><button className="paper-nav-button" onClick={onBack}><ArrowLeft size={20}/>Volver al panel</button></div>
+  const currentPage = Math.min(page, Math.max(0, (sessions?.length ?? 0) - 1));
+  return <main ref={panel} className="professional-panel tablet-screen"><div><button className="paper-nav-button" onClick={onBack}><ArrowLeft size={20}/>Volver al panel</button></div>
     <header className="proposal-heading"><h1>Sesiones de {name}</h1><button className="touch-btn touch-btn-primary" disabled={!sessions} onClick={() => setCompose(true)}><Plus size={20}/>Nueva sesión</button></header>
     {error ? <div className="professional-notice" role="alert"><p>{error}</p><button className="stats-quiet-button" onClick={() => setRetry(value => value + 1)}>Reintentar</button></div> : !sessions ? <p role="status">Cargando sesiones…</p> : !sessions.length ? <section className="stats-card professional-empty"><h2>Aún no hay sesiones propuestas</h2><p>Combina juegos, elige sus niveles y comparte la propuesta con {name}.</p></section> : <>
-      {sessions.map(session => <article className="stats-card session-card" key={session.id}><header className="proposal-heading"><h2>{session.title}</h2><span className="soft-label">{sessionStatusLabel[session.status]} · {session.completedCount}/{session.steps.length}</span></header>{session.note && <p className="session-note">{session.note}</p>}<SessionSteps session={session}/><footer className="proposal-heading"><span className="soft-label">Compartida el {new Date(session.createdAt).toLocaleDateString('es-ES')}</span>{['assigned', 'in-progress'].includes(session.status) && <button className="stats-quiet-button" onClick={() => { setCancel(session); setCancelError(''); }}>Cancelar sesión</button>}</footer></article>)}
+      {sessions.slice(currentPage, currentPage + 1).map(session => <article className="stats-card session-card" key={session.id}><header className="proposal-heading"><h2>{session.title}</h2><span className="soft-label">{sessionStatusLabel[session.status]} · {session.completedCount}/{session.steps.length}</span></header>{session.note && <p className="session-note">{session.note}</p>}<SessionSteps session={session}/><footer className="proposal-heading"><span className="soft-label">Compartida el {new Date(session.createdAt).toLocaleDateString('es-ES')}</span>{['assigned', 'in-progress'].includes(session.status) && <button className="stats-quiet-button" onClick={() => { setCancel(session); setCancelError(''); }}>Cancelar sesión</button>}</footer></article>)}
+      <TabletPager page={currentPage} pages={sessions.length} onChange={setPage} label="Sesiones propuestas"/>
       {sessions.length === 50 && <p>Mostramos las últimas 50 sesiones.</p>}
     </>}
     {compose && <Composer onClose={() => setCompose(false)} onPublish={adapter.publish}/>}

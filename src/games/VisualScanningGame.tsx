@@ -237,7 +237,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
     >
       <div className="scanning-game-container">
         {/* Cuadrícula de búsqueda táctil (4x4) ocupando el espacio completo sin scroll */}
-        <div className="scanning-grid" style={{ gridTemplateColumns: `repeat(${config.scanCols}, minmax(0, 1fr))` }}>
+        <div className="scanning-grid" style={{ gridTemplateColumns: `repeat(${config.scanCols}, minmax(0, 1fr))`, '--scan-rows': config.scanRows } as React.CSSProperties}>
           {items.map(item => (
             <button
               key={item.id}

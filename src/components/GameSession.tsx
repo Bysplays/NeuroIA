@@ -1,3 +1,6 @@
+import { FullscreenButton } from './FullscreenButton';
+import { enterFullscreen } from '../services/fullscreen';
+import { useViewportPanel } from '../services/viewport';
 import { gameConfig, type GameMode } from '../services/difficulty';
 import { SessionContext } from '../services/gameSession';
 import { usePortrait } from '../services/orientation';
@@ -10,6 +13,7 @@ import type { CognitiveDomain, ExerciseId } from '../types';
 import { soundService } from '../services/soundService';
 
 export function GameSession({ id, step, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true }: { id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
+  const panel = useViewportPanel<HTMLDivElement>();
   const portrait = usePortrait();
   const [level, setLevel] = useState(initialLevel);
   const config = gameConfig(level, mode);
@@ -51,8 +55,9 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
     return () => cancelAnimationFrame(frame);
   }, [clock, help, completed, started, portrait, paused]);
   return <SessionContext.Provider value={{ config, clock, finish, lockedLevel, nextReady, restart: () => { clock.reset(); setHelp(true); setSeconds(0); } }}>
+    <div className="game-session" ref={panel}>
     {help && <section className="game-instruction-screen" aria-labelledby="game-instruction-title">
-      {!lockedLevel && <button className="paper-nav-button" onClick={onBack}><ArrowLeft size={20} />{mode === 'normal' ? 'Volver al inicio' : 'Volver'} </button>}
+      <div className="game-instruction-toolbar"><FullscreenButton/>{!lockedLevel && <button className="paper-nav-button" onClick={onBack}><ArrowLeft size={20} />{mode === 'normal' ? 'Volver al inicio' : 'Volver'} </button>}</div>
       <div className="game-instruction-paper">
         <HeaderIllustration scene={exercise?.id ?? "home"} className="game-instruction-art" />
         <span className="soft-label">{step ?? (started ? 'Recordamos cómo jugar' : 'Antes de empezar')}</span>
@@ -65,12 +70,13 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
           </select>
         </label>}
         <button className="paper-nav-button" onClick={() => soundService.speak(instruction)}><Volume2 size={22} />Escuchar instrucciones</button>
-        <button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setStarted(true); setHelp(false); }}>{started ? 'Continuar jugando' : 'Empezar el juego'}</button>
+        <button className="touch-btn touch-btn-primary" onClick={() => { if (!started) void enterFullscreen(true); soundService.stopSpeaking(); setStarted(true); setHelp(false); }}>{started ? 'Continuar jugando' : 'Empezar el juego'}</button>
       </div>
     </section>}
-    {started && <div hidden={help}>
-      {!completed && <div className="game-session-bar"><button ref={helpButton} className="game-help-button" onClick={() => setHelp(true)} aria-label="Mostrar instrucciones"><CircleHelp size={30} /></button><span className="soft-label">Nivel {level}</span><span className="game-session-time" aria-label="Tiempo de juego"><Clock size={22} />{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span></div>}
+    {started && <div className="game-session-play" hidden={help}>
+      {!completed && <div className="game-session-bar"><button ref={helpButton} className="game-help-button" onClick={() => setHelp(true)} aria-label="Mostrar instrucciones"><CircleHelp size={30} /></button><FullscreenButton/><span className="soft-label">Nivel {level}</span><span className="game-session-time" aria-label="Tiempo de juego"><Clock size={22} />{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span></div>}
       {children}
     </div>}
+    </div>
   </SessionContext.Provider>;
 }

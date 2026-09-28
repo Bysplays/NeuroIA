@@ -310,3 +310,10 @@ release issue is lost during prioritization.
   See `vendor/cloudflare/README.md` for bounded batches and checkpoint monitoring.
 
 - [ ] Verify home-screen installation, standalone launch, landscape handling and Google sign-in on physical Android tablets and iPad; manifest and icons are provided, offline entry is not supported.
+
+### Tablet release checks
+
+- [ ] Verify fullscreen entry/exit, landscape lock fallback, touch, software
+  keyboard and browser chrome resizing on physical Android tablets and iPad.
+- [ ] Check longest account/session text and very large text on target devices;
+  preserve accessible scrolling for content that cannot fit.

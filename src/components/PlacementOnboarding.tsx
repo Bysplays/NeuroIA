@@ -1,3 +1,4 @@
+import { FullscreenButton } from './FullscreenButton';
 import { useEffect, useRef, useState } from 'react';
 import { Pause, Volume2 } from 'lucide-react';
 import type { ExerciseId, ExerciseResult, UserProfile } from '../types';
@@ -54,7 +55,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onSignO
     : phase === 'intro' ? 'Primero probaremos un ejemplo sin puntuación. Después haremos una prueba corta, a tu ritmo.'
     : 'Vamos a descubrir por dónde empezar. Te acompañaremos en ocho juegos cortos. No hay nota. Puedes descansar cuando quieras.';
   return <main className="placement-screen">
-    <header className="placement-toolbar"><span>Tu punto de partida</span><button className="paper-nav-button" onClick={onSettings}>Ajustes</button></header>
+    <header className="placement-toolbar"><span>Tu punto de partida</span><FullscreenButton/><button className="paper-nav-button" onClick={onSettings}>Ajustes</button></header>
     <section className="placement-card" aria-labelledby="placement-title">
       <HeaderIllustration scene={complete ? 'home' : id} className="placement-art" />
       <div className="placement-content">

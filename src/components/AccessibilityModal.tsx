@@ -1,3 +1,4 @@
+import { TabletTabs } from './TabletTabs';
 import { ProductInformation } from './ProductInformation';
 import { SubscriptionSettings } from './SubscriptionSettings';
 import { AccountPassword } from './AccountPassword';
@@ -22,6 +23,7 @@ interface AccessibilityModalProps {
 export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
   isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut, showSubscription = true,
 }) => {
+  const [tab, setTab] = useState('text');
   if (!isOpen) return null;
 
   const update = (patch: Partial<AccessibilitySettings>) => {
@@ -41,7 +43,8 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
         </header>
 
         <div className="preferences-body">
-          <ProfileName name={name} onSave={onUpdateName} />
+          <TabletTabs label="Secciones de ajustes" value={tab} onChange={setTab} tabs={[
+            { id: 'text', label: 'Texto', content: <>
           <section className="preferences-section" aria-labelledby="pref-text">
             <h3 id="pref-text"><Type size={20} aria-hidden="true" />Tamaño del texto</h3>
             <div className="preferences-segment" role="group" aria-labelledby="pref-text">
@@ -54,6 +57,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             </div>
           </section>
 
+          </> }, { id: 'appearance', label: 'Apariencia', content: <>
           <section className="preferences-section preferences-style-section" aria-labelledby="pref-screen">
             <h3 id="pref-screen"><Contrast size={20} aria-hidden="true" />Estilo de la página</h3>
             <div className="preferences-themes" role="group" aria-labelledby="pref-screen">
@@ -81,8 +85,12 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             </button>
           </section>
 
+          </> }, { id: 'account', label: 'Tu cuenta', content: <>
+          <ProfileName name={name} onSave={onUpdateName} />
           {showSubscription && <SubscriptionSettings />}
           <AccountPassword />
+          </> }
+          ]}/>
           <div className="preferences-account">
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>
               <LogOut size={18} aria-hidden="true" />{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}

@@ -1,3 +1,4 @@
+import { FullscreenButton } from './FullscreenButton';
 import React, { useState } from 'react';
 import { ChartNoAxesCombined, House, Settings, Volume2, VolumeX } from 'lucide-react';
 import type { UserProfile } from '../types';
@@ -42,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </button>
 
-      <div className="header-right">
+      <div className="header-right"><FullscreenButton/>
         <span className="header-context">{activeView === 'therapist' ? 'ESPACIO PROFESIONAL' : 'MI ESPACIO'}</span>
         {/* Professional navigation stays unavailable until verified roles and care links exist. */}
 

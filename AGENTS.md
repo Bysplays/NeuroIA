@@ -453,3 +453,16 @@ See docs/PROFESSIONALS.md for paths, rules, limits and publication order.
 the existing rules suite. Keep sequential execution because each suite resets the
 same demo project. Pure proposal/adaptation checks are in `npm test`. Use isolated
 browser fixtures for editor/player checks; never create real account activity.
+
+## Tablet viewport and fullscreen
+
+`TabletTabs` owns accessible tab selection and `TabletPager` bounded collection
+navigation. `useViewportPanel` measures the height below surrounding toolbars and
+updates on resize; its min-height allows accessibility overflow. `useCompactViewport`
+reduces page sizes in short windows. Keep viewport rules in interface.css and
+game geometry in games.css; never hide overflow to simulate a fit.
+`FullscreenButton` and `services/fullscreen.ts` share explicit entry/exit and the
+once-per-page first-game Start attempt. Browser rejection must not block play.
+Orientation-lock rejection retains fullscreen and allows manual rotation.
+Run `npm test` for the fullscreen retry/exit contract; verify actual fullscreen
+entry, exit, tabs, pagination and dialog focus in an isolated browser context.
