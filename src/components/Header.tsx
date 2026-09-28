@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { ChartNoAxesCombined, House, Settings, Volume2, VolumeX } from 'lucide-react';
+import { FullscreenButton } from './FullscreenButton';
+import React from 'react';
+import { SoundToggle } from './SoundToggle';
+import { Settings } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { soundService } from '../services/soundService';
 
@@ -8,29 +10,16 @@ interface HeaderProps {
   sessionMinutes: number;
   activeView: 'dashboard' | 'therapist' | 'statistics' | 'game';
   onNavigate: (view: 'dashboard' | 'therapist') => void;
-  onOpenStatistics: () => void;
+  navigationRef?: (node: HTMLDivElement | null) => void;
   onOpenAccessibility: () => void;
   onOpenFatigueAlert: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  profile,
-  activeView,
   onNavigate,
-  onOpenStatistics,
+  navigationRef,
   onOpenAccessibility,
 }) => {
-  const [soundActive, setSoundActive] = useState(profile.settings.soundEffects);
-
-  const toggleSound = () => {
-    const nextState = !soundActive;
-    setSoundActive(nextState);
-    soundService.setSoundEnabled(nextState);
-    if (nextState) {
-      soundService.playTap();
-    }
-  };
-
   return (
     <header className="main-header">
       <button className="header-left" onClick={() => onNavigate('dashboard')} aria-label="NeuroIA, ir al inicio">
@@ -42,27 +31,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </button>
 
+      <div className="header-navigation" ref={navigationRef}/>
       <div className="header-right">
-        <span className="header-context">{activeView === 'therapist' ? 'ESPACIO PROFESIONAL' : 'MI ESPACIO'}</span>
+
         {/* Professional navigation stays unavailable until verified roles and care links exist. */}
 
-        <button
-          className="header-icon-btn"
-          onClick={activeView === 'statistics' ? () => onNavigate('dashboard') : onOpenStatistics}
-          aria-label={activeView === 'statistics' ? 'Volver al inicio' : 'Ver estadísticas'}
-          title={activeView === 'statistics' ? 'Volver al inicio' : 'Ver estadísticas'}
-        >
-          {activeView === 'statistics' ? <House size={20} /> : <ChartNoAxesCombined size={20} />}
-        </button>
-        {/* Botón de Sonido */}
-        <button
-          className="header-icon-btn"
-          onClick={toggleSound}
-          aria-label={soundActive ? 'Silenciar sonidos' : 'Activar sonidos'}
-          title={soundActive ? 'Silenciar sonidos' : 'Activar sonidos'}
-        >
-          {soundActive ? <Volume2 size={20} /> : <VolumeX size={20} />}
-        </button>
+        <SoundToggle/>
 
         {/* Botón de Accesibilidad */}
         <button
@@ -76,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Settings size={20} />
         </button>
+        <FullscreenButton/>
       </div>
     </header>
   );

@@ -21,13 +21,13 @@
 
 ## A space to practice
 
-NeuroIA is a **serious play** platform with nine games covering attention,
+NeuroIA is a **serious play** platform with eight games covering attention,
 memory, language, organization and coordination. Daily sessions, achievements
 and personal progress support practice without competing against other people.
 
 | At your pace | Your way | With you |
 | :--- | :--- | :--- |
-| Daily sessions and individual games | Text sizes and Default / Cozy styles | Google sign-in and account-linked progress |
+| Daily sessions and individual games | Text sizes and Default / Cozy styles | Google/email sign-in and account-linked progress |
 | Pauses, help and instructions | Optional wellness companions | Seven-day trial, invitation or monthly plan |
 
 The app is in Spanish. The [professional workspace](docs/PROFESSIONALS.md) is free;
@@ -52,8 +52,9 @@ npm run dev
 ```
 
 Open the address printed by Vite, usually `http://localhost:5173`.
-Sign-in uses Google and the configured Firebase project; there is no mock login.
-See [authentication setup](docs/AUTHENTICATION.md) for domains and permissions.
+Sign-in uses Google or email/password and the configured Firebase project; there
+is no mock login. Email/password requires provider activation and verified email;
+see [Authentication setup](docs/AUTHENTICATION.md) for activation, domains and permissions.
 
 To connect the frontend to the test billing Worker, create `.env.local`:
 
@@ -74,6 +75,7 @@ npm run lint
 npm test
 node --test vendor/cloudflare/index.test.mjs
 npm run test:firestore
+npm run test:auth
 ```
 
 Firestore tests use only the `demo-neuroia` emulator and require Java 21+.
@@ -99,7 +101,7 @@ lifecycle before enabling live charges.
 | [Design](docs/DESIGN.md) | Visual identity, interaction and accessibility |
 | [Content](docs/CONTENT.md) | Product language and approved copy |
 | [Onboarding](docs/ONBOARDING.md) | Access, invitations and subscriptions |
-| [Authentication](docs/AUTHENTICATION.md) | Google sign-in and Firestore progress |
+| [Authentication](docs/AUTHENTICATION.md) | Google/email sign-in and Firestore progress |
 | [Cloudflare](vendor/cloudflare/README.md) | Worker deployment and daily reconciliation |
 | [Stripe](vendor/stripe/README.md) | Checkout, subscriptions and sandbox setup |
 | [Firebase](vendor/firebase/README.md) | Security rules and legacy Functions |

@@ -1,7 +1,10 @@
+import { selectPool, CLASSIFICATION_POOL, categoryChoices, CATEGORY_NAMES } from '../services/gameObjectPool';
+import type { GameConfig } from '../services/difficulty';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState } from 'react';
-import { CheckCircle2, ArrowRight, Volume2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ArrowRight, Volume2 } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -34,326 +37,15 @@ interface ItemToClassify {
   emoji: string;
   correctCategoryId: string;
   categoryName: string;
-  categories: [CategoryOption, CategoryOption];
+  categories: CategoryOption[];
 }
 
-const CLASSIFICATION_ITEMS: ItemToClassify[] = [
-  // Categoría 1: Alimentos vs Prendas de Ropa
-  {
-    id: 1,
-    name: 'Zanahoria',
-    emoji: '🥕',
-    correctCategoryId: 'food',
-    categoryName: 'Alimentos',
-    categories: [
-      { id: 'food', name: 'Alimentos', emoji: '🍎', color: '#16a34a', bgColor: '#dcfce7' },
-      { id: 'clothes', name: 'Prendas de Ropa', emoji: '👕', color: '#0284c7', bgColor: '#e0f2fe' },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Pantalón',
-    emoji: '👖',
-    correctCategoryId: 'clothes',
-    categoryName: 'Prendas de Ropa',
-    categories: [
-      { id: 'food', name: 'Alimentos', emoji: '🍎', color: '#16a34a', bgColor: '#dcfce7' },
-      { id: 'clothes', name: 'Prendas de Ropa', emoji: '👕', color: '#0284c7', bgColor: '#e0f2fe' },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Manzana',
-    emoji: '🍎',
-    correctCategoryId: 'food',
-    categoryName: 'Alimentos',
-    categories: [
-      { id: 'food', name: 'Alimentos', emoji: '🍎', color: '#16a34a', bgColor: '#dcfce7' },
-      { id: 'clothes', name: 'Prendas de Ropa', emoji: '👕', color: '#0284c7', bgColor: '#e0f2fe' },
-    ],
-  },
-  {
-    id: 4,
-    name: 'Camisa',
-    emoji: '👕',
-    correctCategoryId: 'clothes',
-    categoryName: 'Prendas de Ropa',
-    categories: [
-      { id: 'food', name: 'Alimentos', emoji: '🍎', color: '#16a34a', bgColor: '#dcfce7' },
-      { id: 'clothes', name: 'Prendas de Ropa', emoji: '👕', color: '#0284c7', bgColor: '#e0f2fe' },
-    ],
-  },
-  {
-    id: 5,
-    name: 'Plátano',
-    emoji: '🍌',
-    correctCategoryId: 'food',
-    categoryName: 'Alimentos',
-    categories: [
-      { id: 'food', name: 'Alimentos', emoji: '🍎', color: '#16a34a', bgColor: '#dcfce7' },
-      { id: 'clothes', name: 'Prendas de Ropa', emoji: '👕', color: '#0284c7', bgColor: '#e0f2fe' },
-    ],
-  },
-  {
-    id: 6,
-    name: 'Calcetines',
-    emoji: '🧦',
-    correctCategoryId: 'clothes',
-    categoryName: 'Prendas de Ropa',
-    categories: [
-      { id: 'food', name: 'Alimentos', emoji: '🍎', color: '#16a34a', bgColor: '#dcfce7' },
-      { id: 'clothes', name: 'Prendas de Ropa', emoji: '👕', color: '#0284c7', bgColor: '#e0f2fe' },
-    ],
-  },
-  {
-    id: 7,
-    name: 'Pan',
-    emoji: '🥖',
-    correctCategoryId: 'food',
-    categoryName: 'Alimentos',
-    categories: [
-      { id: 'food', name: 'Alimentos', emoji: '🍎', color: '#16a34a', bgColor: '#dcfce7' },
-      { id: 'clothes', name: 'Prendas de Ropa', emoji: '👕', color: '#0284c7', bgColor: '#e0f2fe' },
-    ],
-  },
-  {
-    id: 8,
-    name: 'Gorra',
-    emoji: '🧢',
-    correctCategoryId: 'clothes',
-    categoryName: 'Prendas de Ropa',
-    categories: [
-      { id: 'food', name: 'Alimentos', emoji: '🍎', color: '#16a34a', bgColor: '#dcfce7' },
-      { id: 'clothes', name: 'Prendas de Ropa', emoji: '👕', color: '#0284c7', bgColor: '#e0f2fe' },
-    ],
-  },
-
-  // Categoría 2: Cocina vs Higiene y Baño
-  {
-    id: 9,
-    name: 'Jabón',
-    emoji: '🧼',
-    correctCategoryId: 'hygiene',
-    categoryName: 'Higiene y Baño',
-    categories: [
-      { id: 'kitchen', name: 'Cocina', emoji: '🍳', color: '#ea580c', bgColor: '#ffedd5' },
-      { id: 'hygiene', name: 'Higiene y Baño', emoji: '🪥', color: '#7c3aed', bgColor: '#ede9fe' },
-    ],
-  },
-  {
-    id: 10,
-    name: 'Sartén',
-    emoji: '🍳',
-    correctCategoryId: 'kitchen',
-    categoryName: 'Cocina',
-    categories: [
-      { id: 'kitchen', name: 'Cocina', emoji: '🍳', color: '#ea580c', bgColor: '#ffedd5' },
-      { id: 'hygiene', name: 'Higiene y Baño', emoji: '🪥', color: '#7c3aed', bgColor: '#ede9fe' },
-    ],
-  },
-  {
-    id: 11,
-    name: 'Cuchara',
-    emoji: '🥄',
-    correctCategoryId: 'kitchen',
-    categoryName: 'Cocina',
-    categories: [
-      { id: 'kitchen', name: 'Cocina', emoji: '🍳', color: '#ea580c', bgColor: '#ffedd5' },
-      { id: 'hygiene', name: 'Higiene y Baño', emoji: '🪥', color: '#7c3aed', bgColor: '#ede9fe' },
-    ],
-  },
-  {
-    id: 12,
-    name: 'Cepillo de Dientes',
-    emoji: '🪥',
-    correctCategoryId: 'hygiene',
-    categoryName: 'Higiene y Baño',
-    categories: [
-      { id: 'kitchen', name: 'Cocina', emoji: '🍳', color: '#ea580c', bgColor: '#ffedd5' },
-      { id: 'hygiene', name: 'Higiene y Baño', emoji: '🪥', color: '#7c3aed', bgColor: '#ede9fe' },
-    ],
-  },
-  {
-    id: 13,
-    name: 'Taza',
-    emoji: '☕',
-    correctCategoryId: 'kitchen',
-    categoryName: 'Cocina',
-    categories: [
-      { id: 'kitchen', name: 'Cocina', emoji: '🍳', color: '#ea580c', bgColor: '#ffedd5' },
-      { id: 'hygiene', name: 'Higiene y Baño', emoji: '🪥', color: '#7c3aed', bgColor: '#ede9fe' },
-    ],
-  },
-  {
-    id: 14,
-    name: 'Toalla',
-    emoji: '🧴',
-    correctCategoryId: 'hygiene',
-    categoryName: 'Higiene y Baño',
-    categories: [
-      { id: 'kitchen', name: 'Cocina', emoji: '🍳', color: '#ea580c', bgColor: '#ffedd5' },
-      { id: 'hygiene', name: 'Higiene y Baño', emoji: '🪥', color: '#7c3aed', bgColor: '#ede9fe' },
-    ],
-  },
-  {
-    id: 15,
-    name: 'Olla',
-    emoji: '🍲',
-    correctCategoryId: 'kitchen',
-    categoryName: 'Cocina',
-    categories: [
-      { id: 'kitchen', name: 'Cocina', emoji: '🍳', color: '#ea580c', bgColor: '#ffedd5' },
-      { id: 'hygiene', name: 'Higiene y Baño', emoji: '🪥', color: '#7c3aed', bgColor: '#ede9fe' },
-    ],
-  },
-  {
-    id: 16,
-    name: 'Esponja de Baño',
-    emoji: '🧽',
-    correctCategoryId: 'hygiene',
-    categoryName: 'Higiene y Baño',
-    categories: [
-      { id: 'kitchen', name: 'Cocina', emoji: '🍳', color: '#ea580c', bgColor: '#ffedd5' },
-      { id: 'hygiene', name: 'Higiene y Baño', emoji: '🪥', color: '#7c3aed', bgColor: '#ede9fe' },
-    ],
-  },
-
-  // Categoría 3: Herramientas vs Muebles del Hogar
-  {
-    id: 17,
-    name: 'Martillo',
-    emoji: '🔨',
-    correctCategoryId: 'tools',
-    categoryName: 'Herramientas',
-    categories: [
-      { id: 'furniture', name: 'Muebles del Hogar', emoji: '🛋️', color: '#0891b2', bgColor: '#cffafe' },
-      { id: 'tools', name: 'Herramientas', emoji: '🔧', color: '#b45309', bgColor: '#fef3c7' },
-    ],
-  },
-  {
-    id: 18,
-    name: 'Sofá',
-    emoji: '🛋️',
-    correctCategoryId: 'furniture',
-    categoryName: 'Muebles del Hogar',
-    categories: [
-      { id: 'furniture', name: 'Muebles del Hogar', emoji: '🛋️', color: '#0891b2', bgColor: '#cffafe' },
-      { id: 'tools', name: 'Herramientas', emoji: '🔧', color: '#b45309', bgColor: '#fef3c7' },
-    ],
-  },
-  {
-    id: 19,
-    name: 'Destornillador',
-    emoji: '🪛',
-    correctCategoryId: 'tools',
-    categoryName: 'Herramientas',
-    categories: [
-      { id: 'furniture', name: 'Muebles del Hogar', emoji: '🛋️', color: '#0891b2', bgColor: '#cffafe' },
-      { id: 'tools', name: 'Herramientas', emoji: '🔧', color: '#b45309', bgColor: '#fef3c7' },
-    ],
-  },
-  {
-    id: 20,
-    name: 'Cama',
-    emoji: '🛏️',
-    correctCategoryId: 'furniture',
-    categoryName: 'Muebles del Hogar',
-    categories: [
-      { id: 'furniture', name: 'Muebles del Hogar', emoji: '🛋️', color: '#0891b2', bgColor: '#cffafe' },
-      { id: 'tools', name: 'Herramientas', emoji: '🔧', color: '#b45309', bgColor: '#fef3c7' },
-    ],
-  },
-  {
-    id: 21,
-    name: 'Alicates',
-    emoji: '🪚',
-    correctCategoryId: 'tools',
-    categoryName: 'Herramientas',
-    categories: [
-      { id: 'furniture', name: 'Muebles del Hogar', emoji: '🛋️', color: '#0891b2', bgColor: '#cffafe' },
-      { id: 'tools', name: 'Herramientas', emoji: '🔧', color: '#b45309', bgColor: '#fef3c7' },
-    ],
-  },
-  {
-    id: 22,
-    name: 'Silla',
-    emoji: '🪑',
-    correctCategoryId: 'furniture',
-    categoryName: 'Muebles del Hogar',
-    categories: [
-      { id: 'furniture', name: 'Muebles del Hogar', emoji: '🛋️', color: '#0891b2', bgColor: '#cffafe' },
-      { id: 'tools', name: 'Herramientas', emoji: '🔧', color: '#b45309', bgColor: '#fef3c7' },
-    ],
-  },
-
-  // Categoría 4: Animales vs Medios de Transporte
-  {
-    id: 23,
-    name: 'Perro',
-    emoji: '🐶',
-    correctCategoryId: 'animals',
-    categoryName: 'Animales',
-    categories: [
-      { id: 'animals', name: 'Animales', emoji: '🐾', color: '#059669', bgColor: '#d1fae5' },
-      { id: 'vehicles', name: 'Medios de Transporte', emoji: '🚗', color: '#2563eb', bgColor: '#dbeafe' },
-    ],
-  },
-  {
-    id: 24,
-    name: 'Autobús',
-    emoji: '🚌',
-    correctCategoryId: 'vehicles',
-    categoryName: 'Medios de Transporte',
-    categories: [
-      { id: 'animals', name: 'Animales', emoji: '🐾', color: '#059669', bgColor: '#d1fae5' },
-      { id: 'vehicles', name: 'Medios de Transporte', emoji: '🚗', color: '#2563eb', bgColor: '#dbeafe' },
-    ],
-  },
-  {
-    id: 25,
-    name: 'Gato',
-    emoji: '🐱',
-    correctCategoryId: 'animals',
-    categoryName: 'Animales',
-    categories: [
-      { id: 'animals', name: 'Animales', emoji: '🐾', color: '#059669', bgColor: '#d1fae5' },
-      { id: 'vehicles', name: 'Medios de Transporte', emoji: '🚗', color: '#2563eb', bgColor: '#dbeafe' },
-    ],
-  },
-  {
-    id: 26,
-    name: 'Bicicleta',
-    emoji: '🚲',
-    correctCategoryId: 'vehicles',
-    categoryName: 'Medios de Transporte',
-    categories: [
-      { id: 'animals', name: 'Animales', emoji: '🐾', color: '#059669', bgColor: '#d1fae5' },
-      { id: 'vehicles', name: 'Medios de Transporte', emoji: '🚗', color: '#2563eb', bgColor: '#dbeafe' },
-    ],
-  },
-  {
-    id: 27,
-    name: 'Caballo',
-    emoji: '🐴',
-    correctCategoryId: 'animals',
-    categoryName: 'Animales',
-    categories: [
-      { id: 'animals', name: 'Animales', emoji: '🐾', color: '#059669', bgColor: '#d1fae5' },
-      { id: 'vehicles', name: 'Medios de Transporte', emoji: '🚗', color: '#2563eb', bgColor: '#dbeafe' },
-    ],
-  },
-  {
-    id: 28,
-    name: 'Avión',
-    emoji: '✈️',
-    correctCategoryId: 'vehicles',
-    categoryName: 'Medios de Transporte',
-    categories: [
-      { id: 'animals', name: 'Animales', emoji: '🐾', color: '#059669', bgColor: '#d1fae5' },
-      { id: 'vehicles', name: 'Medios de Transporte', emoji: '🚗', color: '#2563eb', bgColor: '#dbeafe' },
-    ],
-  },
-];
+function createItems(config: GameConfig): ItemToClassify[] {
+  return selectPool(config, CLASSIFICATION_POOL).map((item, id) => ({ id, name: item.name, emoji: item.symbol,
+    correctCategoryId: item.category, categoryName: CATEGORY_NAMES[item.category],
+    categories: categoryChoices(item, config).map(id => ({ id, name: CATEGORY_NAMES[id], emoji: '', color: '', bgColor: '' })),
+  }));
+}
 
 export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   onBack,
@@ -361,8 +53,8 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
-  const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => [...CLASSIFICATION_ITEMS].sort(() => Math.random() - 0.5).slice(0, 5));
+  const { clock, config, assistanceTarget } = useGameSession();
+  const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => createItems(config));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
@@ -373,7 +65,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
   const initGame = () => {
     setStartTime(clock.now());
-    const shuffled = [...CLASSIFICATION_ITEMS].sort(() => Math.random() - 0.5).slice(0, 5);
+    const shuffled = createItems(config);
     setSessionItems(shuffled);
     setCurrentIdx(0);
     setSelectedCategory(null);
@@ -425,7 +117,10 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
       const accuracy = Math.min(100, Math.round((finalCorrect / total) * 100));
 
       const gameResult: ExerciseResult = {
-        id: 'res-' + clock.now(),
+        id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      practice: config.mode !== 'normal',
         exerciseId: 'categorization',
         domain: 'executive',
         date: new Date().toISOString(),
@@ -462,28 +157,26 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
       planProgress={planProgress}
       onNextPlanExercise={onNextPlanExercise}
     >
-      <div className="categorization-game-container">
-        <div className="categorization-card">
-          {/* Objeto central a clasificar */}
-          <div className="category-object-card">
-            <span className="large-object-emoji"><GameObject transparent symbol={currentItem.emoji} /></span>
-            <h2 className="object-name-title">{currentItem.name}</h2>
-            <button
+      {assistanceTarget && createPortal(<button
               className="touch-btn touch-btn-secondary object-voice-btn"
               onClick={() => soundService.speak(currentItem.name)}
               title="Escuchar nombre del objeto"
             >
               <Volume2 size={22} />
-              <span>Escuchar Objeto</span>
-            </button>
+              <span>Escuchar</span>
+            </button>, assistanceTarget)}
+      <div className="categorization-game-container">
+        <div className="categorization-card">
+          {/* Objeto central a clasificar */}
+          <div className="category-object-card">
+            <span className="large-object-emoji"><GameObject transparent symbol={currentItem.emoji} /></span>
+            <div className="category-object-caption">
+            <h2 className="object-name-title">{currentItem.name}</h2>
+
+            </div>
           </div>
 
-          <div className="categorization-prompt">
-            <p>¿A qué categoría pertenece este elemento?</p>
-          </div>
-
-          {/* Dos contenedores / cajas temáticas */}
-          <div className="category-bins-grid">
+          <div className="category-bins-grid" style={{ gridTemplateColumns: `repeat(${currentItem.categories.length}, minmax(0, 1fr))` }}>
             {currentItem.categories.map(cat => {
               const isSelected = selectedCategory === cat.id;
               const isThisCorrect = cat.id === currentItem.correctCategoryId;
@@ -498,28 +191,17 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
               }
 
               return (
-                <div
+                <button
+                  type="button"
                   key={cat.id}
                   className={`card card-interactive ${binClass}`}
                   onClick={() => handleSelectCategory(cat.id)}
-                  role="button"
-                  tabIndex={0}
+                  aria-label={`${cat.name}${selectedCategory !== null ? isThisCorrect ? ' · Respuesta correcta' : isSelected ? ' · Respuesta incorrecta' : '' : ''}`}
+                  disabled={selectedCategory !== null}
                 >
-                  <div
-                    className="bin-icon-circle"
-                    style={{ backgroundColor: cat.bgColor, color: cat.color }}
-                  >
-                    <span className="bin-emoji"><GameObject transparent symbol={cat.emoji} /></span>
-                  </div>
                   <h3 className="bin-title">{cat.name}</h3>
 
-                  {selectedCategory !== null && isThisCorrect && (
-                    <div className="bin-check-badge animate-fade-in">
-                      <CheckCircle2 size={26} />
-                      <span>¡Aquí va!</span>
-                    </div>
-                  )}
-                </div>
+                </button>
               );
             })}
           </div>

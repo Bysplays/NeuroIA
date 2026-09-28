@@ -1,7 +1,8 @@
+import { GAME_OBJECT_POOL, shuffle } from '../services/gameObjectPool';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { CheckCircle2, Eye, Play } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, type CSSProperties } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -29,48 +30,17 @@ interface CardItem {
   isMatched: boolean;
 }
 
-const ALL_MEMORY_OBJECTS = [
-  { pairKey: 'reloj', emoji: '⏰', label: 'Reloj' },
-  { pairKey: 'casa', emoji: '🏠', label: 'Casa' },
-  { pairKey: 'llave', emoji: '🔑', label: 'Llave' },
-  { pairKey: 'telefono', emoji: '📱', label: 'Teléfono' },
-  { pairKey: 'taza', emoji: '☕', label: 'Taza' },
-  { pairKey: 'gafas', emoji: '👓', label: 'Gafas' },
-  { pairKey: 'zapato', emoji: '👟', label: 'Zapato' },
-  { pairKey: 'manzana', emoji: '🍎', label: 'Manzana' },
-  { pairKey: 'pan', emoji: '🥖', label: 'Pan' },
-  { pairKey: 'cuchara', emoji: '🥄', label: 'Cuchara' },
-  { pairKey: 'camisa', emoji: '👕', label: 'Camisa' },
-  { pairKey: 'coche', emoji: '🚗', label: 'Coche' },
-  { pairKey: 'silla', emoji: '🪑', label: 'Silla' },
-  { pairKey: 'lampara', emoji: '💡', label: 'Lámpara' },
-  { pairKey: 'libro', emoji: '📖', label: 'Libro' },
-  { pairKey: 'tijeras', emoji: '✂️', label: 'Tijeras' },
-  { pairKey: 'cepillo', emoji: '🪥', label: 'Cepillo' },
-  { pairKey: 'paraguas', emoji: '☂️', label: 'Paraguas' },
-  { pairKey: 'bicicleta', emoji: '🚲', label: 'Bicicleta' },
-  { pairKey: 'flor', emoji: '🌻', label: 'Girasol' },
-  { pairKey: 'gato', emoji: '🐱', label: 'Gato' },
-  { pairKey: 'perro', emoji: '🐶', label: 'Perro' },
-  { pairKey: 'platano', emoji: '🍌', label: 'Plátano' },
-  { pairKey: 'cama', emoji: '🛏️', label: 'Cama' },
-  { pairKey: 'guitarra', emoji: '🎸', label: 'Guitarra' },
-  { pairKey: 'radio', emoji: '📻', label: 'Radio' },
-  { pairKey: 'plato', emoji: '🍽️', label: 'Plato' },
-  { pairKey: 'sombrero', emoji: '👒', label: 'Sombrero' },
-  { pairKey: 'vaso', emoji: '🥛', label: 'Vaso' },
-  { pairKey: 'toalla', emoji: '🧴', label: 'Jabón' },
-];
-
-function createDeck(): CardItem[] {
-  // Generar 3 pares (6 cartas) barajadas
+function createDeck(pairs: number, level: number): CardItem[] {
+  // Generate the configured number of pairs.
   const deck: CardItem[] = [];
   let idCounter = 1;
 
-  // Seleccionar 3 objetos al azar del banco de 30 objetos cotidianos
-  const selectedObjects = [...ALL_MEMORY_OBJECTS]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
+  // Higher levels favor visually related objects from the shared pool.
+  const groups = ['food', 'clothes', 'kitchen', 'tools'];
+  const category = shuffle(groups)[0];
+  const similar = shuffle(GAME_OBJECT_POOL.filter(item => item.category === category));
+  const pool = level >= 5 ? [...similar, ...shuffle(GAME_OBJECT_POOL.filter(item => item.category !== category))] : shuffle(GAME_OBJECT_POOL);
+  const selectedObjects = pool.slice(0, pairs).map(item => ({ pairKey: item.symbol, emoji: item.symbol, label: item.name }));
 
   selectedObjects.forEach(obj => {
     deck.push({
@@ -91,8 +61,7 @@ function createDeck(): CardItem[] {
     });
   });
 
-  const shuffled = deck.sort(() => Math.random() - 0.5);
-  return shuffled;
+  return shuffle(deck);
 }
 
 export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
@@ -101,10 +70,11 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
-  const [cards, setCards] = useState<CardItem[]>(createDeck);
+  const { clock, config } = useGameSession();
+  const [cards, setCards] = useState<CardItem[]>(() => createDeck(config.pairs, config.level));
   const [selectedCards, setSelectedCards] = useState<number[]>([]); // índices de las cartas volteadas
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
   const [startTime, setStartTime] = useState<number>(clock.now());
@@ -113,7 +83,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
   // Fase de memorización inicial (4 segundos)
   const [isPreviewPhase, setIsPreviewPhase] = useState(true);
-  const [previewCountdown, setPreviewCountdown] = useState(4);
+  const [previewCountdown, setPreviewCountdown] = useState(config.previewSeconds);
   const countdownTimerRef = useRef<number | null>(null);
 
   const endPreview = useCallback(() => {
@@ -125,14 +95,13 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     setCards(prev => prev.map(c => ({ ...c, isFlipped: false })));
     soundService.playGentlePrompt();
     soundService.speak('¡Encuentra las parejas!');
-    setStartTime(clock.now());
   }, [clock]);
 
   const [previewVersion, setPreviewVersion] = useState(0);
   const mismatchTimerRef = useRef<number | undefined>(undefined);
   useEffect(() => {
     soundService.speak('Memoriza dónde está cada pareja');
-    let remaining = 4;
+    let remaining = config.previewSeconds;
     const timer = clock.setInterval(() => {
       remaining -= 1;
       setPreviewCountdown(remaining);
@@ -143,10 +112,12 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       clock.clearInterval(timer);
       clock.clearTimeout(mismatchTimerRef.current);
     };
-  }, [clock, endPreview, previewVersion]);
+  }, [clock, endPreview, previewVersion, config.previewSeconds]);
 
   const initGame = () => {
-    const shuffled = createDeck();
+    setStartTime(clock.now());
+    setHintsUsed(0);
+    const shuffled = createDeck(config.pairs, config.level);
     setCards(shuffled);
     setSelectedCards([]);
     setIsEvaluating(false);
@@ -155,7 +126,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     setIsCompleted(false);
     setResult(null);
     setIsPreviewPhase(true);
-    setPreviewCountdown(4);
+    setPreviewCountdown(config.previewSeconds);
     setPreviewVersion(version => version + 1);
   };
 
@@ -220,18 +191,22 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   const handleGameFinish = (finalAttempts: number, mistakes: MistakeDetail[]) => {
     const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
     // Precisión basada en intentos óptimos (3 intentos perfectos)
-    const accuracy = Math.min(100, Math.max(65, Math.round((3 / Math.max(3, finalAttempts)) * 100)));
+    const accuracy = Math.min(100, Math.max(0, Math.round((config.pairs / Math.max(config.pairs, finalAttempts)) * 100)));
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + clock.now(),
+      id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      hintsUsed,
+      practice: config.mode !== 'normal',
       exerciseId: 'memory-pairs',
       domain: 'memory',
       date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
       accuracy,
-      score: 300 + Math.max(0, 200 - (finalAttempts - 3) * 30),
-      correctAnswers: 3,
-      totalQuestions: 3,
+      score: 300 + Math.max(0, 200 - (finalAttempts - config.pairs) * 30),
+      correctAnswers: config.pairs,
+      totalQuestions: finalAttempts,
       feedbackMessage:
         accuracy >= 80
           ? '¡Buen trabajo! Has encontrado las parejas con precisión.'
@@ -249,7 +224,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   return (
     <ExerciseWrapper
       exerciseId="memory-pairs"
-      title={isPreviewPhase ? "Parejas de Memoria (Memoriza el Tablero)" : `Parejas de Memoria (${matchedCount}/3 Parejas)`}
+      title={`Parejas de Memoria (${matchedCount}/${config.pairs} Parejas)`}
       domain="memory"
       instructionText={
         isPreviewPhase
@@ -267,34 +242,28 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     >
       <div className="memory-pairs-game-container">
         <div className="pairs-board-card">
-          {isPreviewPhase ? (
-            <div className="pairs-preview-banner animate-fade-in">
-              <div className="preview-banner-text">
-                <div className="preview-indicator-badge">
-                  <Eye size={20} />
-                  <span>Fase de Memorización</span>
-                </div>
-                <p className="preview-countdown-msg">
-                  Memoriza las cartas (se taparán en <strong>{previewCountdown}s</strong>)
-                </p>
-              </div>
-              <button
-                className="touch-btn touch-btn-primary preview-skip-btn"
-                onClick={endPreview}
-                title="Empezar ya a buscar parejas"
-              >
-                <Play size={18} />
-                <span>¡Ya las tengo!</span>
+          <div className="pairs-status-bar">
+              <span className="pairs-stat-pill">Parejas encontradas: <strong>{matchedCount} de {config.pairs}</strong></span>
+              <span className="pairs-stat-pill">Intentos: <strong>{attempts}</strong></span>
+              <button className={`paper-nav-button pairs-preview-control${isPreviewPhase ? ' touch-btn-primary' : ''}`}
+                aria-label={isPreviewPhase ? `Se ocultan en ${previewCountdown} segundos. Empezar ahora` : 'Volver a ver las cartas'}
+                onClick={() => {
+                if (isPreviewPhase) { endPreview(); return; }
+                clock.clearTimeout(mismatchTimerRef.current);
+                setSelectedCards([]); setIsEvaluating(false);
+                setHintsUsed(value => value + 1);
+                setCards(previous => previous.map(card => ({ ...card, isFlipped: true })));
+                setIsPreviewPhase(true); setPreviewCountdown(config.previewSeconds);
+                setPreviewVersion(value => value + 1);
+              }}><span className={isPreviewPhase ? 'pairs-preview-label-hidden' : undefined}>Volver a ver las cartas</span>
+                {isPreviewPhase && <span className="pairs-preview-countdown">{previewCountdown} s</span>}
               </button>
             </div>
-          ) : (
-            <div className="pairs-status-bar animate-fade-in">
-              <span className="pairs-stat-pill">Parejas encontradas: <strong>{matchedCount} de 3</strong></span>
-              <span className="pairs-stat-pill">Intentos: <strong>{attempts}</strong></span>
-            </div>
-          )}
 
-          <div className="pairs-grid">
+          <div className="pairs-grid" style={{
+            '--pair-columns': config.pairs,
+            '--pair-mobile-columns': config.pairs <= 3 ? config.pairs : config.pairs === 6 ? 3 : 2,
+          } as CSSProperties}>
             {cards.map((card, idx) => (
               <button
                 key={card.id}

@@ -28,8 +28,14 @@ export async function verifyUser(token, project) {
     if (!jwk) throw Error();
     const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
     if (!await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, bytes(parts[2]), encoder.encode(parts.slice(0, 2).join('.')))) throw Error();
+    if (claims.firebase?.sign_in_provider === 'password' && claims.email_verified !== true) {
+      fail(403, 'Verifica tu correo antes de continuar.');
+    }
     return claims.sub;
-  } catch { fail(401, 'Vuelve a iniciar sesión.'); }
+  } catch (error) {
+    if (error instanceof HttpError) throw error;
+    fail(401, 'Vuelve a iniciar sesión.');
+  }
 }
 async function googleToken(env) {
   if (oauth?.secret === env.FIREBASE_SERVICE_ACCOUNT && oauth.until > Date.now()) return oauth.token;
@@ -218,8 +224,19 @@ export async function reconcileDaily(env, db = database(env), stripe = stripeCli
     startedAt: page.has_more ? startedAt : null, nextRunAt: page.has_more ? 0 : startedAt + 86400000 });
 }
 const seatIdPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
-const invitationPattern = /^NIA-[A-F0-9]{32}$/;
-const newInvitation = () => `NIA-${crypto.randomUUID().replaceAll('-', '').toUpperCase()}`;
+const invitationPattern = /^NIA-(?:[A-Z2-9]{4}-[A-Z2-9]{2}|[A-F0-9]{32})$/;
+const invitationAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+export const newInvitation = () => {
+  const chars = Array.from(crypto.getRandomValues(new Uint8Array(6)), byte => invitationAlphabet[byte & 31]).join('');
+  return `NIA-${chars.slice(0, 4)}-${chars.slice(4)}`;
+};
+async function availableInvitation(tx) {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const code = newInvitation();
+    if (!await tx.get(`seatInvitations/${code}`)) return code;
+  }
+  throw Error('invitation-collision');
+}
 const seatPath = (uid, id) => `professionals/${uid}/seats/${id}`;
 const proBillingPath = uid => `professionalBilling/${uid}`;
 function requireProfessional(profile, uid) {
@@ -238,8 +255,11 @@ export async function seatCheckout(uid, id, env, db, stripe) {
     if (billing?.pendingSeatId && billing.pendingSeatId !== id) fail(409, 'Termina o cancela primero la compra pendiente.');
     if (existing && existing.status !== 'pending') fail(409, 'Este asiento ya se ha procesado. Actualiza el panel.');
     if (existing && !existing.checkoutId && Date.now() - existing.createdAt > 23 * 3600000) fail(409, 'Este pago pendiente necesita revisión.');
-    const seat = existing || { status: 'pending', createdAt: Date.now(), attempt: crypto.randomUUID(), invitationCode: newInvitation(), occupantUid: null, patientName: null, expiresAt: 0, subscriptionId: null, checkoutId: null, priceId: env.STRIPE_SEAT_PRICE_ID || env.STRIPE_MONTHLY_PRICE_ID };
-    if (!existing) tx.set(seatPath(uid, id), seat, false);
+    const seat = existing || { status: 'pending', createdAt: Date.now(), attempt: crypto.randomUUID(), invitationCode: await availableInvitation(tx), occupantUid: null, patientName: null, expiresAt: 0, subscriptionId: null, checkoutId: null, priceId: env.STRIPE_SEAT_PRICE_ID || env.STRIPE_MONTHLY_PRICE_ID };
+    if (!existing) {
+      tx.set(seatPath(uid, id), seat, false);
+      tx.set(`seatInvitations/${seat.invitationCode}`, { professionalId: uid, seatId: id }, false);
+    }
     tx.set(proBillingPath(uid), { pendingSeatId: id });
     return { ...seat, customerId: billing?.customerId };
   });
@@ -297,6 +317,15 @@ export async function syncSeatSubscription(uid, id, subscriptionId, env, db, str
 export async function redeemSeat(uid, input, db) {
   const code = typeof input?.code === 'string' ? input.code.trim().toUpperCase() : '';
   if (!invitationPattern.test(code)) fail(400, 'El código no es válido');
+  // Bound guessing of short codes per verified account; rejected attempts count too.
+  await db.runTransaction(async tx => {
+    const path = `seatRedemptions/${uid}`;
+    const previous = await tx.get(path);
+    const now = Date.now();
+    const current = previous?.until > now ? previous : { until: now + 60000, count: 0 };
+    if (current.count >= 10) fail(429, 'Has probado varios códigos. Espera un minuto y vuelve a intentarlo.');
+    tx.set(path, { until: current.until, count: current.count + 1 }, false);
+  });
   const name = typeof input.name === 'string' ? input.name.trim().slice(0, 200) : '';
   await db.runTransaction(async tx => {
     const [invitation, access, billing] = await tx.getMany([`seatInvitations/${code}`, `users/${uid}/access/main`, `billing/${uid}`]);
@@ -304,7 +333,7 @@ export async function redeemSeat(uid, input, db) {
     const professionalId = invitation.professionalId;
     if (professionalId === uid) fail(409, 'Comparte este código con la persona que ocupará el asiento.');
     const [profile, seat, link] = await tx.getMany([`professionals/${professionalId}`, seatPath(professionalId, invitation.seatId), `professionals/${professionalId}/patients/${uid}`]);
-    if (!profile?.active || !seat || seat.invitationCode !== code || seat.status !== 'active' || seat.expiresAt <= Date.now()) fail(409, 'Esta invitación no está disponible.');
+    if (!profile?.active || !seat || seat.invitationCode !== code || seat.status !== 'active' || !Number.isFinite(seat.expiresAt) || seat.expiresAt <= Date.now()) fail(409, 'Esta invitación no está disponible.');
     if (seat.occupantUid && seat.occupantUid !== uid) fail(409, 'Este código ya lo ha utilizado otra persona.');
     if ((access?.kind === 'subscription' && access.expiresAt > Date.now()) || billing?.attempt || billing?.checkoutId || billing?.subscriptionId) fail(409, 'Gestiona tu suscripción o pago pendiente antes de usar una invitación.');
     if (access?.kind === 'invitation' && (access.professionalId !== professionalId || access.seatId !== invitation.seatId)) fail(409, 'Abandona tu invitación actual antes de usar otra.');
@@ -324,9 +353,7 @@ export async function leaveSeat(uid, db) {
     const path = seatPath(access.professionalId, access.seatId);
     const seat = await tx.get(path);
     if (!seat || seat.occupantUid !== uid) fail(409, 'No hemos podido confirmar tu invitación.');
-    const code = newInvitation();
-    const collision = await tx.get(`seatInvitations/${code}`);
-    if (collision) throw Error('invitation-collision');
+    const code = await availableInvitation(tx);
     tx.set(`users/${uid}/access/main`, { kind: 'revoked', leftAt: Date.now() }, false);
     tx.delete(`professionals/${access.professionalId}/patients/${uid}`);
     tx.set(path, { occupantUid: null, patientName: null, invitationCode: code });
@@ -334,6 +361,37 @@ export async function leaveSeat(uid, db) {
     // The old code remains unusable because it no longer matches the seat.
   });
   return { ok: true };
+}
+
+// Bounded online confirmations use server time, never the device clock.
+export async function confirmedAccess(uid, db) {
+  return db.runTransaction(async tx => {
+    const [access, billing] = await tx.getMany([`users/${uid}/access/main`, `billing/${uid}`]);
+    const data = access || {};
+    const serverNow = Date.now();
+    let expiresAt = data.kind === 'trial' && Number.isFinite(data.trialStartedAt)
+      ? data.trialStartedAt + 7 * 86400000 : data.expiresAt ?? null;
+    let active = data.kind === 'invitation' && data.invitationCode === 'CEOABERTO' && !data.seatId && expiresAt === null;
+    if (['trial', 'subscription', 'invitation'].includes(data.kind) && Number.isFinite(expiresAt)) active = expiresAt > serverNow;
+    if (data.seatId) {
+      active = false;
+      if (data.kind === 'invitation' && typeof data.professionalId === 'string' && !data.professionalId.includes('/') && typeof data.seatId === 'string' && !data.seatId.includes('/')) {
+        const [seat, owner, link] = await tx.getMany([
+          seatPath(data.professionalId, data.seatId), `professionals/${data.professionalId}`, `professionals/${data.professionalId}/patients/${uid}`,
+        ]);
+        active = Boolean(owner?.active && owner.ownerUid === data.professionalId && link?.patientId === uid && seat?.status === 'active' && seat.occupantUid === uid &&
+          seat.invitationCode === data.invitationCode && link?.seatId === data.seatId &&
+          Number.isFinite(seat.expiresAt) && seat.expiresAt > serverNow && Number.isFinite(expiresAt) && expiresAt > serverNow);
+        if (Number.isFinite(seat?.expiresAt) && Number.isFinite(expiresAt)) expiresAt = Math.min(expiresAt, seat.expiresAt);
+      }
+    }
+    return { active, serverNow, validForMs: 60000, expiresAt,
+      ...(data.kind ? { kind: data.kind } : {}),
+      ...Object.fromEntries(['trialStartedAt', 'autoRenew', 'professionalId', 'professionalName', 'invitationCode', 'seatId'].filter(key => data[key] !== undefined).map(key => [key, data[key]])),
+      pendingCheckout: Boolean(billing?.attempt || billing?.checkoutId),
+      canManageSubscription: Boolean(billing?.customerId && billing?.subscriptionId),
+    };
+  });
 }
 
 export async function professionalRequest(path, uid, input, env, db, stripe) {
@@ -344,9 +402,21 @@ export async function professionalRequest(path, uid, input, env, db, stripe) {
     const [profile, value] = await tx.getMany([`professionals/${uid}`, proBillingPath(uid)]);
     requireProfessional(profile, uid); return value || {};
   });
+  if (path === '/professional/status') return { serverNow: Date.now(), validForMs: 60000 };
   if (path === '/professional/portal') {
     if (!billing.customerId) fail(404, 'Todavía no hay suscripciones que gestionar.');
-    return { url: (await stripe('billing_portal/sessions', { customer: billing.customerId, return_url: returnUrl(env).href })).url };
+    const destination = returnUrl(env); destination.searchParams.set('seatCheckout', 'managed');
+    const params = { customer: billing.customerId, return_url: destination.href };
+    if (input?.seatId !== undefined) {
+      if (typeof input.seatId !== 'string' || !seatIdPattern.test(input.seatId)) fail(400, 'Asiento no válido.');
+      const seat = await db.runTransaction(tx => tx.get(seatPath(uid, input.seatId)));
+      if (!seat?.subscriptionId) fail(404, 'Este asiento no tiene una suscripción que gestionar.');
+      params['flow_data[type]'] = 'subscription_cancel';
+      params['flow_data[subscription_cancel][subscription]'] = seat.subscriptionId;
+      params['flow_data[after_completion][type]'] = 'redirect';
+      params['flow_data[after_completion][redirect][return_url]'] = destination.href;
+    }
+    return { url: (await stripe('billing_portal/sessions', params)).url };
   }
   const id = billing.pendingSeatId;
   if (!id) return { ok: true };
@@ -389,10 +459,11 @@ export function createHandler(deps = {}) {
         await webhook(JSON.parse(body), env, db, stripe);
         return reply({ received: true });
       }
-      if (!['/checkout','/portal','/cancel-checkout','/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
+      if (!['/checkout','/portal','/cancel-checkout','/status','/access', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
       const token = request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1];
       if (!token) fail(401, 'Inicia sesión para continuar.');
       const uid = await (deps.verifyUser || verifyUser)(token, env.FIREBASE_PROJECT_ID);
+      if (path === '/access') return reply(await confirmedAccess(uid, db));
       if (path.startsWith('/professional/') || path === '/redeem-seat' || path === '/leave-seat') {
         const body = await request.text();
         if (body.length > 4096) fail(413, 'Solicitud demasiado grande.');

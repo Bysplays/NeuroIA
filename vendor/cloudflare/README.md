@@ -6,6 +6,13 @@ from an authenticated local CLI. It uses Fetch and Web Crypto, not Firebase Func
 The configured endpoint is `https://neuroia-billing.kikefontanlorenzo.workers.dev`.
 No domain purchase or Firebase Blaze deployment is required.
 
+The reviewed Worker is deployed with verified-email enforcement, `/access`,
+`/professional/status`, per-seat portal cancellation, reserved short invitation codes and the five-minute
+reconciliation trigger. Current version: `5ca4c2f5-7cf7-44d3-9351-2cdfc5a60f97`. Runtime secrets are retained, Stripe stays in test mode,
+preview URLs remain disabled and existing observability is enabled. Health,
+localhost CORS, unauthenticated access and unsigned-webhook rejection were verified;
+signed payment lifecycle and scheduled reconciliation still need live validation.
+
 ## Configuration
 
 Set these ordinary runtime variables on the Worker (also recorded in `vendor/cloudflare/wrangler.jsonc`):
@@ -14,7 +21,7 @@ Set these ordinary runtime variables on the Worker (also recorded in `vendor/clo
 - `FIREBASE_PROJECT_ID=ceoaberto-neuroia`
 - `STRIPE_MONTHLY_PRICE_ID=price_1UItenAWZtSdGYThrex9dsNh`
 - `STRIPE_MODE=test`
-- `ALLOWED_ORIGINS=http://localhost:5173` (comma-separated extra exact origins).
+- `ALLOWED_ORIGINS=http://localhost:5173,https://bysplays.github.io` (comma-separated extra exact origins).
 
 Set these **Secret** bindings directly in Cloudflare:
 
@@ -59,14 +66,22 @@ created by the automated tests.
 
 ## Contracts
 
+- POST `/access`: server-confirmed player entitlement, effective seat expiry and
+  reciprocal link validation; returns `serverNow` and `validForMs: 60000`.
+- POST `/professional/status`: owner-only server time with the same lease.
+- POST `/professional/portal`: optional `{seatId}` opens cancellation confirmation
+  for an owner seat; configure period-end cancellation in the Stripe portal.
 - POST `/checkout`, `/portal`, `/cancel-checkout`, `/status`: require a Firebase ID token in
   `Authorization: Bearer …`; origin allowlist is additional browser protection.
 - POST `/webhook`: requires a Stripe signature over unmodified bytes, with a five-minute
   timestamp tolerance. Unsigned bodies cannot reach Firestore.
 - GET `/health`: public liveness only; never returns secrets.
+- Password-provider JWTs also require `email_verified: true` before any authenticated
+  billing or seat route. Deploy this guard and the corresponding Firestore rules
+  before enabling Email/Password in Firebase; Google login behavior is unchanged.
 - Firebase JWTs are verified against Google's public keys, issuer, audience, subject,
   issued/expiry/authentication times. Subject IDs use the alphanumeric, dash and
-  underscore format of this Google-login app; custom IDs outside that format are rejected. Like default Admin token verification this does
+  underscore format of Firebase-generated account IDs; custom IDs outside that format are rejected. Like default Admin token verification this does
   not query revocation/disabled-user status on every request; tokens expire normally.
 - Firestore REST transactions bind Checkout attempts, block invitation redemption during
   pending payment, and prevent duplicate subscription creation. Stripe idempotency keys

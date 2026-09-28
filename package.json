@@ -9,8 +9,9 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
-    "test:firestore": "npx --yes firebase-tools@15.30.1 emulators:exec --only firestore --project demo-neuroia \"node --experimental-strip-types --test tests/firestore.rules.test.mjs\"",
-    "test:onboarding": "npm run test:firestore"
+    "test:firestore": "npx --yes firebase-tools@15.30.1 emulators:exec --only firestore --project demo-neuroia \"node --experimental-strip-types --test --test-concurrency=1 tests/firestore.rules.test.mjs tests/sessions.rules.test.mjs\"",
+    "test:onboarding": "npm run test:firestore",
+    "test:auth": "npx --yes firebase-tools@15.30.1 emulators:exec --only auth --project demo-neuroia \"node --experimental-strip-types --test tests/emailAuth.emulator.test.mjs\""
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

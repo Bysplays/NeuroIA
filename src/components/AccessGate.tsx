@@ -1,3 +1,5 @@
+import { ConnectionRecovery } from './ConnectionRecovery';
+import { AccountAccessContext } from '../services/accountAccessContext';
 import { AppLoading } from './AppLoading';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { accessService, accessError, type AccountAccess } from '../services/accessService';
@@ -28,7 +30,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
         }
       }
     } catch (error) {
-      if (alive.current && request === version.current) { setError(accessError(error)); setAccess(current => current?.active ? current : null); }
+      if (alive.current && request === version.current) { setError(accessError(error)); setAccess(null); }
     }
   }, []);
   useEffect(() => {
@@ -37,17 +39,22 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     const interval = window.setInterval(() => { if (!locked.current) void refresh(); }, 30000);
     const onFocus = () => { if (!locked.current) void refresh(); };
     window.addEventListener('focus', onFocus);
+    const invalidate = () => { version.current++; setAccess(null); setError('Comprueba la conexión y vuelve a intentarlo.'); };
+    const onVisibility = () => { if (document.visibilityState === 'visible') { invalidate(); onFocus(); } };
+    window.addEventListener('offline', invalidate);
+    window.addEventListener('online', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
     const onAccessChanged = () => { version.current++; setAccess(null); void refresh(); };
     window.addEventListener('neuroia-access-changed', onAccessChanged);
-    return () => { alive.current = false; clearTimeout(initial); clearInterval(interval); window.removeEventListener('focus', onFocus); window.removeEventListener('neuroia-access-changed', onAccessChanged); };
+    return () => { alive.current = false; clearTimeout(initial); clearInterval(interval); window.removeEventListener('focus', onFocus); window.removeEventListener('offline', invalidate); window.removeEventListener('online', onFocus); document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('neuroia-access-changed', onAccessChanged); };
   }, [refresh]);
   useEffect(() => {
-    if (!access?.active || !access.expiresAt) return;
-    const remaining = access.expiresAt - access.serverNow;
+    if (!access?.active) return;
+    const remaining = Math.max(0, Math.min(access.validForMs ?? 0, access.expiresAt ? access.expiresAt - access.serverNow : Infinity));
     const timeout = window.setTimeout(() => {
-      if (remaining <= 2147483647) setAccess(value => value ? { ...value, active: false } : null);
+      setAccess(null);
       void refresh();
-    }, Math.max(0, Math.min(remaining, 2147483647)));
+    }, remaining);
     return () => clearTimeout(timeout);
   }, [access, refresh]);
   useEffect(() => { if (!access?.active) soundService.stopSpeaking(); }, [access?.active]);
@@ -71,14 +78,9 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
   // Unknown entitlement is not a denied entitlement: never show purchase options yet.
   if (!access) {
     if (!error) return <AppLoading />;
-    return <main className="cloud-entry">
-      <h1>No hemos podido abrir tu espacio</h1>
-      <p role="alert">Comprueba la conexión y vuelve a intentarlo.</p>
-      <button className="touch-btn touch-btn-primary" onClick={() => { setError(''); void refresh(); }}>Reintentar</button>
-      <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
-    </main>;
+    return <ConnectionRecovery onRetry={() => { setError(''); void refresh(); }} onSignOut={onSignOut}/>;
   }
-  if (access.active) return <>{children}</>;
+  if (access.active) return <AccountAccessContext.Provider value={access}>{children}</AccountAccessContext.Provider>;
   return <main className="access-entry">
     <img src={`${import.meta.env.BASE_URL}brand/neuroia-logo.svg`} alt="NeuroIA" width="160" />
     {!portrait && <OnboardingModal access={access} loadFailed={Boolean(error)} invitationIssue={invitationIssue} busy={busy}

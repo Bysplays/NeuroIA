@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import type { CognitiveDomain, ExerciseResult } from '../types';
-import { ALL_EXERCISES } from '../services/exerciseCatalog';
-import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion } from '../services/activityStats';
+import { LevelStatistics } from './LevelStatistics';
+import type { ReactNode } from 'react';
+import { TabletTabs } from './TabletTabs';
+import { useViewportPanel, useCompactViewport } from '../services/viewport';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, RotateCcw } from 'lucide-react';
+import type { CognitiveDomain, ExerciseResult, UserProfile } from '../types';
+import { ACTIVITY_EXERCISES, activityExerciseTitle as title, activityExerciseStyle } from '../services/activityExercises';
+import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion, historicalMean } from '../services/activityStats';
 import { loadActivityPage } from '../services/activityHistory';
 
 const domains: [CognitiveDomain, string][] = [['attention', 'Atención'], ['language', 'Lenguaje'], ['memory', 'Memoria'], ['executive', 'Organización'], ['motor', 'Coordinación']];
-const colors = ['#247f89', '#a85578', '#6656ac', '#ac661f', '#427639', '#b34245', '#3570ae', '#88752a', '#8d558c'];
-const title = (id: string) => ALL_EXERCISES.find(e => e.id === id)?.title ?? id;
-const color = (id: string) => colors[Math.max(0, ALL_EXERCISES.findIndex(e => e.id === id)) % colors.length];
+const color = (id: string) => activityExerciseStyle(id).color;
 const number = (n: number | null) => n === null || !Number.isFinite(n) ? '—' : n.toLocaleString('es-ES', { maximumFractionDigits: 1 });
 
 function ActivityTimestamp({ date }: { date: string }) {
@@ -16,11 +18,12 @@ function ActivityTimestamp({ date }: { date: string }) {
   return <time dateTime={date}><span>{formatted.day}</span>{formatted.time !== null && <small>{formatted.time}</small>}</time>;
 }
 
-function LineChart({ results, metric }: { results: ExerciseResult[]; metric: 'accuracy' | 'speed' }) {
+function LineChart({ results, history, complete, metric }: { results: ExerciseResult[]; history: ExerciseResult[]; complete: boolean; metric: 'accuracy' | 'speed' }) {
   const points = dailyActivity(results, metric);
+  const average = complete ? historicalMean(history, metric) : null;
   const days = [...new Set(points.map(p => p.day))];
   const ids = [...new Set(points.map(p => p.exerciseId))];
-  const max = metric === 'accuracy' ? 100 : Math.max(1, ...points.map(p => p.value)) * 1.1;
+  const max = metric === 'accuracy' ? 100 : Math.max(1, average ?? 0, ...points.map(p => p.value)) * 1.1;
   const dayTime = (day: string) => Date.parse(`${day}T12:00:00Z`);
   const start = dayTime(days[0]); const end = dayTime(days.at(-1)!);
   const x = (day: string) => days.length === 1 ? 330 : 55 + (dayTime(day) - start) / (end - start) * 555;
@@ -28,12 +31,13 @@ function LineChart({ results, metric }: { results: ExerciseResult[]; metric: 'ac
   return <section className={`stats-card stats-chart stats-chart-${metric}`}><h2>{metric === 'accuracy' ? 'Precisión media' : 'Velocidad media'}</h2>
     <p>{metric === 'accuracy' ? 'Porcentaje de aciertos · media diaria por ejercicio' : 'Segundos por pregunta · media diaria por ejercicio'}</p>
     {!points.length ? <p className="stats-empty">Todavía no hay datos para esta gráfica.</p> : <>
-      <svg viewBox="0 0 650 265" role="img" aria-label={`${metric === 'accuracy' ? 'Precisión' : 'Segundos por pregunta'} por día. Valores disponibles en la tabla inferior.`}>
+      <svg viewBox="0 0 650 265" role="img" aria-label={`${metric === 'accuracy' ? 'Precisión' : 'Segundos por pregunta'} por día. Valores disponibles en la pestaña Historial.`}>
         {[0, 1, 2, 3, 4].map(i => <g key={i}><line x1="55" x2="610" y1={y(max * i / 4)} y2={y(max * i / 4)} className="stats-grid-line" /><text x="44" y={y(max * i / 4) + 4} textAnchor="end">{number(max * i / 4)}</text></g>)}
+        {average !== null && <line x1="55" x2="610" y1={y(average)} y2={y(average)} className="stats-historical-mean" strokeDasharray="7 5"><title>Media histórica global: {number(average)}{metric === 'accuracy' ? '%' : ' s/pregunta'}</title></line>}
         {days.filter((_, i) => i === 0 || i === days.length - 1 || (days.length > 2 && i === Math.floor(days.length / 2))).map(day => <text key={day} x={x(day)} y="245" textAnchor="middle">{day.slice(8)}/{day.slice(5, 7)}/{day.slice(2, 4)}</text>)}
-        {ids.map(id => { const values = points.filter(p => p.exerciseId === id); return <g key={id} stroke={color(id)}><polyline fill="none" strokeWidth="2.5" strokeDasharray={ALL_EXERCISES.findIndex(e => e.id === id) % 2 ? '7 4' : undefined} points={values.map(p => `${x(p.day)},${y(p.value)}`).join(' ')} />{values.map(p => <circle key={p.day} cx={x(p.day)} cy={y(p.value)} r="4" fill={color(id)}><title>{title(id)} · {p.day}: {number(p.value)}{metric === 'accuracy' ? '%' : ' s/pregunta'}</title></circle>)}</g>; })}
+        {ids.map(id => { const values = points.filter(p => p.exerciseId === id); return <g key={id} stroke={color(id)}><polyline fill="none" strokeWidth="2.5" points={values.map(p => `${x(p.day)},${y(p.value)}`).join(' ')} />{values.map(p => <circle key={p.day} cx={x(p.day)} cy={y(p.value)} r="4" fill={color(id)}><title>{title(id)} · {p.day}: {number(p.value)}{metric === 'accuracy' ? '%' : ' s/pregunta'}</title></circle>)}</g>; })}
       </svg>
-      <ul className="stats-legend">{ids.map(id => <li key={id}><span style={{ background: color(id) }} />{title(id)}</li>)}</ul>
+      <ul className="stats-legend">{average !== null && <li><span className="stats-mean-swatch"/>Media histórica global: {number(average)}{metric === 'accuracy' ? '%' : ' s/pregunta'}</li>}{ids.map(id => <li key={id}><span style={{ background: color(id) }} />{title(id)}</li>)}</ul>
     </>}
   </section>;
 }
@@ -49,7 +53,16 @@ function CategoryRadar({ results }: { results: ExerciseResult[] }) {
   </svg></section>;
 }
 
-export function ActivityStatistics({ uid, history, onBack, heading = 'Tu actividad', backLabel = 'Volver al inicio' }: { uid: string; history: ExerciseResult[]; onBack: () => void; heading?: string; backLabel?: string }) {
+export function ActivityStatistics(props: ActivityStatisticsProps) {
+  return <AccountActivityStatistics key={props.uid} {...props}/>;
+}
+type ActivityStatisticsProps = { levels?: UserProfile['gameLevels']; selectedTab?: string; onTabChange?: (tab: string) => void; embedded?: boolean; achievements?: ReactNode; uid: string; history: ExerciseResult[]; onBack: () => void; heading?: string; subtitle?: string; backLabel?: string };
+function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu actividad', subtitle, backLabel = 'Volver al inicio', embedded = false, achievements, selectedTab, onTabChange }: ActivityStatisticsProps) {
+  const panel = useViewportPanel<HTMLDivElement>();
+  const [localTab, setLocalTab] = useState('overview');
+  const tab = selectedTab ?? localTab;
+  const setTab = onTabChange ?? setLocalTab;
+  const pageSize = useCompactViewport() ? 2 : 3;
   const [archive, setArchive] = useState<ExerciseResult[]>([]);
   const [cursor, setCursor] = useState<string>();
   const [more, setMore] = useState(true);
@@ -62,37 +75,54 @@ export function ActivityStatistics({ uid, history, onBack, heading = 'Tu activid
   const [page, setPage] = useState(0);
   const all = useMemo(() => mergeActivity(archive, history), [archive, history]);
   const results = all.filter(r => (!exercise || r.exerciseId === exercise) && (!domain || r.domain === domain) && (!from || localDay(r.date) >= from) && (!to || localDay(r.date) <= to));
-  const currentPage = Math.min(page, Math.max(0, Math.ceil(results.length / 20) - 1));
-  const loadMore = async () => {
+  const currentPage = Math.min(page, Math.max(0, Math.ceil(results.length / pageSize) - 1));
+  const loadMore = useCallback(async () => {
     if (fetching.current) return;
     fetching.current = true; setBusy(true); setError(false);
     try { const next = await loadActivityPage(uid, cursor); if (mounted.current) { setArchive(a => mergeActivity(a, next.results)); setCursor(next.cursor); setMore(next.more); } }
     catch { if (mounted.current) setError(true); }
     finally { fetching.current = false; if (mounted.current) setBusy(false); }
-  };
+  }, [uid, cursor]);
+  useEffect(() => {
+    if ((tab !== 'charts' && tab !== 'levels') || !more || busy || error) return;
+    const timer = window.setTimeout(() => { void loadMore(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [tab, more, busy, error, loadMore]);
   const resetPage = () => setPage(0);
-  return <div className="activity-statistics">
-    <div className="stats-heading"><button className="stats-quiet-button" onClick={onBack}><ArrowLeft size={20}/> {backLabel}</button><h1>{heading}</h1></div>
+  return <div ref={panel} className={`activity-statistics tablet-screen${embedded ? ' activity-embedded' : ''}`}>
+    {embedded && <header className="workspace-section-heading"><h1>Estadísticas</h1></header>}
+    {!embedded && <header className="stats-heading"><button className="header-icon-btn" aria-label={backLabel} title={backLabel} onClick={onBack}><ArrowLeft size={20}/></button><div><h1>{heading}</h1>{subtitle && <p>{subtitle}</p>}</div></header>}
+    <TabletTabs position="bottom" label="Actividad" value={tab} onChange={setTab} tabs={[
+      { id: 'overview', label: 'Resumen y filtros', content: <>
     <div className="stats-overview"><CategoryRadar results={results}/>
     <section className="stats-card stats-filter-panel" aria-labelledby="stats-filter-title">
-      <div className="stats-section-heading"><div><h2 id="stats-filter-title">Explora tu actividad</h2><p>Filtra las gráficas y el historial.</p></div>
-        <button className="stats-quiet-button" onClick={() => { setDomain(''); setExercise(''); setFrom(''); setTo(''); resetPage(); }}>Limpiar filtros</button>
+      <div className="stats-filter-heading"><div><h2 id="stats-filter-title">Filtros</h2><p>Elige qué actividad quieres ver.</p></div>
+        <button className="stats-filter-reset" disabled={!domain && !exercise && !from && !to} onClick={() => { setDomain(''); setExercise(''); setFrom(''); setTo(''); resetPage(); }}><RotateCcw size={16} aria-hidden="true"/>Restablecer</button>
       </div>
       <div className="stats-filters" onChange={resetPage}>
       <label>Área<select aria-label="Área" value={domain} onChange={e => { setDomain(e.target.value); setExercise(''); }}><option value="">Todas las áreas</option>{domains.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
-      <label>Ejercicio<select aria-label="Ejercicio" value={exercise} onChange={e => setExercise(e.target.value)}><option value="">Todos los ejercicios</option>{ALL_EXERCISES.filter(e => !domain || e.domain === domain).map(e => <option key={e.id} value={e.id}>{e.title}</option>)}</select></label>
+      <label>Ejercicio<select aria-label="Ejercicio" value={exercise} onChange={e => setExercise(e.target.value)}><option value="">Todos los ejercicios</option>{ACTIVITY_EXERCISES.filter(e => (!domain || e.domain === domain) && (!e.retired || all.some(r => r.exerciseId === e.id))).map(e => <option key={e.id} value={e.id}>{e.title}{e.retired ? ' (retirado)' : ''}</option>)}</select></label>
+      <fieldset className="stats-date-range"><legend>Fechas</legend><div className="stats-date-fields">
       <label>Desde<input aria-label="Desde" type="date" value={from} max={to || undefined} onChange={e => setFrom(e.target.value)}/></label>
       <label>Hasta<input aria-label="Hasta" type="date" value={to} min={from || undefined} onChange={e => setTo(e.target.value)}/></label>
+      </div></fieldset>
       </div>
     </section></div>
     {from && to && from > to && <p role="alert">La fecha inicial debe ser anterior a la final.</p>}
-    <div className="stats-lines"><LineChart results={results} metric="accuracy"/><LineChart results={results} metric="speed"/></div>
-    <section className="stats-card stats-history" aria-labelledby="stats-history-title"><div className="stats-section-heading"><div><h2 id="stats-history-title">Ejercicios resueltos</h2><p>{more ? 'Historial reciente · Puedes cargar más registros' : 'Todo el historial disponible'}</p></div><span className="stats-count" role="status">{results.length} registros</span></div>
-      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * 20, (currentPage + 1) * 20).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><ActivityTimestamp date={r.date}/></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
+    </> }, { id: 'charts', label: 'Gráficas', content:
+    <>
+      {more && <div className="stats-archive-notice" role="status">{error ? <>No se pudo cargar todo el historial. <button className="stats-quiet-button" onClick={loadMore}>Reintentar</button></> : 'Cargando el historial completo para calcular las medias…'}</div>}
+      <div className="stats-lines"><LineChart results={results} history={all} complete={!more} metric="accuracy"/><LineChart results={results} history={all} complete={!more} metric="speed"/></div>
+    </>
+    }, { id: 'history', label: 'Historial', content: <section className="stats-card stats-history" aria-labelledby="stats-history-title"><div className="stats-section-heading"><div><h2 id="stats-history-title">Ejercicios resueltos</h2><p>{more ? 'Historial reciente · Puedes cargar más registros' : 'Todo el historial disponible'}</p></div><span className="stats-count" role="status">{results.length} registros</span></div>
+      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><ActivityTimestamp date={r.date}/></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
       {!results.length && <p className="stats-empty">No hay ejercicios registrados con estos filtros.</p>}
-      <div className="stats-history-footer"><div className="stats-pagination"><button className="stats-quiet-button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><span>Página {currentPage + 1} de {Math.max(1, Math.ceil(results.length / 20))}</span><button className="stats-quiet-button" disabled={(currentPage + 1) * 20 >= results.length} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
+      <div className="stats-history-footer"><div className="stats-pagination"><button className="stats-quiet-button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><span>Página {currentPage + 1} de {Math.max(1, Math.ceil(results.length / pageSize))}</span><button className="stats-quiet-button" disabled={(currentPage + 1) * pageSize >= results.length} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
       {more && <button className="stats-quiet-button stats-load" disabled={busy} onClick={loadMore}>{busy ? 'Cargando historial…' : error ? 'Reintentar' : 'Cargar más historial'}</button>}</div>
       {error && <p role="alert">No hemos podido consultar el historial. Puedes volver a intentarlo.</p>}
-    </section>
+    </section> },
+    { id: 'levels', label: 'Nivel', content: <LevelStatistics levels={levels} history={all} complete={!more} busy={busy} error={error} onRetry={loadMore}/> },
+    ...(achievements ? [{ id: 'achievements', label: 'Logros', content: achievements }] : [])
+    ]}/>
   </div>;
 }

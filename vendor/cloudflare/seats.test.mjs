@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { seatCheckout, syncSeatSubscription, redeemSeat, leaveSeat, professionalRequest, webhook, reconcileDaily, createHandler } from './index.mjs';
+import { newInvitation, confirmedAccess, seatCheckout, syncSeatSubscription, redeemSeat, leaveSeat, professionalRequest, webhook, reconcileDaily, createHandler } from './index.mjs';
 const env = { APP_URL: 'https://example.com/app/', STRIPE_MONTHLY_PRICE_ID: 'price_monthly', STRIPE_MODE: 'test' };
 const uid = 'professional-a';
 const id = '12345678-1234-1234-1234-123456789abc';
@@ -43,7 +43,9 @@ test('seat Checkout authenticates owner, creates one subscription per seat and r
   assert.equal(creates.length, 1); assert.equal(creates[0].params['line_items[0][quantity]'], '1');
   assert.equal(creates[0].params['subscription_data[metadata][kind]'], 'seat');
   assert.equal(db.docs.get(path).status, 'pending'); assert.equal(db.docs.has(`users/${uid}/access/main`), false);
-  assert.equal(db.docs.has(`seatInvitations/${db.docs.get(path).invitationCode}`), false);
+  assert.match(db.docs.get(path).invitationCode, /^NIA-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{2}$/);
+  assert.equal(db.docs.get(`seatInvitations/${db.docs.get(path).invitationCode}`).seatId, id);
+  await assert.rejects(redeemSeat('unpaid-person', { code: db.docs.get(path).invitationCode }, db));
   await assert.rejects(seatCheckout('other', id, env, db, stripe), { status: 403 });
   await assert.rejects(seatCheckout(uid, '12345678-1234-1234-1234-123456789abd', env, db, stripe), { status: 409 });
 });
@@ -160,4 +162,106 @@ test('a fully ended personal subscription can be replaced by a sponsored seat wi
  await redeemSeat('person', { code }, db);
  assert.equal(db.docs.get('users/person/access/main').kind, 'invitation');
  assert.equal(db.docs.get(path).occupantUid, 'person');
+});
+
+
+test('server confirmations check paid seat and reciprocal link even if participant access is stale', async () => {
+  const db = invitationStore();
+  await redeemSeat('person', { code }, db);
+  const live = await confirmedAccess('person', db);
+  assert.equal(live.active, true);
+  assert.equal(live.validForMs, 60000);
+  assert.ok(Math.abs(live.serverNow - Date.now()) < 1000);
+  const access = db.docs.get('users/person/access/main');
+  access.expiresAt += 86400000;
+  assert.equal((await confirmedAccess('person', db)).expiresAt, activeSeat.expiresAt);
+  for (const status of ['inactive', 'pending', 'cancelled']) {
+    db.docs.get(path).status = status;
+    assert.equal((await confirmedAccess('person', db)).active, false);
+  }
+  db.docs.get(path).status = 'active';
+  db.docs.get(path).expiresAt = Date.now() - 1;
+  assert.equal((await confirmedAccess('person', db)).active, false);
+  db.docs.get(path).expiresAt = activeSeat.expiresAt;
+  db.docs.delete(`professionals/${uid}/patients/person`);
+  assert.equal((await confirmedAccess('person', db)).active, false);
+});
+
+test('unused codes expire server-side and malformed expiry never grants redemption', async () => {
+  for (const expiresAt of [0, Date.now() - 1, undefined, '9999999999999']) {
+    const db = invitationStore(); db.docs.get(path).expiresAt = expiresAt;
+    await assert.rejects(redeemSeat('person', { code }, db));
+    assert.equal(db.docs.has('users/person/access/main'), false);
+  }
+});
+
+test('access confirmation handles absent, trial, revoked and permanent access without Stripe calls', async () => {
+  const db = store();
+  assert.equal((await confirmedAccess('person', db)).active, false);
+  db.docs.set('users/person/access/main', { kind: 'trial', trialStartedAt: Date.now() - 86400000 });
+  assert.equal((await confirmedAccess('person', db)).active, true);
+  db.docs.set('users/person/access/main', { kind: 'trial', trialStartedAt: Date.now() - 8 * 86400000 });
+  assert.equal((await confirmedAccess('person', db)).active, false);
+  db.docs.set('users/person/access/main', { kind: 'revoked', expiresAt: Date.now() + 86400000 });
+  assert.equal((await confirmedAccess('person', db)).active, false);
+  db.docs.set('users/person/access/main', { kind: 'invitation', invitationCode: 'CEOABERTO', expiresAt: null });
+  assert.equal((await confirmedAccess('person', db)).active, true);
+});
+
+test('professional clock is authenticated, ownership checked and does not mutate pending checkout', async () => {
+  const db = store({ [`professionalBilling/${uid}`]: { pendingSeatId: id }, [path]: { ...activeSeat, status: 'pending' } });
+  const before = structuredClone(db.docs);
+  const result = await professionalRequest('/professional/status', uid, {}, env, db, () => { throw Error('No Stripe request expected'); });
+  assert.equal(result.validForMs, 60000); assert.deepEqual(db.docs, before);
+  await assert.rejects(professionalRequest('/professional/status', 'other', {}, env, db), { status: 403 });
+  const handler = createHandler({ database: () => db, verifyUser: async () => uid });
+  for (const route of ['/access', '/professional/status']) {
+    assert.equal((await handler(new Request(`https://worker${route}`, { method: 'POST' }), env)).status, 401);
+    const response = await handler(new Request(`https://worker${route}`, { method: 'POST', headers: { Authorization: 'Bearer test' } }), env);
+    assert.equal(response.status, 200); assert.equal(response.headers.get('cache-control'), 'no-store');
+  }
+});
+
+
+test('per-seat cancellation opens Stripe confirmation only for the owner stored subscription', async () => {
+  const db = store({ [path]: activeSeat, [`professionalBilling/${uid}`]: { customerId: 'cus_pro' } });
+  let params;
+  const stripe = async (_endpoint, value) => { params = value; return { url: 'https://billing.stripe.com/cancel' }; };
+  await professionalRequest('/professional/portal', uid, { seatId: id, subscriptionId: 'untrusted' }, env, db, stripe);
+  assert.equal(params.customer, 'cus_pro');
+  assert.equal(params['flow_data[type]'], 'subscription_cancel');
+  assert.equal(params['flow_data[subscription_cancel][subscription]'], 'sub_seat');
+  assert.equal(new URL(params.return_url).searchParams.get('seatCheckout'), 'managed');
+  assert.equal(db.docs.get(path).status, 'active');
+  await assert.rejects(professionalRequest('/professional/portal', uid, { seatId: '12345678-1234-1234-1234-123456789abd' }, env, db, stripe), { status: 404 });
+  await assert.rejects(professionalRequest('/professional/portal', uid, { seatId: '../other' }, env, db, stripe), { status: 400 });
+});
+
+
+test('short codes use unambiguous characters and can be redeemed case insensitively', async () => {
+  const short = newInvitation();
+  assert.match(short, /^NIA-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{2}$/);
+  const db = store({ [path]: { ...activeSeat, invitationCode: short }, [`seatInvitations/${short}`]: { professionalId: uid, seatId: id } });
+  await redeemSeat('person', { code: '  ' + short.toLowerCase() + '  ' }, db);
+  assert.equal(db.docs.get(path).occupantUid, 'person');
+});
+
+test('short-code collisions are retried without reusing issued codes', async () => {
+  const original = crypto.getRandomValues;
+  let calls = 0;
+  crypto.getRandomValues = array => { array.fill(calls++ === 0 ? 0 : 1); return array; };
+  try {
+    const db = store({ 'seatInvitations/NIA-AAAA-AA': { professionalId: 'other', seatId: 'old' } });
+    await seatCheckout(uid, id, env, db, async endpoint => endpoint.startsWith('prices/') ? { active: true, recurring: { interval: 'month', interval_count: 1 } } : { id: 'cs_test', url: 'https://checkout.stripe.com/test' });
+    assert.equal(db.docs.get(path).invitationCode, 'NIA-BBBB-BB');
+    assert.equal(db.docs.get('seatInvitations/NIA-AAAA-AA').professionalId, 'other');
+  } finally { crypto.getRandomValues = original; }
+});
+
+test('short-code guessing is bounded even when every attempt fails', async () => {
+  const db = store();
+  for (let i = 0; i < 10; i++) await assert.rejects(redeemSeat('person', { code: 'NIA-ABCD-EF' }, db), { status: 400 });
+  await assert.rejects(redeemSeat('person', { code: 'NIA-ABCD-EF' }, db), { status: 429 });
+  db.docs.get('seatRedemptions/person').until = Date.now() - 1;
+  await assert.rejects(redeemSeat('person', { code: 'NIA-ABCD-EF' }, db), { status: 400 });
 });

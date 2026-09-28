@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion } from '../src/services/activityStats.ts';
+import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion, historicalMean } from '../src/services/activityStats.ts';
 import type { ExerciseResult } from '../src/types/index.ts';
 const result = (id: string, overrides: Partial<ExerciseResult> = {}): ExerciseResult => ({ id, exerciseId: 'categorization', domain: 'executive', date: '2026-09-21T12:00:00Z', durationSeconds: 60, accuracy: 80, score: 0, correctAnswers: 4, totalQuestions: 5, feedbackMessage: '', ...overrides });
 test('daily averages separate exercises, skip missing days and average per-session speed', () => {
@@ -58,4 +58,11 @@ test('date-only history never invents a time or shifts its saved day across time
   if (previousTZ === undefined) delete process.env.TZ;
   else process.env.TZ = previousTZ;
  }
+});
+
+test('historical reference averages every unique session, not daily means or filtered dates', () => {
+ const rows = [result('a', {accuracy: 100, totalQuestions: 10, durationSeconds: 20}), result('b', {accuracy: 50, totalQuestions: 5, durationSeconds: 40}), result('c', {accuracy: 0, date: '2026-09-22', totalQuestions: 0})];
+ assert.equal(historicalMean([...rows, rows[0]], 'accuracy'), 50);
+ assert.equal(historicalMean(rows, 'speed'), 5);
+ assert.equal(historicalMean([], 'accuracy'), null);
 });

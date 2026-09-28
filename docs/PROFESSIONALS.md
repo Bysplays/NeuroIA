@@ -36,7 +36,14 @@ charge. Unknown attempts older than 23 hours require operator reconciliation.
 - `professionalBilling/{uid}`: server-only Stripe customer and pending seat ID;
   separate from personal billing so buying a seat never changes personal access.
 - `seatInvitations/{code}`: server-only mapping to professional and seat. Codes
-  have a `NIA-` prefix and a random UUID payload, and cannot be enumerated by clients.
+  use `NIA-XXXX-XX`, with six cryptographically random characters from
+  `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`. Codes are reserved atomically at purchase
+  creation, including pending purchases; collisions retry and old mappings remain
+  reserved after rotation. Pending mappings never grant access. Previously issued
+  `NIA-` plus 32 hexadecimal characters remain accepted. Clients cannot enumerate codes.
+- `seatRedemptions/{uid}`: server-only fixed-window attempt counter (ten attempts
+  per minute per verified account, including failed lookups). One overwritten record
+  per account; no automatic pruning.
 - `professionals/{uid}/patients/{participantUid}`: server-only reciprocal link
   with participant UID, seat ID and link time.
 - `users/{participantUid}/access/main`: sponsored invitation with professional ID,
@@ -72,13 +79,75 @@ payment recovery but blocks games and professional reads until active again.
 administrator-owned profile. It does not automatically grant this new workspace
 access to its historical participants. Do not claim its ownership from the client.
 
+## Proposed game sessions
+
+“Sesiones” beside each actively linked person opens a proposal list and composer.
+The professional selects 1–8 ordered games, including repeated games, with individual
+levels from 1 to 10, a short title and an optional accompanying message. Review
+precedes publication. Published bodies are immutable; cancel and create a new
+proposal to change them. There are no private clinical notes in these documents.
+
+`professionals/{owner}/seats/{seat}/participants/{uid}/sessions/{id}` isolates every
+proposal by owner, paid seat and participant. Rules independently validate the
+professional owner, occupied seat, invitation code, reciprocal link and server-time
+expiry on reads and writes. The owner publishes/cancels; the participant starts
+and advances. No client may delete a proposal or edit its published body. Replacing
+a seat occupant grants no access to the previous occupant's sessions. CEOABERTO
+has no paid seat and does not expose this new feature.
+
+The participant home lists pending proposals, identifying the professional and
+showing games, levels and completed steps. Instructions, help and timing reuse
+GameSession; proposed levels and repeat controls are locked. Pausing preserves
+the current game. Returning home preserves completed games; an unfinished game
+starts again on resume. Assigned sessions do not change the automatic daily plan
+or personal level recommendations. Their ordinary results still count as activity.
+
+Each result uses `assigned-{sessionId}-{zeroBasedStep}` and includes assignment,
+owner, seat and step fields. The existing ProgressSync queue saves it and its
+permanent receipt. A separate transaction advances the proposal only after the
+matching archived result exists. Resume reconciles an interrupted advancement;
+only pending confirmation polls (every three seconds while the player is open).
+Duplicate device saves/advances confirm the committed receipt/current step after
+transaction permission conflicts. No local or cached snapshot grants completion.
+Cancel/expiry/departure stops proposal access but never blocks saving ordinary
+results. Recovery requires the same valid reciprocal relationship.
+
+The professional list is limited to the latest 50 proposals; the participant query
+filters assigned/in-progress proposals before its 50-item limit. Lists disclose
+these limits. There is no composite index or new backend billing endpoint.
+Publish the reviewed Firestore rules before releasing this frontend. See TODO for
+production/physical-tablet verification and future game-retirement migration.
+
+## Continuous access checks
+
+The configured Worker API is required for player entry, independently of the purchase
+feature flag. `/access` returns server time, the effective expiry and a maximum
+60-second confirmation. The frontend subtracts request elapsed time, checks every
+30 seconds, and closes play on failure, offline notification, lease expiry or
+unconfirmed resume. Unknown access shows retry/logout, not a purchase decision.
+Saved pending results remain in the existing account outbox.
+
+The professional panel uses server time plus monotonic elapsed time (and a wall-clock
+forward jump to detect sleep) to hide expired codes and activity. Failed confirmations
+or a server-confirmed Firestore list falling back to cache remove access to those
+actions until renewed. Firestore rules remain the authorization boundary for linked
+reads; redemption always checks paid expiry in the Worker, including unused codes.
+A cancellation scheduled at period end shows “No se renovará” and “Reactivar
+suscripción” while paid access lasts. Reactivation opens the professional customer
+portal; the owner selects the subscription and confirms renewal there. Personal
+subscription settings offer the same action through the separate personal portal.
+The app never flips renewal locally or claims success from a portal return.
+
 ## Billing lifecycle
 
 The standalone Cloudflare Worker adds authenticated POST routes:
 
 - `/professional/checkout` with `{seatId}`.
 - `/professional/cancel-checkout` for the owner's pending purchase.
-- `/professional/portal` for the professional Stripe customer.
+- `/professional/portal` for the professional Stripe customer; optional `{seatId}`
+  opens Stripe’s cancellation confirmation for that owner’s stored subscription.
+- `/professional/status` confirms the owner and provides server time with a 60-second lease.
+- `/access` confirms player entitlement, reciprocal seat occupancy and expiry.
 - `/redeem-seat` with `{code, name}` and `/leave-seat` for the signed-in participant.
 
 Stripe subscription metadata carries `kind: seat`, owner UID, seat UUID and the
@@ -94,7 +163,8 @@ Duplicate/out-of-order events do not create extra codes or relink departed peopl
 frontend does not invent a price: Checkout displays the configured amount.
 Keep the existing billing feature flag and API URL. The professional panel remains
 accessible if billing is disabled; its purchase action is unavailable. Enable
-cancellation in the Stripe customer portal. Do not enable quantity/price changes
+cancellation at period end in the Stripe customer portal. The per-seat action opens
+Stripe confirmation; it does not cancel directly or change access on return. Do not enable quantity/price changes
 for seats: a changed price/quantity deliberately fails entitlement validation.
 
 ## Deployment and verification

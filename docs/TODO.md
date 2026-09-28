@@ -15,14 +15,21 @@ voice provider or new illustration set has been selected by this planning work.
 | 1 / EEG | Bluetooth EEG headband | Awaiting owner-supplied SDK and hardware details | Real-device connection, signal quality, disconnect/reconnect and supported-device matrix |
 | 2 / SEATS | Monthly professional seats and code validity | Checkout, Worker, redemption and rules implemented; production lifecycle unverified | Unused and redeemed codes follow paid entitlement; expired access blocks games and linked reads |
 | 3 / AI | Browser-local report/note assistance | No runtime integration; professional view is read-only | Spanish evidence-linked drafts, human review, supported-device benchmark and non-AI fallback |
-| 4 / SESSIONS | Professional-assigned game sequences | No assignment service; legacy therapist fields are not a permission system | Named participant, ordered exercises, delivery, completion and strict owner/participant rules |
-| 5 / EMAIL | Email authentication | Google only | Enable chosen Firebase provider; sign-up, sign-in, verification/recovery and account linking |
+| 4 / SESSIONS | Professional-assigned game sequences | Versioned proposals, editor, participant entry, fixed levels, durable completion and resume implemented | Publish reviewed rules/frontend and check real paired accounts on physical tablets |
+| 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Release frontend and verify real email delivery; magic links deferred because Spark allows five sign-in emails/day |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
-| 7 / BRAND | Supplied new logo | [Reference retained](assets/brand/supplied-mark.png); existing sprout still active | Integrate exact reference across app, favicon, installation icons and README |
-| 8 / ART | More realistic illustrated/pictogram game objects | Existing paper atlases | Approved style sample and verified one-to-one stimulus mappings |
-| 9 / LEVELS | Difficulty 1–10 | Legacy domain levels 1–3; games do not consume a shared difficulty configuration | Versioned per-game parameters, saved difficulty and bounded adaptation |
-| 10 / PLACEMENT | Guided initial level assessment | Access onboarding exists; placement does not | New/unassessed accounts complete resumable guided trials before ordinary play |
-| 11 / RETIRE | Remove daily action sequencing | Still selectable and mounted | Eight playable games, Organization uses categorization, old results remain readable |
+| 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
+| 8 / ART | More realistic illustrated/pictogram game objects | Approved towel/table style integrated across 80 objects, standalone stimuli and motor tokens | Physical-tablet recognition feedback |
+| 9 / LEVELS | Difficulty 1–10 | Versioned 1–10 configuration for all games, saved level and timed same-game promotion | User calibration and physical-device checks |
+| 10 / PLACEMENT | Guided initial level assessment | Eight shuffled games with 1/4/7/10 placement ladders, separate from access onboarding | Physical-device checks |
+| 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
+
+### Current implementation sequence
+
+The first priority/ease steps are: 0 — mergeable baseline; 1 — retire daily
+actions; 2 — supplied logo; 3 — email/password entry. Steps 0–2 are complete.
+Step 3 is implemented and locally verified; backend/provider activation is complete.
+Seats, difficulty/placement and professional session proposals are also implemented. Frontend publication and real email-delivery checks remain open below. The product-priority table above is separate from this sequence.
 
 ### EEG
 
@@ -36,10 +43,13 @@ voice provider or new illustration set has been selected by this planning work.
 
 - [ ] Complete the deployment and sandbox checklist below for both unused and
   occupied seats; test expiry while the app is already open, sleep/resume and offline recovery.
-- [ ] Replace client-clock entitlement decisions with an authoritative validity
-  contract. `firestoreAccess.load()` currently labels `Date.now()` as `serverNow`;
-  `AccessGate` preserves previously active access after refresh errors. Define a
-  bounded verified-access lifetime so stale state cannot grant indefinite play.
+- [x] Implement authoritative Worker access checks with server time, reciprocal
+  seat validation and a 60-second maximum lease; failed refresh/offline/resume
+  closes play until confirmed. Professional codes/activity use confirmed time.
+- [x] Deploy Worker `/access`, `/professional/status` and the per-seat portal flow;
+  verify health, localhost CORS and unauthenticated/unsigned-request rejection.
+- [ ] Configure period-end cancellation in the Stripe portal and finish the
+  authenticated sandbox purchase, redemption and cancellation checklist.
 - [ ] Preserve CEOABERTO as the explicitly documented permanent exception unless
   the owner separately changes that contract; paid `NIA-` codes are never permanent.
 
@@ -51,33 +61,61 @@ voice provider or new illustration set has been selected by this planning work.
   device memory, download size and licenses before selecting a model.
 - [ ] Implement local draft generation, cancellation, explicit review and save;
   never manufacture diagnoses, activity or prescriptions from empty histories.
-- [ ] Implement versioned session assignments to an actively linked person,
+- [x] Implement versioned session assignments to an actively linked person,
   ordered game IDs/levels, progress/resume, cancellation and completion receipts.
-- [ ] Test cross-account isolation, seat expiry, departure and historical ownership.
+- [x] Test cross-account isolation, seat expiry, departure, replaced occupants,
+  duplicate games, concurrent completion and durable result recovery in the emulator.
+- [x] Publish the session Firestore rules and verify the active release matches the tested rules.
+- [ ] Publish the session frontend and verify a real professional/participant
+  pair on physical tablets. No production fixture activity is used for verification.
+- [ ] Add older professional-session pagination beyond the latest 50; participant
+  queries filter pending sessions before applying their 50-item limit.
+- [ ] Define session invalidation/migration when retiring a game or changing configuration versions.
 
 ### Authentication, identity and artwork
 
-- [ ] Decide email/password versus email-link sign-in; enable that provider in
-  Firebase and implement its complete recovery/account-linking flow, retaining Google.
-- [ ] Integrate the supplied logo reference, preserve its proportions, and verify
+- [x] Implement the owner's selected email/password method, registration,
+  verification and password recovery, retaining Google and both workspaces.
+- [x] Add a password to an authenticated Google account without changing its UID
+  or history. Test credentials, verification, reset and server enforcement locally.
+- [x] Publish the verified-email Firestore rules and Worker, then enable Firebase
+  Email/Password, keeping Google. Spark billing remains unchanged.
+- [ ] Release the frontend and verify hosted verification/reset emails, configured
+  password policy, domain restrictions and real Google/password use on one UID.
+  Magic links need an explicit quota solution before replacing passwords: Spark
+  permits five sign-in emails/day. See `docs/AUTHENTICATION.md`.
+- [x] Integrate the supplied logo reference, preserve its proportions, and verify
   wordmark, loading, header, card backs, favicon and PWA icons on both themes.
-- [ ] Approve realistic illustrated/pictogram samples, inventory all stimuli and
-  replace atlases without changing answer keys or recognition identities.
+- [x] Approve the towel/table illustrated style, inventory active stimuli and
+  replace their atlas mappings while preserving answer keys. Fix shirt/lamp/pliers
+  identities and separate soup from the pot; document generation and crop review in DESIGN.md.
+- [ ] Gather recognition feedback for the new illustrated stimuli on physical tablets.
 
 ### Difficulty, placement and game retirement
 
-- [ ] Define ten bounded configurations for each of the eight retained games.
-- [ ] Add versioned placement/level state; existing `domainProgress.level = 1`
+- [x] Define ten bounded configurations for each of the eight retained games.
+- [x] Add versioned placement/level state; existing `domainProgress.level = 1`
   is a default, not evidence that placement has been completed.
-- [ ] Build short guided trials with the existing companions, pause/help,
+- [x] Add 1/4/7/10 assessment stages in shuffled game order; preserve the last passed level after failure or omission.
+- [x] Restyle access/progress connection recovery with the shared login presentation.
+- [x] Build short guided trials with the existing companions, pause/help,
   accessible instructions and resumable progress. Respect hidden companions.
-- [ ] Persist the actual level/configuration used per result; adapt between
-  exercises from sufficient recent evidence, with easier play and reassessment.
-- [ ] Remove daily action sequencing from catalog, dispatch and daily plans;
+- [x] Persist actual level/configuration and hint usage per result; adapt between
+  exercises using timed same-game runs and allow manual level selection.
+- [ ] Validate level pacing and vocabulary ordering with users on physical tablets;
+  review memory preview visibility in short landscape viewports.
+- [x] Add explicit reassessment from Mi cuenta; preserve saved activity and replace levels only after finishing and saving.
+- [x] Add a level-up celebration and the Nivel statistics tab (current bars, radar and recorded level timeline per game).
+- [ ] Calibrate pacing and tracking with users.
+- [x] Publish the `assessedLevel` trial field rule to `ceoaberto-neuroia` for 1/4/7/10 onboarding saves.
+- [x] Publish the `qualifyingRuns` rule extension to `ceoaberto-neuroia`; timed promotion can save its per-game run counters.
+- [x] Publish the placement/difficulty Firestore rules; the local frontend can save
+  trials and levels. Frontend publication remains separate.
+- [x] Remove daily action sequencing from catalog, dispatch and daily plans;
   keep memory beacon sequencing. Preserve `daily-seq` / `daily-sequencing`
   history, achievements and cumulative totals.
-- [ ] Verify catalog, Organization, daily plan, completion and historical filters
-  at phone, tablet and desktop sizes with keyboard/touch input.
+- [x] Verify catalog, Organization, daily plan, completion and historical filters
+  at phone, tablet and desktop sizes with keyboard and pointer input.
 
 ## Engineering and release gates
 
@@ -105,7 +143,11 @@ release issue is lost during prioritization.
 
 ## Complete the ElevenLabs audio collection
 
-- 279 of 370 clips are available in `public/audio/elevenlabs-v3/`.
+- The retained recording inventory has 279 of 370 clips available in
+  `public/audio/elevenlabs-v3/`. The current speech collector yields 365 texts;
+  the older inventory also includes three retired daily-sequencing phrases and
+  two previously removed greeting previews. Preserve those original mappings;
+  regenerate the active inventory before commissioning new recordings.
 - 91 feedback clips remain (listed below); the account last showed 6 credits.
 - Resume with Alejandro Castellanos (`WWVK6dYMrl0ZHnHT7cRj`), Eleven v3,
   Spanish override (`es`), stability 0.5. Do not regenerate existing blocks.
@@ -219,8 +261,11 @@ release issue is lost during prioritization.
   preserving narration controls, cancellation, callbacks and playback speed.
   Available clips play locally; missing files and playback failures use browser speech.
 
-## Unresolved game issue
+## Unresolved interface issues
 
+- [ ] Make the header home action close the catalog when already in the
+  dashboard view. The catalog currently keeps its internal selection state;
+  its own “Volver al inicio” action works.
 - [ ] Reproduce the reported blank background in object naming. It was not
   reproduced through the catalog; inspect the domain entry and modal/scroll
   state. Do not mark fixed without a reproduction and verification.
@@ -230,10 +275,9 @@ release issue is lost during prioritization.
 - [x] Google sign-in confirmed by the project owner.
 - [x] Implement Firestore profile/settings/results synchronization, transaction
   receipts, local pending queue, initial import choice and emulator tests.
-- [ ] Publish the reviewed `vendor/firebase/firestore.rules` in the real Firebase project. Local
-  CLI has no authorized account; the production-mode default still needs replacing.
+- [x] Publish the reviewed `vendor/firebase/firestore.rules` in the real Firebase project.
 - [ ] Verify real-account cloud saving from two devices after publishing rules.
-- [ ] Authorize the final deployment hostname in Firebase Authentication.
+- [x] Confirm `bysplays.github.io` is authorized in Firebase Authentication; revisit if the hostname changes.
 - [x] Implement free self-owned professional workspaces, paid-seat care links,
   read-only analytics and participant departure with code rotation.
 - [ ] Verify professional credentials before adding any clinical permissions.
@@ -251,10 +295,11 @@ release issue is lost during prioritization.
   portal; run the payment lifecycle in Stripe test mode. See `docs/ONBOARDING.md`.
 - [ ] Assign CeoAberto's actual Firebase owner UID before any migration of its
   legacy links. New professional workspaces do not inherit those links.
-- [ ] Publish reviewed Spark-compatible rules for real-account invitation/trial
+- [x] Publish reviewed Spark-compatible rules for real-account invitation/trial
   access. No Cloud Functions or Blaze required; localhost:5173 keeps real Google login.
-- [ ] Deploy the reviewed professional-seat Worker and Firestore rules before
-  publishing the professional frontend. Verify one sandbox purchase, unique code,
+- [x] Deploy the reviewed professional-seat Worker and Firestore rules before
+  publishing the professional frontend.
+- [ ] Verify one sandbox purchase, unique code,
   redemption, read-only analytics, renewal failure, portal cancellation and
   departure/reassignment end to end. See `docs/PROFESSIONALS.md`.
 
@@ -269,8 +314,15 @@ release issue is lost during prioritization.
 - Measure CPU usage against the Workers Free limit before enabling the Pages
   purchase flag. No billing backend was deployed by the local frontend build.
 
-- [ ] Redeploy the renewal-aware Worker and enable Cron `*/5 * * * *`; verify
-  daily reconciliation and Stripe test-clock failed renewal/recovery/cancellation.
+- [x] Deploy the renewal-aware Worker and enable Cron `*/5 * * * *`.
+- [ ] Verify daily reconciliation and Stripe test-clock failed renewal/recovery/cancellation.
   See `vendor/cloudflare/README.md` for bounded batches and checkpoint monitoring.
 
 - [ ] Verify home-screen installation, standalone launch, landscape handling and Google sign-in on physical Android tablets and iPad; manifest and icons are provided, offline entry is not supported.
+
+### Tablet release checks
+
+- [ ] Verify fullscreen entry/exit, landscape lock fallback, touch, software
+  keyboard and browser chrome resizing on physical Android tablets and iPad.
+- [ ] Check longest account/session text and very large text on target devices;
+  preserve accessible scrolling for content that cannot fit.

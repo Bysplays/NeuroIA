@@ -65,9 +65,10 @@ Run the available suite locally and fix everything before merging:
 npm run build                 # TypeScript and production build
 npm run lint -- --deny-warnings # Oxlint; zero warnings/errors required for merge
 npm test                      # focused unit coverage
+npm run test:auth             # demo Auth emulator; signup, verification, reset and linking
 node --test vendor/cloudflare/index.test.mjs vendor/cloudflare/seats.test.mjs
 npx --yes firebase-tools@15.30.1 emulators:exec --only firestore --project demo-neuroia \
-  "node --experimental-strip-types --test --test-concurrency=1 tests/firestore.rules.test.mjs vendor/cloudflare/firestore.test.mjs"
+  "node --experimental-strip-types --test --test-concurrency=1 tests/firestore.rules.test.mjs tests/sessions.rules.test.mjs vendor/cloudflare/firestore.test.mjs"
 git diff --check
 ```
 

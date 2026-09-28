@@ -11,6 +11,8 @@ export function firestoreAccess(uid: string, db: Firestore) {
   const professionalRef = doc(db, 'professionals', PROFESSIONAL_ID);
   const patientRef = doc(db, 'professionals', PROFESSIONAL_ID, 'patients', uid);
   return {
+    // Local record inspection for invitation departure; never an authorization confirmation.
+    // Player entry uses the Worker /access server-time contract.
     async load() {
       const snapshot = await getDocFromServer(accessRef);
       const data = snapshot.data();
@@ -22,7 +24,7 @@ export function firestoreAccess(uid: string, db: Firestore) {
       return {
         active: (data?.kind === 'invitation' && data?.invitationCode === INVITATION_CODE && !data?.seatId && expiresAt === null) || (['trial', 'subscription', 'invitation'].includes(data?.kind) && typeof expiresAt === 'number' && expiresAt > now),
         kind: data?.kind as 'trial' | 'subscription' | 'invitation' | 'revoked' | undefined,
-        serverNow: now, expiresAt, trialStartedAt,
+        clientNow: now, expiresAt, trialStartedAt,
         autoRenew: typeof data?.autoRenew === 'boolean' ? data.autoRenew : undefined,
         professionalId: data?.professionalId as string | undefined,
         seatId: data?.seatId as string | undefined,

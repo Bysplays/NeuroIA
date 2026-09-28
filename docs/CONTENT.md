@@ -46,7 +46,7 @@ the current introduction uses the cover paragraph without that claim instead.
 
 The login offers “¿Eres un profesional?” and a reversible professional presentation.
 It addresses professionals who want to follow other people's exercise activity.
-Keep only “Para profesionales”, the heading and the Google action in its panel;
+Keep “Para profesionales”, the heading and Google/email access actions in its panel;
 omit the explanatory and availability paragraphs. Signing in opens a free
 self-owned workspace. Selecting it alone does not grant access to anyone
 else’s data or verify professional credentials. Paid seats plus explicit participant

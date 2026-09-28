@@ -1,5 +1,7 @@
+import { TabletTabs } from './TabletTabs';
 import { ProductInformation } from './ProductInformation';
 import { SubscriptionSettings } from './SubscriptionSettings';
+import { AccountPassword } from './AccountPassword';
 import { ModalFrame } from './ModalFrame';
 import React, { useState } from 'react';
 import { X, Check, Type, Contrast, LogOut } from 'lucide-react';
@@ -8,6 +10,7 @@ import { soundService } from '../services/soundService';
 
 interface AccessibilityModalProps {
   isOpen: boolean;
+  onReassess?: () => void;
   showSubscription?: boolean;
   onSignOut: () => void;
   signingOut: boolean;
@@ -19,8 +22,9 @@ interface AccessibilityModalProps {
 }
 
 export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
-  isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut, showSubscription = true,
+  isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut, showSubscription = true, onReassess,
 }) => {
+  const [tab, setTab] = useState('appearance');
   if (!isOpen) return null;
 
   const update = (patch: Partial<AccessibilitySettings>) => {
@@ -40,7 +44,8 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
         </header>
 
         <div className="preferences-body">
-          <ProfileName name={name} onSave={onUpdateName} />
+          <TabletTabs label="Secciones de ajustes" value={tab} onChange={setTab} tabs={[
+            { id: 'appearance', label: 'Apariencia', content: <div className="preferences-appearance">
           <section className="preferences-section" aria-labelledby="pref-text">
             <h3 id="pref-text"><Type size={20} aria-hidden="true" />Tamaño del texto</h3>
             <div className="preferences-segment" role="group" aria-labelledby="pref-text">
@@ -80,7 +85,19 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             </button>
           </section>
 
+          </div> }, { id: 'account', label: 'Mi cuenta', content: <>
+          <ProfileName name={name} onSave={onUpdateName} />
           {showSubscription && <SubscriptionSettings />}
+          <AccountPassword />
+          {onReassess && <section className="preferences-section" aria-labelledby="pref-level-title">
+            <div className="preferences-action-row">
+              <div><h3 id="pref-level-title">Prueba de nivel</h3>
+                <p>Reajusta tus niveles sin borrar tus partidas.</p></div>
+              <button className="subscription-upgrade preferences-action-button" onClick={onReassess}>Rehacer prueba</button>
+            </div>
+          </section>}
+          </> }
+          ]}/>
           <div className="preferences-account">
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>
               <LogOut size={18} aria-hidden="true" />{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}

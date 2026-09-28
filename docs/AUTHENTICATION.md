@@ -4,10 +4,75 @@ The web app uses Firebase Authentication and Firestore in `ceoaberto-neuroia`.
 The public web configuration is in `src/services/firebase.ts`. Google login has
 been confirmed by the project owner. No Analytics or private service keys are used.
 
+## Email/password activation
+
+Email/password is implemented alongside Google for personal and professional
+entry. Email/Password is enabled in the real project, with Google retained. The
+verified-email Firestore rules and Worker are published. Live email delivery and
+the frontend release remain unverified.
+
+Magic-link entry was evaluated but deferred under the owner's password fallback:
+the project has no billing account, and Spark permits only five sign-in emails
+per day. Switching to links needs a quota decision and a callback implementation;
+no billing plan was changed. See [Firebase limits](https://firebase.google.com/docs/auth/limits).
+
+1. Publish the reviewed Firestore rules and Cloudflare Worker first. Both reject
+   password-provider tokens without `email_verified: true`, including trial,
+   invitation, progress, professional and billing access. Google behavior is retained.
+2. In Authentication > Sign-in method, enable **Email/Password**, keeping Google
+   enabled. Email-link sign-in is not used. Keep one account per email and review
+   email-enumeration protection. Never disable it to implement provider discovery.
+3. Review the project password policy. The app calls `validatePassword` for new
+   passwords and Firebase enforces its configured policy. Sign-in never imposes
+   new creation requirements on an existing password.
+4. Review the Spanish verification and password-reset templates, sender and
+   authorized domains. Keep Firebase's hosted action handler; no custom action URL
+   or application router is required. Test delivery and invalid/expired links on
+   designated real test accounts before release.
+5. Verify new registration, email verification, sign-in, restoration and recovery
+   on the target devices. Verify adding a password from an existing Google account's
+   Settings and subsequent sign-in through both methods with the same Firebase UID.
+
+New password accounts enter `EmailVerification` before either workspace. Sending
+is explicit; retries do not recreate the account. “Ya he verificado mi correo”
+reloads the Firebase user and forces a new ID token before mounting data access.
+Workspace intent is persisted per UID before this gate, including after reload.
+Signing out always remains available. Passwords only live in form/SDK memory.
+
+Password recovery uses `sendPasswordResetEmail` and a neutral confirmation for
+unknown addresses. The Firebase hosted handler validates the one-time code and
+sets the replacement password. The user then returns to sign in. Nothing imports
+or merges progress based on email text.
+
+Settings add a password to the authenticated Google account using `updatePassword`
+on that exact user, retaining its email, UID and Google provider; then reload user
+and token. A recent-login failure exposes an explicit Google reauthentication
+action before retry. This uses the existing-account update endpoint rather than
+attempting a second signup with the same email. Existing password accounts receive
+a reset-email action instead. No client account deletion or UID migration occurs.
+
+Local verification:
+
+```sh
+npm run test:auth
+```
+
+This command starts only the Auth emulator with `demo-neuroia` at 127.0.0.1:9099.
+Tests cover real SDK registration, verification codes, wrong credentials,
+duplicate signup, reset/reused code, same-UID Google/password entry and stale-user
+link rejection. CLI 15.30.1 lacks `getPasswordPolicy`, so tests stub only that
+read-only lookup with a six-character policy. Live policy and email delivery are
+not established by these tests. Browser verification uses isolated contexts with
+the Auth and Firestore emulators; no emulator switch ships in the app.
+
+Sources: [Firebase password authentication](https://firebase.google.com/docs/auth/web/password-auth),
+[account management](https://firebase.google.com/docs/auth/web/manage-users),
+[multiple providers](https://firebase.google.com/docs/auth/web/account-linking).
+
 ## Activate cloud persistence
 
-The implementation is ready locally; the reviewed rules must be published in the
-real Firebase project before production-mode access will work:
+The reviewed rules are published in the real Firebase project. For subsequent
+authorized rule updates and end-to-end verification:
 
 1. Open Firestore Database > Rules in the Firebase console.
 2. Replace the editor with the complete contents of the repository's
@@ -24,11 +89,12 @@ npx firebase-tools@15.30.1 deploy --only firestore:rules --project ceoaberto-neu
 ```
 
 The browser configuration is not permission to administer Firebase. The local CLI
-was not authenticated during implementation, and no production rules were deployed.
+is now authenticated, and the reviewed production rules were deployed with owner authorization.
 Keep Google enabled and authorize `localhost` and the final deployment hostname.
 Use `http://localhost:5173` during local development. Authentication and progress
-can use Spark, including direct Firestore invitation redemption and trials. Only the future
-Stripe Cloud Functions backend requires a billing-enabled project when deployed. Reads/writes remain subject to quotas.
+can use Spark, including direct Firestore invitation redemption and trials. Billing
+uses the Cloudflare Worker; the retained Functions package is not deployed.
+Reads/writes remain subject to quotas.
 
 ### Local access blocked by API-key restrictions
 
@@ -149,3 +215,7 @@ untouched fields and exercise progress still receive live cloud updates. On a ne
 session, load current server settings and overlay any unsent operations. This
 avoids mid-session appearance bounces without repeatedly writing local preferences
 over changes from another device.
+
+Email/password accounts without a display name start with “bella persona” in new
+player and professional profiles. Existing saved names and Google display names
+are preserved; account settings remain the place to change the player name.

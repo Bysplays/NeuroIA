@@ -1,3 +1,4 @@
+import { shuffle } from '../services/gameObjectPool';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState } from 'react';
@@ -62,18 +63,23 @@ const FRUITS_BANK: SymbolDef[] = [
   { symbol: '🍈', name: 'melones' },
 ];
 
-function createRound() {
+function createRound(config: import('../services/difficulty').GameConfig) {
   // 1. Elegir AL AZAR cualquier fruta del banco como objetivo diana
   const targetIdx = Math.floor(Math.random() * FRUITS_BANK.length);
   const targetItem = FRUITS_BANK[targetIdx];
 
   // 2. Las demás frutas sirven como distractores en la cuadrícula
-  const distractors = FRUITS_BANK.filter((_, idx) => idx !== targetIdx).map(i => i.symbol);
+  const colorGroups = ['🍎🍓🍒🍅', '🍐🥑🥦🫒🍈🍉', '🍌🍋🌽🍍', '🍊🍑🥕', '🥝🥥🥔🍄🥐', '🍆🍇'];
+  const similar = colorGroups.find(group => group.includes(targetItem.symbol)) ?? '';
+  const available = FRUITS_BANK.filter((_, idx) => idx !== targetIdx).map(i => i.symbol);
+  const distractors = config.level >= 5
+    ? [...available.filter(symbol => similar.includes(symbol)), ...shuffle(available.filter(symbol => !similar.includes(symbol))).slice(0, config.level >= 8 ? 1 : 3)]
+    : available;
 
   // 3. Cuadrícula equilibrada para tablet (4 filas x 4 columnas)
-  const rows = 4;
-  const cols = 4;
-  const targetProbability = 0.32;
+  const rows = config.scanRows;
+  const cols = config.scanCols;
+  const targetProbability = config.level >= 7 ? 0.18 : 0.32;
 
   const newItems: GridItem[] = [];
   let targetCounter = 0;
@@ -120,8 +126,8 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock } = useGameSession();
-  const [initialRound] = useState(createRound);
+  const { clock, config } = useGameSession();
+  const [initialRound] = useState(() => createRound(config));
   const [currentTarget, setCurrentTarget] = useState<SymbolDef>(initialRound.target);
   const [items, setItems] = useState<GridItem[]>(initialRound.items);
   const [totalTargets, setTotalTargets] = useState(initialRound.total);
@@ -133,7 +139,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
   const initRound = () => {
-    const next = createRound();
+    const next = createRound(config);
     setCurrentTarget(next.target);
     setItems(next.items);
     setTotalTargets(next.total);
@@ -161,7 +167,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
       soundService.playGentlePrompt();
       const newMistakes = mistakes + 1;
       setMistakes(newMistakes);
-      soundService.speak(`Recuerda buscar las ${currentTarget.name}.`);
+      soundService.speak(`Recuerda buscar ${article} ${currentTarget.name}.`);
 
       setMistakesList(prev => [
         ...prev,
@@ -178,12 +184,15 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   const finishGame = (currentMistakes: number) => {
     const elapsedSeconds = Math.max(10, Math.round((clock.now() - startTime) / 1000));
-    const accuracy = Math.max(60, Math.round((totalTargets / (totalTargets + currentMistakes)) * 100));
+    const accuracy = Math.max(0, Math.round((totalTargets / (totalTargets + currentMistakes)) * 100));
     const baseScore = totalTargets * 80;
     const score = Math.max(120, baseScore - currentMistakes * 10);
 
     const gameResult: ExerciseResult = {
-      id: 'res-' + clock.now(),
+      id: crypto.randomUUID(),
+      level: config.level,
+      configVersion: config.version,
+      practice: config.mode !== 'normal',
       exerciseId: 'visual-scanning',
       domain: 'attention',
       date: new Date().toISOString(),
@@ -210,7 +219,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
     initRound();
   };
 
-  const isMasculine = ['plátanos', 'limones', 'melocotones', 'kiwis', 'racimos de uvas'].includes(currentTarget.name);
+  const isMasculine = ['plátanos', 'limones', 'melocotones', 'kiwis', 'racimos de uvas', 'aguacates', 'cocos', 'tomates', 'brócolis', 'champiñones', 'croissants', 'melones'].includes(currentTarget.name);
   const article = isMasculine ? 'todos los' : 'todas las';
 
   return (
@@ -218,11 +227,11 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
       exerciseId="visual-scanning"
       title={
         <span>
-          Busca {article} {currentTarget.name} <span className="title-target-emoji"><GameObject symbol={currentTarget.symbol} /></span> ({foundCount}/{totalTargets})
+          Busca {article} <strong>{currentTarget.name}</strong> ({foundCount}/{totalTargets})
         </span>
       }
       domain="attention"
-      instructionText={`Encuentra todas las ${currentTarget.name}. Mira con calma de izquierda a derecha.`}
+      instructionText={`Encuentra ${article} ${currentTarget.name}. Mira con calma de izquierda a derecha.`}
       hideBadges={true}
       hideInstructionBanner={true}
       onBack={onBack}
@@ -234,7 +243,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
     >
       <div className="scanning-game-container">
         {/* Cuadrícula de búsqueda táctil (4x4) ocupando el espacio completo sin scroll */}
-        <div className="scanning-grid">
+        <div className="scanning-grid" style={{ gridTemplateColumns: `repeat(${config.scanCols}, minmax(0, 1fr))`, '--scan-rows': config.scanRows } as React.CSSProperties}>
           {items.map(item => (
             <button
               key={item.id}

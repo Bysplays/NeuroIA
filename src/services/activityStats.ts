@@ -43,3 +43,10 @@ export function dailyActivity(results: ExerciseResult[], metric: 'accuracy' | 's
   }
   return [...groups.values()].map(g => ({ ...g, value: g.sum / g.count })).sort((a, b) => a.day.localeCompare(b.day));
 }
+
+/** Global per-session reference, computed from deduplicated complete history. */
+export function historicalMean(results: ExerciseResult[], metric: 'accuracy' | 'speed') {
+  const values = mergeActivity(results).map(result => metric === 'accuracy' ? result.accuracy : secondsPerQuestion(result))
+    .filter((value): value is number => value !== null && Number.isFinite(value) && value >= 0 && (metric !== 'accuracy' || value <= 100));
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+}

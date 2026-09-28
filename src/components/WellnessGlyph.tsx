@@ -35,13 +35,6 @@ const illustrations: Record<ExerciseId, ReactNode> = {
     <rect x="54" y="19" width="34" height="59" rx="10" transform="rotate(9 71 49)" fill="currentColor" fillOpacity=".12" />
     <path d="M20 45C17 35 28 34 29 42C36 32 43 44 29 57C26 54 22 50 20 45ZM62 45C59 35 70 34 71 42C78 32 85 44 71 57C68 54 64 50 62 45Z" fill="currentColor" stroke="none" />
   </>,
-  'daily-sequencing': <>
-    <path d="M13 85V64H35V42H57V20H79" />
-    <path d="M18 71H28M41 49H51M63 27H73" />
-    <path d="M17 42Q28 15 57 12M49 6L59 11L53 21" />
-    <circle cx="79" cy="20" r="10" fill="currentColor" />
-    <path d="M25 85H85" strokeOpacity=".3" />
-  </>,
   'categorization': <>
     <path d="M9 56H44L40 84H14ZM56 56H91L86 84H61Z" fill="currentColor" fillOpacity=".15" />
     <circle cx="22" cy="26" r="10" fill="currentColor" />

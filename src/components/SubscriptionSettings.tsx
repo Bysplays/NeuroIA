@@ -45,6 +45,7 @@ export function SubscriptionSettings() {
 
   const invitation = access?.kind === 'invitation';
   const subscription = access?.kind === 'subscription';
+  const canReactivate = subscription && access.active && access.autoRenew === false;
   const until = access?.expiresAt ? new Date(access.expiresAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
   return <section className="preferences-section preferences-subscription" aria-label="Tu plan">
@@ -53,9 +54,9 @@ export function SubscriptionSettings() {
       <div className="subscription-status">
         <div>
           <h3>{invitation ? 'Acceso gratuito por invitación' : subscription ? 'Plan mensual' : access.kind === 'trial' ? 'Prueba gratuita de 7 días' : 'Sin plan activo'}</h3>
-          <p className="subscription-date">{invitation && !access.seatId ? 'Sin fecha de caducidad' : until ? `${access.active ? 'Hasta el' : 'Finalizó el'} ${until}` : access.active ? 'Fecha no disponible' : 'Sin acceso activo'}{subscription && access.autoRenew === true && '. Renovación automática'}</p>
+          <p className="subscription-date">{invitation && !access.seatId ? 'Sin fecha de caducidad' : until ? `${access.active ? 'Hasta el' : 'Finalizó el'} ${until}` : access.active ? 'Fecha no disponible' : 'Sin acceso activo'}{subscription && access.autoRenew === true && '. Renovación automática'}{canReactivate && '. No se renovará'}</p>
         </div>
-      {subscription && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable || !access.canManageSubscription} onClick={() => void openBilling('portal')}>{busy ? 'Abriendo Stripe…' : 'Gestionar'}</button>}
+      {subscription && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable || !access.canManageSubscription} onClick={() => void openBilling('portal')}>{busy ? 'Abriendo Stripe…' : canReactivate ? 'Reactivar suscripción' : 'Gestionar'}</button>}
         {invitation && <button className="subscription-upgrade" onClick={() => { setError(''); setConfirmLeave(true); }}>Abandonar</button>}
         {!subscription && !invitation && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable} onClick={() => void openBilling('checkout')}>{busy ? 'Abriendo…' : 'Mejorar'}</button>}
       </div>

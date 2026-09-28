@@ -1,7 +1,12 @@
+import type { GameConfig } from './difficulty';
 import { createContext, useContext } from 'react';
 import type { createGameClock } from './gameClock';
 
 export const SessionContext = createContext<{
+  config: GameConfig;
+  assistanceTarget?: HTMLDivElement | null;
+  lockedLevel?: boolean;
+  nextReady?: boolean;
   clock: ReturnType<typeof createGameClock>;
   finish: (completed: boolean) => void;
   restart: () => void;

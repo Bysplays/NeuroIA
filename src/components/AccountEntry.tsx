@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { getFirestore } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
+import { accountDisplayName } from '../services/emailAuth';
 import { auth } from '../services/firebase';
 import { firestoreProfessional, type ProfessionalProfile } from '../services/firestoreProfessional';
 import { StorageService } from '../services/storageService';
@@ -31,10 +32,10 @@ function ProfessionalEntry({ user, onSignOut }: {
   useEffect(() => {
     let alive = true;
     const adapter = firestoreProfessional(user.uid, getFirestore(auth.app));
-    adapter.register(user.displayName || '').then(value => { if (alive) setProfile(value); })
+    adapter.register(accountDisplayName(user)).then(value => { if (alive) setProfile(value); })
       .catch(() => { if (alive) setError(true); });
     return () => { alive = false; };
-  }, [user.uid, user.displayName, retry]);
+  }, [user, retry]);
   if (!profile) return error ? <main className="cloud-entry">
     <h1>No hemos podido abrir tu perfil profesional</h1><p role="alert">Vuelve a intentarlo o cierra sesión para acceder de nuevo.</p>
     <button className="touch-btn touch-btn-primary" onClick={() => { setError(false); setRetry(value => value + 1); }}>Reintentar</button>
