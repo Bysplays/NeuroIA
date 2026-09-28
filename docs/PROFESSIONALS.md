@@ -84,14 +84,15 @@ access to its historical participants. Do not claim its ownership from the clien
 “Sesiones” beside each actively linked person opens a proposal list and composer.
 The professional selects 1–8 ordered games, including repeated games, with individual
 levels from 1 to 10, a short title and an optional accompanying message. Review
-precedes publication. Published bodies are immutable; cancel and create a new
-proposal to change them. There are no private clinical notes in these documents.
+precedes publication. The owner can edit title, note and games while the session is still assigned.
+Once started, its contents are locked to preserve activity evidence. There are no private clinical notes in these documents.
 
 `professionals/{owner}/seats/{seat}/participants/{uid}/sessions/{id}` isolates every
 proposal by owner, paid seat and participant. Rules independently validate the
 professional owner, occupied seat, invitation code, reciprocal link and server-time
-expiry on reads and writes. The owner publishes/cancels; the participant starts
-and advances. No client may delete a proposal or edit its published body. Replacing
+expiry on reads and writes. The owner publishes, edits unstarted sessions and cancels; the participant starts
+and advances. No client may delete a proposal or edit a started session. Editing
+uses a transaction with stale-draft checks and preserves identity and creation date. Replacing
 a seat occupant grants no access to the previous occupant's sessions. CEOABERTO
 has no paid seat and does not expose this new feature.
 

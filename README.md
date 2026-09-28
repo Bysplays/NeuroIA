@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Vite-8-9183b5?style=flat-square" alt="Vite 8" />
   </p>
   <p>
-    <a href="https://bysplays.github.io/NeuroIA/">Open NeuroIA</a> ·
+    <a href="https://neuroia.es/">Open NeuroIA</a> ·
     <a href="#project-portals">Project portals</a> ·
     <a href="#local-development">Local development</a>
   </p>
@@ -88,6 +88,9 @@ Before merging, run `npm run lint -- --deny-warnings` and the complete checks in
 | :--- | :--- | :--- |
 | GitHub Pages through Actions on pushes to `main` | Cloudflare Worker deployed separately | Firestore rules published separately |
 
+The production domain is `https://neuroia.es/`; local Vite remains on
+`http://localhost:5173/`. Follow the [domain migration guide](docs/DEPLOYMENT.md)
+for Hostinger DNS, GitHub Pages, Firebase and payment return URLs.
 The Pages build supports `/NeuroIA/` and custom domains. Set
 `VITE_BILLING_API_URL` and `VITE_STRIPE_ENABLED` in Actions variables to enable
 billing in that build. Publishing the frontend **does not deploy the Worker or

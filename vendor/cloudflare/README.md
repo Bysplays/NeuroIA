@@ -17,7 +17,7 @@ signed payment lifecycle and scheduled reconciliation still need live validation
 
 Set these ordinary runtime variables on the Worker (also recorded in `vendor/cloudflare/wrangler.jsonc`):
 
-- `APP_URL=https://bysplays.github.io/NeuroIA/`
+- `APP_URL=https://neuroia.es/`
 - `FIREBASE_PROJECT_ID=ceoaberto-neuroia`
 - `STRIPE_MONTHLY_PRICE_ID=price_1UItenAWZtSdGYThrex9dsNh`
 - `STRIPE_MODE=test`
@@ -54,7 +54,10 @@ Measure deployed CPU usage during test Checkout before considering this producti
    and `VITE_STRIPE_ENABLED=true`. The existing Pages build now reads these variables.
    These are public configuration, not secrets. A rebuild is required.
 6. Local Vite can use the same values in root `.env.local` and must be restarted.
-   Checkout returns to `APP_URL`; with the deployed configuration that is GitHub Pages.
+   Checkout returns to server-owned `APP_URL`. The target production value is
+   `https://neuroia.es/`; apply the [domain migration](../../docs/DEPLOYMENT.md)
+   to update the deployed binding. A local Worker can use `http://localhost:5173/`
+   only with `STRIPE_MODE=test`; all other return URLs require HTTPS.
    Do not enable purchase UI before the backend, webhook and portal are configured.
 
 Use a designated test account without invitation access. Complete a sandbox Checkout,

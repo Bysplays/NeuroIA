@@ -7,7 +7,7 @@
   "observability": { "enabled": true, "logs": { "enabled": true } },
   "triggers": { "crons": ["*/5 * * * *"] },
   "vars": {
-    "APP_URL": "https://bysplays.github.io/NeuroIA/",
+    "APP_URL": "https://neuroia.es/",
     "FIREBASE_PROJECT_ID": "ceoaberto-neuroia",
     "STRIPE_MONTHLY_PRICE_ID": "price_1UItenAWZtSdGYThrex9dsNh",
     "STRIPE_MODE": "test",

@@ -90,7 +90,9 @@ npx firebase-tools@15.30.1 deploy --only firestore:rules --project ceoaberto-neu
 
 The browser configuration is not permission to administer Firebase. The local CLI
 is now authenticated, and the reviewed production rules were deployed with owner authorization.
-Keep Google enabled and authorize `localhost` and the final deployment hostname.
+Keep Google enabled and authorize `localhost`, `neuroia.es` and `www.neuroia.es`.
+See [domain deployment](DEPLOYMENT.md) for API-key referrers and migration checks.
+Keep `authDomain` on the Firebase-hosted helper; GitHub Pages does not serve `/__/auth/handler`.
 Use `http://localhost:5173` during local development. Authentication and progress
 can use Spark, including direct Firestore invitation redemption and trials. Billing
 uses the Cloudflare Worker; the retained Functions package is not deployed.

@@ -362,7 +362,7 @@ notes, reports and EEG contracts remain proposed. Production deployment is track
 | Placement | Optional progress.profile.placement: version, completed, per-game trial evidence; cursor derived from first missing game | Participant via validated durable operations |
 | Difficulty | Versioned per-exercise level/evidence map in progress; legacy fields retained | Progress transaction/reducer |
 | Results | Optional numeric level, configuration version, assignment/owner/seat/step IDs | Participant; existing result ID/receipt semantics |
-| Assignments | `professionals/{owner}/seats/{seat}/participants/{uid}/sessions/{id}`; immutable published body | Active linked owner authors; participant step receipts only |
+| Assignments | `professionals/{owner}/seats/{seat}/participants/{uid}/sessions/{id}`; owner-editable until started; immutable afterwards | Active linked owner authors; participant step receipts only |
 | Private notes | Separate professional-owned note documents, participant association and timestamps | Authoring owner only under active-link rules |
 | Reports | Reviewed report documents with source references, model version and sharing state | Explicit owner save/share; participant reads shared versions only |
 | EEG | Bounded transient device buffer by default | Local adapter; no cloud writes by default |

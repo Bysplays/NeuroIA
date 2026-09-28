@@ -146,7 +146,8 @@ export function stripeClient(env) {
 }
 function returnUrl(env) {
   const url = new URL(env.APP_URL);
-  if (url.protocol !== 'https:') throw Error('https-required');
+  const localTest = env.STRIPE_MODE === 'test' && url.origin === 'http://localhost:5173';
+  if (url.protocol !== 'https:' && !localTest) throw Error('https-required');
   url.search = ''; url.hash = ''; return url;
 }
 export async function checkout(uid, env, db, stripe) {

@@ -131,6 +131,11 @@ available. `npm run build` runs TypeScript and the production build.
 
 ### GitHub Pages
 
+The target production URL is `https://neuroia.es/`; Vite development remains on
+`http://localhost:5173/`. See `docs/DEPLOYMENT.md` for DNS, Firebase authorization,
+Pages rebuilds and Worker payment returns. `APP_URL` is server-owned; HTTP
+returns are accepted only for `localhost:5173` with `STRIPE_MODE=test`.
+
 `.github/workflows/deploy.yml` builds and deploys every push to `main` using Node
 22 and `npm ci`. Set the repository's Pages source to **GitHub Actions** before
 its first run. The workflow reads public repository variables `VITE_BILLING_API_URL` and
@@ -512,3 +517,15 @@ each stage and saves only completed game ladders. Retakes share this flow. No ne
 normal results or activity counters are created during assessment.
 `ConnectionRecovery` shares the login shell for access and initial progress errors;
 keep pending-write notices separate and retain retry/logout behavior.
+
+ProfessionalSessions opens SessionAnalytics by selected session ID using React
+state. The adapter reads at most eight deterministic result documents for confirmed
+steps under the linked participant; existing active-seat rules enforce access.
+sessionAnalytics.ts checks session/owner/seat/step/game/level/version attribution,
+deduplicates by step and derives answer-weighted accuracy and summed durations.
+Missing results are disclosed, not counted as zero. Async responses are scoped to
+the selected session and refresh attempt; no progress writes or new rules are used.
+
+Session edits use firestoreSessions.edit: only assigned sessions can change title,
+note and steps. The transaction checks the original draft to reject stale edits;
+rules enforce owner-only editing and preserve status, ownership and all result fields.
