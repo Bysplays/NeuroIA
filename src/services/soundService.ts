@@ -8,6 +8,7 @@ import { NarrationPlayer, normalizeSpeechText } from './narrationPlayer';
 class SoundService {
   private audioCtx: AudioContext | null = null;
   private soundEnabled: boolean = true;
+  private soundListeners = new Set<() => void>();
   private voiceEnabled: boolean = true; // Control de voz del locutor
   private spanishVoice: SpeechSynthesisVoice | null = null;
   private voiceListeners: Set<(voiceEnabled: boolean) => void> = new Set();
@@ -64,8 +65,17 @@ class SoundService {
   }
 
   public setSoundEnabled(enabled: boolean) {
+    if (this.soundEnabled === enabled) return;
     this.soundEnabled = enabled;
+    this.soundListeners.forEach(listener => listener());
   }
+
+  public getSoundEnabled = () => this.soundEnabled;
+
+  public subscribeSound = (listener: () => void) => {
+    this.soundListeners.add(listener);
+    return () => { this.soundListeners.delete(listener); };
+  };
 
   public setSpeechRate(rate: number) {
     this.narration.setRate(rate);

@@ -87,7 +87,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/AchievementShowcase.tsx` | Standalone badge collection and details |
 | `src/components/TherapistReport.tsx` | Professional guidance, notes, history, and print view |
 | `src/components/WellnessGlyph.tsx` | Distinct catalog illustrations for each game |
-| `src/components/GameObject.tsx` and `src/services/gameArtwork.json` | Sprite rendering and mapping of game stimuli; Organization opts into the transparent atlas with measured crops in `organizationArtwork.json` |
+| `src/components/GameObject.tsx` and `src/services/gameArtwork.json` | Shared game stimuli: `illustratedArtwork.json` maps active objects to transparent atlases with measured crops in `illustratedAtlasBounds.json`; standalone table/towel/soup assets and legacy atlas fallback remain supported |
 | `src/components/PaperTarget.tsx` | Illustrated motor-game tokens |
 | `public/brand/` and `public/images/` | Brand marks and paper illustrations; provenance in `docs/assets/` |
 
@@ -260,7 +260,7 @@ and question sets with lazy state, and reset answers in the next/restart handler
 State updater functions must remain pure: do not mutate existing card objects,
 schedule work or save results from an updater. Timer effects own their cleanup;
 frame callbacks read committed state and stop after a single completion. Help pauses scheduled activity without discarding answers. GameSession
-mounts games only after Start and is keyed by exercise and daily-plan position.
+mounts ordinary games only after Start (placement uses autoStart) and is keyed by exercise and daily-plan position.
 Run `node --experimental-strip-types --test tests/gameClock.test.ts` to verify
 the clock, alongside the existing speech-voice tests.
 
@@ -389,9 +389,7 @@ profile creation/import and is never updated by the settings input.
 
 ## Account activity statistics
 
-`ActivityStatistics` is a React-state workspace view opened from Header.
-Pass the statistics view state to Header so its chart button becomes a home
-button using the existing dashboard navigation callback. Activity surfaces use
+`ActivityStatistics` is embedded in the player dashboard’s Estadísticas tab, with an additional Logros tab rendering `AchievementShowcase`. Primary `TabletTabs` navigation uses a portal into Header’s navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
 the shared `data-style` attribute and palette tokens; no separate theme state.
 `activityStats.ts` deduplicates results and computes local-day per-exercise means.
 It maps historical result IDs `visual-scan`, `daily-seq` and `motor-coord` to
@@ -415,7 +413,7 @@ No new writes, authorization rules or progress storage are introduced.
 `GameSession` freezes the selected level at start and exposes config in session context.
 `GameExercise` dispatches the same eight implementations for ordinary and placement play.
 `PlacementOnboarding` gates only player Workspace after access/cloud load. It runs
-unscored examples and short trials, using durable `placement` operations in ProgressSync.
+unscored assessment stages, using durable `placement` operations in ProgressSync for each finished game ladder.
 `profile.placement` records bounded per-game evidence; optional `profile.gameLevels`
 contains provisional levels/evidence until the final trial marks placement complete.
 The reducer, adapter and Firestore rules use the existing atomic progress/receipt
@@ -466,3 +464,51 @@ once-per-page first-game Start attempt. Browser rejection must not block play.
 Orientation-lock rejection retains fullscreen and allows manual rotation.
 Run `npm test` for the fullscreen retry/exit contract; verify actual fullscreen
 entry, exit, tabs, pagination and dialog focus in an isolated browser context.
+
+Placement starts GameSession with `autoStart` for the current 1/4/7/10 stage in a shuffled game order.
+Only the welcome and final level summary require progression buttons. Advance
+after the current trial appears in the parent progress snapshot; do not infer
+missing evidence or start the next game before that update. Manual help and pause
+retain their existing clock behavior; ordinary games still open instructions.
+
+Classification renders its object-listening button into GameSession’s assistance
+slot through a React portal. The slot sits beside manual help on the bottom
+navigation row (wrapping directly above it on narrow phones), keeping the current-object narration callback owned by the game.
+
+GameSession shares the viewport header and assistance/navigation footer between
+all placement and ordinary games, including daily sessions. Instruction cards reuse
+the shared `placement-*` layout classes without separate instruction-card styles; starting instructions and difficulty selection remain available outside placement. Narration uses the session instruction;
+classification supplies current-object narration through the assistance portal.
+
+Object naming and word completion use shared instruction narration without hint or answer-reveal controls. New results preserve the hintsUsed field with a value of zero.
+
+`SoundToggle` shares the sound service subscription across Header and GameSession (instructions and play). Read the current service state on mount instead of copying profile settings into component state; narrator preference stays independent.
+
+Difficulty promotion uses `gameLevels[id].qualifyingRuns` (optional 0/1) through
+existing progress transactions. Each game keeps its own timed run; other games
+cannot reset it. Old `evidence` is retained for compatibility but does not count
+as timed evidence. See `docs/SDD.md` for strict thresholds and exclusions.
+`gameObjectPool.ts` owns the 82 shared illustrated identities, vocabulary tiers
+and distractor selection. Keep ambiguous generic/specific labels from competing.
+Statistics automatically load all archive pages on the chart tab before showing
+an unfiltered historical mean. Exercise data lines are solid and distinct colors;
+only the global reference line is dashed. Account changes remount the archive view.
+
+`Reassessment` reuses the placement UI with an in-memory draft and an explicit
+Guardar niveles action. Its `placement` operation carries a complete `trials` map;
+apply it to the latest server profile and replace only `gameLevels`. Preserve the
+original placement and all activity. Existing placement receipts protect retries;
+do not write all trials and levels together (Firestore expression budget).
+`LevelUpScreen` only announces level gains accompanied by new result IDs. The
+Nivel activity tab receives `gameLevels` from the current/authorized participant
+profile; `levelStatistics.ts` builds dated played-level series from archived results.
+
+`placementAssessment.ts` owns the 1/4/7/10 assessment ladder. New final trials carry
+optional `assessedLevel` (1, 4, 7 or 10; legacy 5 remains valid); trials without it keep the legacy mapping.
+PlacementOnboarding randomly interleaves unfinished games after each assessment turn
+(single round except motor-target, which uses its full level-specific target count), keeping
+independent stage cursors and avoiding immediate repeats. It resets GameSession at
+each stage and saves only completed game ladders. Retakes share this flow. No new
+normal results or activity counters are created during assessment.
+`ConnectionRecovery` shares the login shell for access and initial progress errors;
+keep pending-write notices separate and retain retry/logout behavior.

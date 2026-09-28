@@ -53,13 +53,13 @@ export function AccountPassword() {
     finally { setBusy(false); }
   };
   return <section className="preferences-section account-password" aria-labelledby="account-password-title">
-    <div className="account-password-heading">
+    <div className="preferences-action-row">
       <div>
         <h3 id="account-password-title">Acceso a tu cuenta</h3>
         <p>{user.email}</p>
       </div>
-      {linked ? <button className="subscription-upgrade" disabled={busy} onClick={reset}>Cambiar contraseña</button>
-        : !open && <button className="paper-nav-button" onClick={() => setOpen(true)}>Añadir contraseña</button>}
+      {linked ? <button className="subscription-upgrade preferences-action-button" disabled={busy} onClick={reset}>Cambiar contraseña</button>
+        : !open && <button className="subscription-upgrade preferences-action-button" onClick={() => setOpen(true)}>Añadir contraseña</button>}
     </div>
     {!linked && open && <form className="email-form" onSubmit={submit} aria-busy={busy}>
           <p className="entry-note">Podrás entrar con este correo y seguir usando Google. Al menos 6 caracteres.</p>

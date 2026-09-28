@@ -71,7 +71,7 @@ export function LoginScreen({ onSignIn, onEmail, onClearError, busy, error }: {
   </div>;
 
   return <main className={`login-screen${professional ? ' login-screen-professional' : ''}`}>
-    <div className="login-brand"><FullscreenButton/><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="40" height="40" /><span>Neuro<strong>IA</strong></span></div>
+    <div className="login-brand"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="40" height="40" /><span>Neuro<strong>IA</strong></span><FullscreenButton/></div>
     <section className="login-card" aria-labelledby="login-title">
       {professional ? [actions, illustration] : [illustration, actions]}
     </section>

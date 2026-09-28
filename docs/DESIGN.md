@@ -12,9 +12,9 @@ This is a living guide to the current product direction. Read [AGENTS.md](../AGE
 for implementation, verification, and maintenance practices. Keep this guide in
 English; the application speaks Spanish.
 
-The planned realistic illustrated game objects are specified in [SDD.md](SDD.md). They remain pending; the
-current implementation and visual references below are still authoritative until
-each feature is integrated and verified.
+Game stimuli use the approved semi-realistic drawn style described under
+[Game-object illustration recipe](#game-object-illustration-recipe). Decorative
+companions, header scenes and achievement artwork retain their established identities.
 
 ## Purpose and tone
 
@@ -40,12 +40,13 @@ Use the actual home screen and these repository assets as the visual references:
   See `docs/assets/images/headers/README.md` for prompts and provenance.
 - `public/images/achievement-badges.png` and `achievement-badges-extended.png`:
   the collectible illustration family.
-- `public/images/paper-play-tokens.png`: the smiling paper target and companion
-  used in the two motor games.
-- `public/images/organization-objects.png`: a shared 8 × 10 true-alpha atlas
-  for Organization stimuli, preserving object identities and original map order.
-- `public/images/game-objects-0.png` through `game-objects-2.png`: recognizable
-  objects and action symbols for game stimuli.
+- `public/images/objects/illustrated/motor-tokens.png`: the textured target and
+  companion discs used in the two motor games; the original paper sheet is retained as a reference.
+- `public/images/objects/towel.png` and `table.png`: approved style anchors for game objects.
+- `public/images/objects/illustrated/sheet-0.png` through `sheet-4.png`: 80 drawn
+  objects shared by the games. `src/services/illustratedArtwork.json` keeps their identity mapping;
+  measured bounds preserve complete silhouettes. Table, towel and soup are standalone images.
+- The earlier organization/game-object atlases remain available for legacy symbols and provenance.
 - `public/brand/neuroia-mark.svg` and `neuroia-logo.svg`: the owner's mint
   organic branching mark, preserving the supplied transparent PNG and its tall
   proportions inside SVG layouts. The wordmark retains the existing typography.
@@ -59,7 +60,7 @@ The mascots have soft organic bodies, imperfect dark ink features, small limbs,
 and visible paper grain. Keep the same characters across screens. Avoid neon
 halos, glass panels, glossy 3D, heavy shadows, generic emoji artwork, and thin
 vector redraws of the approved paper illustrations. Simple interface controls may
-use restrained line icons; important game artwork should use the paper family.
+use restrained line icons; game stimuli should follow the semi-realistic drawn recipe below; companions remain in the paper family.
 
 ## Color and typography
 
@@ -121,13 +122,18 @@ text, short windows, long notes and dialog forms. Native dialogs retain their
 scrolling and focus behavior. Game boards adapt to available height while
 keeping touch targets, stimuli and feedback visible.
 
-Use rounded, labelled tabs with an explicit active state and arrow-key navigation.
-Home has Hoy, Juegos, optional Para ti and Tu recorrido; settings has Texto,
-Apariencia and Tu cuenta; activity has Resumen y filtros, Gráficas and Historial;
+Use rounded, labelled tabs with equal widths and heights within each bar, an explicit active state and arrow-key navigation. Allow labels to wrap on narrow screens.
+Place primary player tabs inside the shared header, between the brand and utilities; on narrow screens use a second header row. Activity tabs (Resumen y filtros, Gráficas, Historial and Logros when available) sit below their content at the bottom of the activity view. Other secondary section tabs remain above their content. Center short panels vertically in the remaining space below and allow long content to grow without overlapping navigation.
+
+The first row of each player tab starts at the same vertical position, approximately 20% down the viewport (with at least 16px clearance below the header): the Hoy greeting, game filters, proposed-session heading and Estadísticas heading. Use a shared 52px minimum row height and let wrapped text grow. In Juegos, omit the result-count caption and leave 40px between the area filters and game cards. Keep the Hoy greeting directly above its cards. In the daily card, position the main claim at 40% of the available vertical space between the session label and start action, leaving more room below than above. Embedded statistics content begins 18px below its heading, matching Hoy; keep activity tabs at the bottom without vertically centering the content away from its heading. Choose from 15 short, cheerful, greeting-card-style Spanish subtitles randomly on dashboard mount and keep it stable during updates and tab changes. Keep the wording upbeat and literal; avoid double meanings, references to failure or inadequacy, pressure and claims of cognitive improvement. Keep the greeting on the left and its welcome subtitle on the right, inset 16–32px from the card edges; omit the date.
+
+Home has Hoy, Juegos, optional Para ti and Estadísticas; settings has Apariencia (text size followed vertically by visual style)
+and Tu cuenta; activity has Resumen y filtros, Gráficas and Historial;
 the professional panel has Personas and Asientos. Collections use previous/next
 controls and page counts instead of an unbounded page.
 
-A fullscreen control is available at entry, in toolbars and during play. Attempt
+The fullscreen control is the rightmost action in the top toolbar at entry,
+in workspaces and during play. Attempt
 fullscreen once on the first explicit game Start gesture, requesting landscape
 when supported. Rejection never blocks play; retain a manual retry and exit,
 respect Escape, and do not re-enter automatically after the user exits. Installed
@@ -158,7 +164,7 @@ and size naturally to their content. Do not restore the flame icon.
 Professional owners enter a separate free workspace through the professional
 login; do not add the retained clinical therapist view to personal navigation.
 Do not add back the duplicate
-“Acompañamos tu progreso” card at the bottom. “Tu recorrido” uses the available
+“Acompañamos tu progreso” card at the bottom. “Estadísticas” uses the available
 width. The home links to achievements rather than displaying the badge collection.
 
 ### All games
@@ -324,6 +330,8 @@ workspace cards and quiet controls. A native dialog collects a title, optional
 message and up to eight game/level rows with explicit up/down/remove controls.
 “Revisar sesión” shows the exact sequence before “Compartir sesión”. Published
 proposals show status and completed/total counts; cancellation requires confirmation.
+An empty Para ti inbox says “Aún no tienes sesiones propuestas.” after server confirmation, inside the same tinted, rounded notice surface used for connection messages. Keep a Refrescar action visible with a filled action-color hover distinct from the panel. Loading and connection errors remain separate from confirmed empty results.
+
 In the Para ti tab, the participant home identifies the proposing
 professional and offers start/resume.
 Game introductions show the fixed level and sequence position. A compact toolbar
@@ -351,11 +359,81 @@ The retained therapist component is not the professional dashboard and remains
 unwired for clinical writes. There are no diagnosis, notes or prescribed activities
 in this workspace. Access and purchase contracts are in [PROFESSIONALS.md](PROFESSIONALS.md).
 
+## Game-object illustration recipe
+
+### Approved look
+
+Use `public/images/objects/towel.png` as the primary reference and `table.png` as
+an additional material example. Objects should look **realistic but drawn**:
+recognizable proportions, soft volume, gentle gouache/colored-pencil shading,
+fine tactile grain and clear silhouettes. Preserve identifying colors (red apple,
+green pear, purple sequence flower). Avoid photographs, flat emoji, thick cartoon
+outlines, plastic/glossy 3D, distracting decoration and faces on ordinary objects.
+
+Use a true transparent alpha background, no floor, cast shadow, frame, labels or
+watermarks. Keep the entire object visible and centered with modest safe margins.
+Choose the view that makes recognition easiest, rather than forcing all subjects
+into the same angle. A towel must look like a towel, a lamp must include a base and
+shade, pliers must not look like a saw, and soup must not reuse the cooking pot.
+
+### Repeatable generation prompt
+
+Use the built-in `image_gen` tool with the approved towel/table images attached
+as **style references**, not objects to include. Replace the bracketed fields:
+
+```text
+Use case: stylized-concept.
+Asset: one game stimulus for Spanish label [EXACT LABEL].
+Subject: [PRECISE OBJECT, ESSENTIAL PARTS, IDENTIFYING COLOR AND VIEW].
+Style: semi-realistic hand-drawn gouache and colored-pencil illustration,
+recognizable real proportions and materials, gentle dimensional shading,
+delicate tactile grain, soft natural colors, crisp readable silhouette.
+Match the attached towel/table references for rendering style only.
+Composition: centered complete object on a square canvas, safe margins,
+readable at 64–160 CSS pixels. Genuine transparent alpha background.
+Avoid: photographs, flat emoji, glossy 3D, faces, extra objects, ground,
+cast shadows, text, labels, frames and watermarks.
+```
+
+For related objects, generate small atlases (currently 4 columns × 4 rows) with
+an explicit numbered row-major inventory. Request equal cells and generous
+transparent gutters. Check the returned dimensions: the generator may not return
+the requested resolution or perfectly even placement. Never assume grid coordinates
+alone identify the complete sprite. `scripts/measure_illustrated_atlas.mjs` measures
+alpha bounds in a browser from a decoded image; save reviewed results in
+`src/services/illustratedAtlasBounds.json`. It does not alter source pixels.
+Inspect all crops against the manifest before integrating them. Regenerate an
+ambiguous or clipped object separately rather than changing the answer to fit it.
+
+### Integration and verification
+
+1. Inventory actual stimuli and Spanish labels across every consumer before generating.
+   Preserve stable exercise IDs, answer keys, pair keys, ordering and scoring.
+2. Save atlas PNGs in `public/images/objects/illustrated/` and standalone PNGs in
+   `public/images/objects/`. Record complete prompts, references, tool, layout and
+   identity corrections in the matching `docs/assets/images/objects/` directory.
+3. Reuse `GameObject` for all question images and matching choices. Use the same
+   sprite for a visual-search target and every matching cell. Preserve true alpha
+   with normal blending in every theme; do not add a white tile behind it.
+4. Review a labelled contact sheet **one object at a time**. Verify silhouette,
+   identity, color, complete edges, absence of neighboring sprites and legibility
+   at the smallest actual game size. Check for unintended numbers or lettering.
+5. Exercise real answer, next, matching, demo and completion paths in isolated
+   browser fixtures. Inspect phone, landscape tablet and desktop screenshots,
+   including contrast themes. Do not write fixture progress to real accounts.
+6. Motor artwork may gain texture and soft volume, but preserve the recognizable
+   characters, concentric target center, circular boundary and full hit area.
+   Never change gameplay geometry to compensate for an unsuitable image.
+
+The decorative mascot/header/badge family retains its own paper-style references;
+this recipe applies to objects and tokens used inside games. UI controls remain
+code-native icons. See the [atlas provenance and complete prompts](assets/images/objects/illustrated/README.md).
+
 ## Illustration workflow
 
 1. Inspect the existing asset that establishes the style. Use it as a visual
    reference rather than describing a vaguely similar mascot from memory.
-2. For paper characters and objects, generate matching raster artwork. Extend
+2. For characters, generate matching paper raster artwork. For game objects, use the semi-realistic recipe above. Extend
    existing SVG controls as vectors when that is the appropriate asset type.
 3. When creating multiple related images, try to generate the whole set in one
    generation as a shared sheet to save tokens and maintain visual consistency.
@@ -564,14 +642,17 @@ production prerequisites are documented in `docs/ONBOARDING.md`.
 
 ### Activity statistics
 
-A chart icon beside sound and settings opens the account activity view. While
-that view is open, the same button shows a house, is labelled “Volver al inicio”,
-and returns to the home. Keep the
+Estadísticas in the header groups activity statistics and Logros as secondary tabs. Do not duplicate this navigation with a header statistics icon. Keep the
 category radar at the upper left, showing completion counts rather than ability.
-Two daily charts use one consistent color per exercise: mean accuracy and mean
+Two daily charts use distinct, consistent colors and solid lines for every exercise: mean accuracy and mean
 seconds per question (session duration divided by question count, then averaged
 per day). This is not reaction-time measurement. Missing days are not zeroes.
-Area, exercise and inclusive local-date filters apply to all charts and the table.
+Area, exercise and inclusive local-date filters apply to the data series and table.
+Each chart also has a horizontal dashed reference for the unfiltered historical
+mean of all sessions, labeled Media histórica global. Reserve dashed strokes for
+these references. Opening Gráficas loads all archive pages; show loading/retry
+until coverage is complete and withhold the reference while history is partial.
+Time averages use seconds per question and exclude zero-question results.
 Show timestamp, correct/total answers, accuracy, duration and seconds per question
 in a horizontally scrollable, paginated table. Start with recent account history;
 explicitly offer more archived records and disclose partial coverage. Preserve
@@ -592,23 +673,142 @@ and minutes). Historical records with only a date show that day without a time;
 do not invent a completion hour. Omit the device-local-time caption. Group
 pagination and archive loading in a padded footer with comfortable touch buttons.
 
+The Nivel statistics tab shows current per-game base levels as numbered colored
+progress bars, an eight-axis radar with the matching numbers and a dated timeline
+selected by game. Use three equal-width cards stretched to the same row height in both player and professional views. Keep bars and charts side by side on landscape tablets; stack
+on phones and allow overflow for enlarged text. Timeline points are recorded
+played levels, including manual/professional selections, not reconstructed past
+base levels. Load the archive for this tab too; disclose partial coverage and
+exclude missing levels and placement/practice records. Missing current levels
+read Sin asignar, never an invented level.
+
+After a new completed result raises a base level, show a centered celebration
+with the static achievements friend, ¡HAS SUBIDO DE NIVEL!, the new level, game
+name and Continuar. The card enters with a brief zoom/bounce; the friend itself
+stays static. Respect hidden companions and reduced motion. Use ModalFrame for
+focus, Escape and scroll locking; backdrop clicks do not dismiss it. Do not replay
+celebrations on initial load, result retries or reassessment.
+
+Mi cuenta in settings offers Rehacer prueba with the short caption
+“Reajusta tus niveles sin borrar tus partidas.” Place its colored primary button
+on the right, matching Añadir contraseña / Cambiar contraseña. These actions
+reuse the compact Abandonar subscription button sizing (44px minimum height,
+8px × 16px padding and .72rem text). Keep text on the
+left; on narrow screens wrap the button below while retaining right alignment. Reuse the eight-game
+onboarding, then show Guardar niveles. Explain that completed activity and earned
+milestones remain. Keep the draft in memory until accepted; cancellation or reload
+leaves existing levels untouched. Saving replaces all base levels together and
+clears their qualifying runs. Preserve the original onboarding record.
+
 ### Guided game placement and difficulty
 
-After player access and cloud loading, unassessed accounts see one calm companion
-panel with progress, one instruction, optional listening and a primary Continue.
-Use the existing per-game illustrations, a level-1 example and a short level-3
-trial. A pause preserves the active game; returning or restarting the app repeats
-only the unfinished trial. The explicit inaccessible-trial action starts that game
-at level 1 and labels it as unmeasured in the summary. Do not call this a diagnosis
-or an ability score. Professional entry has no placement flow.
+Naming, word completion and classification share an 82-object illustrated pool.
+Use common objects in early levels and progressively more demanding vocabulary,
+similar distractors and up to four options later. Classification avoids broad,
+overlapping groups. Memory pairs introduce similar-category objects; visual search
+uses similar-color distractors. A successful timed performance raises the next
+base level (one perfect game under a minute, or two consecutive games of the same
+type above 90% and under three minutes each, capped at 10). Other game types do not
+break that run. Repeat reopens instructions at the updated base level.
 
-Between trials, keep the feedback panel visible while its progress update arrives,
-showing “Preparando el siguiente paso…” and disabling Continue until that trial is
-available. Never replace missing trial evidence with an invented level.
-Show all eight starting levels at completion, then “Ir a mis juegos”. Settings and
-logout remain accessible. Respect hidden companions, large text and contrast.
-Ordinary instructions show the recommendation and a 1–10 selector; the chosen level
-stays fixed during play and repeats and is shown in the game bar and result. Help
+
+After player access and cloud loading, unassessed accounts see one calm companion
+panel with progress, one instruction, optional listening and a primary Empezar.
+Empezar launches a randomly selected unfinished game. After each assessment turn, randomly
+choose another unfinished game, avoiding immediate repeats while alternatives remain.
+Keep the next level and last passed evidence separately for each game. Each
+game tries levels 1, 4, 7 and 10 in sequence, advancing only after a perfect completed
+stage (use correct/total counts rather than rounded accuracy). A failed or skipped
+stage ends that game at its last passed level; with none passed, use level 1.
+Objects come randomly from the existing level-appropriate pools. Move directly
+between stages and games without automatic instruction/result screens. Help,
+settings and landscape pauses remain available. The bottom actions stay ← Volver
+and Omitir →. Skipping before passing anything is marked unmeasured; after a pass,
+retain that successful evidence. Returning preserves the pending stage of each game; reloading restarts unfinished
+games at level 1, while completed games remain saved. Pause keeps the current stage.
+
+Place Escuchar at the right of the prepared-game count on welcome and completion,
+above the progress bar. Keep a stable panel width, 24–32px card padding and
+20–24px spacing between content groups, with a balanced illustration column.
+Wait for the completed trial in the parent progress snapshot before advancing;
+show only a brief preparing status during that wait. Never infer missing evidence.
+Do not describe placement as a diagnosis or ability score. Professional entry
+has no placement flow.
+
+Show all eight starting levels at completion, then “Ir a mis juegos”. Settings remain accessible; logout is available inside Settings without a
+duplicate button on the placement screen. Respect hidden companions, large text and contrast.
+Ordinary instructions start at the recommended level and offer a compact minus/plus control for levels 1–10; the chosen level
+stays fixed during play and is shown in the game bar and result. Repeats start at the updated base. Help
 and portrait continue pausing the existing clock. Tracking offers holding Space as
-a keyboard alternative and remains manually adjusted. See SDD for scoring and
+a keyboard alternative and follows the same timed promotion rule. See SDD for scoring and
 provisional calibration limits.
+
+Game instructions reuse the full onboarding layout: placement screen, toolbar, card, artwork, content, copy and actions. Keep the same card width, spacing and typography. The toolbar carries the NeuroIA wordmark and utilities; center the card between it and a bottom-left text action ← Volver and session progress at bottom right, in the placement skip position. Omit the Instrucciones label, repeated difficulty caption and recommended suffix; retain only the title and a short instruction. Do not add a parallel set of instruction-card styles. Settings/fullscreen remain in the toolbar and Empezar is the primary action. They continue the placement layout: illustration on the left,
+content on the right, a top row inset 16px from the card’s upper edge, with a compact level control on the left and Escuchar on the right (the level is read-only once started or professionally assigned), followed by
+the title/instructions and a full-width start or resume action. Use the shared
+surface palette, 24–32px padding and 20–24px spacing between content groups.
+
+Classification centers the object above its name/listen row and category choices.
+Leave 72px between the object/name group and category options, and 12px before the next action; keep 16px between image
+and caption. Omit the category question and option icons. Center the object name
+on the image axis. Center the complete group in
+the available play space with a 16px downward optical offset, keeping footer
+controls fixed and image size adapted to short viewports.
+Categories fill a single joined row with white surfaces, a 4px gap and straight
+inner edges; only outer corners are rounded. Keep centered category labels and color feedback with accessible answer labels, without extra success copy. Reserve the next-action space and make its button span the full combined width of the category options.
+
+All games, during placement and ordinary sessions, share a viewport header with time on the left, the exercise title
+centered, and fullscreen/settings on the right. Center the image with its name
+below, followed by categories. Keep ← Volver and Omitir → at the bottom edges
+during placement. Place listening and manual help centered on the same bottom row as Volver, with the current level at the right (beside Omitir during placement). On narrow phones, wrap assistance immediately above navigation without extra spacing. Settings pauses placement;
+closing settings leaves the existing Retomar action.
+
+Tracking keeps its progress bar and moving arena between the shared header and
+footer. Its footer Escuchar reads the tracking instruction; resize the arena to
+the remaining height without changing movement bounds, contact detection or timing.
+
+Active games use the same 1120px maximum outer width as instructions, with 24px lateral gutters (16px on narrow screens) and 16px vertical padding. Header, play area and footer align to these shared inner edges.
+
+Memory sequence reserves its live-message space before starting, so observation, turn and retry feedback never moves the start/replay button. It places its full-width start/replay action below the two-column tile grid; omit the idle prompt and retain live observation/turn feedback. Visual scanning has no enclosing colored board surface; each cell retains its own surface. Its heading names the target in bold without a duplicate target image.
+
+Object naming uses a transparent play area with a centered image above a joined row of text-only answer buttons, matching classification. Its next-action button spans the full answer-row width, up to 780px. Remove semantic/phonetic hints and answer-revealing audio; the shared Escuchar reads only the instruction. Preserve answer feedback, question order and result scoring; new naming results record zero hints.
+
+Word completion follows the same transparent vertical layout: image, incomplete word, joined text-only letter options and reserved next action. The next-action button spans the full width of the letter options (including their 780px maximum). Remove hint/reveal controls and check/cross feedback icons while preserving selection colors, spoken feedback and drag/touch input. Its shared Escuchar reads instructions; new results retain hintsUsed as zero.
+
+Home, game instructions and active games share the same sound-effects toggle in their upper-right tools. Its state stays synchronized while navigating; instruction narration remains independent.
+
+Word-completion MESA uses the dedicated transparent table illustration (`images/objects/table.png`), never the logs sprite. Standalone stimulus provenance lives beside atlas documentation under `docs/assets/images/objects/`.
+
+Memory pairs keeps the same title, statistics row and board geometry during preview and play. Only the replay control changes to a green countdown while cards are visible; its label reserves the same width. Pressing the countdown preserves the existing early-start action.
+
+Statistics filters use a compact heading and secondary reset action, aligned area/exercise fields, and a separate paired date range. Keep native selects/date inputs, visible labels and 48px minimum control heights. Reset is disabled when no filters are active.
+
+Memory-pair grids always use complete, equally sized rows. Tablets and desktop use two rows with one column per pair (4 cards: 2×2; 6: 3×2; up to 12: 6×2). Narrow screens use a divisor of the card count to preserve full rows and usable targets. Preview and hidden cards share these columns.
+
+Toalla uses the dedicated transparent towel stimulus in classification and memory pairs (`images/objects/towel.png`); the soap dispenser must only represent soap.
+
+### Connection recovery
+
+Access and initial progress failures share ConnectionRecovery: the existing login
+shell, NeuroIA wordmark, fullscreen control, rest friend on a tinted panel and a
+short Vamos a reconectar heading. Keep the colored Reintentar conexión action
+prominent and Cerrar sesión as a secondary text action. Reuse appearance tokens,
+hidden-companion behavior and narrow-screen stacking. Permission failures use
+account-access wording instead of claiming a network fault. Pending-save notices
+remain distinct from an initial-load failure; never replace inaccessible progress
+with an empty profile.
+
+Assessment turns contain one naming/completion/classification question, one beacon
+sequence, one scanning board, one pair board or one short tracking interval.
+Toca la diana is the exception: complete its full level-specific target sequence
+(5, 8, 11 and 14 targets at levels 1, 4, 7 and 10) before switching games.
+Normal game lengths are unchanged.
+
+Professional activity and session pages use a compact back icon beside a left-aligned
+section title, with the participant name underneath in muted text. Avoid placing a
+large participant heading opposite an oversized back action. The session composer
+uses the shared native dialog with a tinted icon/header, compact close control,
+labelled fields, a game count and individually bordered game cards. Keep level and
+game selection together, reorder/remove actions below, and a full-width primary
+review/share action. Long drafts scroll within the dialog; preserve Escape, focus
+return, validation and the review-before-sharing step.

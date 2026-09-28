@@ -37,27 +37,72 @@ test('placement resumes one trial at a time, keeps counters unchanged and commit
   assert.equal(placementLevel({ ...trial, hints: 1 }), 3);
   assert.equal(placementLevel({ ...trial, questions: 1 }), 1);
 });
-test('three eligible sessions adjust at most one level and retries/easier practice cannot promote', () => {
+test('one perfect result under a minute promotes once; retry and easier games do not promote', () => {
   let data = placed();
   const save = (r: ExerciseResult) => { data = applyProgressOperation(data, { id: `result:${r.id}`, kind: 'result', result: r }); };
-  save(result('a')); save(result('a')); save(result('b'));
-  assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 4);
-  save(result('easy', 10, 1)); save({ ...result('practice'), practice: true });
-  assert.equal(data.profile.gameLevels!['visual-scanning']!.evidence.length, 2);
-  save(result('c')); assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 5);
-  assert.deepEqual(data.profile.gameLevels!['visual-scanning']!.evidence, []);
-  for (let n = 0; n < 3; n++) save(result('low'+n, 2, 5));
-  assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 4);
+  save(result('fast'));
+  assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 5);
+  save(result('fast')); save(result('easy', 10, 4));
+  save({ ...result('practice', 10, 5), practice: true });
+  assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 5);
   assert.equal(data.profile.gameLevels!['language-naming']!.level, 4);
 });
-test('adaptation respects bounds and hints, and does not infer motor tracking ability', () => {
-  for (const level of [1,10]) {
-    let data = placed(); data.profile.gameLevels!['visual-scanning']!.level = level;
-    for (let i=0;i<3;i++) data = applyProgressOperation(data, { id: String(i), kind: 'result', result: result(String(i), level === 1 ? 0 : 10, level) });
-    assert.equal(data.profile.gameLevels!['visual-scanning']!.level, level);
-  }
+test('two consecutive qualifying games promote independently, failures break only their own streak', () => {
   let data = placed();
-  for (let i=0;i<3;i++) data = applyProgressOperation(data, { id: String(i), kind: 'result', result: { ...result(String(i)), hintsUsed: 1 } });
+  const strong = (id: string, overrides: Partial<ExerciseResult> = {}) => ({ ...result(id, 19), correctAnswers: 19, totalQuestions: 20, accuracy: 95, durationSeconds: 120, ...overrides });
+  const save = (r: ExerciseResult) => { data = applyProgressOperation(data, { id: `result:${r.id}`, kind: 'result', result: r }); };
+  save(strong('one')); assert.equal(data.profile.gameLevels!['visual-scanning']!.qualifyingRuns, 1);
+  save(strong('other', { exerciseId: 'language-naming', domain: 'language' }));
+  save(strong('two')); assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 5);
+  assert.equal(data.profile.gameLevels!['language-naming']!.qualifyingRuns, 1);
+  save(strong('bad', { exerciseId: 'language-naming', domain: 'language', correctAnswers: 2 }));
+  save(strong('again', { exerciseId: 'language-naming', domain: 'language' }));
+  assert.equal(data.profile.gameLevels!['language-naming']!.level, 4);
+  assert.equal(data.profile.gameLevels!['language-naming']!.qualifyingRuns, 1);
+});
+test('thresholds are strict, no automatic demotion, old evidence is not timed evidence', () => {
+  let data = placed(); data.profile.gameLevels!['visual-scanning']!.evidence = [100, 100];
+  const save = (r: ExerciseResult) => { data = applyProgressOperation(data, { id:r.id, kind:'result', result:r }); };
+  save({ ...result('60'), durationSeconds: 60 });
   assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 4);
-  assert.throws(() => applyProgressOperation(fresh(), { id:'bad', kind:'placement', exerciseId:'memory-path', trial:{ ...trial, accuracy:NaN } }));
+  assert.equal(data.profile.gameLevels!['visual-scanning']!.qualifyingRuns, 1);
+  save({ ...result('180'), durationSeconds: 180 });
+  assert.equal(data.profile.gameLevels!['visual-scanning']!.qualifyingRuns, 0);
+  save(result('90', 9)); assert.equal(data.profile.gameLevels!['visual-scanning']!.qualifyingRuns, 0);
+  for(let i=0;i<4;i++) save(result('low'+i, 1));
+  assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 4);
+  for(const time of [0, -1, NaN]) save({ ...result('time'+time), durationSeconds: time });
+  assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 4);
+});
+test('all scored exercise types use the rule and level ten is capped', () => {
+  let data = placed();
+  for(const id of EXERCISE_IDS) {
+    const before = data.profile.gameLevels![id]!.level;
+    const domain = id.startsWith('motor') ? 'motor' : 'attention';
+    data = applyProgressOperation(data, { id, kind:'result', result:{ ...result(id), exerciseId:id, domain, level:before } });
+    assert.equal(data.profile.gameLevels![id]!.level, before + 1);
+  }
+  data.profile.gameLevels!['visual-scanning']!.level = 10;
+  data = applyProgressOperation(data, { id:'max', kind:'result', result:result('max', 10, 10) });
+  assert.equal(data.profile.gameLevels!['visual-scanning']!.level, 10);
+});
+
+test('a completed reassessment replaces only levels and preserves activity and settings', () => {
+  let data = placed();
+  data = applyProgressOperation(data, { id:'before-retake', kind:'result', result:result('before-retake') });
+  const before = structuredClone(data);
+  const trials = Object.fromEntries(EXERCISE_IDS.map(id => [id, { ...trial, accuracy:65 }])) as Record<typeof EXERCISE_IDS[number], typeof trial>;
+  const after = applyProgressOperation(data, { id:'retake', kind:'placement', trials });
+  assert.deepEqual(after.history, before.history);
+  assert.deepEqual(after.profile.placement, before.profile.placement);
+  assert.equal(after.profile.totalSessions, before.profile.totalSessions);
+  assert.deepEqual(after.profile.settings, before.profile.settings);
+  assert.deepEqual(after.profile.domainProgress, before.profile.domainProgress);
+  assert.equal(after.profile.gameLevels!['visual-scanning'].level, 3);
+  assert.equal(after.profile.gameLevels!['motor-tracking'].level, 1);
+  assert.ok(hasPlacement(after.profile));
+  assert.deepEqual(data, before);
+  const { 'memory-path': removed, ...partial } = trials;
+  assert.ok(removed);
+  assert.throws(() => applyProgressOperation(data, { id:'partial', kind:'placement', trials:partial as typeof trials }));
 });

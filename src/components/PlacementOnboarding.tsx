@@ -1,82 +1,99 @@
+import { advanceAssessment, nextAssessmentGame, type AssessmentLevel } from '../services/placementAssessment';
 import { FullscreenButton } from './FullscreenButton';
 import { useEffect, useRef, useState } from 'react';
-import { Pause, Volume2 } from 'lucide-react';
+import { Volume2 } from 'lucide-react';
 import type { ExerciseId, ExerciseResult, UserProfile } from '../types';
+import type { PlacementTrial } from '../services/difficulty';
 import type { ProgressSync } from '../services/progressSync';
-import { DIFFICULTY_VERSION, EXERCISE_IDS, hasPlacement, placementLevel, placementTrials } from '../services/difficulty';
+import { DIFFICULTY_VERSION, EXERCISE_IDS, hasPlacement, placementTrials } from '../services/difficulty';
 import { getExerciseById } from '../services/exerciseCatalog';
+import { enterFullscreen } from '../services/fullscreen';
 import { soundService } from '../services/soundService';
 import { GameSession } from './GameSession';
 import { GameExercise } from './GameExercise';
 import { HeaderIllustration } from './HeaderIllustration';
 
-export function PlacementOnboarding({ profile, sync, onDone, onSettings, onSignOut }: {
-  profile: UserProfile; sync: ProgressSync; onDone: () => void; onSettings: () => void; onSignOut: () => void;
+export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial, onCancel, doneLabel = 'Ir a mis juegos' }: {
+  profile: UserProfile; sync: ProgressSync; doneLabel?: string; onTrial?: (id: ExerciseId, trial: PlacementTrial) => void; onCancel?: () => void; onDone: () => void; onSettings: () => void;
 }) {
   const trials = placementTrials(profile);
-  const [id, setId] = useState<ExerciseId>(() => EXERCISE_IDS.find(key => !trials[key]) ?? EXERCISE_IDS[0]);
-  const [phase, setPhase] = useState<'welcome' | 'intro' | 'practice' | 'ready' | 'trial' | 'feedback'>('welcome');
+  const [id, setId] = useState<ExerciseId>(() => nextAssessmentGame(EXERCISE_IDS.filter(key => !trials[key])) ?? EXERCISE_IDS[0]);
+  const [stages, setStages] = useState<Partial<Record<ExerciseId, { level: AssessmentLevel; best?: PlacementTrial }>>>({});
+  const level = stages[id]?.level ?? 1;
+  const best = stages[id]?.best;
+  const submitted = useRef<string | null>(null);
+  const [phase, setPhase] = useState<'welcome' | 'trial' | 'feedback'>('welcome');
   const [paused, setPaused] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const complete = hasPlacement(profile);
-  const exercise = getExerciseById(id)!;
   const count = EXERCISE_IDS.filter(key => trials[key]).length;
   const feedbackTrial = trials[id];
   // The parent progress snapshot can arrive after the local phase change.
-  const awaitingTrial = phase === 'feedback' && !feedbackTrial;
-  const playing = phase === 'practice' || phase === 'trial';
+  const playing = phase === 'trial';
+  const available = EXERCISE_IDS.filter(key => !trials[key]);
   useEffect(() => { soundService.stopSpeaking(); heading.current?.focus(); window.scrollTo(0, 0); }, [phase, id]);
   useEffect(() => () => soundService.stopSpeaking(), []);
 
+  // Reconcile the local cursor when the parent delivers the saved trial.
+  if (phase === 'feedback' && feedbackTrial) {
+    setPaused(false);
+    const remaining = nextAssessmentGame(available, id);
+    if (remaining) { setId(remaining); setPhase('trial'); }
+    else setPhase('welcome');
+  }
+
   const save = (result?: ExerciseResult) => {
-    if (phase === 'practice' && result) { setPhase('ready'); return; }
-    sync.enqueue({ id: `placement:${DIFFICULTY_VERSION}:${id}:${crypto.randomUUID()}`, kind: 'placement', exerciseId: id,
-      trial: result ? { accuracy: result.accuracy, questions: result.totalQuestions, hints: result.hintsUsed ?? 0, skipped: false }
-        : { accuracy: 0, questions: 0, hints: 0, skipped: true } });
+    const key = `${id}:${level}`;
+    if (phase !== 'trial' || submitted.current === key) return;
+    submitted.current = key;
+    const outcome = advanceAssessment(level, best, result);
+    if (outcome.next) {
+      setStages(previous => ({ ...previous, [id]: { level: outcome.next!, best: outcome.best } }));
+      setId(nextAssessmentGame(available, id) ?? id);
+      return;
+    }
+    const trial = outcome.finished!;
+    if (onTrial) onTrial(id, trial);
+    else sync.enqueue({ id: `placement:${DIFFICULTY_VERSION}:${id}:${crypto.randomUUID()}`, kind: 'placement', exerciseId: id, trial });
     setPhase('feedback');
   };
   const next = () => {
-    const remaining = EXERCISE_IDS.find(key => !trials[key]);
-    if (remaining) { setId(remaining); setPhase('intro'); }
+    const remaining = available.includes(id) ? id : nextAssessmentGame(available);
+    if (remaining) { submitted.current = null; setPaused(false); setId(remaining); setPhase('trial'); }
     else setPhase('welcome');
   };
   if (playing) return <div className="placement-play">
-    <div className="placement-toolbar"><span>Tu punto de partida · {EXERCISE_IDS.indexOf(id) + 1} de 8</span>
-      <button className="paper-nav-button" onClick={() => { soundService.stopSpeaking(); setPaused(true); }}><Pause size={18} />Pausar</button></div>
     {paused && <section className="placement-card"><HeaderIllustration scene="rest" className="placement-art" /><div><h1>Hacemos una pausa</h1><p>Descansa lo que necesites. Seguiremos por donde lo dejaste.</p><button autoFocus className="touch-btn touch-btn-primary" onClick={() => setPaused(false)}>Retomar</button></div></section>}
-    <div hidden={paused}><GameSession paused={paused} key={`${id}-${phase}`} id={id} initialLevel={phase === 'practice' ? 1 : 3} mode={phase === 'practice' ? 'practice' : 'placement'} onBack={() => setPhase('intro')}>
-      <GameExercise id={id} profile={profile} onBack={() => setPhase('intro')} onSaveResult={save} />
+    <div hidden={paused}><GameSession paused={paused} key={`${id}-${level}-${phase}`} id={id} onSkip={() => save()} onSettings={() => { setPaused(true); onSettings(); }} autoStart initialLevel={level} mode="placement" onBack={() => setPhase('welcome')}>
+      <GameExercise id={id} profile={profile} onBack={() => setPhase('welcome')} onSaveResult={save} />
     </GameSession></div>
   </div>;
+  if (phase === 'feedback') return <main className="placement-screen"><p role="status">Preparando el siguiente juego…</p></main>;
   const message = complete ? 'Ya tenemos un punto de partida para cada juego. Los niveles describen esta práctica, no tu capacidad general. Puedes elegir otro nivel antes de jugar.'
-    : awaitingTrial ? 'Preparando el siguiente paso…'
-    : phase === 'feedback' ? feedbackTrial?.skipped ? 'Este juego empezará en nivel 1, sin una prueba medida. Podrás cambiarlo antes de jugar.' : id === 'motor-tracking' ? 'Este juego empieza en nivel 1. Puedes elegir otro antes de jugar; su nivel se ajusta manualmente.' : `Empezaremos este juego en nivel ${placementLevel(feedbackTrial!, id)}. Se irá ajustando con tus partidas.`
-    : phase === 'ready' ? 'Ya conoces el juego. Ahora haremos una prueba corta para elegir por dónde empezar. Puedes pedir ayuda siempre que lo necesites.'
-    : phase === 'intro' ? 'Primero probaremos un ejemplo sin puntuación. Después haremos una prueba corta, a tu ritmo.'
-    : 'Vamos a descubrir por dónde empezar. Te acompañaremos en ocho juegos cortos. No hay nota. Puedes descansar cuando quieras.';
+    : 'Pruebas breves, mezclando juegos. Probamos los niveles 1, 4, 7 y 10 y conservamos el último que superes.';
   return <main className="placement-screen">
-    <header className="placement-toolbar"><span>Tu punto de partida</span><FullscreenButton/><button className="paper-nav-button" onClick={onSettings}>Ajustes</button></header>
+    <header className="placement-toolbar"><span>Tu punto de partida</span>{onCancel && <button className="placement-text-action" onClick={onCancel}>Cancelar prueba</button>}<button className="paper-nav-button" onClick={onSettings}>Ajustes</button><FullscreenButton/></header>
     <section className="placement-card" aria-labelledby="placement-title">
       <HeaderIllustration scene={complete ? 'home' : id} className="placement-art" />
       <div className="placement-content">
-        <p className="soft-label">{count} de 8 juegos preparados</p>
+        <div className="placement-progress">
+        <div className="placement-progress-heading">
+          <p className="soft-label">{count} de 8 juegos preparados</p>
+          <button className="paper-nav-button" onClick={() => soundService.speak(message)}><Volume2 size={20} />Escuchar</button>
+        </div>
         <progress max={8} value={count} aria-label="Juegos preparados" />
-        <h1 ref={heading} tabIndex={-1} id="placement-title">{complete ? 'A tu ritmo, desde aquí' : phase === 'welcome' ? 'Busquemos tu punto de partida' : phase === 'feedback' ? 'Un paso más' : exercise.title}</h1>
+        </div>
+        <div className="placement-copy">
+        <h1 ref={heading} tabIndex={-1} id="placement-title">{complete ? 'A tu ritmo, desde aquí' : 'Busquemos tu punto de partida'}</h1>
         <p aria-live="polite">{message}</p>
-        <button className="paper-nav-button" onClick={() => soundService.speak(message)}><Volume2 size={20} />Escuchar</button>
+        </div>
         {complete ? <>
           <ul className="placement-levels">{EXERCISE_IDS.map(key => <li key={key}><span>{getExerciseById(key)!.title}{trials[key]?.skipped ? ' · sin prueba' : ''}</span><strong>Nivel {profile.gameLevels![key]!.level}</strong></li>)}</ul>
-          <button className="touch-btn touch-btn-primary" onClick={onDone}>Ir a mis juegos</button>
+          <button className="touch-btn touch-btn-primary" onClick={onDone}>{doneLabel}</button>
         </> : <div className="placement-actions">
-          <button className="touch-btn touch-btn-primary" disabled={awaitingTrial} onClick={() => {
-            if (phase === 'welcome' || phase === 'feedback') next();
-            else setPhase(phase === 'ready' ? 'trial' : 'practice');
-          }}>{awaitingTrial ? 'Un momento…' : phase === 'intro' ? 'Probar un ejemplo' : phase === 'ready' ? 'Empezar la prueba' : 'Continuar'}</button>
-          {(phase === 'intro' || phase === 'ready') && <button className="paper-nav-button" onClick={() => save()}>Esta prueba no me resulta accesible: empezar en nivel 1</button>}
-          {phase !== 'welcome' && phase !== 'feedback' && <button className="paper-nav-button" onClick={() => setPhase('welcome')}>Volver</button>}
+          <button className="touch-btn touch-btn-primary" onClick={() => { void enterFullscreen(true); next(); }}>Empezar</button>
         </div>}
       </div>
     </section>
-    <footer><button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button></footer>
   </main>;
 }

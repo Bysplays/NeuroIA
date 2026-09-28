@@ -1,9 +1,10 @@
-import { adaptDifficulty, applyPlacement, type PlacementTrial } from './difficulty.ts';
+import { adaptDifficulty, applyPlacement, hasPlacement, EXERCISE_IDS, type PlacementTrial } from './difficulty.ts';
 import type { ExerciseId } from '../types/index.ts';
 import type { AccessibilitySettings, ExerciseResult, UserProfile } from '../types/index.ts';
 
 export interface ProgressData { profile: UserProfile; history: ExerciseResult[] }
 export type ProgressOperation =
+  | { id: string; kind: 'placement'; trials: Record<ExerciseId, PlacementTrial> }
   | { id: string; kind: 'placement'; exerciseId: ExerciseId; trial: PlacementTrial }
   | { id: string; kind: 'result'; result: ExerciseResult }
   | { id: string; kind: 'settings'; settings: Partial<AccessibilitySettings>; name?: string };
@@ -13,7 +14,16 @@ export function applyProgressOperation(data: ProgressData, operation: ProgressOp
   const next = structuredClone(data);
   const profile = next.profile;
   if (operation.kind === 'placement') {
-    applyPlacement(profile, operation.exerciseId, operation.trial);
+    if ('trials' in operation) {
+      if (Object.keys(operation.trials).length !== EXERCISE_IDS.length || EXERCISE_IDS.some(id => !operation.trials[id])) throw new Error('incomplete-reassessment');
+      if (!hasPlacement(profile)) throw new Error('missing-initial-placement');
+      const assessment = structuredClone(profile);
+      delete assessment.placement;
+      delete assessment.gameLevels;
+      for (const id of EXERCISE_IDS) applyPlacement(assessment, id, operation.trials[id]);
+      // Preserve the original onboarding record; a retake recalibrates base levels only.
+      profile.gameLevels = assessment.gameLevels;
+    } else applyPlacement(profile, operation.exerciseId, operation.trial);
     return next;
   }
   if (operation.kind === 'settings') {

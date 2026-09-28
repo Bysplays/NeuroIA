@@ -15,14 +15,14 @@ import { ActivityStatistics } from './ActivityStatistics';
 import { AppLoading } from './AppLoading';
 
 function PersonActivity({ uid, seat, onBack }: { uid: string; seat: ProfessionalSeat; onBack: () => void }) {
-  const [activity, setActivity] = useState<{ name: string; history: ExerciseResult[] } | null>(null);
+  const [activity, setActivity] = useState<{ name: string; history: ExerciseResult[]; levels?: UserProfile['gameLevels'] } | null>(null);
   const [error, setError] = useState(false);
   useEffect(() => firestoreProfessional(uid, getFirestore(auth.app)).subscribeActivity(seat.occupantUid!, setActivity, () => {
     setActivity(null); setError(true);
   }), [uid, seat.occupantUid]);
   if (error) return <section className="cloud-entry"><h1>No hemos podido consultar esta actividad</h1><p role="alert">Comprueba la conexión y que la invitación siga activa.</p><button className="stats-quiet-button" onClick={onBack}>Volver al panel</button></section>;
   if (!activity) return <AppLoading />;
-  return <ActivityStatistics uid={seat.occupantUid!} history={activity.history} heading={`Actividad de ${activity.name || seat.patientName || 'la persona invitada'}`} backLabel="Volver al panel" onBack={onBack} />;
+  return <ActivityStatistics uid={seat.occupantUid!} history={activity.history} levels={activity.levels} heading="Estadísticas" subtitle={activity.name || seat.patientName || 'Persona invitada'} backLabel="Volver al panel" onBack={onBack} />;
 }
 
 export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSettings, onUpdateName }: {
@@ -123,7 +123,7 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
   return <div className="professional-workspace">
     <header className="main-header">
       <button className="header-left" onClick={returnToPanel} aria-label="NeuroIA, volver al panel profesional"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="32" height="40"/><span className="header-title">Neuro<span className="brand-light">IA</span></span></button>
-      <div className="professional-account-actions"><FullscreenButton/><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button></div>
+      <div className="professional-account-actions"><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button><FullscreenButton/></div>
     </header>
     {currentSeat ? personView === 'sessions' ? <ProfessionalSessions key={currentSeat.id + currentSeat.occupantUid} link={{ professionalId: uid, seatId: currentSeat.id, patientId: currentSeat.occupantUid! }} name={currentSeat.patientName || 'la persona invitada'} onBack={returnToPanel}/> : <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main ref={panel} className="professional-panel tablet-screen">
       <div className="professional-heading"><h1>Espacio profesional</h1>

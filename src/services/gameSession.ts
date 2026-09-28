@@ -4,6 +4,7 @@ import type { createGameClock } from './gameClock';
 
 export const SessionContext = createContext<{
   config: GameConfig;
+  assistanceTarget?: HTMLDivElement | null;
   lockedLevel?: boolean;
   nextReady?: boolean;
   clock: ReturnType<typeof createGameClock>;

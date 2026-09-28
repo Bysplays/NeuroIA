@@ -32,9 +32,15 @@ test('retired results keep their historical names, filters, colors and original 
   const [display] = mergeActivity([result]);
   assert.equal(activityExerciseTitle(display.exerciseId), 'Secuencias de la Vida Diaria');
   assert.ok(ACTIVITY_EXERCISES.find(exercise => exercise.id === display.exerciseId)?.retired);
-  assert.deepEqual(activityExerciseStyle(display.exerciseId), { color: '#b34245', dashed: true });
-  assert.deepEqual(activityExerciseStyle('categorization'), { color: '#3570ae', dashed: false });
-  assert.equal(activityExerciseStyle('motor-target').color, '#88752a');
+  assert.deepEqual(activityExerciseStyle(display.exerciseId), { color: '#bf302e' });
+  assert.deepEqual(activityExerciseStyle('categorization'), { color: '#2876c7' });
+  assert.equal(activityExerciseStyle('motor-target').color, '#82720d');
   assert.equal(result.exerciseId, 'daily-seq');
   assert.equal(display.score, 450);
+});
+
+test('every historical exercise has a distinct solid series color', () => {
+  const styles = ACTIVITY_EXERCISES.map(item => activityExerciseStyle(item.id));
+  assert.equal(new Set(styles.map(style => style.color)).size, styles.length);
+  assert.ok(styles.every(style => !('dashed' in style)));
 });

@@ -27,9 +27,9 @@ function BadgeArt({ index, unlocked }: { index: number; unlocked: boolean }) {
   </>;
 }
 
-export function AchievementShowcase({ profile, onBack }: { profile: UserProfile; onBack: () => void }) {
+export function AchievementShowcase({ profile, onBack, embedded = false }: { embedded?: boolean; profile: UserProfile; onBack: () => void }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
-  useEffect(() => { headingRef.current?.focus({ preventScroll: true }); }, []);
+  useEffect(() => { if (!embedded) headingRef.current?.focus({ preventScroll: true }); }, [embedded]);
   const achievements = getAchievements(profile);
   const panel = useViewportPanel<HTMLElement>();
   const [page, setPage] = useState(0);
@@ -40,8 +40,8 @@ export function AchievementShowcase({ profile, onBack }: { profile: UserProfile;
   const progressText = (achievement: Achievement) => `${achievement.current} de ${achievement.target} ${achievement.unit}`;
 
   return (
-    <section ref={panel} className="achievement-showcase achievement-page tablet-screen" id="achievements" aria-labelledby="achievements-title" tabIndex={-1}>
-      <button className="text-link achievement-back" onClick={onBack}><ArrowLeft size={18} /> Volver al inicio</button>
+    <section ref={panel} className={`achievement-showcase achievement-page tablet-screen${embedded ? ' achievements-embedded' : ''}`} id="achievements" aria-labelledby="achievements-title" tabIndex={-1}>
+      {!embedded && <button className="text-link achievement-back" onClick={onBack}><ArrowLeft size={18} /> Volver al inicio</button>}
       <div className="achievement-heading">
         <div className="achievement-heading-copy"><span className="achievement-overline">Pequeños pasos, grandes recuerdos</span><h1 id="achievements-title" tabIndex={-1} ref={headingRef}>Tu colección de logros</h1><p>{earned ? 'Cada chapa guarda un poquito de tu recorrido.' : 'Tu primera chapa te espera al completar un ejercicio.'}</p></div>
         <HeaderIllustration scene="achievements" className="menu-header-art" />

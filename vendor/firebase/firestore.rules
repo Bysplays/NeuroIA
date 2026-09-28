@@ -27,14 +27,16 @@ service cloud.firestore {
     function validGameLevel(value) {
       let level = value.level;
       let evidence = value.evidence;
-      return value is map && value.keys().hasOnly(['level', 'evidence'])
+      return value is map && value.keys().hasOnly(['level', 'evidence', 'qualifyingRuns'])
+        && (!('qualifyingRuns' in value) || (value.qualifyingRuns is int && value.qualifyingRuns >= 0 && value.qualifyingRuns <= 1))
         && level is int && level >= 1 && level <= 10
         && evidence is list && evidence.size() < 3
         && (evidence.size() < 1 || (evidence[0] is int && evidence[0] >= 0 && evidence[0] <= 100))
         && (evidence.size() < 2 || (evidence[1] is int && evidence[1] >= 0 && evidence[1] <= 100));
     }
     function validTrial(value) {
-      return value is map && value.keys().hasOnly(['accuracy', 'questions', 'hints', 'skipped'])
+      return value is map && value.keys().hasOnly(['accuracy', 'questions', 'hints', 'skipped', 'assessedLevel'])
+        && (!('assessedLevel' in value) || value.assessedLevel in [1, 4, 5, 7, 10])
         && value.accuracy is number && value.accuracy >= 0 && value.accuracy <= 100
         && value.questions is int && value.questions >= 0 && value.questions <= 1000
         && value.hints is int && value.hints >= 0 && value.hints <= 1000 && value.skipped is bool;

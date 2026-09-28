@@ -37,6 +37,18 @@ function result(session, step) {
 async function save(value, db = playerDb) {
   return firestoreProgress(link.patientId, db).commit({ id: `result:${value.id}`, kind: 'result', result: value });
 }
+test('an empty participant inbox resolves without a cache error', async () => {
+  const errors = [];
+  let unsubscribe;
+  try {
+    const sessions = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Inbox did not reach the server')), 10000);
+      unsubscribe = player.watch(values => { clearTimeout(timeout); resolve(values); }, () => errors.push('query-error'), true);
+    });
+    assert.deepEqual(sessions, []);
+    assert.deepEqual(errors, []);
+  } finally { unsubscribe?.(); }
+});
 test('publish, list, start and durable result reconciliation across devices are idempotent', async () => {
   await owner.publish('proposal', draft); await owner.publish('proposal', draft);
   assert.equal((await getDocs(collection(playerDb, path))).size, 1);

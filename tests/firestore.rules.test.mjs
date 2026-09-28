@@ -297,3 +297,78 @@ test('placement is durable, atomic with levels, isolated and does not create exe
   assert.equal((await backend.load()).profile.gameLevels['visual-scanning'].level, 5);
 
 });
+
+
+test('timed promotion keeps independent durable runs and rejects invalid counters', async () => {
+  const uid = 'timed-levels';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  await backend.initialize(fresh());
+  for (const exerciseId of ['visual-scanning', 'language-naming']) {
+    await backend.commit({ id:`placement:1:${exerciseId}`, kind:'placement', exerciseId,
+      trial:{ accuracy:90, questions:3, hints:0, skipped:false } });
+  }
+  const strong = (id, exerciseId) => ({ ...op(id), result:{ ...op(id).result,
+    exerciseId, domain:exerciseId === 'language-naming' ? 'language' : 'attention',
+    level:4, configVersion:1, durationSeconds:120, accuracy:95, correctAnswers:19, totalQuestions:20 } });
+  await assertSucceeds(backend.commit(strong('scan-one', 'visual-scanning')));
+  await assertSucceeds(backend.commit(strong('naming-one', 'language-naming')));
+  let saved = await backend.load();
+  assert.equal(saved.profile.gameLevels['visual-scanning'].qualifyingRuns, 1);
+  assert.equal(saved.profile.gameLevels['language-naming'].qualifyingRuns, 1);
+  const second = strong('scan-two', 'visual-scanning');
+  await assertSucceeds(backend.commit(second));
+  await assertSucceeds(backend.commit(second));
+  saved = await backend.load();
+  assert.equal(saved.profile.gameLevels['visual-scanning'].level, 5);
+  assert.equal(saved.profile.gameLevels['visual-scanning'].qualifyingRuns, 0);
+  assert.equal(saved.profile.gameLevels['language-naming'].qualifyingRuns, 1);
+  for (const count of [-1, 2, 0.5, '1']) {
+    const invalid = structuredClone(saved);
+    invalid.profile.gameLevels['language-naming'].qualifyingRuns = count;
+    await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), { schemaVersion:1, data:invalid, updatedAt:serverTimestamp() }));
+  }
+});
+
+test('reassessment uses existing placement rules and receipts without resetting saved activity', async () => {
+  const uid = 'reassessment-owner';
+  const backend = firestoreProgress(uid, env.authenticatedContext(uid).firestore());
+  await backend.initialize(fresh());
+  await backend.commit(op('before-reassessment'));
+  const ids = ['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
+  for (const exerciseId of ids) await backend.commit({ id:`initial:${exerciseId}`, kind:'placement', exerciseId, trial:{ accuracy:100, questions:3, hints:0, skipped:false } });
+  const trials = Object.fromEntries(ids.map((id, i) => [id, { accuracy:65 + i, questions:3 + i, hints:0, skipped:false }]));
+  const retake = { id:'retake:one', kind:'placement', trials };
+  await assertSucceeds(backend.commit(retake));
+  let saved = await backend.load();
+  assert.equal(saved.profile.gameLevels['visual-scanning'].level, 3);
+  assert.equal(saved.profile.totalSessions, 1);
+  assert.equal(saved.history[0].id, 'before-reassessment');
+  await backend.commit({ ...op('after-retake'), result:{ ...op('after-retake').result, level:3, configVersion:1, durationSeconds:30 } });
+  await backend.commit(retake);
+  saved = await backend.load();
+  assert.equal(saved.profile.gameLevels['visual-scanning'].level, 4);
+  assert.equal(saved.profile.totalSessions, 2);
+});
+
+test('1/4/7/10 placement saves with existing records, rejects invalid levels and assigns tracking', async () => {
+  const uid='ladder-placement';
+  const db=env.authenticatedContext(uid).firestore();
+  const backend=firestoreProgress(uid,db);
+  await backend.initialize(fresh());
+  const ids=['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
+  for (const [i,exerciseId] of ids.entries()) {
+    await assertSucceeds(backend.commit({id:`ladder:${exerciseId}`,kind:'placement',exerciseId,
+      trial:{accuracy:100,questions:3,hints:0,skipped:false,assessedLevel:[1,4,7,10][i%4]}}));
+  }
+  const saved=await backend.load();
+  assert.equal(saved.profile.placement.completed,true);
+  assert.equal(saved.profile.gameLevels['motor-tracking'].level,10);
+  assert.equal(saved.profile.totalSessions,0);
+  assert.deepEqual(saved.history,[]);
+  for(const assessedLevel of [0,2,6,11,'5']) {
+    const invalid=structuredClone(saved);
+    invalid.profile.placement.trials['word-completion'].assessedLevel=assessedLevel;
+    await assertFails(setDoc(doc(db,`users/${uid}/progress/main`),{schemaVersion:1,data:invalid,updatedAt:serverTimestamp()}));
+  }
+});

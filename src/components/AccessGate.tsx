@@ -1,3 +1,4 @@
+import { ConnectionRecovery } from './ConnectionRecovery';
 import { AccountAccessContext } from '../services/accountAccessContext';
 import { AppLoading } from './AppLoading';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
@@ -77,12 +78,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
   // Unknown entitlement is not a denied entitlement: never show purchase options yet.
   if (!access) {
     if (!error) return <AppLoading />;
-    return <main className="cloud-entry">
-      <h1>No hemos podido abrir tu espacio</h1>
-      <p role="alert">Comprueba la conexión y vuelve a intentarlo.</p>
-      <button className="touch-btn touch-btn-primary" onClick={() => { setError(''); void refresh(); }}>Reintentar</button>
-      <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
-    </main>;
+    return <ConnectionRecovery onRetry={() => { setError(''); void refresh(); }} onSignOut={onSignOut}/>;
   }
   if (access.active) return <AccountAccessContext.Provider value={access}>{children}</AccountAccessContext.Provider>;
   return <main className="access-entry">

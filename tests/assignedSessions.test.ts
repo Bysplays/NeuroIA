@@ -18,9 +18,10 @@ test('deterministic per-step results only advance matching session, level and ve
   assert.equal(canAdvanceSession({ ...session, status: 'cancelled' }, result), false);
   assert.throws(() => assignmentResult(session, 0, { ...base, level: 4 }));
 });
-test('professional levels do not change personal recommendations', () => {
-  const profile = getInitialProfile(); profile.gameLevels = { 'memory-pairs': { level: 3, evidence: [100, 100] } };
-  const before = structuredClone(profile.gameLevels);
-  adaptDifficulty(profile, assignmentResult(session, 0, base));
-  assert.deepEqual(profile.gameLevels, before);
+test('qualifying assigned results update the personal base without changing prescribed levels', () => {
+  const profile = getInitialProfile(); profile.gameLevels = { 'memory-pairs': { level: 3, evidence: [] } };
+  const before = structuredClone(session);
+  adaptDifficulty(profile, assignmentResult(session, 0, { ...base, durationSeconds:59 }));
+  assert.equal(profile.gameLevels['memory-pairs'].level, 4);
+  assert.deepEqual(session, before);
 });

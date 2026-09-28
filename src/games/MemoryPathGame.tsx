@@ -43,14 +43,14 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 }) => {
   const { clock, config } = useGameSession();
   const activeTiles = ALL_TILES;
-  const maxRounds = config.mode === 'practice' ? 1 : 3;
+  const maxRounds = config.mode === 'normal' ? 3 : 1;
 
   const [round, setRound] = useState(1);
   const [sequence, setSequence] = useState<number[]>([]);
   const [playerInput, setPlayerInput] = useState<number[]>([]);
   const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const [activeTile, setActiveTile] = useState<number | null>(null);
-  const [statusMessage, setStatusMessage] = useState('Pulsa "Comenzar Secuencia" para observar');
+  const [statusMessage, setStatusMessage] = useState('');
   const [score, setScore] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
   const [hintsUsed, setHintsUsed] = useState(0);
@@ -204,6 +204,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     setRound(1);
     setScore(0);
     setSequence([]);
+    setStatusMessage('');
     setPlayerInput([]);
     setErrorsCount(0);
     setMistakesList([]);
@@ -228,33 +229,6 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       onNextPlanExercise={onNextPlanExercise}
     >
       <div className="memory-game-container">
-        <div className="memory-compact-control-bar">
-          <div className="memory-status-badge">
-            <Eye size={24} />
-            <span>{statusMessage}</span>
-          </div>
-
-          <div className="memory-actions">
-            {sequence.length === 0 ? (
-              <button
-                className="touch-btn touch-btn-primary touch-btn-large gentle-bounce"
-                onClick={() => startCurrentRound()}
-              >
-                <Play size={24} />
-                <span>Comenzar Secuencia</span>
-              </button>
-            ) : (
-              <button
-                className="touch-btn touch-btn-secondary touch-btn-large"
-                onClick={handleRepeatDemo}
-                disabled={isPlayingDemo}
-              >
-                <RotateCcw size={22} />
-                <span>Ver de Nuevo</span>
-              </button>
-            )}
-          </div>
-        </div>
 
         <div
           className="memory-tiles-grid"
@@ -281,6 +255,34 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
             );
           })}
         </div>
+        <div className="memory-sequence-controls">
+          <div className="memory-status-slot">
+            <div className="memory-status-badge memory-status-reserve" aria-hidden="true"><Eye size={24}/><span>Casi lo tienes. Puedes pulsar "Ver de nuevo" para recordar la secuencia.</span></div>
+            <div className="memory-status-badge" role="status">{statusMessage && <><Eye size={24}/><span>{statusMessage}</span></>}</div>
+          </div>
+
+          <div className="memory-actions">
+            {sequence.length === 0 ? (
+              <button
+                className="touch-btn touch-btn-primary touch-btn-large"
+                onClick={() => startCurrentRound()}
+              >
+                <Play size={24} />
+                <span>Comenzar secuencia</span>
+              </button>
+            ) : (
+              <button
+                className="touch-btn touch-btn-secondary touch-btn-large"
+                onClick={handleRepeatDemo}
+                disabled={isPlayingDemo}
+              >
+                <RotateCcw size={22} />
+                <span>Ver de nuevo</span>
+              </button>
+            )}
+          </div>
+        </div>
+
       </div>
     </ExerciseWrapper>
   );

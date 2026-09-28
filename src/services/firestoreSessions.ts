@@ -14,7 +14,11 @@ export function firestoreSessions(db: Firestore, link: SessionLink) {
     watch(next: (sessions: AssignedSession[]) => void, error: () => void, activeOnly = false) {
       const list = activeOnly ? query(sessions, where('status', 'in', ['assigned', 'in-progress']), limit(50)) : query(sessions, orderBy('createdAt', 'desc'), limit(50));
       return onSnapshot(list, { includeMetadataChanges: true }, snapshot => {
-        if (snapshot.metadata.fromCache) { error(); return; }
+        // The initial cache snapshot is not a failed server query (often empty on first entry).
+        if (snapshot.metadata.fromCache) {
+          if (typeof navigator !== 'undefined' && !navigator.onLine) error();
+          return;
+        }
         if (!snapshot.metadata.hasPendingWrites) next(snapshot.docs.map(read).sort((a, b) => b.createdAt - a.createdAt));
       }, error);
     },

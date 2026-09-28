@@ -2773,29 +2773,26 @@ body:has(.dashboard-area-selection-active),
 }
 
 .letter-option-btn {
-  width: clamp(76px, 9.5vw, 98px) !important;
-  height: clamp(76px, 9.5vw, 98px) !important;
-  min-width: clamp(76px, 9.5vw, 98px) !important;
-  min-height: clamp(76px, 9.5vw, 98px) !important;
-  max-width: clamp(76px, 9.5vw, 98px) !important;
-  max-height: clamp(76px, 9.5vw, 98px) !important;
-  aspect-ratio: 1 / 1 !important;
-  padding: 0 !important;
-  flex: 0 0 auto !important;
-  box-sizing: border-box !important;
+  width: clamp(76px, 9.5vw, 98px);
+  height: clamp(76px, 9.5vw, 98px);
+  min-height: clamp(76px, 9.5vw, 98px);
+  aspect-ratio: auto;
+  padding: 0;
+  flex: 0 0 auto;
+  box-sizing: border-box;
   border-radius: var(--radius-xl);
-  font-size: clamp(2.2rem, 3.4vw, 2.8rem) !important;
+  font-size: clamp(2.2rem, 3.4vw, 2.8rem);
   font-weight: 800;
   background: linear-gradient(135deg, var(--color-surface), var(--color-surface-hover));
   border: 3px solid var(--color-border);
   color: var(--color-text-main);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
   cursor: grab;
   user-select: none;
   touch-action: none;
@@ -2821,24 +2818,6 @@ body:has(.dashboard-area-selection-active),
   transform: scale(0.96);
 }
 
-.letter-check-badge {
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.letter-check-icon {
-  color: #16a34a !important;
-  stroke: #16a34a !important;
-  filter: drop-shadow(0 1px 3px rgba(22, 163, 74, 0.35));
-}
-
 .btn-letter-correct {
   background: #f0fdf4 !important;
   border-color: #16a34a !important;
@@ -2848,7 +2827,6 @@ body:has(.dashboard-area-selection-active),
 
 .btn-letter-correct .btn-letter-char {
   color: #15803d !important;
-  transform: translateY(8px);
 }
 
 .btn-letter-incorrect {

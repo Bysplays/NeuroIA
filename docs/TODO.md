@@ -19,9 +19,9 @@ voice provider or new illustration set has been selected by this planning work.
 | 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Release frontend and verify real email delivery; magic links deferred because Spark allows five sign-in emails/day |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
-| 8 / ART | More realistic illustrated/pictogram game objects | Existing paper atlases | Approved style sample and verified one-to-one stimulus mappings |
-| 9 / LEVELS | Difficulty 1–10 | Versioned 1–10 configuration for all games, saved level and three-session adaptation | User calibration and physical-device checks; tracking stays manual |
-| 10 / PLACEMENT | Guided initial level assessment | Resumable eight-game placement before ordinary play, separate from access onboarding | Physical-device checks, explicit reassessment |
+| 8 / ART | More realistic illustrated/pictogram game objects | Approved towel/table style integrated across 80 objects, standalone stimuli and motor tokens | Physical-tablet recognition feedback |
+| 9 / LEVELS | Difficulty 1–10 | Versioned 1–10 configuration for all games, saved level and timed same-game promotion | User calibration and physical-device checks |
+| 10 / PLACEMENT | Guided initial level assessment | Eight shuffled games with 1/4/7/10 placement ladders, separate from access onboarding | Physical-device checks |
 | 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
 
 ### Current implementation sequence
@@ -65,7 +65,8 @@ Seats, difficulty/placement and professional session proposals are also implemen
   ordered game IDs/levels, progress/resume, cancellation and completion receipts.
 - [x] Test cross-account isolation, seat expiry, departure, replaced occupants,
   duplicate games, concurrent completion and durable result recovery in the emulator.
-- [ ] Publish the session rules and frontend; verify a real professional/participant
+- [x] Publish the session Firestore rules and verify the active release matches the tested rules.
+- [ ] Publish the session frontend and verify a real professional/participant
   pair on physical tablets. No production fixture activity is used for verification.
 - [ ] Add older professional-session pagination beyond the latest 50; participant
   queries filter pending sessions before applying their 50-item limit.
@@ -85,21 +86,29 @@ Seats, difficulty/placement and professional session proposals are also implemen
   permits five sign-in emails/day. See `docs/AUTHENTICATION.md`.
 - [x] Integrate the supplied logo reference, preserve its proportions, and verify
   wordmark, loading, header, card backs, favicon and PWA icons on both themes.
-- [ ] Approve realistic illustrated/pictogram samples, inventory all stimuli and
-  replace atlases without changing answer keys or recognition identities.
+- [x] Approve the towel/table illustrated style, inventory active stimuli and
+  replace their atlas mappings while preserving answer keys. Fix shirt/lamp/pliers
+  identities and separate soup from the pot; document generation and crop review in DESIGN.md.
+- [ ] Gather recognition feedback for the new illustrated stimuli on physical tablets.
 
 ### Difficulty, placement and game retirement
 
 - [x] Define ten bounded configurations for each of the eight retained games.
 - [x] Add versioned placement/level state; existing `domainProgress.level = 1`
   is a default, not evidence that placement has been completed.
+- [x] Add 1/4/7/10 assessment stages in shuffled game order; preserve the last passed level after failure or omission.
+- [x] Restyle access/progress connection recovery with the shared login presentation.
 - [x] Build short guided trials with the existing companions, pause/help,
   accessible instructions and resumable progress. Respect hidden companions.
 - [x] Persist actual level/configuration and hint usage per result; adapt between
-  exercises using three-session windows and allow manual level selection.
+  exercises using timed same-game runs and allow manual level selection.
 - [ ] Validate level pacing and vocabulary ordering with users on physical tablets;
   review memory preview visibility in short landscape viewports.
-- [ ] Add explicit reassessment; calibrate moving-target adaptation separately.
+- [x] Add explicit reassessment from Mi cuenta; preserve saved activity and replace levels only after finishing and saving.
+- [x] Add a level-up celebration and the Nivel statistics tab (current bars, radar and recorded level timeline per game).
+- [ ] Calibrate pacing and tracking with users.
+- [x] Publish the `assessedLevel` trial field rule to `ceoaberto-neuroia` for 1/4/7/10 onboarding saves.
+- [x] Publish the `qualifyingRuns` rule extension to `ceoaberto-neuroia`; timed promotion can save its per-game run counters.
 - [x] Publish the placement/difficulty Firestore rules; the local frontend can save
   trials and levels. Frontend publication remains separate.
 - [x] Remove daily action sequencing from catalog, dispatch and daily plans;

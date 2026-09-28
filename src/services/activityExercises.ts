@@ -2,16 +2,16 @@ import { ALL_EXERCISES } from './exerciseCatalog.ts';
 import type { CognitiveDomain } from '../types/index.ts';
 
 // Stable historical series styles must not change when a game leaves the catalog.
-const series: Record<string, { color: string; dashed: boolean }> = {
-  'visual-scanning': { color: '#247f89', dashed: false },
-  'language-naming': { color: '#a85578', dashed: true },
-  'word-completion': { color: '#6656ac', dashed: false },
-  'memory-path': { color: '#ac661f', dashed: true },
-  'memory-pairs': { color: '#427639', dashed: false },
-  'daily-sequencing': { color: '#b34245', dashed: true },
-  categorization: { color: '#3570ae', dashed: false },
-  'motor-target': { color: '#88752a', dashed: true },
-  'motor-tracking': { color: '#8d558c', dashed: false },
+const series: Record<string, { color: string }> = {
+  'visual-scanning': { color: '#007f86' },
+  'language-naming': { color: '#d34887' },
+  'word-completion': { color: '#5946c2' },
+  'memory-path': { color: '#c56508' },
+  'memory-pairs': { color: '#327b35' },
+  'daily-sequencing': { color: '#bf302e' },
+  categorization: { color: '#2876c7' },
+  'motor-target': { color: '#82720d' },
+  'motor-tracking': { color: '#7c466d' },
 };
 
 export const ACTIVITY_EXERCISES: { id: string; domain: CognitiveDomain; title: string; retired?: boolean }[] = [
@@ -24,5 +24,5 @@ export function activityExerciseTitle(id: string) {
 }
 
 export function activityExerciseStyle(id: string) {
-  return series[id] ?? { color: '#247f89', dashed: false };
+  return series[id] ?? { color: '#007f86' };
 }

@@ -1,7 +1,9 @@
+import { selectPool, completionRound, GAME_OBJECT_POOL } from '../services/gameObjectPool';
+import type { GameConfig } from '../services/difficulty';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useRef } from 'react';
-import { Volume2, HelpCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -29,232 +31,11 @@ interface CompletionItem {
   distractorLetters: string[];
 }
 
-const COMPLETION_BANK: CompletionItem[] = [
-  {
-    id: 1,
-    emoji: '🏠',
-    word: 'CASA',
-    missingIndex: 2, // CA_A -> S
-    hint: 'Lugar donde vivimos. Suena /ss/...',
-    distractorLetters: ['L', 'M', 'R'],
-  },
-  {
-    id: 2,
-    emoji: '⏰',
-    word: 'RELOJ',
-    missingIndex: 3, // REL_J -> O
-    hint: 'Mide las horas. Es la vocal O...',
-    distractorLetters: ['A', 'E', 'U'],
-  },
-  {
-    id: 3,
-    emoji: '🍎',
-    word: 'MANZANA',
-    missingIndex: 5, // MANZA_A -> N
-    hint: 'Fruta dulce y crujiente. Falta la letra N...',
-    distractorLetters: ['M', 'P', 'T'],
-  },
-  {
-    id: 4,
-    emoji: '🔑',
-    word: 'LLAVE',
-    missingIndex: 3, // LLA_E -> V
-    hint: 'Sirve para abrir cerraduras. Falta la letra V...',
-    distractorLetters: ['B', 'D', 'N'],
-  },
-  {
-    id: 5,
-    emoji: '👟',
-    word: 'ZAPATO',
-    missingIndex: 4, // ZAPA_O -> T
-    hint: 'Protege el pie al caminar. Suena /t/...',
-    distractorLetters: ['D', 'C', 'P'],
-  },
-  {
-    id: 6,
-    emoji: '☕',
-    word: 'TAZA',
-    missingIndex: 2, // TA_A -> Z
-    hint: 'Recipiente con asa para café o té. Falta la Z...',
-    distractorLetters: ['S', 'C', 'R'],
-  },
-  {
-    id: 7,
-    emoji: '🥖',
-    word: 'PAN',
-    missingIndex: 1, // P_N -> A
-    hint: 'Alimento básico de harina. Es la vocal A...',
-    distractorLetters: ['E', 'O', 'I'],
-  },
-  {
-    id: 8,
-    emoji: '🛏️',
-    word: 'CAMA',
-    missingIndex: 2, // CA_A -> M
-    hint: 'Mueble para dormir. Falta la letra M...',
-    distractorLetters: ['P', 'T', 'B'],
-  },
-  {
-    id: 9,
-    emoji: '🚗',
-    word: 'COCHE',
-    missingIndex: 1, // C_CHE -> O
-    hint: 'Vehículo de cuatro ruedas. Es la vocal O...',
-    distractorLetters: ['A', 'U', 'I'],
-  },
-  {
-    id: 10,
-    emoji: '🥛',
-    word: 'VASO',
-    missingIndex: 0, // _ASO -> V
-    hint: 'Recipiente de cristal para beber agua. Falta la V...',
-    distractorLetters: ['B', 'P', 'C'],
-  },
-  {
-    id: 11,
-    emoji: '👓',
-    word: 'GAFAS',
-    missingIndex: 4, // GAFA_ -> S
-    hint: 'Lentes para ver y leer. Falta la letra S...',
-    distractorLetters: ['R', 'N', 'Z'],
-  },
-  {
-    id: 12,
-    emoji: '📖',
-    word: 'LIBRO',
-    missingIndex: 4, // LIBR_ -> O
-    hint: 'Contiene páginas para leer. Falta la vocal O...',
-    distractorLetters: ['A', 'E', 'U'],
-  },
-  {
-    id: 13,
-    emoji: '🪑',
-    word: 'SILLA',
-    missingIndex: 2, // SI_LA -> L
-    hint: 'Mueble para sentarse. Falta la letra L...',
-    distractorLetters: ['T', 'M', 'R'],
-  },
-  {
-    id: 14,
-    emoji: '🐶',
-    word: 'PERRO',
-    missingIndex: 3, // PE_RO -> R
-    hint: 'El mejor amigo fiel. Falta la letra R...',
-    distractorLetters: ['S', 'N', 'L'],
-  },
-  {
-    id: 15,
-    emoji: '🐱',
-    word: 'GATO',
-    missingIndex: 2, // GA_O -> T
-    hint: 'Mascota ágil que ronronea. Falta la letra T...',
-    distractorLetters: ['P', 'M', 'B'],
-  },
-  {
-    id: 16,
-    emoji: '🌻',
-    word: 'FLOR',
-    missingIndex: 2, // FL_R -> O
-    hint: 'Planta aromática y bonita. Es la vocal O...',
-    distractorLetters: ['A', 'E', 'I'],
-  },
-  {
-    id: 17,
-    emoji: '🪵',
-    word: 'MESA',
-    missingIndex: 2, // ME_A -> S
-    hint: 'Mueble donde comemos. Suena /ss/...',
-    distractorLetters: ['R', 'L', 'N'],
-  },
-  {
-    id: 18,
-    emoji: '💧',
-    word: 'AGUA',
-    missingIndex: 2, // AG_A -> U
-    hint: 'Líquido para beber y saciar la sed. Es la vocal U...',
-    distractorLetters: ['O', 'E', 'I'],
-  },
-  {
-    id: 19,
-    emoji: '🥾',
-    word: 'BOTA',
-    missingIndex: 2, // BO_A -> T
-    hint: 'Calzado que cubre el tobillo. Falta la letra T...',
-    distractorLetters: ['C', 'P', 'R'],
-  },
-  {
-    id: 20,
-    emoji: '🍲',
-    word: 'SOPA',
-    missingIndex: 2, // SO_A -> P
-    hint: 'Plato caliente que tomamos con cuchara. Falta la P...',
-    distractorLetters: ['T', 'B', 'M'],
-  },
-  {
-    id: 21,
-    emoji: '👕',
-    word: 'ROPA',
-    missingIndex: 2, // RO_A -> P
-    hint: 'Prendas con las que nos vestimos. Falta la P...',
-    distractorLetters: ['T', 'S', 'B'],
-  },
-  {
-    id: 22,
-    emoji: '🌙',
-    word: 'LUNA',
-    missingIndex: 2, // LU_A -> N
-    hint: 'Brilla en el cielo por la noche. Falta la N...',
-    distractorLetters: ['M', 'R', 'P'],
-  },
-  {
-    id: 23,
-    emoji: '✋',
-    word: 'MANO',
-    missingIndex: 2, // MA_O -> N
-    hint: 'Tiene cinco dedos. Falta la letra N...',
-    distractorLetters: ['R', 'L', 'T'],
-  },
-  {
-    id: 24,
-    emoji: '👄',
-    word: 'BOCA',
-    missingIndex: 2, // BO_A -> C
-    hint: 'La usamos para hablar y comer. Falta la C...',
-    distractorLetters: ['T', 'S', 'P'],
-  },
-  {
-    id: 25,
-    emoji: '💇',
-    word: 'PELO',
-    missingIndex: 2, // PE_O -> L
-    hint: 'Crece en la cabeza y lo peinamos. Falta la L...',
-    distractorLetters: ['R', 'S', 'N'],
-  },
-  {
-    id: 26,
-    emoji: '☀️',
-    word: 'SOL',
-    missingIndex: 1, // S_L -> O
-    hint: 'Nos da calor y luz de día. Es la vocal O...',
-    distractorLetters: ['A', 'E', 'U'],
-  },
-  {
-    id: 27,
-    emoji: '👁️',
-    word: 'OJO',
-    missingIndex: 1, // O_O -> J
-    hint: 'Órgano con el que vemos. Falta la letra J...',
-    distractorLetters: ['G', 'C', 'S'],
-  },
-  {
-    id: 28,
-    emoji: '🚆',
-    word: 'TREN',
-    missingIndex: 2, // TR_N -> E
-    hint: 'Medio de transporte que va por vías. Es la vocal E...',
-    distractorLetters: ['A', 'O', 'I'],
-  },
-];
+function createWords(config: GameConfig): CompletionItem[] {
+  return selectPool(config, GAME_OBJECT_POOL.filter(item => !item.name.includes(' ') && item.name.length <= 13)).map((item, id) => ({
+    id, emoji: item.symbol, ...completionRound(item, config), hint: `La palabra es ${item.name}.`,
+  }));
+}
 
 export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   onBack,
@@ -263,12 +44,10 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   onNextPlanExercise,
 }) => {
   const { clock, config } = useGameSession();
-  const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => [...COMPLETION_BANK.slice(0, config.vocabularySize)].sort(() => Math.random() - 0.5).slice(0, config.rounds));
+  const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => createWords(config));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [hintsUsed, setHintsUsed] = useState(0);
-  const [showHint, setShowHint] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
@@ -280,13 +59,11 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
 
   const initGame = () => {
     setStartTime(clock.now());
-    setHintsUsed(0);
-    const shuffled = [...COMPLETION_BANK.slice(0, config.vocabularySize)].sort(() => Math.random() - 0.5).slice(0, config.rounds);
+    const shuffled = createWords(config);
     setSessionItems(shuffled);
     setCurrentIdx(0);
     setSelectedLetter(null);
     setIsCorrect(null);
-    setShowHint(false);
     setIsDragOver(false);
     draggedLetterRef.current = null;
     setCorrectCount(0);
@@ -360,7 +137,6 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
       setCurrentIdx(prev => prev + 1);
       setSelectedLetter(null);
       setIsCorrect(null);
-      setShowHint(false);
       setIsDragOver(false);
       draggedLetterRef.current = null;
     } else {
@@ -373,7 +149,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
         id: crypto.randomUUID(),
       level: config.level,
       configVersion: config.version,
-      hintsUsed,
+      hintsUsed: 0,
       practice: config.mode !== 'normal',
         exerciseId: 'word-completion',
         domain: 'language',
@@ -469,39 +245,6 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
             })}
           </div>
 
-          {/* 3. Controles de audio y pista */}
-          <div className="completion-audio-helpers">
-            <button
-              className="touch-btn touch-btn-secondary"
-              onClick={() => { setHintsUsed(value => value + 1); soundService.speak(currentItem.word); }}
-              title="Escuchar la palabra completa"
-            >
-              <Volume2 size={22} />
-              <span>Escuchar Palabra</span>
-            </button>
-
-            <button
-              className="touch-btn touch-btn-secondary"
-              onClick={() => {
-                soundService.playGentlePrompt();
-                setHintsUsed(value => value + 1);
-                setShowHint(true);
-                soundService.speak(currentItem.hint);
-              }}
-              title="Pedir una pista"
-            >
-              <HelpCircle size={22} />
-              <span>Pista de Ayuda</span>
-            </button>
-          </div>
-
-          {showHint && (
-            <div className="hint-banner animate-fade-in">
-              <strong>Pista: </strong>
-              <span>{currentItem.hint}</span>
-            </div>
-          )}
-
           <div className="letter-options-grid">
             {letterOptions.map((letter, idx) => {
               const isSelected = selectedLetter === letter;
@@ -522,15 +265,11 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
                   draggable={selectedLetter === null}
                   onDragStart={e => handleDragStartLetter(e, letter)}
                   onPointerDown={() => handlePointerDownLetter(letter)}
+                  aria-label={selectedLetter === null ? letter : `${letter}${letter === targetLetter ? ' · Respuesta correcta' : isSelected ? ' · Respuesta incorrecta' : ''}`}
                   onClick={() => handleSelectLetter(letter)}
                   disabled={selectedLetter !== null}
                   title="Toca o arrastra esta letra a la casilla"
                 >
-                  {selectedLetter !== null && letter === targetLetter && (
-                    <div className="letter-check-badge animate-fade-in" aria-hidden="true">
-                      <CheckCircle2 size={24} className="letter-check-icon" strokeWidth={2.8} />
-                    </div>
-                  )}
                   <span className="btn-letter-char">{letter}</span>
                 </button>
               );

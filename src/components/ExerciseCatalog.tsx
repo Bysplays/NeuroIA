@@ -45,7 +45,6 @@ export function ExerciseCatalog({ profile, onBack, onSelectExercise, embedded = 
         <button aria-pressed={filter === 'all'} onClick={() => chooseFilter('all')}>Todos <span>{ALL_EXERCISES.length}</span></button>
         {areas.map(area => <button key={area.id} aria-pressed={filter === area.id} onClick={() => chooseFilter(area.id)}><span className={`library-dot marker-${area.id}`} />{area.label}</button>)}
       </div>
-      <p className="library-result-count" role="status">{exercises.length} {exercises.length === 1 ? 'juego para explorar' : 'juegos para explorar'}</p>
       <div className="library-grid">
         {exercises.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(exercise => (
           <button key={exercise.id} className={`library-game practice-${exercise.domain}`} onClick={() => { soundService.playTap(); onSelectExercise(exercise); }}>

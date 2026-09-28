@@ -37,7 +37,7 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | Identity | Google and email/password entry, verification/recovery and same-UID password setup | Provider activated; frontend publication and live delivery remain unverified |
 | Progress | Firestore authority, transactional receipts, durable per-account outbox; versioned placement | Physical-device/release verification |
 | Games | Eight catalog entries; daily actions retired with history preserved | Parameterize eight games |
-| Levels | Eight games consume versioned levels 1–10; guided initial trials and bounded adaptation | User calibration, tracking adaptation and explicit reassessment |
+| Levels | Eight games consume versioned levels 1–10; guided initial trials and bounded adaptation | User calibration on physical devices |
 | Professionals | Free workspace, paid-seat links, read-only charts/history | Versioned session proposals implemented; private note-writing remains pending |
 | Billing | Worker Checkout, signed webhooks, reconciliation, portal, seat redemption/rotation | Production deployment and sandbox lifecycle not fully verified |
 | Access | Server-owned entitlement records; browser refresh on focus/every 30 seconds | Worker-confirmed time and expiry; 60-second lease, fail-closed refresh; Worker deployed, real-account lifecycle pending |
@@ -181,7 +181,7 @@ Publishing freezes the title, message, ordered games, numeric levels and configu
 version. Changing a published proposal requires cancellation and a new proposal;
 there is no mutable revision that can replace a running game. Proposals contain
 1–8 games, including duplicates, an 80-character title and an optional 280-character
-message. Levels are fixed during the proposal and do not feed personal level adaptation.
+message. Levels remain fixed during the proposal. Qualifying completions can raise the personal base used outside the proposal; prescribed levels never change.
 Seat expiry/departure blocks access and new assignments; recovery resumes only if
 the reciprocal relationship and proposal remain valid. Game retirement/version
 migration remains a release gate for future catalog changes.
@@ -254,8 +254,11 @@ new visual identity. The supplied transparent PNG is embedded unchanged in the a
 installation PNGs are browser rasterizations. No image generation was used.
 
 Game-object direction: more realistic recognizable illustrations/pictograms,
-without replacing the approved companion family. Approve a small sample first,
-then inventory every stimulus and map it through the shared artwork renderer.
+without replacing the approved companion family. The user-approved towel/table
+style is integrated through five transparent atlases (80 objects), three standalone
+stimuli and refreshed motor tokens. `GameObject` shares measured alpha crops across
+all consumers; original legacy atlases remain fallback resources. DESIGN.md contains
+the repeatable prompt, source references, identity checks and integration workflow.
 Preserve answer keys, target/example identity and color cues. Brand/mascot/art
 visibility must respect existing theme and companion settings.
 Acceptance: all crops/mappings, transparent edges, small-size legibility, both
@@ -265,18 +268,18 @@ styles, contrast, large text, app install icons and Pages base paths.
 
 `difficulty.ts` version 1 supplies ten bounded parameter rows for all eight games.
 `GameSession` initializes from the per-game recommendation and lets the player choose
-1–10 before starting. It freezes the choice for play and repeat; no mid-game changes.
+1–10 before starting. It freezes the choice during play. Repeat starts from the updated base; no mid-game changes.
 Every new result records `level`, `configVersion`, `hintsUsed` when relevant and
 `practice`. Legacy domain levels and old results remain readable and unchanged.
 
 | Game | Version 1 controls, level 1 → 10 |
 | --- | --- |
-| Visual scanning | 2×3 → 6×6 board, existing target identity and at least three targets |
-| Object naming | 3 → 8 questions; 8 → 30-item pool; gentle/moderate/challenge distractors; 2–3 choices |
-| Word completion | 3 → 8 questions; 8 → full 28-item pool; 2 → 4 letter choices; one missing letter |
+| Visual scanning | 2×3 → 6×6 board, at least three targets; similar-color distractors at higher levels |
+| Object naming | 3 → 8 questions from 82 shared objects; tiered vocabulary and increasingly similar distractors; 2 → 4 choices |
+| Word completion | 3 → 8 questions from the shared single-word pool; vowels → inner consonants; 2 → 4 similar letter choices |
 | Memory beacons | 2 → 6 steps per sequence; 1300 → 800 ms per step; three rounds |
-| Memory pairs | 2 → 6 pairs; 8 → 3-second preview |
-| Categorization | 3 → 8 questions; 8 → full 28-item pool; existing two unambiguous groups |
+| Memory pairs | 2 → 6 pairs; 8 → 3-second preview; same-category objects at higher levels |
+| Categorization | 3 → 8 questions from the shared pool; 2 → 4 options from eight classification groups |
 | Static targets | 5 → 14 targets; 160 → 88 px diameter, clamped inside arena |
 | Moving target | 0.06 → 0.24 percentage-points/16 ms; 6 → 15 seconds of accumulated contact; 160 → 88 px |
 
@@ -285,46 +288,54 @@ bounds/distinctness tests. These are initial game-design settings, not validated
 ability measures. Review vocabulary ordering, pacing and physical-device comfort
 with users before considering calibration complete.
 
-Three eligible normal results at the current recommended level consume one evidence
-window. Mean accuracy ≥85% promotes one level; <60% reduces one; otherwise retain.
-Hints or answer-revealing audio cap a session's promotion evidence at 84%. Require
-at least three answers/attempts (two for pairs). Easier/harder manual sessions,
-older configuration versions, placement, duplicates and aborted games do not change
-the recommendation. Receipts protect replay across the bounded history window.
-Memory pairs use matched pairs / attempts, not a fabricated perfect result.
-A repeat-preview action counts as a hint; larger decks use more columns on wider
-viewports, and preview time counts as active game time.
-New scanning, memory and motor results no longer floor accuracy at a positive value.
-Historical records are untouched. Moving-target adaptation is deliberately manual:
-contact ratios across keyboard/pointer methods are not comparable enough to infer
-an automatic recommendation. Keyboard holding is an explicit accessible alternative.
+Each game's base rises by one (maximum 10) after one perfect completion in
+strictly less than 60 active seconds, or two consecutive completions of that same
+game with strictly more than 90% accuracy and less than 180 active seconds each.
+Use answer counts, not rounded display accuracy. Other games do not interrupt the
+run. An ineligible completed normal result at the current configuration resets
+only its own run. Practice, placement, old-version results and aborted games are
+excluded. Results at or above the current base qualify, including assigned games;
+lower manual levels do not. There is no automatic demotion. Hints remain recorded
+but do not add an exception to these thresholds. Repeat starts at the current base.
+
+The optional `gameLevels[id].qualifyingRuns` counter persists 0 or 1 using the
+existing progress transaction and idempotent result receipts. Legacy `evidence`
+remains readable but is cleared on the next eligible-version normal completion;
+old precision-only evidence cannot establish a timed run. Memory pairs use
+matched pairs / attempts and preview time counts as active time. Moving targets
+use their existing contact accuracy, including the keyboard alternative; these
+are game-design settings, not calibrated ability measures. Historical results
+remain unchanged.
 
 ### PLACEMENT — initial guided level assessment (implemented)
 
 Player entry after access and cloud loading requires version-1 completed placement
 and valid per-game levels. Professional entry has no placement gate. The shared game
-renderer supplies an unscored level-1 example then a short level-3 trial for each of
-the eight games. Naming, words and categories have three questions; beacons three
-rounds; pairs three pairs; scanning a 3×3 board; static targets six; tracking six
-seconds accumulated contact. Instructions, help, optional narration, companions,
-landscape pauses and settings use the existing systems.
+renderer randomly chooses an unfinished game after each assessment turn, excluding
+the previous game whenever alternatives remain. Turns use one round except motor-target,
+which retains the full normal target count for the tested level (5/8/11/14).
+Each game retains its own next
+level and best result in memory. Each unfinished
+game tries levels 1 → 4 → 7 → 10; a stage passes only with nonzero question count and
+all answers correct (not rounded displayed accuracy). On failure/omission, retain
+the last passed level, or level 1 if none passed. Advancing stages remounts the
+GameSession by game and tested level, resetting answers, layout configuration and
+clock. Object selection uses the existing randomized level-specific pools.
 
-A completed trial queues a durable `placement` operation. Its evidence and provisional
-game level are written in the progress transaction; the eighth trial atomically
-marks the full set complete. The first committed evidence for each game wins;
-retries and another device cannot overwrite it. Placement never writes result
-archives or increments ordinary activity, achievements, streaks or daily plans.
-Pausing preserves the mounted trial and its clock. Returning/reloading resumes the
-first unfinished game; only that incomplete trial restarts.
+A finished game queues one durable placement operation with optional
+`PlacementTrial.assessedLevel` restricted to 1, 4, 7 or 10 (5 remains readable for previous assessments). If a previous stage passed,
+keep its evidence; otherwise save the failed/omitted level-1 result. This explicit
+level bypasses the legacy accuracy-to-level mapping, including tracking. The old
+mapping remains for existing trials without assessedLevel, and version 1 accounts
+are never forced to repeat placement. The final game's save completes placement.
+Trials do not create ordinary result archives, streaks, achievements or plan work.
 
-Trial accuracy ≥85% without hints assigns level 4, ≥60% assigns level 3, otherwise
-level 1. Require at least three attempts. An explicit inaccessible-trial action
-records `skipped`, no measured evidence and level 1. Tracking always starts at level
-1 with a manual selector. The final screen discloses skipped games and shows all
-levels. Completed placement does not repeat on sign-in. Local imports intentionally
-omit placement; only existing cloud placement bypasses it. A separate explicit
-reassessment flow remains a follow-up; choosing a different single-game level is
-already available.
+Help/settings pause a stage. Return keeps all per-game stage positions in memory; reload restarts unfinished
+ladders from level 1; completed games are kept, and the remaining order may be reshuffled
+on reload. No instructions or individual result confirmations interrupt progression.
+The summary lists final levels and labels only games skipped before any success as
+unmeasured. Mi cuenta retakes use the same ladder, saving all new base levels only
+when accepted and preserving the original onboarding record and saved activity.
 
 
 ### RETIRE — daily action sequencing
@@ -409,3 +420,22 @@ Production-only validation must remain open until actually performed.
 - Approved game-object style sample; the supplied logo variants are implemented.
 - Per-game difficulty tables, assessment trial count/duration, adaptation thresholds
   and assisted alternatives validated with representative users.
+
+### Level visibility and reassessment
+
+`LevelUpScreen` compares live profile snapshots with newly observed result IDs.
+It queues increases per game and ignores initial load, duplicates and placement
+changes. The celebration is an accessible dialog, with reduced-motion support.
+`LevelStatistics` reads current `gameLevels` and archived played levels through
+`levelTimeline`; it never fabricates historical base-level changes from result
+accuracy. Full archive loading is shared with the ordinary activity charts.
+
+An explicit retake uses `Reassessment` and the existing `PlacementOnboarding`.
+Its incomplete trials stay in component memory; cancellation/reload does not alter
+saved levels. Guardar niveles enqueues a placement operation containing all eight
+validated trials. The reducer recalculates only `gameLevels`, resetting their
+promotion evidence; original placement, history, counters, achievements and
+settings are preserved. Existing Firestore placement receipts make retries
+idempotent. Preserving the original placement also avoids validating all trials
+and levels in one write, which exceeds the rules evaluator expression budget.
+No new rule fields or permissions are required.

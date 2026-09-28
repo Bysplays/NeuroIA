@@ -1,3 +1,5 @@
+import { LevelUpScreen } from './components/LevelUpScreen';
+import { Reassessment } from './components/Reassessment';
 import { AssignedSessionInbox, AssignedSessionPlayer } from './components/AssignedSessions';
 import { useAccountAccess } from './services/accountAccessContext';
 import type { AssignedSession } from './services/assignedSessions';
@@ -109,8 +111,10 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   const { profile, history } = data;
   const access = useAccountAccess();
   const [proposal, setProposal] = useState<AssignedSession | null>(null);
+  const [navigationTarget, setNavigationTarget] = useState<HTMLDivElement | null>(null);
   const sessionLink = access?.kind === 'invitation' && access.professionalId && access.seatId ? { professionalId: access.professionalId, seatId: access.seatId, patientId: uid } : null;
   const playingProposal = proposal && sessionLink && proposal.professionalId === sessionLink.professionalId && proposal.seatId === sessionLink.seatId ? proposal : null;
+  const [reassessing, setReassessing] = useState(false);
   const [placementOpen, setPlacementOpen] = useState(() => !hasPlacement(profile));
   const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | 'achievements' | 'statistics' | CognitiveDomain | ExerciseId>('dashboard');
 
@@ -230,7 +234,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   const isPlayingGame = !!playingProposal || activeView !== 'dashboard' && activeView !== 'therapist' && activeView !== 'achievements' && activeView !== 'statistics';
 
   const exerciseId = getExercisesForDomain(activeView as CognitiveDomain)[0]?.id ?? activeView as ExerciseId;
-  const placement = !hasPlacement(profile) || placementOpen;
+  const placement = !hasPlacement(profile) || placementOpen || reassessing;
 
   return (
     <div className={`app-root ${isPlayingGame ? 'app-root-focus-mode' : ''}`}>
@@ -245,26 +249,25 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
             setActiveView(view);
             window.scrollTo(0, 0);
           }}
-          onOpenStatistics={() => { setActiveView('statistics'); window.scrollTo(0, 0); }}
+          navigationRef={setNavigationTarget}
           onOpenAccessibility={() => setIsAccessibilityOpen(true)}
           onOpenFatigueAlert={() => setIsFatigueOpen(true)}
         />
       )}
 
-      {placement ? <PlacementOnboarding profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} onSignOut={onSignOut} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
+      {reassessing ? <Reassessment profile={profile} sync={sync} onDone={() => setReassessing(false)} onSettings={() => setIsAccessibilityOpen(true)}/> : placement ? <PlacementOnboarding profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
         {playingProposal && <AssignedSessionPlayer key={playingProposal.id} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isFatigueOpen || isRestModalOpen} />}
         {activeView === 'dashboard' && !playingProposal && (
-          <Dashboard
+          <Dashboard uid={uid} history={history} navigationTarget={navigationTarget}
             proposedSessions={sessionLink && <AssignedSessionInbox key={sessionLink.professionalId + sessionLink.seatId} link={sessionLink} onStart={value => { setDailyPlanSession(null); setProposal(value); window.scrollTo(0, 0); }} />}
             profile={profile}
             onSelectDomain={handleSelectDomain}
             onSelectExercise={handleSelectExercise}
             onStartDailyPlan={handleStartDailyPlan}
-            onOpenAchievements={() => { setActiveView('achievements'); window.scrollTo(0, 0); }}
           />
         )}
 
-        {activeView === 'statistics' && <ActivityStatistics uid={uid} history={history} onBack={handleBackToDashboard} />}
+        {activeView === 'statistics' && <ActivityStatistics uid={uid} levels={profile.gameLevels} history={history} onBack={handleBackToDashboard} />}
 
         {activeView === 'achievements' && <AchievementShowcase profile={profile} onBack={handleBackToDashboard} />}
 
@@ -277,12 +280,14 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
           />
         )}
 
-        {isPlayingGame && !playingProposal && <GameSession key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
+        {isPlayingGame && !playingProposal && <GameSession onSettings={() => setIsAccessibilityOpen(true)} paused={isAccessibilityOpen} key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
           <GameExercise id={exerciseId} profile={profile} onBack={handleBackToDashboard} onSaveResult={handleSaveExerciseResult} planProgress={planProgress} onNextPlanExercise={handleNextPlanExercise} />
         </GameSession>}
       </main>}
 
+      <LevelUpScreen data={data}/>
       <AccessibilityModal
+        onReassess={!placement ? () => { setIsAccessibilityOpen(false); handleBackToDashboard(); setReassessing(true); } : undefined}
         onSignOut={onSignOut}
         signingOut={signingOut}
         isOpen={isAccessibilityOpen}
