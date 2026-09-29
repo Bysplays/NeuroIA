@@ -117,7 +117,7 @@ export function LoginScreen({
                       </>
                     ) : (
                       <>
-                        Juega a <em>tu ritmo.</em>
+                        Juega <em>a tu ritmo.</em>
                       </>
                     )}
                   </h1>
