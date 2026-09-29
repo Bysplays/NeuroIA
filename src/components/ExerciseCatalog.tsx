@@ -1,12 +1,19 @@
 import { TabletPager } from './TabletTabs';
 import { useCompactViewport } from '../services/viewport';
-import { HeaderIllustration } from './HeaderIllustration';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import type { CognitiveDomain, ExerciseDefinition, UserProfile } from '../types';
+import { ArrowLeft, ArrowRight, Search, MessageCircle, LetterText, Route, Copy, Shapes, Target, MousePointer2 } from 'lucide-react';
+import type { CognitiveDomain, ExerciseDefinition, ExerciseId, UserProfile } from '../types';
 import { ALL_EXERCISES, EXERCISE_SUMMARIES } from '../services/exerciseCatalog';
 import { soundService } from '../services/soundService';
-import { WellnessGlyph } from './WellnessGlyph';
+const gameIcons = {
+  'visual-scanning': Search, 'language-naming': MessageCircle,
+  'word-completion': LetterText, 'memory-path': Route, 'memory-pairs': Copy,
+  categorization: Shapes, 'motor-target': Target, 'motor-tracking': MousePointer2,
+};
+function CatalogIcon({ exercise }: { exercise: ExerciseId }) {
+  const Icon = gameIcons[exercise];
+  return <Icon size={36} strokeWidth={1.6} aria-hidden="true"/>;
+}
 
 const areas: { id: CognitiveDomain; label: string }[] = [
   { id: 'attention', label: 'Atención' },
@@ -39,7 +46,6 @@ export function ExerciseCatalog({ profile, onBack, onSelectExercise, embedded = 
           <h1 id="library-title" tabIndex={-1} ref={heading}>Ocho formas de jugar.</h1>
           <p>Elige lo que te apetezca. Practica a tu ritmo.</p>
         </div>
-        <HeaderIllustration scene="catalog" className="menu-header-art" />
       </div>
       }<div className="library-filters" role="group" aria-label="Filtrar juegos por área">
         <button aria-pressed={filter === 'all'} onClick={() => chooseFilter('all')}>Todos <span>{ALL_EXERCISES.length}</span></button>
@@ -49,7 +55,7 @@ export function ExerciseCatalog({ profile, onBack, onSelectExercise, embedded = 
         {exercises.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(exercise => (
           <button key={exercise.id} className={`library-game practice-${exercise.domain}`} onClick={() => { soundService.playTap(); onSelectExercise(exercise); }}>
             <span className="library-game-top"><span>{areas.find(area => area.id === exercise.domain)?.label}</span>{profile.prescribedDomains?.includes(exercise.domain) && <span className="library-priority">Pautado para ti</span>}</span>
-            <span className="library-game-art"><WellnessGlyph exercise={exercise.id} /></span>
+            <span className="library-game-art catalog-game-icon"><CatalogIcon exercise={exercise.id} /></span>
             <strong>{exercise.title}</strong>
             <span className="library-game-description">{EXERCISE_SUMMARIES[exercise.id]}</span>
             <span className="library-game-action">Ver cómo se juega <span><ArrowRight size={20} /></span></span>

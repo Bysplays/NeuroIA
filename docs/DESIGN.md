@@ -86,11 +86,18 @@ Hoy keeps copy minimal: a greeting and actual streak, “Para hoy” with the fe
 game title and “Jugar”, a “Tu sesión” list containing game names only, and icon-led
 area shortcuts. Do not repeat greetings with an eyebrow or supporting slogan,
 repeat area labels under every game, or add descriptions under area shortcuts.
-Use short concrete labels: “Empezar sesión”, “Explorar”, “Ver todos”. The displayed session queue is passed to
+Use short concrete labels: “Realizar sesión completa”, “Explorar”, “Ver todos”. The displayed session queue is passed to
 the start callback; starting it must not silently choose a different sequence.
 Do not add fake map progress, completion counts or placeholders for patient data.
 
-Juegos presents the eight real exercises with area filters, recognizable art and
+The authenticated home's featured Jugar action spans its entire title column with
+centered text and a right arrow, matching the public entry action. The daily-plan
+CTA says Realizar sesión completa (Otra sesión after completion). Catalog headers
+have no legacy companion illustration; its eight blue Lucide icons describe each
+interaction (search, naming, letters, sequence, pairs, sorting, target, tracking).
+Keep real illustrated game stimuli unchanged: catalog icons are navigation only.
+
+Juegos presents the eight real exercises with area filters, distinct Lucide line icons and
 an explicit instruction entry action. Preserve paging when necessary for viewport
 height and text size. Activity and achievements reuse the existing read-only
 statistics, archive pagination and cumulative milestone logic. Secondary tabs

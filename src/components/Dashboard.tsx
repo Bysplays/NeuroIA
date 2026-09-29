@@ -134,7 +134,7 @@ export function Dashboard({
           >
             {profile.dailyPlanCompletedToday
               ? "Otra sesión"
-              : "Empezar sesión"}
+              : "Realizar sesión completa"}
             <ArrowRight size={18} />
           </button>
         </aside>
