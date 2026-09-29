@@ -6,6 +6,15 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 
 ## Current remaining scope
 
+- [x] Prepare three independent clinical-blue, tablet-first concepts using Mobbin
+  references from Kit, Ahead and Brilliant. The review board is at
+  `/design/concepts/`; see [DESIGN-CONCEPTS.md](DESIGN-CONCEPTS.md).
+- [ ] Select a concept or a concrete combination before changing the application.
+- [ ] Implement the selected direction throughout player, entry, onboarding,
+  games, activity, account and professional flows in portrait and landscape;
+  verify all states and existing contracts listed in DESIGN-CONCEPTS.md. The
+  concept prototype is not completion of the production redesign.
+
 The owner confirms real Muse 2 connection, EEG/PPG, battery, reconnection and saved
 charts; the payment/seat lifecycle (purchase, renewal, failed payment, cancellation
 and reassignment) in Sandbox; and real email delivery, cross-device sync,

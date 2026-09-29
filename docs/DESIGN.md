@@ -1,5 +1,9 @@
 # NeuroIA design guide
 
+An independent clinical-blue redesign exploration is available in
+[DESIGN-CONCEPTS.md](DESIGN-CONCEPTS.md). Its three tablet-first proposals are
+awaiting selection; they do not yet replace the production guidance below.
+
 NeuroIA should feel like the same welcoming place from the home screen through
 the last exercise. The default visual direction is **Default**: a pale ivory-to-aqua background,
 translucent mint surfaces, dark blue ink, white activity cards and a solid teal

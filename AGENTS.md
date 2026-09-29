@@ -586,3 +586,13 @@ It covers selected areas, optional movement, changing choices, keyboard input,
 large text, contrast, delayed parent updates, reload, actual target-stage completion,
 skip and retake cancellation. Server persistence and permissions use the real demo
 Firestore adapter/rules tests separately; never seed a real account for screenshots.
+
+## Independent design concepts
+
+`design/concepts/index.html` is a development-only review board with three proposed
+clinical-blue directions, real tablet-sized iframes and sample-only navigation.
+It is not imported by the production entry and never connects to auth, payments
+or progress services. Its only application component import is the read-only
+`GameObject` illustration renderer. See `docs/DESIGN-CONCEPTS.md` for references,
+scope, limits and the selection gate requested by the owner. Do not treat the
+prototype or its sample results as implemented production behavior.
