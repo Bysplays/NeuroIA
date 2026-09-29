@@ -6,7 +6,7 @@
 :root {
   /* Escala de texto base */
   --font-base: 18px;
-  --font-scale: 1.1;
+  --font-scale: 1;
 
   /* Paleta de referencia: marfil, verde agua, azul tinta y lavanda. */
   --color-bg: #f6f6f2;

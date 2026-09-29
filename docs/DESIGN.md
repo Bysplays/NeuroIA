@@ -415,3 +415,7 @@ around the companions.
 
 Settings tabs have 20 px clearance below the dialog header. The retired Amigos
 del bienestar control is not shown; retain stored companion preferences for compatibility.
+
+New profiles and the initial page use Normal text size by default. Preserve explicit
+saved text-size preferences. The profile-name input and Guardar use 4 px corners,
+matching the other account actions.

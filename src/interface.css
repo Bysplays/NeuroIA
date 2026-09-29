@@ -1018,7 +1018,8 @@ body[data-companions="hidden"] .achievement-symbol-pending { border-style: dashe
 body[data-contrast="high-contrast"] #invitation-error:not(:empty) { color: var(--color-text-main); }
 
 .preferences-name { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.preferences-name input { flex: 1; min-width: 0; width: 100%; padding: 12px 16px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg); color: var(--color-text-main); font: inherit; }
+.preferences-name input { flex: 1; min-width: 0; width: 100%; padding: 12px 16px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-bg); color: var(--color-text-main); font: inherit; }
+.preferences-name .paper-nav-button { border-radius: 4px; }
 .preferences-name button:disabled { opacity: .6; cursor: default; }
 
 /* Account activity: shared filters, daily series and accessible raw values. */

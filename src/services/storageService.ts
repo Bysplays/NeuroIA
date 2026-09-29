@@ -7,7 +7,7 @@ const HISTORY_KEY = 'neuroia_history_v1';
 export const defaultSettings: AccessibilitySettings = {
   pageStyle: 'default',
   showCompanions: true,
-  fontSize: 'large',
+  fontSize: 'normal',
   contrast: 'standard',
   handDominance: 'center',
   speechEnabled: true,
