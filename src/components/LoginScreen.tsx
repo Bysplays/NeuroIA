@@ -76,7 +76,9 @@ export function LoginScreen({
           <section className="entry-error-notification">
             <CircleAlert size={30} aria-hidden="true" />
             <h2 id="entry-error-title">No hemos podido continuar</h2>
-            <p role="alert">{formError || error}</p>
+            <div className="entry-error-message" role="alert">
+              {(formError || error).split(/(?<=Google\.)\s+/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+            </div>
             <button className="touch-btn touch-btn-primary" onClick={() => { setFormError(""); onClearError(); }}>Volver al formulario</button>
           </section>
         </ModalFrame>

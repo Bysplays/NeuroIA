@@ -127,7 +127,9 @@ below the form. Reference: [Brilliant sign-in on Mobbin](https://mobbin.com/scre
 adapted as a full page with NeuroIA's palette and existing authentication.
 Authentication failures and mismatched registration passwords use a compact
 ModalFrame notification (440 px maximum, 6 px corners, 4 px action corners).
-Show the specific error with a short heading and Volver al formulario action;
+Show the specific error with a short heading and Volver al formulario action.
+Justify error paragraphs with Spanish hyphenation; start Google troubleshooting
+in a separate paragraph after the Google sentence;
 Escape/backdrop also dismiss and return focus while preserving entered values.
 Keep recovery success as an inline status. Reference: [Workable error notification](https://mobbin.com/screens/d66e2824-c0f4-415f-ac20-aaf9d46ff1da).
 Personal/professional intent survives authentication. Existing verification,

@@ -50,7 +50,7 @@ export function Fixture() {
         error={authError}
         onClearError={() => setAuthError("")}
         onEmail={async () => { if (query.has("auth-failure")) throw { code: "auth/invalid-credential" }; }}
-        onSignIn={() => { if (query.has("auth-failure")) setAuthError("No se ha completado el acceso con Google."); }}
+        onSignIn={() => { if (query.has("auth-failure")) setAuthError("No se ha completado el acceso con Google. Si la ventana se cierra sola, abre esta página en tu navegador habitual, como Safari o Chrome, y vuelve a intentarlo."); }}
       />
     );
   return (
