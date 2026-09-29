@@ -82,7 +82,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             </div>
           </section>
 
-          </div> }, { id: 'account', label: 'Mi cuenta', content: <>
+          </div> }, { id: 'account', label: 'Mi cuenta', content: <div className="preferences-account-panel">
           <ProfileName name={name} onSave={onUpdateName} />
           {showSubscription && <SubscriptionSettings />}
           <AccountPassword />
@@ -93,7 +93,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
               <button className="subscription-upgrade preferences-action-button" onClick={onReassess}>Rehacer prueba</button>
             </div>
           </section>}
-          </> }
+          </div> }
           ]}/>
           <div className="preferences-account">
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>

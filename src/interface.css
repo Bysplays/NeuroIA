@@ -1799,3 +1799,9 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .game-help-dialog .entry-error-heading .entry-toolbar-action { margin-left: auto; flex-shrink: 0; }
 .eeg-preferences .preferences-section p { font-size: .75rem; line-height: 1.6; }
 .eeg-preferences .eeg-connection-row { gap: 16px; }
+
+/* Account actions share the password action's width, including the joined Save. */
+.preferences-account-panel { --account-action-width: min(9rem, 42vw); }
+.preferences-account-panel .subscription-upgrade,
+.preferences-account-panel .paper-nav-button { width: var(--account-action-width); max-width: 100%; flex-shrink: 0; box-sizing: border-box; text-align: center; justify-content: center; }
+.preferences-account-panel .preferences-name .paper-nav-button { font-size: .72rem; }

@@ -479,3 +479,7 @@ is disabled and reads “Navegador no soportado”, without redundant status cop
 connection instructions; detect API capability rather
 than browser names. Firefox and Safari currently do not implement Web Bluetooth.
 Reference: [MDN compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Bluetooth#browser_compatibility).
+
+Within Settings → Mi cuenta, action buttons share a 9rem width sized for Cambiar
+contraseña. The joined name Save action uses the same width. All these actions shrink
+together to at most 42vw on narrow screens so the name input remains usable.
