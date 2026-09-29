@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Brain, Check, Hand, Layers, MessageCircle, Search } from 'lucide-react';
 import { INTEREST_AREAS, type PlacementPreferences as Preferences } from '../services/placementPreferences';
-import { PlanButton } from './PlanButton';
+import { SlidersHorizontal } from 'lucide-react';
 import { Brand } from './Brand';
 
 const icons = { attention: Search, memory: Brain, language: MessageCircle, executive: Layers, motor: Hand };
@@ -21,7 +21,7 @@ export function PlacementPreferences({ initial, onSave, onBack, onSettings }: {
   useEffect(() => { heading.current?.focus(); window.scrollTo(0, 0); }, [step]);
   const save = (choice = movement) => onSave({ interests, movement: choice });
   return <main className="placement-screen placement-preferences">
-    <header className="placement-toolbar"><Brand/><PlanButton/><button className="paper-nav-button" onClick={onSettings}>Ajustes</button></header>
+    <header className="placement-toolbar"><Brand/><button className="entry-toolbar-action" aria-haspopup="dialog" onClick={onSettings}><SlidersHorizontal size={18} aria-hidden="true"/>Ajustes</button></header>
     <section className="interest-panel" aria-labelledby="interests-title">
       <div className="interest-content">
         <p className="soft-label">Paso {step + 1} de 2 · {step === 0 ? 'Tus intereses' : 'Tu comodidad'}</p>

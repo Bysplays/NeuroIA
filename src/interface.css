@@ -1762,3 +1762,25 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 /* Featured action matches its title column; catalog symbols share the UI icon family. */
 .editorial-hero-copy > .touch-btn { width: 100%; min-height: 56px; justify-content: center; gap: 24px; }
 .catalog-game-icon { display: grid; place-items: center; width: 72px; height: 72px; margin-block: 16px; border-radius: 20px; background: var(--panel-blue); color: var(--color-primary); flex-shrink: 0; }
+
+/* Entry navigation and account dialogs share the current restrained controls. */
+.entry-toolbar-action { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); font: inherit; font-size: .75rem; cursor: pointer; }
+.entry-toolbar-action:hover { background: var(--panel-blue); }
+.modal-shell:has(> .entry-preferences) { width: min(620px, calc(100vw - 32px)); border-radius: 6px; background: var(--color-surface); scrollbar-gutter: auto; }
+.modal-shell:has(> .plan-preferences) { width: min(480px, calc(100vw - 32px)); }
+.entry-preferences .preferences-header { padding: 24px 24px 18px; background: var(--color-surface); gap: 12px; }
+.entry-preferences .preferences-header h2 { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; line-height: 1.4; }
+.entry-preferences .preferences-header h2 svg { color: var(--color-primary); flex-shrink: 0; }
+.entry-preferences .preferences-header p { font-size: .75rem; line-height: 1.5; margin-top: 8px; }
+.entry-preferences .preferences-close { width: 44px; height: 44px; border: 0; border-radius: 4px; background: transparent; align-self: flex-start; }
+.entry-preferences .preferences-close:hover { background: var(--panel-blue); }
+.entry-preferences .preferences-body { padding: 0 24px 20px; }
+.entry-preferences .subscription-upgrade, .entry-preferences .touch-btn { border-radius: 4px; min-height: 44px; }
+.entry-preferences .preferences-segment, .entry-preferences .preferences-themes button { border-radius: 8px; }
+.entry-preferences .preferences-segment button { border-radius: 4px; }
+@media (max-width: 480px) {
+  .placement-preferences .placement-toolbar, .placement-welcome .placement-toolbar { gap: 8px; }
+  .entry-toolbar-action { padding: 10px; gap: 6px; }
+  .entry-preferences .preferences-header { padding: 20px 20px 16px; }
+  .entry-preferences .preferences-body { padding-inline: 20px; }
+}

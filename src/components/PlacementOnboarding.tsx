@@ -1,6 +1,6 @@
 import { advanceAssessment } from '../services/placementAssessment';
+import { SlidersHorizontal } from 'lucide-react';
 import { Brand } from './Brand';
-import { PlanButton } from './PlanButton';
 import { useEffect, useRef, useState } from 'react';
 import { Volume2 } from 'lucide-react';
 import type { ExerciseId, ExerciseResult, UserProfile } from '../types';
@@ -92,7 +92,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
   const message = complete ? (onCancel ? 'Guardaremos los niveles de estas áreas. Los demás niveles y tus partidas se mantendrán.' : 'Ya puedes empezar con las áreas que has elegido. Los juegos que no has probado siguen disponibles; puedes explorarlos cuando quieras.')
     : 'Iremos área por área, con juegos breves a tu ritmo. Puedes omitir cualquiera que no te resulte cómodo.';
   return <main className="placement-screen placement-welcome">
-    <header className="placement-toolbar"><Brand/>{onCancel && <button className="placement-text-action" onClick={onCancel}>Cancelar prueba</button>}<button className="paper-nav-button" onClick={onSettings}>Ajustes</button><PlanButton/></header>
+    <header className="placement-toolbar"><Brand/>{onCancel && <button className="placement-text-action" onClick={onCancel}>Cancelar prueba</button>}<button className="entry-toolbar-action" aria-haspopup="dialog" onClick={onSettings}><SlidersHorizontal size={18} aria-hidden="true"/>Ajustes</button></header>
     <section className="placement-card" aria-labelledby="placement-title">
       <div className="placement-content">
         <div className="placement-progress"><div className="placement-progress-heading">

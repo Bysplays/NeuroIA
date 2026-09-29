@@ -183,8 +183,8 @@ recent-authentication and account ownership requirements remain unchanged.
 
 Registration remains available within the sign-in page. Purchases are available
 after authentication and remain server-confirmed. Access choice is a page, with subscription, the existing trial
-and invitation redemption. “Mi acceso” is available before assessment and within
-Mi cuenta, using the existing subscription service. Never imply payment has
+and invitation redemption. Access management remains within Mi cuenta, using the existing subscription
+service; onboarding does not repeat the access entry point. Never imply payment has
 completed based only on a browser return URL.
 The subscription entry uses a brand header and an 880 px content region: three
 short benefits beside one monthly-plan card. On narrow screens, center the heading
@@ -224,6 +224,10 @@ and assessment welcome/completion. Omit decorative companion panels. Match entry
 typography, restrained 12 px corners, fine choice borders and full-width 52 px primary
 actions. Selected choices use a pale blue surface and an explicit check; preserve
 keyboard focus and readable descriptions on mobile and with enlarged text.
+The onboarding toolbar exposes only Ajustes beside the brand: access has already
+been resolved before this stage. Use a labelled 44 px icon button with a fine border
+and 8 px corners. Account/settings native dialogs use a white header, inline
+icon/title, compact close control and 6 px outer corners, matching entry notifications.
 
 Ask one question at a time: desired areas, then optional interaction preference.
 Present areas in a two-column tile grid, with the final tile spanning both columns;

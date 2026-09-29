@@ -5,7 +5,7 @@ import { SubscriptionSettings } from './SubscriptionSettings';
 import { AccountPassword } from './AccountPassword';
 import { ModalFrame } from './ModalFrame';
 import React, { useState } from 'react';
-import { X, Check, Type, Contrast, LogOut } from 'lucide-react';
+import { X, Check, Type, Contrast, LogOut, SlidersHorizontal } from 'lucide-react';
 import type { AccessibilitySettings } from '../types';
 import { soundService } from '../services/soundService';
 
@@ -36,13 +36,13 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
 
   return (
     <ModalFrame onClose={onClose} labelledBy="accessibility-title">
-      <div className="preferences">
+      <div className="preferences entry-preferences">
         <header className="preferences-header">
           <div>
-            <h2 id="accessibility-title">Ajustes</h2>
+            <h2 id="accessibility-title"><SlidersHorizontal size={22} aria-hidden="true"/>Ajustes</h2>
             <p>Un espacio cómodo para ti.</p>
           </div>
-          <button className="preferences-close" onClick={onClose} aria-label="Cerrar ajustes"><X size={22} /></button>
+          <button className="preferences-close" onClick={onClose} aria-label="Cerrar ajustes"><X size={18} /></button>
         </header>
 
         <div className="preferences-body">
