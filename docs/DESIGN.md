@@ -177,7 +177,7 @@ check, the verification link reads Comprobando…; resend reads Enviando… duri
 delivery. Keep status in the action itself without an extra loading paragraph.
 Loading reuses the shared Brand instead of a separate wordmark and keeps its
 accessible status and reduced-motion dots. Visible warm loading phrases rotate every
-2.5 seconds in a reserved two-line area; the screen-reader status stays stable
+4 seconds in a reserved two-line area; the screen-reader status stays stable
 (Preparando tu espacio) to avoid repeated announcements. Clear the interval on exit
 and never delay readiness to finish a phrase. Professional entry failures reuse the
 same recovery page as player access failures.
@@ -232,12 +232,16 @@ been resolved before this stage. Use a labelled 44 px icon button with a fine bo
 and 8 px corners. Account/settings native dialogs use a white header, inline
 icon/title, compact close control and 6 px outer corners, matching entry notifications.
 
-Ask one question at a time: desired areas, then optional interaction preference.
+Use three steps: desired areas, optional interaction preference, then optional
+Tu condición context.
 Present areas in a two-column tile grid, with the final tile spanning both columns;
 use one column on very narrow screens. Require at least one area and omit the
 explore-all shortcut. Movement preferences retain labelled rows, including Prefiero no elegir ahora,
-with a single Preparar mis juegos action and no separate skip button. Avoid collecting a
-diagnosis. Only selected areas enter initial assessment; tap preference excludes
+with Continuar and no separate skip button. The final step offers stroke, other
+condition, none, or no response, with optional affected side and mobility. Never
+request free-text diagnoses. Require explicit consent before storing condition
+context; disclose linked-professional access. Prefiero no responder stores no
+condition object. This context never selects games or changes difficulty. Only selected areas enter initial assessment; tap preference excludes
 continuous tracking. Untested games remain accessible with their default level.
 
 New assessment ladders have **at most two stages per game**, starting at 1 and
@@ -426,3 +430,7 @@ matching the other account actions.
 
 Settings includes Financiado por IGAPE beside About and Legal, opening the shared
 funding document page and returning to the previous settings state on close.
+
+Pending progress writes show a compact notification with Reintentar and the link-style
+Avanzar sin sincronizar. Dismissal keeps the local projection and durable queue;
+retain a small pending notice and background retries. Never label unsynced work saved.

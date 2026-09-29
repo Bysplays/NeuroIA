@@ -10,6 +10,7 @@ import { EmailVerification } from "../../src/components/EmailVerification";
 import { Brand } from "../../src/components/Brand";
 import AccessGate from "../../src/components/AccessGate";
 import { OnboardingModal } from "../../src/components/OnboardingModal";
+import { ProgressSaveNotice } from '../../src/components/ProgressSaveNotice';
 import { AppLoading } from "../../src/components/AppLoading";
 import type { User } from "firebase/auth";
 import { GameSession } from "../../src/components/GameSession";
@@ -56,6 +57,7 @@ export function Fixture() {
   if (query.has('access-gate')) return <AccessGate onSignOut={()=>setLoggedOut(true)}><p>Acceso confirmado</p></AccessGate>;
   if (query.has('subscription') && !loggedOut) return <main className="entry-page access-entry"><header className="entry-header"><Brand/></header><OnboardingModal access={{active:false, serverNow:1790683200000, checkoutAvailable:!query.has('unavailable'), kind:query.has('expired') ? 'trial' : undefined}} busy={query.has('busy') || accessBusy} loadFailed={false} invitationIssue={accessAction ? {code:accessAction,message:'Este código no es válido. Revísalo e inténtalo de nuevo.'} : null} onTrial={()=>setLoggedOut(true)} onInvite={setAccessAction} onCheckout={()=>query.has('pending') ? setAccessBusy(true) : setLoggedOut(true)} onSignOut={()=>setLoggedOut(true)} onPortal={()=>setLoggedOut(true)} checkoutReturn={query.get('checkout')}/></main>;
 
+  if (query.has('save-error')) return <ProgressSaveNotice status={accessBusy ? 'saved' : 'pending'} onRetry={async () => { if (!query.has('failure')) setAccessBusy(true); }}/>;
   if (query.has("loading")) return <AppLoading/>;
   if (query.has("verification") && !loggedOut) return <EmailVerification initialDelivery={query.has("sending") ? "sending" : query.has("delivery-failed") ? "failed" : "sent"} user={{ email: 'una.direccion.larga.de.prueba@example.com' } as User} onVerified={() => setLoggedOut(true)} onSignOut={() => setLoggedOut(true)} signingOut={false} externalError={query.has('error') ? 'No hemos podido enviar el correo. Vuelve a intentarlo.' : ''}/>;
   if (query.has("connection-error") && !loggedOut) return <ConnectionRecovery onRetry={() => setLoggedOut(true)} onSignOut={() => setLoggedOut(true)}/>;

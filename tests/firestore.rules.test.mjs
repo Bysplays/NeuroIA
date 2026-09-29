@@ -461,3 +461,22 @@ test('all-area preferences and retake stay within the rules budget and preserve 
     assert.equal(saved.profile.placement.trials[id].assessedLevel, 1);
   }
 });
+
+
+test('optional condition context round-trips with bounded values and consent', async () => {
+  const uid = 'condition-context';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  await backend.initialize(fresh());
+  const condition = {kind:'stroke',side:'left',mobility:'support',consentVersion:1};
+  const preferences = {interests:['memory'],movement:'unspecified',condition};
+  await backend.commit({id:'context',kind:'placement',preferences});
+  const data = await backend.load();
+  assert.deepEqual(data.profile.placement.preferences.condition,condition);
+  for (const invalid of [{...condition,consentVersion:0},{...condition,side:'invalid'},{...condition,diagnosis:'private'},{...condition,kind:'none'}]) {
+    const next = structuredClone(data); next.profile.placement.preferences.condition = invalid;
+    await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), {schemaVersion:1,data:next,updatedAt:serverTimestamp()}));
+  }
+  await backend.commit({id:'remove-context',kind:'placement',preferences:{interests:['memory'],movement:'unspecified'}});
+  assert.equal((await backend.load()).profile.placement.preferences.condition,undefined);
+});

@@ -89,3 +89,18 @@ test('thematic retakes replace chosen levels only and preserve original activity
   assert.deepEqual(preferencesSaved.profile.placement?.retakePreferences, { interests: ['motor'], movement: 'taps' });
   assert.throws(() => applyProgressOperation(data, { id: 'missing', kind: 'placement', preferences: memory, trials: { 'memory-path': trial } }));
 });
+
+
+test('optional condition context is strictly bounded and never affects exercise selection', () => {
+  const condition = { kind: 'stroke' as const, side: 'left' as const, mobility: 'support' as const, consentVersion: 1 as const };
+  const preferences = { ...memory, condition };
+  assert.equal(validPlacementPreferences(preferences), true);
+  assert.deepEqual(placementExercises(preferences), placementExercises(memory));
+  const result = applyProgressOperation(fresh(), {id:'condition',kind:'placement',preferences});
+  assert.deepEqual(result.profile.placement?.preferences?.condition, condition);
+  for (const invalid of [{...condition,consentVersion:0},{...condition,side:'unknown'},{...condition,diagnosis:'free text'},{...condition,kind:'none'}]) {
+    assert.equal(validPlacementPreferences({...memory,condition:invalid}), false);
+  }
+  const removed = applyProgressOperation(result, {id:'remove-condition',kind:'placement',preferences:memory});
+  assert.equal(removed.profile.placement?.preferences?.condition, undefined);
+});

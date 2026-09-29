@@ -8,14 +8,31 @@ export const INTEREST_AREAS = [
   { id: 'executive', title: 'Organización', description: 'Agrupar objetos y elegir categorías.' },
   { id: 'motor', title: 'Coordinación', description: 'Tocar y seguir objetivos en pantalla.' },
 ] as const satisfies readonly { id: CognitiveDomain; title: string; description: string }[];
+export interface ConditionContext {
+  kind: 'stroke' | 'other' | 'none';
+  side: 'unspecified' | 'left' | 'right' | 'both' | 'none';
+  mobility: 'unspecified' | 'independent' | 'support' | 'limited';
+  consentVersion: 1;
+}
+export function validConditionContext(value: unknown): value is ConditionContext {
+  if (!value || typeof value !== 'object') return false;
+  const c = value as ConditionContext;
+  return Object.keys(c).length === 4 && c.consentVersion === 1
+    && ['stroke', 'other', 'none'].includes(c.kind)
+    && ['unspecified', 'left', 'right', 'both', 'none'].includes(c.side)
+    && ['unspecified', 'independent', 'support', 'limited'].includes(c.mobility)
+    && (c.kind !== 'none' || (c.side === 'unspecified' && c.mobility === 'unspecified'));
+}
 export interface PlacementPreferences {
   interests: CognitiveDomain[];
   movement: 'unspecified' | 'standard' | 'taps';
+  condition?: ConditionContext;
 }
 export function validPlacementPreferences(value: unknown): value is PlacementPreferences {
   if (!value || typeof value !== 'object') return false;
   const p = value as PlacementPreferences;
-  return Object.keys(p).length === 2 && Array.isArray(p.interests) && p.interests.length > 0
+  return Object.keys(p).every(key => ['interests', 'movement', 'condition'].includes(key))
+    && (!('condition' in p) || validConditionContext(p.condition)) && Array.isArray(p.interests) && p.interests.length > 0
     && p.interests.length <= 5 && new Set(p.interests).size === p.interests.length
     && p.interests.every(id => INTEREST_AREAS.some(area => area.id === id))
     && ['unspecified', 'standard', 'taps'].includes(p.movement);

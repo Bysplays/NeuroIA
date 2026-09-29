@@ -59,7 +59,7 @@ export const PRIVACY_SECTIONS = [
     title: 'Tu cuenta y tus preferencias',
     paragraphs: [
       'Para acceder utilizas una cuenta de Google o un correo electrónico y una contraseña. Firebase Authentication gestiona la identificación y la sesión. NeuroIA utiliza el identificador de tu cuenta, tu correo y tu nombre para reconocer tu perfil y asociar tu actividad. La contraseña no se guarda.',
-      'Se guardan tus preferencias de presentación, los intereses que eliges y los niveles iniciales de los juegos. No necesitas indicar un diagnóstico para realizar la configuración inicial.',
+      'Se guardan tus preferencias de presentación, los intereses que eliges y los niveles iniciales de los juegos. El paso opcional «Tu condición» permite indicar si has sufrido un ictus, otra condición o ninguna, el lado afectado y tu movilidad. Solo se guardan estas respuestas si consientes expresamente. Son contexto del perfil: no cambian los juegos ni la dificultad y no constituyen una valoración clínica. Puedes elegir «Prefiero no responder» para continuar sin aportar estos datos.',
     ],
   },
   {
@@ -72,7 +72,7 @@ export const PRIVACY_SECTIONS = [
   {
     title: 'Cuando te vinculas con un profesional',
     paragraphs: [
-      'Al canjear una invitación vinculas tu cuenta con el profesional que la ofrece. Mientras esa vinculación y su acceso estén activos, puede consultar tu actividad y resultados, incluidas las gráficas de Muse que hayas guardado con ellos, y proponerte sesiones de juegos.',
+      'Al canjear una invitación vinculas tu cuenta con el profesional que la ofrece. Mientras esa vinculación y su acceso estén activos, puede consultar tu actividad y resultados, las gráficas de Muse guardadas y el contexto de condición que hayas consentido compartir. También puede proponerte sesiones de juegos.',
       'El acceso profesional no permite modificar tus resultados personales. Puedes abandonar la vinculación desde las opciones de acceso de tu cuenta. Dejar de compartir no borra tu historial ni equivale a eliminar tu cuenta.',
     ],
   },

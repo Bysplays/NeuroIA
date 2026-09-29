@@ -303,10 +303,26 @@ for (const choice of ['trial', 'checkout']) {
 test('loading phrases rotate without changing the accessible status', async ({page}) => {
   await page.clock.install();
   await page.goto(fixture+'?loading');
-  await expect(page.getByText('Eligiendo emociones positivas…')).toBeVisible();
-  await page.clock.runFor(2500);
-  await expect(page.getByText('Recordando que cada día es un regalo…')).toBeVisible();
+  await expect(page.getByText('Eligiendo emociones positivas')).toBeVisible();
+  await page.clock.runFor(4000);
+  await expect(page.getByText('Recordando que cada día es un regalo')).toBeVisible();
   await expect(page.getByRole('status',{name:'Preparando tu espacio'})).toBeVisible();
-  await page.clock.runFor(17500);
-  await expect(page.getByText('Eligiendo emociones positivas…')).toBeVisible();
+  await page.clock.runFor(28000);
+  await expect(page.getByText('Eligiendo emociones positivas')).toBeVisible();
+});
+
+
+test('save failure can be dismissed while remaining pending or retried', async ({page}) => {
+  await page.goto(fixture+'?save-error&failure');
+  await page.getByRole('button',{name:'Reintentar',exact:true}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button',{name:'Avanzar sin sincronizar'}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('status')).toContainText('Guardado pendiente');
+  await page.getByRole('button',{name:'Reintentar',exact:true}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.goto(fixture+'?save-error');
+  await page.getByRole('button',{name:'Reintentar',exact:true}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByText('Guardado pendiente.')).toHaveCount(0);
 });

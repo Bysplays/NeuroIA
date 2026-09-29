@@ -10,29 +10,26 @@ professional-only entry is unaffected.
 | Reference | Observed pattern | NeuroIA use |
 | --- | --- | --- |
 | [Headspace: what's on your mind](https://mobbin.com/screens/6aba84cc-e359-446c-8cf3-b10cae809456) | One question, labelled options with visible selection, primary Continue below | One question per step, large selectable rows and a distinct forward action |
-| [Headspace: previous experience](https://mobbin.com/screens/c180da4c-a544-4c8c-aa74-1e6358f241ea) | Small progress indicator, Back, plain-language radio choices | Two-step indicator, reversible navigation and optional movement choices |
+| [Headspace: previous experience](https://mobbin.com/screens/c180da4c-a544-4c8c-aa74-1e6358f241ea) | Small progress indicator, Back, plain-language radio choices | Three-step indicator, reversible navigation and optional movement choices |
 | [Elevate: training goals](https://mobbin.com/screens/43ef6cad-b661-4f3c-8b53-ead77a641031) | Independent goals with explicit selected state | Multiple practice areas without forcing a single goal |
 
 Only interaction patterns informed the implementation. No reference screenshot,
-third-party mascot, clinical claim or external copy is shipped. Existing paper
-companions, clinical-blue Calma palette and shared game/session/settings systems remain.
+third-party mascot, clinical claim or external copy is shipped. The clinical-blue Calma palette and shared game/session/settings systems remain.
 
 ## Interaction
 
 1. Choose one or more areas: Atención, Memoria, Lenguaje, Organización,
-   Coordinación. Continue is disabled until a choice is made. The explicit
-   exploration alternative selects all five areas.
+   Coordinación. Continue is disabled until a choice is made; there is no exploration shortcut.
 2. Optionally choose normal inputs, taps only, or no preference. Taps-only omits
    the moving-target tracking game from assessment. It does not block its later
-   catalog entry or change game mechanics. No diagnosis, affected limb, clinical
-   history or free-text health information is collected.
-3. Review areas and the actual number of selected games. Start or change choices.
-   Work through one area before another, using at most two stages per game (1 then 4). A failed Simon trial ends immediately without a forced replay.
-4. Finish when all selected games have a saved final trial. Show measured levels,
-   omitted trials and untested games distinctly. Unselected games remain playable
-   with the normal level-1 fallback; no measured level is manufactured for them.
+   catalog entry or change game mechanics. This step only captures input preferences.
+3. Optionally provide condition context (stroke, other or none), affected side and
+   mobility. No response is the default. Explicit consent is required to store it;
+   linked professionals with progress-read permission can access it. This context
+   never changes exercise selection or difficulty.
+4. Start the selected games. Existing skip and resume behavior is preserved.
 
-Back preserves draft selections within the two-step form. Confirming the form
+Back preserves draft selections within the three-step form. Confirming the form
 queues its preferences durably. Draft checkbox changes before confirmation are
 not saved. Changing a confirmed selection preserves already saved trials and
 stages; a removed area is not silently marked skipped. Adding it again can resume
@@ -102,3 +99,10 @@ CR-05's remaining numeric labels, CR-06's misleading results buttons, CR-07's
 sequence retry, CR-08's pairs reveal and CR-09's trial pacing remain separate backlog
 items. This change does not claim to resolve those game behaviors. Welcome copy
 no longer announces numeric ladder steps, but the internal ladder is unchanged.
+
+Optional `preferences.condition` contains bounded kind/side/mobility enums and
+`consentVersion: 1`; omission is backward-compatible and means no context supplied.
+Choosing no response during editing removes this object from current preferences.
+Permanent operation receipts and backups are not a full erasure mechanism.
+The current Firestore preferences/stages/context rules have been published and
+verified against the local tested file; no frontend deployment is implied.

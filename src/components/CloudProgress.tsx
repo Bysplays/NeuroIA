@@ -1,3 +1,4 @@
+import { ProgressSaveNotice } from './ProgressSaveNotice';
 import { ConnectionRecovery } from './ConnectionRecovery';
 import { AppLoading } from './AppLoading';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
@@ -89,10 +90,7 @@ export function CloudProgress({ user, onSignOut, children }: {
   </main>;
 
   return <>
-    {view.status === 'pending' && <div className="account-notice cloud-status" role="status">
-      <span>Guardado pendiente. Mantén esta página abierta y reintenta.</span>
-      <span>{view.message}</span><button className="paper-nav-button" onClick={() => { void view.sync?.retry(); }}>Reintentar</button>
-    </div>}
+    <ProgressSaveNotice status={view.status ?? 'saved'} onRetry={() => view.sync!.retry()}/>
     {children(view.sync, view.data)}
   </>;
 }

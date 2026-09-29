@@ -24,15 +24,20 @@ service cloud.firestore {
         && seat.status == 'active' && seat.expiresAt > request.time.toMillis()
         && seat.occupantUid == uid && link.patientId == uid && link.seatId == seatId;
     }
+    function validLevelEvidence(evidence) {
+      return evidence is list && evidence.size() < 3
+        && evidence[0] is int && evidence[0] >= 0 && evidence[0] <= 100
+        && (evidence.size() < 2 || (evidence[1] is int && evidence[1] >= 0 && evidence[1] <= 100));
+    }
     function validGameLevel(value) {
       let level = value.level;
       let evidence = value.evidence;
+      let runs = value.get('qualifyingRuns', 0);
       return value is map && value.keys().hasOnly(['level', 'evidence', 'qualifyingRuns'])
-        && (!('qualifyingRuns' in value) || (value.qualifyingRuns is int && value.qualifyingRuns >= 0 && value.qualifyingRuns <= 1))
+        && runs is int && runs >= 0 && runs <= 1
         && level is int && level >= 1 && level <= 10
-        && evidence is list && (evidence == [] || (evidence.size() < 3
-        && evidence[0] is int && evidence[0] >= 0 && evidence[0] <= 100
-        && (evidence.size() < 2 || (evidence[1] is int && evidence[1] >= 0 && evidence[1] <= 100))));
+        // Reassessment resets all eight lists; keep that path below the rules expression limit.
+        && (evidence == [] || validLevelEvidence(evidence));
     }
     function validTrial(value) {
       return value is map && value.keys().hasOnly(['accuracy', 'questions', 'hints', 'skipped', 'assessedLevel'])
@@ -53,9 +58,18 @@ service cloud.firestore {
         && (!('motor-target' in value) || value['motor-target'] == previous.get('motor-target', null) || validGameLevel(value['motor-target']))
         && (!('motor-tracking' in value) || value['motor-tracking'] == previous.get('motor-tracking', null) || validGameLevel(value['motor-tracking']));
     }
+    function validConditionContext(value) {
+      return value is map && value.keys().hasAll(['kind', 'side', 'mobility', 'consentVersion'])
+        && value.keys().hasOnly(['kind', 'side', 'mobility', 'consentVersion'])
+        && value.consentVersion == 1 && value.kind in ['stroke', 'other', 'none']
+        && value.side in ['unspecified', 'left', 'right', 'both', 'none']
+        && value.mobility in ['unspecified', 'independent', 'support', 'limited']
+        && (value.kind != 'none' || (value.side == 'unspecified' && value.mobility == 'unspecified'));
+    }
     function validPlacementPreferences(value) {
       return value is map && value.keys().hasAll(['interests', 'movement'])
-        && value.keys().hasOnly(['interests', 'movement'])
+        && value.keys().hasOnly(['interests', 'movement', 'condition'])
+        && (!('condition' in value) || validConditionContext(value.condition))
         && value.interests is list && value.interests.size() > 0 && value.interests.size() <= 5
         && value.interests.toSet().size() == value.interests.size()
         && value.interests.hasOnly(['attention', 'memory', 'language', 'executive', 'motor'])

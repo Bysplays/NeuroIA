@@ -10,7 +10,7 @@ async function choose(page, area = 'Memoria') {
 }
 async function saved(page) { return JSON.parse(await page.getByTestId('profile').textContent()); }
 for (const size of [{ width: 390, height: 844 }, { width: 820, height: 1180 }, { width: 1280, height: 800 }, { width: 844, height: 390 }]) {
-  test(`two-step choices fit and remain keyboard-accessible at ${size.width}×${size.height}`, async ({ page }) => {
+  test(`three-step choices fit and remain keyboard-accessible at ${size.width}×${size.height}`, async ({ page }) => {
     await page.setViewportSize(size); await page.goto(fixture);
     await expect(page.getByRole('button', { name: 'Continuar', exact: true })).toBeDisabled();
     const memory = page.getByRole('checkbox', { name: /Memoria/ });
@@ -22,14 +22,16 @@ for (const size of [{ width: 390, height: 844 }, { width: 820, height: 1180 }, {
     await page.getByRole('button', { name: 'Volver', exact: true }).click();
     await expect(memory).toBeChecked();
     await page.getByRole('button', { name: 'Continuar', exact: true }).click();
-    await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
+    await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
     await expect(page.getByText('0 de 2 juegos preparados')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
 test('selected assessment survives reload and finishes without testing unrelated areas', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 }); await page.goto(fixture + '?delay');
-  await choose(page); await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
+  await choose(page); await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   await expect.poll(async () => (await saved(page)).placement?.preferences?.interests).toEqual(['memory']);
   await page.reload(); await expect(page.getByText('0 de 2 juegos preparados')).toBeVisible();
   await page.getByRole('button', { name: 'Empezar', exact: true }).click();
@@ -47,12 +49,14 @@ test('selected assessment survives reload and finishes without testing unrelated
 test('taps plan excludes tracking, choices can change and large text remains usable', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 }); await page.goto(fixture + '?large&hidden&contrast');
   await choose(page, 'Coordinación'); await page.getByRole('radio', { name: /Prefiero dar toques/ }).check();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   await expect(page.getByText('0 de 1 juegos preparados')).toBeVisible();
   await page.getByRole('button', { name: 'Cambiar mis elecciones' }).click();
   await expect(page.getByRole('checkbox', { name: /Coordinación/ })).toBeChecked();
   await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await expect(page.getByRole('radio', { name: /Prefiero dar toques/ })).toBeChecked();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
@@ -60,6 +64,7 @@ test('explicit area choices persist when editing reassessment', async ({ page })
   await page.goto(fixture + '?retake');
   await expect(page.getByRole('button', { name: /No sé qué elegir/ })).toHaveCount(0);
   for (const checkbox of await page.getByRole('checkbox').all()) await checkbox.check();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   await expect(page.getByText('0 de 8 juegos preparados')).toBeVisible();
@@ -74,6 +79,7 @@ test('explicit area choices persist when editing reassessment', async ({ page })
 test('a passed target stage survives reload and continues at its saved difficulty', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 }); await page.goto(fixture + '?delay');
   await choose(page, 'Coordinación'); await page.getByRole('radio', { name: /Prefiero dar toques/ }).check();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   await page.getByRole('button', { name: 'Empezar', exact: true }).click();
   for (let i = 0; i < 5; i++) await page.getByRole('button', { name: 'Tocar diana de coordinación' }).click();
@@ -90,6 +96,7 @@ test('a passed target stage survives reload and continues at its saved difficult
 test('accepting a selective retake preserves other levels and preselects its saved choices next time', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 }); await page.goto(fixture + '?retake');
   await choose(page, 'Coordinación'); await page.getByRole('radio', { name: /Prefiero dar toques/ }).check();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   await page.getByRole('button', { name: 'Empezar', exact: true }).click();
   await page.getByRole('button', { name: /Omitir/ }).click();
@@ -101,4 +108,28 @@ test('accepting a selective retake preserves other levels and preselects its sav
   await page.reload();
   await expect(page.getByRole('checkbox', { name: /Coordinación/ })).toBeChecked();
   await expect(page.getByRole('checkbox', { name: /Memoria/ })).not.toBeChecked();
+});
+
+
+test('condition context is optional, consented, saved and does not change the game plan', async ({page}) => {
+  await page.goto(fixture);
+  await choose(page);
+  await page.getByRole('button',{name:'Continuar',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Tu condición',exact:true})).toBeFocused();
+  await page.getByRole('radio',{name:'He sufrido un ictus',exact:true}).check();
+  await page.getByLabel('Lado del cuerpo afectado').selectOption('left');
+  await page.getByLabel('¿Cómo es tu movilidad al desplazarte?').selectOption('support');
+  await expect(page.getByRole('button',{name:'Preparar mis juegos'})).toBeDisabled();
+  await page.getByRole('checkbox',{name:/Consiento guardar/}).check();
+  await page.getByRole('button',{name:'Preparar mis juegos'}).click();
+  await expect.poll(async()=> (await saved(page)).placement?.preferences?.condition).toEqual({kind:'stroke',side:'left',mobility:'support',consentVersion:1});
+  await expect(page.getByText('0 de 2 juegos preparados')).toBeVisible();
+  await page.reload();
+  await page.getByRole('button',{name:'Cambiar mis elecciones'}).click();
+  await page.getByRole('button',{name:'Continuar',exact:true}).click();
+  await page.getByRole('button',{name:'Continuar',exact:true}).click();
+  await expect(page.getByLabel('Lado del cuerpo afectado')).toHaveValue('left');
+  await page.getByRole('radio',{name:'Prefiero no responder',exact:true}).check();
+  await page.getByRole('button',{name:'Preparar mis juegos'}).click();
+  await expect.poll(async()=> (await saved(page)).placement?.preferences?.condition).toBeUndefined();
 });

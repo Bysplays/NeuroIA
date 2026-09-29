@@ -95,7 +95,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/services/appearance.ts` | Applies restored and live appearance settings before paint |
 | `src/services/firestoreProgress.ts` | Firestore transactions, retry receipts and live updates |
 | `src/services/progressSnapshot.ts` | Orders server snapshots by timestamp to reject delayed older data |
-| `src/components/CloudProgress.tsx` | Cloud loading, import choice and save-status boundary |
+| `src/components/CloudProgress.tsx`, `ProgressSaveNotice.tsx` | Cloud loading, import choice and dismissible pending-save notification |
 | `src/services/soundService.ts` and `speechVoice.ts` | Shared audio, narrator controls, and Spain-voice selection |
 | `src/services/achievements.ts` | Cumulative achievement conditions |
 | `src/components/AchievementShowcase.tsx` | Standalone badge collection and details |
@@ -627,3 +627,12 @@ information view in existing React state. The previous screen remains mounted bu
 hidden; Settings temporarily closes its native dialog and retains its selected tab.
 GameSession remains paused while Settings owns that navigation. No router, history
 rewrite or new persistence is introduced.
+
+PlacementPreferences now has three steps; ConditionPreferences owns optional
+bounded health-context choices and explicit consent. `PlacementPreferences.condition`
+is optional, validated identically by the reducer and Firestore rules, and never
+influences `placementExercises` or difficulty. The existing progress authorization
+means an active linked professional can read it; disclose that before saving. Do
+not reuse legacy strokeDate/affectedSide fields or accept free-text diagnoses.
+ProgressSaveNotice retains pending data and retries after dismissal; its continue
+action never bypasses initial cloud loading or server-confirmed access.

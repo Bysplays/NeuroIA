@@ -1780,3 +1780,14 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
   .entry-preferences .preferences-header { padding: 20px 20px 16px; }
   .entry-preferences .preferences-body { padding-inline: 20px; }
 }
+
+.condition-preferences { display: grid; gap: 24px; }
+.condition-details { display: grid; gap: 18px; }
+.condition-details label { font-size: .8rem; font-weight: 600; line-height: 1.5; }
+.condition-details select { display: block; width: 100%; min-height: 48px; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-surface); color: var(--color-text-main); font: inherit; font-weight: 400; }
+.condition-privacy { border-top: 1px solid var(--color-border); padding-top: 16px; }
+.condition-privacy p { color: var(--color-text-muted); font-size: .75rem; line-height: 1.6; margin: 0 0 12px; }
+.condition-privacy label { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; font-size: .8rem; line-height: 1.5; cursor: pointer; }
+.condition-privacy input { flex: none; width: 20px; height: 20px; margin-top: 3px; accent-color: var(--color-primary); }
+
+.save-continue { display: block; margin: 16px auto 0; min-height: 44px; font-size: .8rem; text-decoration: underline; text-underline-offset: 4px; }

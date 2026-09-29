@@ -100,16 +100,19 @@ subject to the confirmed deadline and available client materials.
 
 ### Initial assessment: correctness and pacing
 
-- [x] **CR-04 — Interests before assessment (implemented locally).** Two accessible
-  steps select practice areas and an optional taps-only preference; thematic trials
+- [x] **CR-04 — Interests before assessment (implemented locally).** Three accessible
+  steps select practice areas, an optional taps-only preference and optional condition context; thematic trials
   follow those choices. Preferences, passed stages and completed trials resume
   through the existing durable progress queue. Unselected games stay untested;
   choices can be edited before completion and through a selective retake afterward.
-  No diagnosis or free-text health information is collected. See [implementation,
+  Condition context requires explicit consent; no free-text health information is collected. See [implementation,
   Mobbin references and checks](PLACEMENT.md).
-- [ ] **CR-04 release —** Review with the client and publish the updated Firestore
-  rules before the frontend. Verify the deployed flow on the target devices; no
-  production rules or frontend have been published as part of local implementation.
+- [x] **CR-04 rules —** Published and verified onboarding preferences/stages and
+  bounded optional condition context rules in `ceoaberto-neuroia` after demo tests.
+  Preserved the existing production level-evidence validation.
+- [ ] **CR-04 release —** Owner review, target-device checks and frontend publication.
+- [ ] Approve health-context purpose, consent wording, retention/deletion and professional
+  disclosure before public release; the implemented consent checkbox is not legal certification.
 - [x] **CR-05 — Pressure-free assessment wording (local).** Trial controls say “A tu ritmo”; numeric levels are retained only in ordinary play and the final evidence summary. No numeric trial announcement is narrated.
 
 - [x] **CR-06 — Misleading results action during trials (local).** Naming, words and categorization use “Continuar” during assessment. Ordinary completion keeps its results action; placement advances after durable evidence.
