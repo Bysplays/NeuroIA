@@ -931,7 +931,7 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 
 /* Stable entry presentation shared by every initial asynchronous boundary. */
 .app-loading { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 32px 24px; text-align: center; background: var(--color-bg); color: var(--color-text-main); }
-.app-loading p { font-size: 14.4px; line-height: 1.5; color: var(--color-text-muted); margin: 0; }
+.app-loading p { width: 100%; max-width: 34ch; min-height: 3em; display: grid; align-items: center; font-size: 14.4px; line-height: 1.5; color: var(--color-text-muted); margin: 0; }
 .app-loading-dots { display: flex; gap: 7px; padding: 8px; }
 .app-loading-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-primary); animation: loading-dot 1.4s ease-in-out infinite; }
 .app-loading-dots i:nth-child(2) { animation-delay: .16s; }

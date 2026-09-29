@@ -176,7 +176,10 @@ Escape dismissal and focus return. Delivery success stays inline. During a manua
 check, the verification link reads Comprobando…; resend reads Enviando… during
 delivery. Keep status in the action itself without an extra loading paragraph.
 Loading reuses the shared Brand instead of a separate wordmark and keeps its
-accessible status and reduced-motion dots. Professional entry failures reuse the
+accessible status and reduced-motion dots. Visible warm loading phrases rotate every
+2.5 seconds in a reserved two-line area; the screen-reader status stays stable
+(Preparando tu espacio) to avoid repeated announcements. Clear the interval on exit
+and never delay readiness to finish a phrase. Professional entry failures reuse the
 same recovery page as player access failures.
 Personal/professional intent survives authentication. Existing verification,
 recent-authentication and account ownership requirements remain unchanged.

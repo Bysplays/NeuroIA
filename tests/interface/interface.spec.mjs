@@ -298,3 +298,15 @@ for (const choice of ['trial', 'checkout']) {
     expect(await page.evaluate(()=>!!window.startedTrial || !!window.startedCheckout)).toBe(false);
   });
 }
+
+
+test('loading phrases rotate without changing the accessible status', async ({page}) => {
+  await page.clock.install();
+  await page.goto(fixture+'?loading');
+  await expect(page.getByText('Eligiendo emociones positivas…')).toBeVisible();
+  await page.clock.runFor(2500);
+  await expect(page.getByText('Recordando que cada día es un regalo…')).toBeVisible();
+  await expect(page.getByRole('status',{name:'Preparando tu espacio'})).toBeVisible();
+  await page.clock.runFor(17500);
+  await expect(page.getByText('Eligiendo emociones positivas…')).toBeVisible();
+});
