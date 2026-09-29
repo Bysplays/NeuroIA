@@ -43,8 +43,8 @@ export function InformationPage({
     <main className={`information-page information-page-${kind}`}>
       <header className="information-page-header">
         <Brand />
-        <button className="text-link" onClick={back}>
-          <X size={20}/>
+        <button className="entry-toolbar-action" onClick={back}>
+          <X size={18} aria-hidden="true"/>
           Cerrar
         </button>
       </header>

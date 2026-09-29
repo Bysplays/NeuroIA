@@ -326,7 +326,7 @@ body[data-contrast="standard"] .game-session .category-bin-card { background: #f
 .game-session .category-bin-card:first-child { border-radius: 24px 0 0 24px; }
 .game-session .category-bin-card:last-child { border-radius: 0 24px 24px 0; }
 .game-session .category-bin-card:hover, .game-session .category-bin-card:active { transform: none; }
-.game-session .category-bin-card .bin-title { font-size: .9rem; }
+.game-session .category-bin-card .bin-title { font-size: .9rem; max-width: 100%; overflow-wrap: anywhere; hyphens: auto; }
 .game-session .category-next-bar { padding: 0; min-height: 56px; width: 100%; }
 .game-session .category-next-bar > button { width: 100%; max-width: none; }
 
@@ -459,7 +459,7 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 .game-session .instruction-level-control > button { width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); box-shadow: none; }
 .game-session .paper-nav-button { min-height: 44px; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); }
 .game-session .paper-nav-button.touch-btn-primary { background: var(--color-primary); color: var(--color-action-text); }
-.game-session .naming-option-btn, .game-session .letter-option-btn, .game-session .category-bin-card { border-radius: 12px; box-shadow: none; }
+.game-session .naming-option-btn, .game-session .letter-option-btn { border-radius: 12px; box-shadow: none; }
 .game-session .naming-option-btn { font-size: .85rem; font-weight: 600; }
 .game-session .placement-actions .touch-btn, .game-session .memory-actions .touch-btn { border-radius: 12px; min-height: 52px; font-size: .85rem; }
 

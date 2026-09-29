@@ -542,4 +542,4 @@ release issue is lost during prioritization.
   periods/criteria, provider agreements and international transfer safeguards.
   Current legal page describes verified app behavior, not a complete approved policy.
 
-- [ ] Investigate intermittent horizontal overflow in the level-10 categorization browser fixture with large text (advanced-board check failed once and passed on repeat); verify long category labels across generated sets.
+- [x] Keep long category labels inside their buttons with wrapping and hyphenation; verified the level-10 narrow/short viewport fixture with large text.

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, CircleAlert } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleAlert, X } from "lucide-react";
 import { ModalFrame } from "./ModalFrame";
 import { Brand } from "./Brand";
 import { PracticeMotif } from "./PracticeMotif";
@@ -103,8 +103,8 @@ export function LoginScreen({
               <Brand />
             </button>
             {mode !== null && (
-              <button className="text-link" disabled={busy} onClick={() => changeMode(mode === "reset" ? "signin" : null)}>
-                <ArrowLeft size={18} /> Volver
+              <button className="entry-toolbar-action" disabled={busy} onClick={() => changeMode(mode === "reset" ? "signin" : null)}>
+                {mode === "reset" ? <><ArrowLeft size={18} aria-hidden="true"/> Volver</> : <><X size={18} aria-hidden="true"/> Cerrar</>}
               </button>
             )}
           </header>
