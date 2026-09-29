@@ -21,10 +21,13 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [x] Prepare live account-lifecycle infrastructure: Worker modules/cron published
   with deletion disabled, stable trial secret configured and scoped Auth IAM granted.
   All four collection-group indexes confirmed READY; no real account was deleted.
+- [x] Remove the two owner-approved trial access records, retaining both pseudonymous
+  trial-use markers atomically. Read-back confirmed both removals and markers;
+  profiles, results, invitations and Auth accounts were preserved.
 - [ ] Coordinate the frontend migration with new
   Firestore rules and ACCOUNT_DELETION_ENABLED. The currently published frontend
   still grants trials directly; changing rules alone would break existing signups.
-  Owner choice on frontend publication is pending. Verify with a disposable account
+  GitHub authorization and the required explicit merge approval remain pending. Verify with a disposable account
   after activation; backend preparation has already been authorized.
 - [ ] Review refreshed onboarding preferences and assessment entry with the owner;
   visual styling now matches account entry. Existing assessment acceptance checks remain open.

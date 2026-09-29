@@ -210,6 +210,9 @@ Firestore. Do not switch rules or enable deletion independently of the frontend
 migration: old trial activation would fail. Publishing the current frontend remains
 subject to the owner's separate choice; backend authorization has already been given.
 No real account was deleted. Health and unauthenticated rejection checks passed.
+The two trial access records explicitly approved for cleanup were removed in one
+transaction with their permanent pseudonymous trial-use markers. Read-back confirmed
+both deletions and markers. Profiles, results, invitations and Auth accounts remain intact.
 
 Activation sequence (finish coordinated with frontend publication):
 
