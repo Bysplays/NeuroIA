@@ -11,13 +11,14 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
   user: User; onVerified: () => void; onSignOut: () => void; signingOut: boolean; externalError: string;
   initialDelivery?: 'idle' | 'sending' | 'sent' | 'failed';
 }) {
-  const [busy, setBusy] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'send' | 'check' | null>(null);
+  const busy = pendingAction !== null;
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
   const act = async (send: boolean) => {
     if (busy || signingOut) return;
-    setBusy(true); setError(''); setNotice('');
+    setPendingAction(send ? 'send' : 'check'); setError(''); setNotice('');
     try {
       if (send) {
         await sendVerification(user);
@@ -27,7 +28,7 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
         if (auth.currentUser === user) onVerified();
       } else setError('Tu correo aún no está verificado. Abre el enlace recibido y vuelve a comprobarlo.');
     } catch (error) { setError(authErrorMessage(error, 'email')); }
-    finally { setBusy(false); }
+    finally { setPendingAction(null); }
   };
   return <main className="entry-page email-verification">
     {error && <ModalFrame labelledBy="verification-error-title" onClose={() => setError('')}>
@@ -50,10 +51,9 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
       <div className="verification-body">
         <p>Abre el enlace de verificación de tu correo <strong data-selectable="true">{user.email}</strong>. Revisa también la carpeta de spam.</p>
         <div className="verification-actions">
-          <button className="touch-btn touch-btn-primary" disabled={busy || signingOut || initialDelivery === 'sending'} onClick={() => act(true)}>Reenviar</button>
-          <button className="email-text-button" disabled={busy || signingOut} onClick={() => act(false)}>Ya he verificado mi correo</button>
+          <button className="touch-btn touch-btn-primary" disabled={busy || signingOut || initialDelivery === 'sending'} onClick={() => act(true)} aria-busy={pendingAction === 'send'}>{pendingAction === 'send' ? 'Enviando…' : 'Reenviar'}</button>
+          <button className="email-text-button" disabled={busy || signingOut} onClick={() => act(false)} aria-busy={pendingAction === 'check'}>{pendingAction === 'check' ? 'Comprobando…' : 'Ya he verificado mi correo'}</button>
         </div>
-        {busy && <p className="entry-note" role="status">Un momento…</p>}
         {notice && <p className="email-feedback" role="status">{notice}</p>}
         {!notice && !error && initialDelivery === 'sending' && <p className="email-feedback" role="status">Enviando el correo de verificación…</p>}
         {!notice && !error && initialDelivery === 'sent' && <p className="email-feedback" role="status">Correo de verificación enviado.</p>}

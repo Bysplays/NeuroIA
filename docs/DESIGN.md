@@ -158,7 +158,9 @@ the manual action Reenviar. Disable resend during the initial delivery and show
 its success or failure accurately. Reloading/restoring a session never auto-sends.
 Email verification checks that remain unverified, and manual send/check failures,
 use the same compact notification modal as registration, with a Volver action,
-Escape dismissal and focus return. Delivery success stays inline.
+Escape dismissal and focus return. Delivery success stays inline. During a manual
+check, the verification link reads Comprobando…; resend reads Enviando… during
+delivery. Keep status in the action itself without an extra loading paragraph.
 Loading reuses the shared Brand instead of a separate wordmark and keeps its
 accessible status and reduced-motion dots. Professional entry failures reuse the
 same recovery page as player access failures.
