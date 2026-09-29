@@ -141,7 +141,7 @@ export function LoginScreen({
               className="account-entry-layout"
               aria-labelledby="entry-title"
             >
-              <div className="account-entry-form">
+              <div className={`account-entry-form${mode !== "reset" ? " account-entry-tabbed" : ""}`}>
                 {mode !== "reset" && <div
                   className="entry-mode-switch"
                   role="group"
@@ -256,7 +256,7 @@ export function LoginScreen({
                   </button>
                   {mode === "register" && (
                     <p className="entry-provider-note">
-                      Las cuentas de terceros no necesitan registro. Accede desde «Iniciar sesión».
+                      Las cuentas de terceros no necesitan registro.<br />Accede desde «Iniciar sesión».
                     </p>
                   )}
                   {mode === "signin" && (

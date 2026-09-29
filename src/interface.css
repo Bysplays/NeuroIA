@@ -1590,6 +1590,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .entry-auth > .product-information-links { margin-top: 0; padding: 8px 0 0; gap: 0 20px; }
 .account-entry-layout { flex: 1; display: flex; align-items: center; padding: 8px 0 16px; }
 .account-entry-form { max-width: 440px; width: 100%; margin: 0 auto; }
+.account-entry-tabbed { min-height: 30rem; }
 .account-entry-form h1 { font-size: clamp(1.4rem, 3vw, 1.7rem); line-height: 1.25; margin: 18px 0 8px; letter-spacing: -.035em; }
 .account-entry-form > p { font-size: .85rem; line-height: 1.5; color: var(--color-text-muted); margin-bottom: 18px; }
 .account-entry-form .email-form { display: grid; gap: 14px; }

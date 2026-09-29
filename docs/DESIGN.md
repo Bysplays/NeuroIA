@@ -114,9 +114,10 @@ third-party accounts can use Iniciar sesión without separate registration.
 Use 6 px label/input gaps, 14 px between fields, 48 px minimum inputs and
 54 px primary actions. Keep the auth header and footer compact and use a minimum
 viewport-height shell. Center the auth form vertically in the available space
-between header and footer; allow natural scrolling on short screens, with a keyboard
+between header and footer, reserving a shared 30rem minimum height for sign-in
+and registration so their selector stays at the same height; allow natural scrolling on short screens, with a keyboard
 or enlarged text. Registration places the third-party note below its submit button in muted 0.7rem
-text, not below the heading. The header holds only the brand and Volver. Do not add a decorative side
+text, not below the heading, with an explicit line break after its first sentence. The header holds only the brand and Volver. Do not add a decorative side
 panel or duplicate access buttons. Recovery hides the access selector and uses
 the header Volver action to return to sign-in, without a duplicate return action
 below the form. Reference: [Brilliant sign-in on Mobbin](https://mobbin.com/screens/a7afa68a-7e23-4fe5-8c0d-081a1eecc314),
