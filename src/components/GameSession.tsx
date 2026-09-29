@@ -113,9 +113,6 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
       <div className="placement-card">
         <div className="instruction-art"><ExerciseIllustration exercise={exercise?.id ?? 'visual-scanning'} /></div>
         <div className="placement-content">
-        <div className="placement-progress-heading">
-        <button className="paper-nav-button" onClick={() => soundService.speak(instruction)}><Volume2 size={20} />Escuchar</button>
-        </div>
         <div className="placement-copy">
         <h1 ref={heading} tabIndex={-1} id="game-instruction-title">{exercise?.title}</h1>
         <p>{instruction}</p>
@@ -130,7 +127,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         <button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setStarted(true); setHelp(false); }}>{started ? 'Continuar jugando' : 'Empezar a jugar'}</button></div>
         </div>
       </div>
-      {(!lockedLevel || step) && <footer className="instruction-navigation">{!lockedLevel && <button className="entry-toolbar-action" onClick={onBack}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}{step && <span className="instruction-step soft-label">{step}</span>}</footer>}
+      <footer className="instruction-navigation">{!lockedLevel && <button className="entry-toolbar-action" onClick={onBack}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}<button className="paper-nav-button instruction-listen" onClick={() => soundService.speak(instruction)}><Volume2 size={20} aria-hidden="true"/>Escuchar</button>{step && <span className="instruction-step soft-label">{step}</span>}</footer>
     </section>}
     {started && <div className="game-session-play">
       {!completed && <header className="viewport-session-header">

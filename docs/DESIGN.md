@@ -262,7 +262,8 @@ distinct blue-and-white compositions tied to each interaction (search, naming,
 letters, sequence, pairs, sorting, target and tracking). Never reuse the login/home
 `PracticeMotif` or a legacy companion for game introductions. Desktop uses an illustration column
 and a compact copy/action column; narrow screens stack a small illustration above
-centered instructions. Keep listen separate above the title. Group the ordinary-play
+centered instructions. Center the listen action in the introduction footer, with Back on the left
+and optional session position on the right. Do not add the in-game help icon here. Group the ordinary-play
 level selector and **Empezar a jugar** side by side at equal height, with a small
 gap and generous hit areas, including on phones. Level minus/plus controls have
 flat internal edges and only the outer group corners are rounded. Keep the back action separate.

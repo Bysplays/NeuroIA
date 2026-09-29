@@ -377,13 +377,14 @@ body[data-contrast="standard"] .game-session .category-bin-card { background: #f
 .game-instruction-screen .placement-copy h1 { font-size: clamp(1.5rem, 2.8vw, 2.1rem); line-height: 1.2; margin: 0; }
 .game-instruction-screen .placement-copy p { font-size: .9rem; line-height: 1.65; color: var(--color-text-muted); }
 .game-instruction-screen .placement-content { gap: 24px; align-self: center; }
-.game-instruction-screen .placement-progress-heading { justify-content: flex-start; }
 .game-instruction-screen .placement-copy { gap: 16px; }
 .game-instruction-screen .placement-actions { display: flex; flex-direction: row; align-items: stretch; gap: 10px; margin-top: 8px; }
 .game-instruction-screen .placement-actions > .touch-btn { flex: 1; min-width: 0; padding-inline: 16px; }
 .game-instruction-screen .placement-actions > .soft-label { align-self: center; }
-.instruction-navigation { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; }
-.instruction-step { margin-left: auto; text-align: right; }
+.instruction-navigation { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; min-height: 48px; }
+.instruction-navigation > .entry-toolbar-action { grid-column: 1; grid-row: 1; justify-self: start; }
+.instruction-navigation > .instruction-listen { grid-column: 2; grid-row: 1; justify-self: center; }
+.instruction-step { grid-column: 3; grid-row: 1; justify-self: end; text-align: right; min-width: 0; overflow-wrap: anywhere; }
 .instruction-brand { display: block; min-width: 0; width: 150px; max-width: 50%; height: 44px; object-fit: contain; object-position: left center; }
 .instruction-level-control { display: inline-flex; align-items: center; gap: 0; padding: 0; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); flex-shrink: 0; }
 .instruction-level-control > span { min-width: 58px; text-align: center; font-size: .75rem; font-variant-numeric: tabular-nums; }
@@ -452,7 +453,6 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
   .instruction-art .exercise-illustration { max-width: 170px; }
   .game-instruction-screen .placement-content { gap: 18px; }
   .game-instruction-screen .placement-copy { gap: 12px; }
-  .game-instruction-screen .placement-progress-heading { justify-content: center; }
   .game-instruction-screen .placement-copy { text-align: center; }
   .game-instruction-screen .placement-actions { gap: 8px; }
   .game-instruction-screen .placement-actions > .touch-btn { padding-inline: 10px; }
