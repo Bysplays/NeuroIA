@@ -9,7 +9,7 @@ import { FullscreenButton } from './FullscreenButton';
 import { useViewportPanel } from '../services/viewport';
 import { gameConfig, type GameMode } from '../services/difficulty';
 import { SessionContext } from '../services/gameSession';
-import { PracticeMotif } from './PracticeMotif';
+import { ExerciseIllustration } from './ExerciseIllustration';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Minus, Plus, CircleHelp, Clock, Settings2, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { createGameClock } from '../services/gameClock';
@@ -91,7 +91,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>
       <div className="placement-card">
-        <div className="instruction-art"><PracticeMotif /></div>
+        <div className="instruction-art"><ExerciseIllustration exercise={exercise?.id ?? 'visual-scanning'} /></div>
         <div className="placement-content">
         <div className="placement-progress-heading">
         <button className="paper-nav-button" onClick={() => soundService.speak(instruction)}><Volume2 size={20} />Escuchar</button>

@@ -257,8 +257,10 @@ unselected levels and existing history.
 
 ## Game instructions, play and feedback
 
-Each game starts with a full instruction page using the approved blue-card
-`PracticeMotif`, never a legacy companion. Desktop uses an illustration column
+Each game starts with a full instruction page using `ExerciseIllustration`: eight
+distinct blue-and-white compositions tied to each interaction (search, naming,
+letters, sequence, pairs, sorting, target and tracking). Never reuse the login/home
+`PracticeMotif` or a legacy companion for game introductions. Desktop uses an illustration column
 and a compact copy/action column; narrow screens stack a small illustration above
 centered instructions. Keep listen separate above the title. Group the ordinary-play
 level selector and **Empezar a jugar** side by side at equal height, with a small

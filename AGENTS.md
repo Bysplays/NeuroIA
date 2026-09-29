@@ -80,6 +80,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/ExerciseCatalog.tsx` | Eight-game catalog and area filters |
 | `src/services/exerciseCatalog.ts` | Eight active exercise definitions and short summaries |
 | `src/services/activityExercises.ts` | Historical names and stable chart styles, including retired daily sequencing |
+| `src/components/ExerciseIllustration.tsx` | Eight decorative SVG compositions for game introductions; not playable stimuli |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/PlacementPreferences.tsx` and `src/services/placementPreferences.ts` | Two-step interests/functional movement choices and thematic assessment selection; see `docs/PLACEMENT.md` |
 | `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |

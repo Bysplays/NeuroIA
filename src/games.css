@@ -373,7 +373,7 @@ body[data-contrast="standard"] .game-session .category-bin-card { background: #f
 .game-instruction-screen .placement-copy > h1 { outline: none; }
 .game-instruction-screen > .placement-card { width: 100%; margin-block: auto; padding: 40px 0; min-height: 0; border: 0; border-radius: 0; background: transparent; gap: clamp(32px, 5vw, 72px); grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); }
 .instruction-art { display: grid; place-items: center; padding: 24px; border-radius: 48% 48% 24px 24px; background: var(--panel-blue); }
-.instruction-art .practice-motif { max-width: 300px; }
+.instruction-art .exercise-illustration { display: block; width: 100%; aspect-ratio: 1; max-width: 300px; margin: auto; }
 .game-instruction-screen .placement-copy h1 { font-size: clamp(1.5rem, 2.8vw, 2.1rem); line-height: 1.2; margin: 0; }
 .game-instruction-screen .placement-copy p { font-size: .9rem; line-height: 1.65; color: var(--color-text-muted); }
 .game-instruction-screen .placement-content { gap: 24px; align-self: center; }
@@ -446,7 +446,7 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
   .game-session .game-instruction-screen { padding: 16px 20px; gap: 16px; }
   .game-instruction-screen > .placement-card { grid-template-columns: 1fr; padding: 16px 0; gap: 24px; max-width: 460px; align-self: center; }
   .instruction-art { width: min(100%, 260px); padding: 8px; margin-inline: auto; }
-  .instruction-art .practice-motif { max-width: 170px; }
+  .instruction-art .exercise-illustration { max-width: 170px; }
   .game-instruction-screen .placement-content { gap: 18px; }
   .game-instruction-screen .placement-copy { gap: 12px; }
   .game-instruction-screen .placement-progress-heading { justify-content: center; }
@@ -460,7 +460,7 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 }
 @media (max-height: 540px) and (min-width: 700px) {
   .game-instruction-screen > .placement-card { padding-block: 8px; }
-  .instruction-art .practice-motif { max-width: 190px; }
+  .instruction-art .exercise-illustration { max-width: 190px; }
   .game-instruction-screen .placement-content { gap: 12px; }
 }
 
