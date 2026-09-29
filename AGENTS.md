@@ -602,8 +602,7 @@ prototype or its sample results as implemented production behavior.
 `Brand` owns the shared transparent wordmark; `PracticeMotif` is CSS decoration,
 not a game stimulus. Default appearance uses clinical-blue Calma tokens and Manrope;
 `pageStyle: cozy` remains compatible as Papel. See docs/DESIGN.md.
-`ProjectFunding` presents the unmodified owner-supplied IGAPE notice, a full-size
-link and HTML transcript in the unauthenticated home’s IGAPE dialog and About. Provenance lives in
+`ProjectFunding` presents the unmodified owner-supplied IGAPE notice, an HTML transcript on the IGAPE information page and About. Provenance lives in
 `docs/assets/images/institutional/README.md`.
 `LoginScreen` starts on the unauthenticated app home and switches to inline email forms.
 `OnboardingModal` retains its existing API but now renders the access-choice page.
@@ -620,3 +619,11 @@ network in the suite. Run `npm run test:interface` for entry/funding, eight-game
 layout, keyboard pairs, trial failure and fullscreen-regression checks. Screenshots
 are written to `/tmp`, not committed. `npm run test:placement` checks preference
 persistence and delayed evidence with its isolated backend.
+
+`InformationPage` renders IGAPE, About and the legal notice as ordinary pages with
+a shared Brand header and a return action (Cerrar on IGAPE; Volver elsewhere). `ProductInformation` is a controlled link list.
+LoginScreen, player Workspace and ProfessionalDashboard own the selected
+information view in existing React state. The previous screen remains mounted but
+hidden; Settings temporarily closes its native dialog and retains its selected tab.
+GameSession remains paused while Settings owns that navigation. No router, history
+rewrite or new persistence is introduced.

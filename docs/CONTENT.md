@@ -9,7 +9,7 @@ not a determination of regulatory status or legal compliance.
 
 `src/services/productCopy.ts` holds the public introduction, information sections
 and supplied general notice. `ProductInformation` makes these accessible before
-sign-in and from the settings footer using the shared dialog. The concise unauthenticated-home heading “Juega a tu ritmo” adapts the supplied claim; its
+sign-in and from the settings footer using full document pages. The concise unauthenticated-home heading “Juega a tu ritmo” adapts the supplied claim; its
 one-sentence introduction names actual practice areas. The complete product
 explanation remains in About. Browser title and description follow the
 same positioning. Keep descriptions grounded in observable in-game activity.
@@ -66,7 +66,7 @@ legacy identifiers are not product copy and do not require a data migration.
 ## Supplied institutional attribution
 
 The owner supplied the complete IGAPE funding notice on 2026-09-29. Render it
-unchanged in the unauthenticated home’s IGAPE dialog and About with a full-size link and HTML transcript.
+unchanged on the IGAPE information page and About with an HTML transcript.
 The notice's AI project subtitle is funding attribution, not an additional claim
 that the current product ships all planned AI capabilities. See
 [asset provenance](assets/images/institutional/README.md).

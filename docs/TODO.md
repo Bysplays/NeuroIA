@@ -45,8 +45,7 @@ subject to the confirmed deadline and available client materials.
 ### Delivery dependencies and recovery
 
 - [x] **CR-01 — IGAPE attribution and logos (local).** Complete owner-supplied
-  notice appears in the unauthenticated home’s IGAPE dialog and About, unmodified, with full-size link
-  and selectable HTML transcript. Image loading, mobile layout and About focus
+  notice appears on the IGAPE information page and About, unmodified, with a selectable HTML transcript. Image loading, mobile layout and About focus
   return checked. Client approval of publicity compliance/placement remains a
   release check; this is not a legal certification.
 - [ ] **CR-02 — Recovery and review environment.** Inventory the deployed version,
@@ -91,9 +90,9 @@ subject to the confirmed deadline and available client materials.
 
 ### Public entry, registration and service access
 
-- [x] **CR-10 — Public explanation (local).** The unauthenticated app home presents a short non-medical introduction and Iniciar sesión. Full product information and IGAPE funding are accessible in dialogs before authentication.
+- [x] **CR-10 — Public explanation (local).** The unauthenticated app home presents a short non-medical introduction and Comenzar. Full product information and IGAPE funding are accessible on separate pages before authentication.
 
-- [x] **CR-11 — Visible registration (local).** Iniciar sesión is the unauthenticated home action; Crear cuenta is visible on the access page. Inline forms preserve personal/professional intent, Google entry, confirmation and recovery.
+- [x] **CR-11 — Visible registration (local).** Comenzar opens sign-in from the unauthenticated home; Crear cuenta is visible on the access page. Inline forms preserve personal/professional intent, Google entry, confirmation and recovery.
 
 - [x] **CR-12 — Purchase before assessment (local).** The unauthenticated home has no purchase pitch; existing signed-in access choices and Mi acceso expose the authenticated subscription flow before placement and from Mi cuenta. Server availability and Stripe confirmation remain required; repeat real Sandbox lifecycle acceptance before release.
 

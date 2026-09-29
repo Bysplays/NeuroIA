@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Brand } from "./Brand";
 import { PracticeMotif } from "./PracticeMotif";
 import { HeaderIllustration } from "./HeaderIllustration";
 import { ProductInformation } from "./ProductInformation";
-import { ModalFrame } from "./ModalFrame";
-import { ProjectFunding } from "./ProjectFunding";
+import { InformationPage, type InformationKind } from "./InformationPage";
 import { authErrorMessage } from "../services/authErrors";
 import type { EmailAction } from "../services/emailAuth";
 
@@ -27,7 +26,7 @@ export function LoginScreen({
   busy: boolean;
   error: string;
 }) {
-  const [fundingOpen, setFundingOpen] = useState(false);
+  const [information, setInformation] = useState<InformationKind | null>(null);
   const [professional, setProfessional] = useState(false);
   const [mode, setMode] = useState<EmailAction | null>(null);
   const [email, setEmail] = useState("");
@@ -71,293 +70,290 @@ export function LoginScreen({
     }
   };
   return (
-    <main className={`entry-page${mode === null ? " entry-home" : ""}`}>
-      <header className="entry-header">
-        <button
-          className="brand-button"
-          aria-label="NeuroIA, presentación"
-          disabled={busy}
-          onClick={() => changeMode(null)}
-        >
-          <Brand />
-        </button>
-        {mode !== null && (
-          <div className="entry-header-actions">
+    <>
+      {information && (
+        <InformationPage
+          kind={information}
+          onBack={() => setInformation(null)}
+        />
+      )}
+      <div hidden={information !== null}>
+        <main className={`entry-page${mode === null ? " entry-home" : ""}`}>
+          <header className="entry-header">
             <button
-              className="text-link"
+              className="brand-button"
+              aria-label="NeuroIA, presentación"
               disabled={busy}
-              onClick={() => changeMode("signin")}
+              onClick={() => changeMode(null)}
             >
-              Iniciar sesión
+              <Brand />
             </button>
             {mode !== null && (
-              <button
-                className="paper-nav-button"
-                disabled={busy}
-                onClick={() => changeMode("register")}
-              >
-                Crear cuenta
-              </button>
-            )}
-          </div>
-        )}
-      </header>
-      {mode === null ? (
-        <>
-          <section className="public-hero" aria-labelledby="entry-title">
-            <div>
-              <h1 ref={title} tabIndex={-1} id="entry-title">
-                {professional ? (
-                  <>
-                    Un espacio para <em>acompañar.</em>
-                  </>
-                ) : (
-                  <>
-                    Juega a <em>tu ritmo.</em>
-                  </>
-                )}
-              </h1>
-              <p>
-                {professional
-                  ? "Propón juegos y consulta la actividad de las personas vinculadas contigo."
-                  : "Juegos para practicar memoria, atención y coordinación."}
-              </p>
-              <div className="public-actions">
+              <div className="entry-header-actions">
                 <button
-                  className="touch-btn touch-btn-primary"
+                  className="text-link"
                   disabled={busy}
                   onClick={() => changeMode("signin")}
                 >
                   Iniciar sesión
-                  <ArrowRight size={21} />
                 </button>
-                <button
-                  className="entry-funding-link"
-                  onClick={() => setFundingOpen(true)}
-                  aria-haspopup="dialog"
-                >
-                  Financiación IGAPE
-                </button>
-              </div>
-            </div>
-            <div className="public-art">
-              <PracticeMotif />
-            </div>
-          </section>
-          {fundingOpen && (
-            <ModalFrame
-              labelledBy="entry-funding-title"
-              onClose={() => setFundingOpen(false)}
-            >
-              <article className="product-information">
-                <header className="modal-header">
-                  <h2 id="entry-funding-title" className="modal-title">
-                    IGAPE
-                  </h2>
+                {mode !== null && (
                   <button
-                    className="modal-close-btn"
-                    aria-label="Cerrar financiación"
-                    onClick={() => setFundingOpen(false)}
+                    className="paper-nav-button"
+                    disabled={busy}
+                    onClick={() => changeMode("register")}
                   >
-                    <X size={22} />
+                    Crear cuenta
                   </button>
-                </header>
-                <div className="product-information-body">
-                  <ProjectFunding />
-                </div>
-              </article>
-            </ModalFrame>
-          )}
-        </>
-      ) : (
-        <section className="account-entry-layout" aria-labelledby="entry-title">
-          <aside className="account-entry-welcome">
-            <p className="editorial-eyebrow">
-              {professional
-                ? "Tu espacio profesional"
-                : "Un comienzo a tu medida"}
-            </p>
-            <h2>
-              Empieza por
-              <br />
-              un pequeño
-              <br />
-              <em>momento.</em>
-            </h2>
-            <HeaderIllustration scene={professional ? "therapist" : "home"} />
-          </aside>
-          <div className="account-entry-form">
-            <button
-              className="text-link"
-              disabled={busy}
-              onClick={() => changeMode(null)}
-            >
-              <ArrowLeft size={18} />
-              Volver
-            </button>
-            <div
-              className="entry-mode-switch"
-              role="group"
-              aria-label="Tipo de acceso"
-            >
-              <button
-                aria-pressed={mode === "register"}
-                disabled={busy}
-                onClick={() => changeMode("register")}
-              >
-                Crear cuenta
-              </button>
-              <button
-                aria-pressed={mode === "signin"}
-                disabled={busy}
-                onClick={() => changeMode("signin")}
-              >
-                Iniciar sesión
-              </button>
-            </div>
-            <h1 ref={title} tabIndex={-1} id="entry-title">
-              {mode === "register"
-                ? "Un buen comienzo."
-                : mode === "reset"
-                  ? "Volvamos a tu cuenta."
-                  : "Qué bien verte de nuevo."}
-            </h1>
-            <p>
-              {mode === "reset"
-                ? "Te enviaremos un enlace para recuperar tu contraseña."
-                : "Elige cómo quieres entrar."}
-            </p>
-            {mode !== "reset" && (
-              <>
-                <button
-                  className="google-login-button"
-                  disabled={busy}
-                  onClick={() => onSignIn(professional)}
-                >
-                  <span className="google-login-mark" aria-hidden="true">
-                    G
-                  </span>
-                  {busy ? "Un momento…" : "Continuar con Google"}
-                </button>
-                <div className="entry-divider">
-                  <span>o con tu correo</span>
-                </div>
-              </>
+                )}
+              </div>
             )}
-            <form className="email-form" onSubmit={submit} aria-busy={busy}>
-              <label htmlFor="login-email">Correo electrónico</label>
-              <input
-                id="login-email"
-                name="email"
-                type="email"
-                autoComplete="username"
-                autoCapitalize="none"
-                spellCheck={false}
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                disabled={busy}
-              />
-              {mode !== "reset" && (
-                <>
-                  <label htmlFor="login-password">Contraseña</label>
-                  <input
-                    id="login-password"
-                    name="password"
-                    type="password"
-                    autoComplete={
-                      mode === "register" ? "new-password" : "current-password"
-                    }
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                    minLength={mode === "register" ? 6 : undefined}
-                    disabled={busy}
-                    aria-describedby={
-                      mode === "register" ? "password-hint" : undefined
-                    }
-                  />
-                </>
-              )}
-              {mode === "register" && (
-                <>
-                  <p id="password-hint" className="entry-note">
-                    Al menos 6 caracteres. Después verificaremos tu correo.
+          </header>
+          {mode === null ? (
+            <>
+              <section className="public-hero" aria-labelledby="entry-title">
+                <div className="public-copy">
+                  <h1 ref={title} tabIndex={-1} id="entry-title">
+                    {professional ? (
+                      <>
+                        Un espacio para <em>acompañar.</em>
+                      </>
+                    ) : (
+                      <>
+                        Juega a <em>tu ritmo.</em>
+                      </>
+                    )}
+                  </h1>
+                  <p>
+                    {professional
+                      ? "Propón juegos y consulta la actividad de las personas vinculadas contigo."
+                      : "Practica memoria, atención y coordinación"}
                   </p>
-                  <label htmlFor="login-confirmation">
-                    Repite la contraseña
-                  </label>
+                  <div className="public-actions">
+                    <button
+                      className="touch-btn touch-btn-primary"
+                      disabled={busy}
+                      onClick={() => changeMode("signin")}
+                    >
+                      Comenzar
+                      <ArrowRight size={21} />
+                    </button>
+                    <button
+                      className="entry-funding-link"
+                      data-information-link="funding"
+                      onClick={() => setInformation("funding")}
+                    >
+                      Financiado por IGAPE
+                    </button>
+                  </div>
+                </div>
+                <div className="public-art">
+                  <PracticeMotif />
+                </div>
+              </section>
+            </>
+          ) : (
+            <section
+              className="account-entry-layout"
+              aria-labelledby="entry-title"
+            >
+              <aside className="account-entry-welcome">
+                <p className="editorial-eyebrow">
+                  {professional
+                    ? "Tu espacio profesional"
+                    : "Un comienzo a tu medida"}
+                </p>
+                <h2>
+                  Empieza por
+                  <br />
+                  un pequeño
+                  <br />
+                  <em>momento.</em>
+                </h2>
+                <HeaderIllustration
+                  scene={professional ? "therapist" : "home"}
+                />
+              </aside>
+              <div className="account-entry-form">
+                <button
+                  className="text-link"
+                  disabled={busy}
+                  onClick={() => changeMode(null)}
+                >
+                  <ArrowLeft size={18} />
+                  Volver
+                </button>
+                <div
+                  className="entry-mode-switch"
+                  role="group"
+                  aria-label="Tipo de acceso"
+                >
+                  <button
+                    aria-pressed={mode === "register"}
+                    disabled={busy}
+                    onClick={() => changeMode("register")}
+                  >
+                    Crear cuenta
+                  </button>
+                  <button
+                    aria-pressed={mode === "signin"}
+                    disabled={busy}
+                    onClick={() => changeMode("signin")}
+                  >
+                    Iniciar sesión
+                  </button>
+                </div>
+                <h1 ref={title} tabIndex={-1} id="entry-title">
+                  {mode === "register"
+                    ? "Un buen comienzo."
+                    : mode === "reset"
+                      ? "Volvamos a tu cuenta."
+                      : "Qué bien verte de nuevo."}
+                </h1>
+                <p>
+                  {mode === "reset"
+                    ? "Te enviaremos un enlace para recuperar tu contraseña."
+                    : "Elige cómo quieres entrar."}
+                </p>
+                {mode !== "reset" && (
+                  <>
+                    <button
+                      className="google-login-button"
+                      disabled={busy}
+                      onClick={() => onSignIn(professional)}
+                    >
+                      <span className="google-login-mark" aria-hidden="true">
+                        G
+                      </span>
+                      {busy ? "Un momento…" : "Continuar con Google"}
+                    </button>
+                    <div className="entry-divider">
+                      <span>o con tu correo</span>
+                    </div>
+                  </>
+                )}
+                <form className="email-form" onSubmit={submit} aria-busy={busy}>
+                  <label htmlFor="login-email">Correo electrónico</label>
                   <input
-                    id="login-confirmation"
-                    name="confirmation"
-                    type="password"
-                    autoComplete="new-password"
-                    value={confirmation}
-                    onChange={(event) => setConfirmation(event.target.value)}
+                    id="login-email"
+                    name="email"
+                    type="email"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                     required
                     disabled={busy}
                   />
-                </>
-              )}
-              <button
-                className="touch-btn touch-btn-primary"
-                disabled={busy}
-                type="submit"
-              >
-                {busy
-                  ? "Un momento…"
-                  : mode === "register"
-                    ? "Crear cuenta"
-                    : mode === "reset"
-                      ? "Enviar enlace"
-                      : "Entrar"}
-                <ArrowRight size={20} />
-              </button>
-              {mode === "signin" && (
-                <button
-                  className="email-text-button"
-                  type="button"
-                  disabled={busy}
-                  onClick={() => changeMode("reset")}
-                >
-                  He olvidado mi contraseña
-                </button>
-              )}
-              {mode === "reset" && (
-                <button
-                  className="email-text-button"
-                  type="button"
-                  disabled={busy}
-                  onClick={() => changeMode("signin")}
-                >
-                  Volver a iniciar sesión
-                </button>
-              )}
-              {(error || formError) && (
-                <p className="email-feedback" role="alert">
-                  {formError || error}
-                </p>
-              )}
-              {notice && (
-                <p className="email-feedback" role="status">
-                  {notice}
-                </p>
-              )}
-            </form>
-          </div>
-        </section>
-      )}
-      <ProductInformation>
-        <button
-          disabled={busy}
-          onClick={() => {
-            setProfessional((value) => !value);
-            changeMode(null);
-          }}
-        >
-          {professional ? "Volver al acceso personal" : "¿Eres un profesional?"}
-        </button>
-      </ProductInformation>
-    </main>
+                  {mode !== "reset" && (
+                    <>
+                      <label htmlFor="login-password">Contraseña</label>
+                      <input
+                        id="login-password"
+                        name="password"
+                        type="password"
+                        autoComplete={
+                          mode === "register"
+                            ? "new-password"
+                            : "current-password"
+                        }
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        required
+                        minLength={mode === "register" ? 6 : undefined}
+                        disabled={busy}
+                        aria-describedby={
+                          mode === "register" ? "password-hint" : undefined
+                        }
+                      />
+                    </>
+                  )}
+                  {mode === "register" && (
+                    <>
+                      <p id="password-hint" className="entry-note">
+                        Al menos 6 caracteres. Después verificaremos tu correo.
+                      </p>
+                      <label htmlFor="login-confirmation">
+                        Repite la contraseña
+                      </label>
+                      <input
+                        id="login-confirmation"
+                        name="confirmation"
+                        type="password"
+                        autoComplete="new-password"
+                        value={confirmation}
+                        onChange={(event) =>
+                          setConfirmation(event.target.value)
+                        }
+                        required
+                        disabled={busy}
+                      />
+                    </>
+                  )}
+                  <button
+                    className="touch-btn touch-btn-primary"
+                    disabled={busy}
+                    type="submit"
+                  >
+                    {busy
+                      ? "Un momento…"
+                      : mode === "register"
+                        ? "Crear cuenta"
+                        : mode === "reset"
+                          ? "Enviar enlace"
+                          : "Entrar"}
+                    <ArrowRight size={20} />
+                  </button>
+                  {mode === "signin" && (
+                    <button
+                      className="email-text-button"
+                      type="button"
+                      disabled={busy}
+                      onClick={() => changeMode("reset")}
+                    >
+                      He olvidado mi contraseña
+                    </button>
+                  )}
+                  {mode === "reset" && (
+                    <button
+                      className="email-text-button"
+                      type="button"
+                      disabled={busy}
+                      onClick={() => changeMode("signin")}
+                    >
+                      Volver a iniciar sesión
+                    </button>
+                  )}
+                  {(error || formError) && (
+                    <p className="email-feedback" role="alert">
+                      {formError || error}
+                    </p>
+                  )}
+                  {notice && (
+                    <p className="email-feedback" role="status">
+                      {notice}
+                    </p>
+                  )}
+                </form>
+              </div>
+            </section>
+          )}
+          <ProductInformation onOpen={setInformation}>
+            <button
+              disabled={busy}
+              onClick={() => {
+                setProfessional((value) => !value);
+                changeMode(null);
+              }}
+            >
+              {professional
+                ? "Volver al acceso personal"
+                : "¿Eres un profesional?"}
+            </button>
+          </ProductInformation>
+        </main>
+      </div>
+    </>
   );
 }

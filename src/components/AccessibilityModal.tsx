@@ -1,3 +1,4 @@
+import type { InformationKind } from "./InformationPage";
 import { TabletTabs } from './TabletTabs';
 import { ProductInformation } from './ProductInformation';
 import { SubscriptionSettings } from './SubscriptionSettings';
@@ -9,6 +10,7 @@ import type { AccessibilitySettings } from '../types';
 import { soundService } from '../services/soundService';
 
 interface AccessibilityModalProps {
+  onInformation: (kind: InformationKind) => void;
   isOpen: boolean;
   onReassess?: () => void;
   showSubscription?: boolean;
@@ -22,7 +24,7 @@ interface AccessibilityModalProps {
 }
 
 export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
-  isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut, showSubscription = true, onReassess,
+  onInformation, isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut, showSubscription = true, onReassess,
 }) => {
   const [tab, setTab] = useState('appearance');
   if (!isOpen) return null;
@@ -102,7 +104,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>
               <LogOut size={18} aria-hidden="true" />{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}
             </button>
-            <ProductInformation />
+            <ProductInformation onOpen={onInformation} />
           </div>
         </div>
       </div>

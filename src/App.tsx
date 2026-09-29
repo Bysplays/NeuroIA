@@ -1,3 +1,4 @@
+import { InformationPage, type InformationKind } from "./components/InformationPage";
 import { eegService } from './services/eegService';
 import { LevelUpScreen } from './components/LevelUpScreen';
 import { Reassessment } from './components/Reassessment';
@@ -126,6 +127,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   const [dailyPlanSession, setDailyPlanSession] = useState<DailyPlanSession | null>(null);
 
   // Modales y control de descanso/fatiga
+  const [information, setInformation] = useState<InformationKind | null>(null);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isFatigueOpen, setIsFatigueOpen] = useState(false);
   const [isRestModalOpen, setIsRestModalOpen] = useState(false);
@@ -236,6 +238,9 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   const placement = !hasPlacement(profile) || placementOpen || reassessing;
 
   return (
+    <>
+    {information && <InformationPage kind={information} onBack={() => setInformation(null)}/>}
+    <div hidden={information !== null}>
     <div className={`app-root ${isPlayingGame ? 'app-root-focus-mode' : ''}`}>
       {!placement && !isPlayingGame && (
         <Header
@@ -288,11 +293,11 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
       </main>}
 
       <LevelUpScreen data={data}/>
-      <AccessibilityModal
+      <AccessibilityModal onInformation={setInformation}
         onReassess={!placement ? () => { setIsAccessibilityOpen(false); handleBackToDashboard(); setReassessing(true); } : undefined}
         onSignOut={onSignOut}
         signingOut={signingOut}
-        isOpen={isAccessibilityOpen}
+        isOpen={isAccessibilityOpen && information === null}
         name={profile.name}
         onUpdateName={name => sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings: {}, name })}
         settings={profile.settings}
@@ -301,7 +306,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
       />
 
       <FatigueAlertModal
-        isOpen={isFatigueOpen}
+        isOpen={isFatigueOpen && information === null}
         onClose={() => setIsFatigueOpen(false)}
         onTakeBreak={() => {
           setIsFatigueOpen(false);
@@ -310,7 +315,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
       />
 
       <RestBreakModal
-        isOpen={isRestModalOpen}
+        isOpen={isRestModalOpen && information === null}
         onClose={() => setIsRestModalOpen(false)}
         onFinishBreak={() => {
           setIsRestModalOpen(false);
@@ -319,6 +324,8 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
         }}
       />
     </div>
+    </div>
+    </>
   );
 };
 

@@ -1,3 +1,4 @@
+import { InformationPage, type InformationKind } from "../../src/components/InformationPage";
 // Browser-only fixture. No production entry imports this file, no authenticated writes.
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
@@ -36,6 +37,7 @@ export function Fixture() {
     (query.get("game") as ExerciseId) || undefined,
   );
   const [results, setResults] = useState<ExerciseResult[]>([]);
+  const [information, setInformation] = useState<InformationKind | null>(null);
   const [settings, setSettings] = useState(false);
   const [navigation, setNavigation] = useState<HTMLDivElement | null>(null);
   const [loggedOut, setLoggedOut] = useState(query.has("entry"));
@@ -52,6 +54,8 @@ export function Fixture() {
     );
   return (
     <>
+      {information && <InformationPage kind={information} onBack={() => setInformation(null)}/>}
+      <div hidden={information !== null}>
       {game ? (
         <GameSession
           key={game}
@@ -97,11 +101,11 @@ export function Fixture() {
             onSignOut={() => setLoggedOut(true)}
             signingOut={false}
           />
-          <ProductInformation />
+          <ProductInformation onOpen={setInformation}/>
         </>
       )}
-      <AccessibilityModal
-        isOpen={settings}
+      <AccessibilityModal onInformation={setInformation}
+        isOpen={settings && information === null}
         settings={profile.settings}
         name={profile.name}
         showSubscription={false}
@@ -118,6 +122,7 @@ export function Fixture() {
       <output data-testid="results" hidden>
         {JSON.stringify(results)}
       </output>
+      </div>
     </>
   );
 }

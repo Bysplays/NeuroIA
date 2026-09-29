@@ -18,20 +18,25 @@ for (const size of [{width:390,height:844},{width:820,height:1180},{width:1280,h
     await page.goto(fixture+'?entry');
     await expect(page.getByRole('heading',{name:/Juega a tu ritmo/})).toBeVisible();
     await expect(page.getByText('Quiero suscribirme',{exact:true})).toHaveCount(0);
-    await page.getByRole('button',{name:'Financiación IGAPE'}).click();
-    const image = page.getByRole('dialog').locator('.project-funding > img');
+    await page.getByRole('button',{name:'Financiado por IGAPE'}).click();
+    const image = page.locator('.information-page .project-funding > img');
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate(e=>e.complete && e.naturalWidth > 0)).toBe(true);
-    await page.getByText('Leer la información en texto',{exact:true}).click();
     await expect(page.getByText('IG408M-2026-000-000102',{exact:true})).toBeVisible();
     await page.screenshot({path:`/tmp/calma-funding-${size.width}.png`,fullPage:true});
-    await page.keyboard.press('Escape');
-    await expect(page.getByRole('button',{name:'Financiación IGAPE'})).toBeFocused();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.locator('.information-page').getByRole('heading',{name:'NEUROIA',exact:true})).toHaveCount(0);
+    await expect(page.getByRole('link',{name:'Ver a tamaño completo'})).toHaveCount(0);
+    await page.getByRole('button',{name:'Cerrar',exact:true}).click();
+    await expect(page.getByRole('button',{name:'Financiado por IGAPE'})).toBeFocused();
     await page.getByRole('button',{name:'Sobre NeuroIA',exact:true}).click();
-    await expect(page.getByRole('dialog').locator('.project-funding')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.getByRole('button',{name:'Sobre NeuroIA',exact:true})).toBeFocused();
-    await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click();
+    await expect(page.locator('.information-page .project-funding')).toBeVisible();
+    await page.getByRole('button',{name:'Volver',exact:true}).click();
+    await page.getByRole('button',{name:'Aviso legal',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'Aviso legal',exact:true})).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await page.getByRole('button',{name:'Volver',exact:true}).click();
+    await page.getByRole('button',{name:'Comenzar',exact:true}).click();
     await expect(page.getByRole('button',{name:'Entrar',exact:true})).toBeVisible();
     await page.getByRole('button',{name:'Crear cuenta',exact:true}).first().click();
     await expect(page.getByLabel('Repite la contraseña')).toBeVisible();
@@ -128,4 +133,20 @@ test('advanced boards keep their actions inside narrow and short viewports',asyn
       expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),id+' advanced board overflow').toBe(true);
     }
   }
+});
+
+test('information pages return to settings without restarting the game',async({page})=>{
+  await page.goto(fixture+'?game=memory-pairs');
+  await page.getByRole('button',{name:'Empezar a jugar'}).click();
+  await page.locator('.memory-card-tile').first().click();
+  const revealed = await page.locator('.memory-card-tile').first().getAttribute('aria-label');
+  await page.getByRole('button',{name:'Ajustes',exact:true}).click();
+  await page.getByRole('button',{name:'Sobre NeuroIA',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Sobre NeuroIA',exact:true})).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button',{name:'Volver',exact:true}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button',{name:'Cerrar ajustes',exact:true}).click();
+  await expect(page.locator('.memory-card-tile').first()).toHaveAttribute('aria-label',revealed);
+  await expect(page.locator('.memory-card-tile').first()).toHaveClass(/tile-flipped/);
 });

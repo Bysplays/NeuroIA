@@ -91,14 +91,17 @@ remain within their section; they must not be confused with the primary navigati
 ## Public entry and institutional funding
 
 The unauthenticated app home introduces NeuroIA before asking for credentials. It has
-one short headline (“Juega a tu ritmo”), one sentence about the games, a primary
-**Iniciar sesión** action. The centered “Financiación IGAPE” link sits directly
-below it and opens the shared native dialog with the complete funding notice.
+one short headline (“Juega a tu ritmo”), the subtitle “Practica memoria, atención y
+coordinación”, and a primary **Comenzar** action that opens sign-in. The centered
+“Financiado por IGAPE” link sits directly below it and opens a full document page.
 Center this home’s hero vertically in the space between header and footer, allowing
 the page to grow and scroll on short viewports or with enlarged text. The sign-in
 button matches the subtitle column width, capped at 430 px; its funding link is
 centered underneath. This vertical centering applies only to the unauthenticated
-home, not the credential forms or signed-in workspace. Avoid repeated
+home, not the credential forms or signed-in workspace. At widths up to 760 px,
+copy and illustration share a centered column capped at 430 px; retain side gutters
+and allow heading wrapping. Test intermediate widths around the breakpoint as well
+as standard devices so neither the text nor artwork drifts to a different axis. Avoid repeated
 authentication actions, promotional eyebrows, illustration captions and explanatory
 card grids. Do not show a subscription pitch or the full funding image inline; longer product
 explanations remain accessible through Sobre NeuroIA. Registration and sign-in are
@@ -113,8 +116,8 @@ Mi cuenta, using the existing subscription service. Never imply payment has
 completed based only on a browser return URL.
 
 `ProjectFunding` displays the **entire unchanged owner-supplied IGAPE image** on
-the unauthenticated home’s IGAPE dialog and in Sobre NeuroIA. Do not crop or recolor its institutional
-logos. Preserve aspect ratio, offer the original-size image, and include a selectable
+the IGAPE information page and in Sobre NeuroIA. Do not crop or recolor its institutional
+logos. Preserve aspect ratio and include a selectable
 HTML transcript for narrow screens and assistive technology. The supplied AI project
 subtitle is attribution, not a claim of a currently available adaptive AI feature.
 Asset provenance is in [the institutional asset guide](assets/images/institutional/README.md).
@@ -176,9 +179,16 @@ Allow scrolling on short landscape phones and when text is enlarged.
 
 Use native buttons, visible focus, descriptive input labels, live status regions
 and keyboard-operable tabs. Respect reduced motion. Use `ModalFrame` for transient
-settings, About, Muse and account dialogs: focus containment, Escape, close button,
-scroll handling and focus return remain required. Long institutional copy must be
-selectable and scrollable. Sound and narration remain independent preferences.
+settings, Muse and account dialogs: focus containment, Escape, close button,
+scroll handling and focus return remain required. IGAPE, About and the legal notice are ordinary pages, with the shared logo, a
+heading, readable text and a visible return action: Cerrar on IGAPE, Volver on
+About and the legal notice. IGAPE uses restrained 0.9rem body copy and a 1.5–2rem
+heading, respecting text-size preferences. Omit the repeated NEUROIA heading and
+full-size-image link on its page. Leave 28 px above and below the funding details
+table to separate it from the surrounding paragraphs. IGAPE shows the full transcript
+and original image; About retains the complete product wording. Returning restores
+the previous entry/settings view without discarding form or game state. Long copy
+is selectable and scrollable. Sound and narration remain independent preferences.
 
 Professional workspace, proposals, participant activity, recovery and verification
 share these tokens, controls and typography. Retain functional distinctions: free
