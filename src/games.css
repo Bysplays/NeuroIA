@@ -22,7 +22,7 @@
 body:not([data-contrast="standard"]) .paper-game-companions { mix-blend-mode: normal; }
 .exercise-viewport { min-height: 0; }
 .exercise-container .card { box-shadow: none; }
-.exercise-container .touch-btn { box-shadow: none; border-radius: 99px; font-size: .8rem; min-height: 48px; }
+.exercise-container .touch-btn { box-shadow: none; border-radius: 12px; font-size: .8rem; min-height: 48px; }
 .exercise-container .touch-btn-primary { border: 0; background: var(--color-action-bg); color: var(--color-action-text); }
 .exercise-container .touch-btn-secondary { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-main); }
 .exercise-container .gentle-bounce { animation: none; }
@@ -437,9 +437,6 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 @media (max-width: 600px) { .eeg-signal-strip { gap: 8px; grid-template-columns: 32px minmax(20px, 1fr) minmax(110px, auto); } }
 
 /* Non-blocking reinforcement shares the session's pausable timer. */
-.game-feedback-toast { display: none; }
-.game-feedback-toast.is-visible { position: fixed; bottom: max(100px, calc(env(safe-area-inset-bottom) + 80px)); left: 50%; transform: translateX(-50%); z-index: 35; display: flex; align-items: center; gap: 12px; width: max-content; max-width: calc(100vw - 32px); padding: 14px 16px; border: 1px solid var(--color-primary); border-radius: 18px; background: var(--color-surface); color: var(--color-text-main); box-shadow: 0 8px 30px #173b5518; font-size: .85rem; pointer-events: none; }
-.game-feedback-toast button { display: grid; place-items: center; flex-shrink: 0; min-width: 44px; min-height: 44px; border: 0; background: var(--color-primary-light); color: var(--color-primary); border-radius: 50%; cursor: pointer; pointer-events: auto; }
 @media (max-width: 699px) {
   .game-instruction-screen > .placement-card { grid-template-columns: 1fr; padding: 12px 0 24px; gap: 24px; }
   .game-instruction-screen .placement-art { height: 180px; width: 100%; max-width: 100%; padding: 12px; }
@@ -447,3 +444,9 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
   .game-instruction-screen .placement-actions .touch-btn { width: 100%; }
   .game-instruction-screen .placement-progress-heading { flex-wrap: wrap; }
 }
+
+/* Stable, clearly ranked game actions; answer tiles keep their own hit areas. */
+.exercise-container .game-next-action, .exercise-container .result-primary { min-height: 52px; width: min(100%, 440px); padding: 14px 24px; gap: 16px; border: 0; border-radius: 8px; font-size: .9rem; font-weight: 600; line-height: 1.4; box-shadow: none; justify-content: center; animation: none; }
+.game-next-action svg { width: 20px; height: 20px; flex-shrink: 0; }
+.viewport-session-footer .paper-nav-button, .viewport-session-header .paper-nav-button { border: 1px solid var(--color-border); border-radius: 8px; min-height: 44px; padding: 10px 14px; background: transparent; }
+.exercise-container .actions-bar { padding-top: 16px; }

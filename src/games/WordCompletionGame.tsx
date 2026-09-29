@@ -43,7 +43,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, feedback } = useGameSession();
+  const { clock, config } = useGameSession();
   const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => createWords(config));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -89,8 +89,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
-      feedback('Bien hecho. Sigue a tu ritmo.');
-      soundService.speak(`¡Correcto! ${currentItem.word}`);
+      soundService.speak(currentItem.word);
       setCorrectCount(prev => prev + 1);
     } else {
       soundService.playGentlePrompt();
@@ -283,7 +282,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
             aria-hidden={selectedLetter === null}
           >
             <button
-              className={`touch-btn touch-btn-primary touch-btn-large ${selectedLetter !== null ? 'gentle-bounce' : ''}`}
+              className="touch-btn touch-btn-primary game-next-action"
               onClick={handleNext}
               disabled={selectedLetter === null}
               tabIndex={selectedLetter === null ? -1 : 0}

@@ -278,10 +278,13 @@ pages may scroll. Keep complete motor hit areas inside their measured arenas.
 - Categorization: preserve group identity and clear selected/answer states.
 - Targets/tracking: preserve pointer contact, keyboard interaction and arena bounds.
 
-Short correct-answer reinforcement appears as a non-blocking status bubble with
-text, an icon and a dismiss button. It never takes focus or demands another click.
-Its timer uses the shared pausable clock. Completion remains a real result page
-with the existing save/daily-plan callbacks; no extra success modal blocks trials.
+Use in-place answer states rather than success popups or praise narration. Preserve
+spoken instructions, object names and corrective content when needed by the task.
+Game continuation is a stable blue action with 8 px corners, a 52 px minimum
+height and a right arrow; never bounce it. Secondary controls have restrained
+borders. Touch audio uses a quiet sine tone with smooth attack/release; correct
+answers use a brief low-volume two-note cue. Sound and narrator toggles remain
+independent. Completion retains the existing result and daily-plan callbacks.
 
 ## Responsive and accessible behavior
 

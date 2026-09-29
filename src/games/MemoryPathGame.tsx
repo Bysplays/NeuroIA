@@ -41,7 +41,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, feedback } = useGameSession();
+  const { clock, config } = useGameSession();
   const activeTiles = ALL_TILES;
   const maxRounds = config.mode === 'normal' ? 3 : 1;
 
@@ -137,7 +137,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       }
       soundService.playGentlePrompt();
       setStatusMessage('Casi lo tienes. Puedes pulsar "Ver de nuevo" para recordar la secuencia.');
-      soundService.speak('No te preocupes. Pulsa ver de nuevo para recordar.');
+      soundService.speak('Pulsa ver de nuevo para recordar la secuencia.');
       setPlayerInput([]);
       setErrorsCount(prev => prev + 1);
 
@@ -158,7 +158,6 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
     if (nextInput.length === sequence.length) {
       soundService.playSuccess();
-      feedback('Bien hecho. Sigue a tu ritmo.');
       const newScore = score + Math.round(round * 120);
       setScore(newScore);
 

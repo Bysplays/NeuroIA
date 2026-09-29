@@ -40,7 +40,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, feedback } = useGameSession();
+  const { clock, config } = useGameSession();
   // Preguntas seleccionadas al azar para esta sesión
   const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>(() => createQuestions(config));
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -79,13 +79,11 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
-      feedback('Bien hecho. Sigue a tu ritmo.');
-      soundService.speak('Correcto');
       setCorrectCount(prev => prev + 1);
       setScore(prev => prev + 100);
     } else {
       soundService.playGentlePrompt();
-      soundService.speak(`Buen intento. El objeto correcto es ${currentQ.word}.`);
+      soundService.speak(`El objeto correcto es ${currentQ.word}.`);
       setMistakesList(prev => [
         ...prev,
         {
@@ -197,7 +195,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
             aria-hidden={selectedOption === null}
           >
             <button
-              className={`touch-btn touch-btn-primary touch-btn-large ${selectedOption !== null ? 'gentle-bounce' : ''}`}
+              className="touch-btn touch-btn-primary game-next-action"
               onClick={handleNext}
               disabled={selectedOption === null}
               tabIndex={selectedOption === null ? -1 : 0}

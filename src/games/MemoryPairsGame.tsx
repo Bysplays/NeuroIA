@@ -70,7 +70,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, feedback } = useGameSession();
+  const { clock, config } = useGameSession();
   const [cards, setCards] = useState<CardItem[]>(() => createDeck(config.pairs, config.level));
   const [selectedCards, setSelectedCards] = useState<number[]>([]); // índices de las cartas volteadas
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -155,8 +155,6 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       if (cardA.pairKey === cardB.pairKey) {
         // ¡Coincidencia!
         soundService.playSuccess();
-      feedback('Bien hecho. Sigue a tu ritmo.');
-        soundService.speak(`¡Pareja de ${cardA.label}!`);
         const matchedCards = newCards.map((card, i) =>
           i === firstIdx || i === secondIdx ? { ...card, isMatched: true } : card);
         setCards(matchedCards);

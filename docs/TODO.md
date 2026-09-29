@@ -167,7 +167,7 @@ subject to the confirmed deadline and available client materials.
 
 - [x] **CR-16 — Word-completion naming (local).** Active catalog and instruction title use Completar palabras; legacy IDs and saved history are unchanged. New spoken wording uses the existing recording fallback.
 
-- [x] **CR-17 — Visual positive reinforcement (local).** GameSession shows a short, dismissible, non-blocking status bubble after correct answers, alongside existing results. Uses the pausable clock and never takes focus. Target success verified with sound disabled.
+- [x] **CR-17 — Answer feedback revised by owner.** Removed transient praise bubbles and spoken congratulations. Keep in-place answer feedback and ordinary results; continuation actions are stable and click/success effects quieter.
 
 ### Verification before client approval
 

@@ -53,7 +53,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, assistanceTarget, feedback } = useGameSession();
+  const { clock, config, assistanceTarget } = useGameSession();
   const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => createItems(config));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -87,8 +87,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
-      feedback('Bien hecho. Sigue a tu ritmo.');
-      soundService.speak(`¡Correcto! ${currentItem.name} pertenece a ${currentItem.categoryName}.`);
+      soundService.speak(`${currentItem.name} pertenece a ${currentItem.categoryName}.`);
       setCorrectCount(prev => prev + 1);
     } else {
       soundService.playGentlePrompt();
@@ -213,7 +212,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
             aria-hidden={selectedCategory === null}
           >
             <button
-              className={`touch-btn touch-btn-primary touch-btn-large ${selectedCategory !== null ? 'gentle-bounce' : ''}`}
+              className="touch-btn touch-btn-primary game-next-action"
               onClick={handleNext}
               disabled={selectedCategory === null}
               tabIndex={selectedCategory === null ? -1 : 0}

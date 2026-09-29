@@ -81,7 +81,7 @@ class SoundService {
     this.narration.setRate(rate);
   }
 
-  // Toque grave y breve, con entrada y salida suaves para evitar chasquidos.
+  // Toque discreto con entrada y salida suaves para evitar chasquidos.
   public playTap() {
     if (!this.soundEnabled) return;
     const ctx = this.getAudioContext();
@@ -93,13 +93,13 @@ class SoundService {
       const now = ctx.currentTime;
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(240, now);
-      osc.frequency.exponentialRampToValueAtTime(180, now + 0.045);
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(330, now + 0.09);
 
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.025, now + 0.006);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-      gain.gain.linearRampToValueAtTime(0, now + 0.045);
+      gain.gain.linearRampToValueAtTime(0.018, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.10);
+      gain.gain.linearRampToValueAtTime(0, now + 0.12);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -109,37 +109,38 @@ class SoundService {
       };
 
       osc.start(now);
-      osc.stop(now + 0.05);
+      osc.stop(now + 0.13);
     } catch {
       // Ignorar errores de autoplay policy
     }
   }
 
-  // Tono cálido y agradable de acierto (acorde suave C5 - E5)
+  // Dos notas suaves y breves para confirmar un acierto.
   public playSuccess() {
     if (!this.soundEnabled) return;
     const ctx = this.getAudioContext();
     if (!ctx) return;
 
     try {
-      const frequencies = [523.25, 659.25, 783.99]; // Acorde de Do Mayor (Do5, Mi5, Sol5)
+      const frequencies = [392, 493.88]; // Sol4 y Si4
       frequencies.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
-        osc.type = 'triangle'; // Tono suave y redondo
+        osc.type = 'sine'; // Tono suave y redondo
         osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.07);
 
         const startTime = ctx.currentTime + idx * 0.07;
         gain.gain.setValueAtTime(0.001, startTime);
-        gain.gain.linearRampToValueAtTime(0.12, startTime + 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+        gain.gain.linearRampToValueAtTime(0.028, startTime + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.18);
 
         osc.connect(gain);
         gain.connect(ctx.destination);
 
         osc.start(startTime);
-        osc.stop(startTime + 0.36);
+        osc.stop(startTime + 0.20);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
       });
     } catch {
       // Ignorar errores

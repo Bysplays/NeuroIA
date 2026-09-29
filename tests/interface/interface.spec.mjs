@@ -102,7 +102,7 @@ test('trial continuation has no results promise and target success is visible wi
     expect(box.x).toBeGreaterThanOrEqual(arena.x);expect(box.y).toBeGreaterThanOrEqual(arena.y);
     expect(box.x+box.width).toBeLessThanOrEqual(arena.x+arena.width+1);expect(box.y+box.height).toBeLessThanOrEqual(arena.y+arena.height+1);
     await target.click();
-    if(i===0) await expect(page.getByRole('status').filter({hasText:'Bien hecho. Sigue a tu ritmo.'})).toBeVisible();
+    if(i===0) await expect(page.getByRole('status').filter({hasText:'Bien hecho. Sigue a tu ritmo.'})).toHaveCount(0);
   }
   await expect(page.getByRole('heading',{name:'Un paso más. Bien hecho.'})).toBeVisible();
   expect(JSON.parse(await page.getByTestId('results').textContent())).toHaveLength(1);

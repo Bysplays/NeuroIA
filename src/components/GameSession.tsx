@@ -9,8 +9,8 @@ import { useViewportPanel } from '../services/viewport';
 import { gameConfig, type GameMode } from '../services/difficulty';
 import { SessionContext } from '../services/gameSession';
 import { HeaderIllustration } from './HeaderIllustration';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { Minus, Plus, CircleHelp, Clock, Settings2, Volume2, Check, X } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Minus, Plus, CircleHelp, Clock, Settings2, Volume2 } from 'lucide-react';
 import { createGameClock } from '../services/gameClock';
 import { getExerciseById, getExercisesForDomain } from '../services/exerciseCatalog';
 import type { CognitiveDomain, ExerciseId } from '../types';
@@ -31,14 +31,6 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
   const [level, setLevel] = useState(initialLevel);
   const config = gameConfig(level, mode);
   const [clock] = useState(createGameClock);
-  const [feedbackMessage, setFeedbackMessage] = useState('');
-  const feedbackTimer = useRef<number | undefined>(undefined);
-  const feedback = useCallback((message: string) => {
-    clock.clearTimeout(feedbackTimer.current);
-    setFeedbackMessage(message);
-    feedbackTimer.current = clock.setTimeout(() => setFeedbackMessage(''), 2400);
-  }, [clock]);
-  useEffect(() => () => clock.clearTimeout(feedbackTimer.current), [clock]);
   const [started, setStarted] = useState(autoStart);
   const [help, setHelp] = useState(!autoStart);
   const [completed, finish] = useState(false);
@@ -93,7 +85,7 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
     }, 1000);
     return () => clock.clearInterval(timer);
   }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started]);
-  return <SessionContext.Provider value={{ config, feedback, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { setFeedbackMessage(''); recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setLevel(initialLevel); setStarted(false); finish(false); setHelp(true); setSeconds(0); } }}>
+  return <SessionContext.Provider value={{ config, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setLevel(initialLevel); setStarted(false); finish(false); setHelp(true); setSeconds(0); } }}>
     <div className={`game-session${started && !help && !completed ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
     {help && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>
@@ -126,7 +118,6 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
 
       {!completed && <EegLive recording={eeg} ppg={ppg} eegMean={recorder.mean()} ppgMean={ppgRecorder.mean()} recordable={mode === 'normal'}/>}
       {children}
-      {!completed && <div className={`game-feedback-toast${feedbackMessage ? ' is-visible' : ''}`} role="status" aria-atomic="true">{feedbackMessage && <><Check size={23} aria-hidden="true"/><span>{feedbackMessage}</span><button aria-label="Cerrar mensaje" onClick={() => setFeedbackMessage('')}><X size={18}/></button></>}</div>}
       {!completed && <footer className="viewport-session-footer">
         <button className="placement-text-action" onClick={onBack}>← Volver</button>
         <div className="viewport-assistance-row">
