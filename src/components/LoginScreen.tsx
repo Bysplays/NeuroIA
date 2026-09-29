@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleAlert } from "lucide-react";
+import { ModalFrame } from "./ModalFrame";
 import { Brand } from "./Brand";
 import { PracticeMotif } from "./PracticeMotif";
 import { ProductInformation } from "./ProductInformation";
@@ -70,6 +71,16 @@ export function LoginScreen({
   };
   return (
     <>
+      {(error || formError) && (
+        <ModalFrame labelledBy="entry-error-title" onClose={() => { setFormError(""); onClearError(); }}>
+          <section className="entry-error-notification">
+            <CircleAlert size={30} aria-hidden="true" />
+            <h2 id="entry-error-title">No hemos podido continuar</h2>
+            <p role="alert">{formError || error}</p>
+            <button className="touch-btn touch-btn-primary" onClick={() => { setFormError(""); onClearError(); }}>Volver al formulario</button>
+          </section>
+        </ModalFrame>
+      )}
       {information && (
         <InformationPage
           kind={information}
@@ -150,7 +161,7 @@ export function LoginScreen({
                   <button aria-pressed={mode === "signin"} disabled={busy} onClick={() => changeMode("signin")}>Iniciar sesión</button>
                   <button aria-pressed={mode === "register"} disabled={busy} onClick={() => changeMode("register")}>Crear cuenta</button>
                 </div>}
-                <h1 ref={title} tabIndex={-1} id="entry-title">
+                <h1 className={mode === "register" ? "entry-title-with-space" : undefined} ref={title} tabIndex={-1} id="entry-title">
                   {mode === "register"
                     ? "Crea tu cuenta"
                     : mode === "reset"
@@ -268,11 +279,6 @@ export function LoginScreen({
                     >
                       He olvidado mi contraseña
                     </button>
-                  )}
-                  {(error || formError) && (
-                    <p className="email-feedback" role="alert">
-                      {formError || error}
-                    </p>
                   )}
                   {notice && (
                     <p className="email-feedback" role="status">

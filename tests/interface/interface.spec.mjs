@@ -150,3 +150,48 @@ test('information pages return to settings without restarting the game',async({p
   await expect(page.locator('.memory-card-tile').first()).toHaveAttribute('aria-label',revealed);
   await expect(page.locator('.memory-card-tile').first()).toHaveClass(/tile-flipped/);
 });
+
+
+test('registration error dialog preserves fields and restores focus', async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(fixture+'?entry');
+  await page.getByRole('button',{name:'Comenzar',exact:true}).click();
+  await page.getByRole('button',{name:'Crear cuenta',exact:true}).click();
+  await page.getByLabel('Correo electrónico').fill('preview@example.invalid');
+  await page.getByLabel('Contraseña',{exact:true}).fill('test-password');
+  await page.getByLabel('Repite la contraseña').fill('different-password');
+  const submit = page.locator('button[type="submit"]');
+  await submit.click();
+  const dialog = page.getByRole('dialog',{name:'No hemos podido continuar'});
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('alert')).toHaveText('Las contraseñas no coinciden.');
+  await expect(dialog.getByRole('button',{name:'Volver al formulario'})).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('button')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(submit).toBeFocused();
+  await expect(page.getByLabel('Correo electrónico')).toHaveValue('preview@example.invalid');
+  await expect(page.getByLabel('Contraseña',{exact:true})).toHaveValue('test-password');
+  await submit.click();
+  await dialog.getByRole('button').click();
+  await expect(dialog).toHaveCount(0);
+});
+
+
+test('email and Google failures use the dismissible notification', async ({page}) => {
+  await page.goto(fixture+'?entry&auth-failure');
+  await page.getByRole('button',{name:'Comenzar',exact:true}).click();
+  await page.getByRole('button',{name:'Continuar con Google'}).click();
+  const dialog = page.getByRole('dialog',{name:'No hemos podido continuar'});
+  await expect(dialog.getByRole('alert')).toContainText('Google');
+  await dialog.getByRole('button').click();
+  await expect(dialog).toHaveCount(0);
+  await page.getByLabel('Correo electrónico').fill('preview@example.invalid');
+  await page.getByLabel('Contraseña',{exact:true}).fill('test-password');
+  await page.getByRole('button',{name:'Entrar',exact:true}).click();
+  await expect(dialog.getByRole('alert')).toContainText('correo y contraseña');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByLabel('Correo electrónico')).toHaveValue('preview@example.invalid');
+});

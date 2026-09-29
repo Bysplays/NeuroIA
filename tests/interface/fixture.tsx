@@ -40,16 +40,17 @@ export function Fixture() {
   const [information, setInformation] = useState<InformationKind | null>(null);
   const [settings, setSettings] = useState(false);
   const [navigation, setNavigation] = useState<HTMLDivElement | null>(null);
+  const [authError, setAuthError] = useState("");
   const [loggedOut, setLoggedOut] = useState(query.has("entry"));
   const back = () => setGame(undefined);
   if (loggedOut)
     return (
       <LoginScreen
         busy={false}
-        error=""
-        onClearError={() => {}}
-        onEmail={async () => {}}
-        onSignIn={() => {}}
+        error={authError}
+        onClearError={() => setAuthError("")}
+        onEmail={async () => { if (query.has("auth-failure")) throw { code: "auth/invalid-credential" }; }}
+        onSignIn={() => { if (query.has("auth-failure")) setAuthError("No se ha completado el acceso con Google."); }}
       />
     );
   return (

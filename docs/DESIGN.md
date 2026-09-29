@@ -117,11 +117,17 @@ viewport-height shell. Center the auth form vertically in the available space
 between header and footer, reserving a shared 30rem minimum height for sign-in
 and registration so their selector stays at the same height; allow natural scrolling on short screens, with a keyboard
 or enlarged text. Registration places the third-party note below its submit button in muted 0.7rem
-text, not below the heading, with an explicit line break after its first sentence. The header holds only the brand and Volver. Do not add a decorative side
+text, not below the heading, with an explicit line break after its first sentence.
+Reserve a subtitle-sized blank space below the registration heading before the first field. The header holds only the brand and Volver. Do not add a decorative side
 panel or duplicate access buttons. Recovery hides the access selector and uses
 the header Volver action to return to sign-in, without a duplicate return action
 below the form. Reference: [Brilliant sign-in on Mobbin](https://mobbin.com/screens/a7afa68a-7e23-4fe5-8c0d-081a1eecc314),
 adapted as a full page with NeuroIA's palette and existing authentication.
+Authentication failures and mismatched registration passwords use a compact
+ModalFrame notification (440 px maximum, 6 px corners, 4 px action corners).
+Show the specific error with a short heading and Volver al formulario action;
+Escape/backdrop also dismiss and return focus while preserving entered values.
+Keep recovery success as an inline status. Reference: [Workable error notification](https://mobbin.com/screens/d66e2824-c0f4-415f-ac20-aaf9d46ff1da).
 Personal/professional intent survives authentication. Existing verification,
 recent-authentication and account ownership requirements remain unchanged.
 

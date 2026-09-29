@@ -1592,6 +1592,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .account-entry-form { max-width: 440px; width: 100%; margin: 0 auto; }
 .account-entry-tabbed { min-height: 30rem; }
 .account-entry-form h1 { font-size: clamp(1.4rem, 3vw, 1.7rem); line-height: 1.25; margin: 18px 0 8px; letter-spacing: -.035em; }
+.account-entry-form h1.entry-title-with-space { margin-bottom: calc(26px + 1.275rem); }
 .account-entry-form > p { font-size: .85rem; line-height: 1.5; color: var(--color-text-muted); margin-bottom: 18px; }
 .account-entry-form .email-form { display: grid; gap: 14px; }
 .account-entry-form .entry-provider-note { font-size: .7rem; line-height: 1.5; color: var(--color-text-muted); text-align: center; margin: 0; }
@@ -1704,3 +1705,11 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .information-page-funding .project-funding > img { margin-top: 24px; }
 
 .information-page-content p { text-align: justify; hyphens: auto; }
+
+/* Compact authentication feedback; preserve other dialog shapes. */
+.modal-shell:has(.entry-error-notification) { width: min(440px, calc(100vw - 32px)); border-radius: 6px; background: var(--color-surface); scrollbar-gutter: auto; }
+.entry-error-notification { padding: 28px; }
+.entry-error-notification > svg { color: var(--color-primary); margin-bottom: 18px; }
+.entry-error-notification h2 { font-size: 1.15rem; line-height: 1.35; margin: 0 0 12px; }
+.entry-error-notification p { color: var(--color-text-muted); font-size: .85rem; line-height: 1.6; margin: 0 0 24px; overflow-wrap: anywhere; }
+.modal-shell .entry-error-notification .touch-btn { width: 100%; border-radius: 4px; }
