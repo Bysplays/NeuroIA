@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ModalFrame } from './ModalFrame';
 import type { AccountAccess } from '../services/accessService';
 
 export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onTrial, onInvite, onCheckout, onSignOut, onPortal, checkoutReturn, onCancelCheckout }: {
@@ -12,15 +11,11 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
   const [code, setCode] = useState('');
   const codeError = invitationIssue?.code === code ? invitationIssue.message : '';
   const expired = access?.kind != null;
-  return <ModalFrame labelledBy="onboarding-title" onClose={() => {}} dismissOnBackdrop={false}>
+  return <div className="access-choice-page">
     <section className="onboarding">
       <header className="onboarding-heading">
         <h1 id="onboarding-title" tabIndex={-1} autoFocus>{expired ? 'Continúa con NeuroIA' : 'Empieza con NeuroIA'}</h1>
         {expired && <p>{access?.kind === 'trial' ? 'Tu prueba gratuita ha terminado.' : 'Tu acceso no está activo.'}</p>}
-        <svg className="onboarding-paper-edge" viewBox="0 0 400 32" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-          <path d="M0 18 C100 42 170 0 250 16 C310 30 360 28 400 12 V32 H0 Z" fill="currentColor" opacity=".35" transform="translate(0 -6)" />
-          <path d="M0 18 C100 42 170 0 250 16 C310 30 360 28 400 12 V32 H0 Z" fill="currentColor" />
-        </svg>
       </header>
       {!access && !loadFailed && <p role="status">Preparando tus opciones…</p>}
       {checkoutReturn === 'success' && <p role="status">Estamos comprobando tu pago. El acceso se abrirá cuando se confirme.</p>}
@@ -51,5 +46,5 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
         <button className="paper-nav-button" disabled={busy} onClick={onSignOut}>Cerrar sesión</button>
       </footer>
     </section>
-  </ModalFrame>;
+  </div>;
 }

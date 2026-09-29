@@ -72,7 +72,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                     </span>
                     <span className="cozy-preview-cards"><i /><i /><i /><i /><i /></span>
                   </span>
-                  <span className="preferences-theme-label">{style === 'default' ? 'Default' : 'Cozy'}
+                  <span className="preferences-theme-label">{style === 'default' ? 'Calma' : 'Papel'}
                     <Check size={16} aria-hidden="true" />
                   </span>
                 </button>

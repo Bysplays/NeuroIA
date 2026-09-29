@@ -1,3 +1,4 @@
+import { Brand } from './Brand';
 import { RotateCw } from 'lucide-react';
 import { FullscreenButton } from './FullscreenButton';
 import { HeaderIllustration } from './HeaderIllustration';
@@ -6,7 +7,7 @@ export function ConnectionRecovery({ title = 'Vamos a reconectar', message = 'Co
   title?: string; message?: string; onRetry: () => void; onSignOut: () => void;
 }) {
   return <main className="login-screen connection-recovery">
-    <header className="login-brand"><img src={`${import.meta.env.BASE_URL}brand/neuroia-logo.svg`} alt="NeuroIA" width="160"/><FullscreenButton/></header>
+    <header className="login-brand"><Brand/><FullscreenButton/></header>
     <section className="login-card" aria-labelledby="connection-title">
       <div className="login-welcome"><HeaderIllustration scene="rest" className="login-art"/></div>
       <div className="login-actions">

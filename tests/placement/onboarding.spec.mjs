@@ -78,7 +78,8 @@ test('a passed target stage survives reload and continues at its saved difficult
   await expect.poll(async () => (await saved(page)).placement?.stages?.['motor-target']?.level).toBe(4);
   await page.reload();
   await page.getByRole('button', { name: 'Empezar', exact: true }).click();
-  await expect(page.getByText('Nivel 4', { exact: true })).toBeVisible();
+  await expect(page.getByText('A tu ritmo', { exact: true })).toBeVisible();
+  await expect(page.getByText('Nivel 4', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: /Omitir/ }).click();
   await expect(page.getByRole('heading', { name: 'A tu ritmo, desde aquí' })).toBeVisible();
   expect((await saved(page)).placement.trials['motor-target'].assessedLevel).toBe(1);

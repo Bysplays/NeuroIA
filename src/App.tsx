@@ -24,8 +24,6 @@ import { Dashboard } from './components/Dashboard';
 import { TherapistReport } from './components/TherapistReport';
 import { AccessibilityModal } from './components/AccessibilityModal';
 import { FatigueAlertModal } from './components/FatigueAlertModal';
-import { LandscapeGate } from './components/LandscapeGate';
-import { usePortrait } from './services/orientation';
 import { LoginScreen } from './components/LoginScreen';
 import { EmailVerification } from './components/EmailVerification';
 import { accountDisplayName, needsEmailVerification, submitEmailAuth, type EmailAction } from './services/emailAuth';
@@ -97,7 +95,7 @@ export const App: React.FC = () => {
     finally { setBusy(false); }
   };
 
-  return <LandscapeGate>{loading
+  return <>{loading
     ? <AppLoading />
     : user
       ? verificationRequired
@@ -106,11 +104,10 @@ export const App: React.FC = () => {
         {error && <p className="account-notice" role="alert">{error}</p>}
         <Suspense fallback={<AppLoading />}><AccountEntry key={user.uid} user={user} professionalEntry={professionalEntry} onSignOut={handleSignOut}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace uid={user.uid} onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></AccountEntry></Suspense></>
       : <LoginScreen onSignIn={handleSignIn} onEmail={handleEmail} onClearError={() => setError('')} busy={busy} error={error} />
-  }</LandscapeGate>;
+  }</>;
 };
 
 const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: boolean; sync: ProgressSync; data: ProgressData }> = ({ uid, onSignOut, signingOut, sync, data }) => {
-  const portrait = usePortrait();
   const { profile, history } = data;
   const access = useAccountAccess();
   const [proposal, setProposal] = useState<AssignedSession | null>(null);
@@ -136,7 +133,6 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
 
   // Contador de minutos de sesión para ofrecer pausas
   useEffect(() => {
-    if (portrait) return;
     const timer = setInterval(() => {
       setSessionMinutes(prev => {
         const next = prev + 1;
@@ -148,7 +144,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
     }, 60000);
 
     return () => clearInterval(timer);
-  }, [portrait]);
+  }, []);
 
   // Commit visual preferences before paint, together with the selected controls.
   useLayoutEffect(() => {
@@ -183,10 +179,10 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   };
 
   // Iniciar el Plan del Día (secuencia guiada alternando ejercicios)
-  const handleStartDailyPlan = () => {
+  const handleStartDailyPlan = (selectedQueue?: ExerciseId[]) => {
     soundService.playSuccess();
     const domainQueue = StorageService.generateDailyPlanQueue(profile);
-    const exerciseQueue = domainQueue.map(domain => {
+    const exerciseQueue = selectedQueue ?? domainQueue.map(domain => {
       const exList = getExercisesForDomain(domain);
       const chosen = exList[Math.floor(Math.random() * exList.length)];
       return chosen ? chosen.id : (domain as unknown as ExerciseId);
@@ -253,6 +249,8 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
             window.scrollTo(0, 0);
           }}
           navigationRef={setNavigationTarget}
+          onSignOut={onSignOut}
+          signingOut={signingOut}
           onOpenAccessibility={() => setIsAccessibilityOpen(true)}
           onOpenFatigueAlert={() => setIsFatigueOpen(true)}
         />
@@ -262,6 +260,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
         {playingProposal && <AssignedSessionPlayer key={playingProposal.id} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isFatigueOpen || isRestModalOpen} />}
         {activeView === 'dashboard' && !playingProposal && (
           <Dashboard uid={uid} history={history} navigationTarget={navigationTarget}
+            onOpenSettings={() => setIsAccessibilityOpen(true)} onSignOut={onSignOut} signingOut={signingOut}
             proposedSessions={sessionLink && <AssignedSessionInbox key={sessionLink.professionalId + sessionLink.seatId} link={sessionLink} onStart={value => { setDailyPlanSession(null); setProposal(value); window.scrollTo(0, 0); }} />}
             profile={profile}
             onSelectDomain={handleSelectDomain}
@@ -283,7 +282,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
           />
         )}
 
-        {isPlayingGame && !playingProposal && <GameSession onSettings={() => setIsAccessibilityOpen(true)} paused={isAccessibilityOpen} key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
+        {isPlayingGame && !playingProposal && <GameSession onSettings={() => setIsAccessibilityOpen(true)} paused={isAccessibilityOpen || isFatigueOpen || isRestModalOpen} key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
           <GameExercise id={exerciseId} profile={profile} onBack={handleBackToDashboard} onSaveResult={handleSaveExerciseResult} planProgress={planProgress} onNextPlanExercise={handleNextPlanExercise} />
         </GameSession>}
       </main>}

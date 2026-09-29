@@ -1,12 +1,14 @@
 import { EegButton } from './EegButton';
-import { FullscreenButton } from './FullscreenButton';
+import { Brand } from './Brand';
 import React from 'react';
 import { SoundToggle } from './SoundToggle';
-import { Settings } from 'lucide-react';
+import { Settings2, LogOut } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { soundService } from '../services/soundService';
 
 interface HeaderProps {
+  onSignOut: () => void;
+  signingOut: boolean;
   profile: UserProfile;
   sessionMinutes: number;
   activeView: 'dashboard' | 'therapist' | 'statistics' | 'game';
@@ -17,19 +19,14 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onNavigate,
+  onNavigate, onSignOut, signingOut,
   navigationRef,
   onOpenAccessibility,
 }) => {
   return (
     <header className="main-header">
       <button className="header-left" onClick={() => onNavigate('dashboard')} aria-label="NeuroIA, ir al inicio">
-        <div className="header-logo-icon">
-          <img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="40" height="40" />
-        </div>
-        <div>
-          <span className="header-title">Neuro<span className="brand-light">IA</span></span>
-        </div>
+        <Brand/>
       </button>
 
       <div className="header-navigation" ref={navigationRef}/>
@@ -50,9 +47,9 @@ export const Header: React.FC<HeaderProps> = ({
           aria-label="Ajustes de accesibilidad"
           title="Ajustar tamaño del texto y estilo de la página"
         >
-          <Settings size={20} />
+          <Settings2 size={20} />
         </button>
-        <FullscreenButton/>
+        <button className="header-signout" disabled={signingOut} onClick={onSignOut}><LogOut size={18}/>{signingOut ? 'Cerrando…' : 'Cerrar sesión'}</button>
       </div>
     </header>
   );

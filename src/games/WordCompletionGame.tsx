@@ -43,7 +43,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, config, feedback } = useGameSession();
   const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => createWords(config));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -89,6 +89,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
+      feedback('Bien hecho. Sigue a tu ritmo.');
       soundService.speak(`¡Correcto! ${currentItem.word}`);
       setCorrectCount(prev => prev + 1);
     } else {
@@ -287,7 +288,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
               disabled={selectedLetter === null}
               tabIndex={selectedLetter === null ? -1 : 0}
             >
-              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Palabra' : 'Ver Resultados'}</span>
+              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Palabra' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
               <ArrowRight size={24} />
             </button>
           </div>

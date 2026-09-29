@@ -15,7 +15,7 @@ professional-only entry is unaffected.
 
 Only interaction patterns informed the implementation. No reference screenshot,
 third-party mascot, clinical claim or external copy is shipped. Existing paper
-companions, mint/ink palette and shared game/session/settings systems remain.
+companions, clinical-blue Calma palette and shared game/session/settings systems remain.
 
 ## Interaction
 
@@ -27,7 +27,7 @@ companions, mint/ink palette and shared game/session/settings systems remain.
    catalog entry or change game mechanics. No diagnosis, affected limb, clinical
    history or free-text health information is collected.
 3. Review areas and the actual number of selected games. Start or change choices.
-   Work through one area before another, retaining each game's existing ladder.
+   Work through one area before another, using at most two stages per game (1 then 4). A failed Simon trial ends immediately without a forced replay.
 4. Finish when all selected games have a saved final trial. Show measured levels,
    omitted trials and untested games distinctly. Unselected games remain playable
    with the normal level-1 fallback; no measured level is manufactured for them.
@@ -48,7 +48,7 @@ receipts. No new account store or authorization bypass is introduced.
 - `placement.preferences`: `{ interests: CognitiveDomain[], movement:
   'unspecified' | 'standard' | 'taps' }`. Interests are unique, nonempty and limited
   to the five supported domains. This is the initial assessment's chosen plan.
-- `placement.stages[exerciseId]`: next ladder level (4/7/10) and the actual last
+- `placement.stages[exerciseId]`: next ladder level (4 for new attempts; legacy 7/10 remain compatible) and the actual last
   passed trial. Only a passed nonempty stage advances; retries cannot regress a
   higher stage or replace a finished trial. Finalizing a game removes its stage.
 - `placement.trials`: bounded final evidence for games actually attempted/omitted.

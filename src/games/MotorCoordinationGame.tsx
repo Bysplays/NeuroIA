@@ -31,7 +31,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, config, feedback } = useGameSession();
   const totalTargets = config.targets;
   const targetSize = config.targetSize; // Diana ampliada para máxima accesibilidad y visibilidad
 
@@ -82,6 +82,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     if (isCompleted) return;
 
     soundService.playSuccess();
+      feedback('Bien hecho. Sigue a tu ritmo.');
 
     const newTouch = { x: currentTarget.x, y: currentTarget.y, id: clock.now() };
     setTouches(prev => [...prev, newTouch]);

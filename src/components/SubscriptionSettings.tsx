@@ -58,7 +58,7 @@ export function SubscriptionSettings() {
         </div>
       {subscription && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable || !access.canManageSubscription} onClick={() => void openBilling('portal')}>{busy ? 'Abriendo Stripe…' : canReactivate ? 'Reactivar suscripción' : 'Gestionar'}</button>}
         {invitation && <button className="subscription-upgrade" onClick={() => { setError(''); setConfirmLeave(true); }}>Abandonar</button>}
-        {!subscription && !invitation && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable} onClick={() => void openBilling('checkout')}>{busy ? 'Abriendo…' : 'Mejorar'}</button>}
+        {!subscription && !invitation && <button className="subscription-upgrade" disabled={busy || !access.checkoutAvailable} onClick={() => void openBilling('checkout')}>{busy ? 'Abriendo…' : 'Suscribirme'}</button>}
       </div>
       {invitation && access.professionalName && <p className="subscription-detail">Vinculado a {access.professionalName}.</p>}
     </>}

@@ -1,5 +1,5 @@
 import { advanceAssessment } from '../services/placementAssessment';
-import { FullscreenButton } from './FullscreenButton';
+import { PlanButton } from './PlanButton';
 import { useEffect, useRef, useState } from 'react';
 import { Volume2 } from 'lucide-react';
 import type { ExerciseId, ExerciseResult, UserProfile } from '../types';
@@ -8,7 +8,6 @@ import type { ProgressSync } from '../services/progressSync';
 import { DIFFICULTY_VERSION, EXERCISE_IDS, hasPlacement, placementTrials } from '../services/difficulty';
 import { INTEREST_AREAS, nextThematicGame, placementExercises, type PlacementPreferences as Preferences } from '../services/placementPreferences';
 import { getExerciseById } from '../services/exerciseCatalog';
-import { enterFullscreen } from '../services/fullscreen';
 import { soundService } from '../services/soundService';
 import { GameSession } from './GameSession';
 import { GameExercise } from './GameExercise';
@@ -92,7 +91,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
   const message = complete ? (onCancel ? 'Guardaremos los niveles de estas áreas. Los demás niveles y tus partidas se mantendrán.' : 'Ya puedes empezar con las áreas que has elegido. Los juegos que no has probado siguen disponibles; puedes explorarlos cuando quieras.')
     : 'Iremos área por área, con juegos breves a tu ritmo. Puedes omitir cualquiera que no te resulte cómodo.';
   return <main className="placement-screen">
-    <header className="placement-toolbar"><span>Tu punto de partida</span>{onCancel && <button className="placement-text-action" onClick={onCancel}>Cancelar prueba</button>}<button className="paper-nav-button" onClick={onSettings}>Ajustes</button><FullscreenButton/></header>
+    <header className="placement-toolbar"><span>Tu punto de partida</span>{onCancel && <button className="placement-text-action" onClick={onCancel}>Cancelar prueba</button>}<button className="paper-nav-button" onClick={onSettings}>Ajustes</button><PlanButton/></header>
     <section className="placement-card" aria-labelledby="placement-title">
       <HeaderIllustration scene={complete ? 'home' : (available[0] ?? 'home')} className="placement-art" />
       <div className="placement-content">
@@ -107,7 +106,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
           <p className="placement-plan-note">Puedes cambiar tus áreas desde Ajustes → Tu cuenta → Rehacer prueba.</p>
           <button className="touch-btn touch-btn-primary" onClick={onDone}>{doneLabel}</button>
         </> : <div className="placement-actions">
-          <button className="touch-btn touch-btn-primary" onClick={() => { void enterFullscreen(true); next(); }}>{count ? 'Continuar' : 'Empezar'}</button>
+          <button className="touch-btn touch-btn-primary" onClick={() => { next(); }}>{count ? 'Continuar' : 'Empezar'}</button>
           <button className="placement-text-action" onClick={() => { setSavingPreferences(false); setEditing(true); }}>Cambiar mis elecciones</button>
         </div>}
       </div>

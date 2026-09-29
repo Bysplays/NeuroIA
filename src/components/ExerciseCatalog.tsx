@@ -33,10 +33,10 @@ export function ExerciseCatalog({ profile, onBack, onSelectExercise, embedded = 
   return (
     <section className="exercise-library" aria-labelledby="library-title">
       {!embedded && <button className="text-link" onClick={onBack}><ArrowLeft size={18} /> Volver al inicio</button>}
-      {!embedded && <div className="library-heading">
+      {<div className="library-heading">
         <div>
           <span className="library-eyebrow">Un rato para tu mente</span>
-          <h1 id="library-title" tabIndex={-1} ref={heading}>Encuentra tu próximo juego</h1>
+          <h1 id="library-title" tabIndex={-1} ref={heading}>Ocho formas de jugar.</h1>
           <p>Elige lo que te apetezca. Practica a tu ritmo.</p>
         </div>
         <HeaderIllustration scene="catalog" className="menu-header-art" />
@@ -52,7 +52,7 @@ export function ExerciseCatalog({ profile, onBack, onSelectExercise, embedded = 
             <span className="library-game-art"><WellnessGlyph exercise={exercise.id} /></span>
             <strong>{exercise.title}</strong>
             <span className="library-game-description">{EXERCISE_SUMMARIES[exercise.id]}</span>
-            <span className="library-game-action">Empezar <span><ArrowRight size={20} /></span></span>
+            <span className="library-game-action">Ver cómo se juega <span><ArrowRight size={20} /></span></span>
           </button>
         ))}
       </div>

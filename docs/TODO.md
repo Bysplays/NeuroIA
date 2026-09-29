@@ -9,11 +9,13 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [x] Prepare three independent clinical-blue, tablet-first concepts using Mobbin
   references from Kit, Ahead and Brilliant. The review board is at
   `/design/concepts/`; see [DESIGN-CONCEPTS.md](DESIGN-CONCEPTS.md).
-- [ ] Select a concept or a concrete combination before changing the application.
-- [ ] Implement the selected direction throughout player, entry, onboarding,
-  games, activity, account and professional flows in portrait and landscape;
-  verify all states and existing contracts listed in DESIGN-CONCEPTS.md. The
-  concept prototype is not completion of the production redesign.
+- [x] Owner selected A — Calma editorial, with the clinical-blue palette.
+- [x] Apply A to the application shell, public entry, home, onboarding, catalog,
+  instruction pages, game controls, activity and account surfaces. Shared tokens
+  also style professional screens. Remove orientation gating and automatic fullscreen.
+- [ ] Complete client/device acceptance across signed-in professional, billing and
+  recovery flows. Local component screenshots do not replace a full production
+  account review; see DESIGN-CONCEPTS.md for the original acceptance matrix.
 
 The owner confirms real Muse 2 connection, EEG/PPG, battery, reconnection and saved
 charts; the payment/seat lifecycle (purchase, renewal, failed payment, cancellation
@@ -42,11 +44,11 @@ subject to the confirmed deadline and available client materials.
 
 ### Delivery dependencies and recovery
 
-- [ ] **CR-01 — IGAPE attribution and logos.** Obtain the exact text, photo/reference
-  and original logo files the client says were sent previously; they are not
-  attached to this request. Confirm required placement and presentation, then add
-  them visibly to the initial public page/landing. Gate: client approves the exact
-  wording, logo proportions, legibility and placement on the target devices.
+- [x] **CR-01 — IGAPE attribution and logos (local).** Complete owner-supplied
+  notice appears on the public landing and About, unmodified, with full-size link
+  and selectable HTML transcript. Image loading, mobile layout and About focus
+  return checked. Client approval of publicity compliance/placement remains a
+  release check; this is not a legal certification.
 - [ ] **CR-02 — Recovery and review environment.** Inventory the deployed version,
   source commit, existing remote backups and data/configuration recovery procedures;
   establish an isolated review URL and document how to restore the last approved
@@ -54,6 +56,9 @@ subject to the confirmed deadline and available client materials.
   verified facts. Current evidence: the Ahead source is committed on
   `codex/neuroia-ahead-redesign`, with local tag
   `archive/neuroia-ahead-redesign-2026-09-29`, AGENTS guidance and a local Git hook.
+  Local main is `801dd54`; origin points to `git@github.com:Bysplays/NeuroIA.git`.
+  The checked-out change is isolated on `codex/neuroia-blue-concepts`. Neither
+  the deployed commit nor a separate hosted restore URL has been verified.
   This does **not** establish a hosted backup website, remote archive or database
   backup, and it is not a backup of the currently deployed original design.
 - [ ] **CR-03 — IGAPE delivery evidence.** Confirm the actual report deadline,
@@ -74,81 +79,43 @@ subject to the confirmed deadline and available client materials.
 - [ ] **CR-04 release —** Review with the client and publish the updated Firestore
   rules before the frontend. Verify the deployed flow on the target devices; no
   production rules or frontend have been published as part of local implementation.
-- [ ] **CR-05 — Pressure-free assessment wording.** Remove announcements of numeric
-  trial levels and use neutral invitations to play with gradually changing
-  difficulty. The client cites levels 2/5/7; the current documented ladder is
-  1/4/7/10, so inspect actual screens rather than adopting the reported numbers.
-  Gate: introductions, transitions and narration avoid numeric assessment pressure;
-  internal versioned level evidence remains intact.
-- [ ] **CR-06 — Misleading results action during trials.** Reproduce the reported
-  “Ver Resultados” action that advances directly to the next game. This copy exists
-  in naming, word completion and categorization; check all assessment games.
-  Use an action matching the actual next step during assessment. Gate: no trial
-  promises a results screen it will not show; ordinary play retains real results.
-- [ ] **CR-07 — Simon/sequence failure must advance.** Reproduce the forced replay
-  and “No te preocupes” prompt in initial assessment. A failed assessed attempt
-  should record its evidence and proceed without requiring another try. Gate:
-  failure saves once, advances once after confirmation, and survives delayed saves
-  or resume; ordinary practice keeps its separately intended retry behavior.
-- [ ] **CR-08 — Pairs should reveal on touch.** Replace the long compulsory opening
-  preview reported in assessment with cards revealed by tapping before matching.
-  Current MemoryPairsGame starts face-up with a timed preview and an early-start
-  control; verify the client path. Confirm whether this applies to ordinary play
-  too. Gate: immediate understandable interaction, clear matching/mismatch feedback,
-  keyboard/touch access, and compatible timing/difficulty evidence.
-- [ ] **CR-09 — Shorter, balanced assessment.** Review the total trial burden and
-  why Simon repeats several times while the target game is tried only once. Agree
-  per-area stopping rules, maximum attempts and an acceptable overall duration;
-  coordinate with CR-04 and CR-07. Gate: no unnecessary forced repeats, sufficient
-  per-game evidence, and correctly distinguished assessed, skipped and untested
-  games. Do not assume that equal trial counts produce equivalent measurements.
+- [x] **CR-05 — Pressure-free assessment wording (local).** Trial controls say “A tu ritmo”; numeric levels are retained only in ordinary play and the final evidence summary. No numeric trial announcement is narrated.
+
+- [x] **CR-06 — Misleading results action during trials (local).** Naming, words and categorization use “Continuar” during assessment. Ordinary completion keeps its results action; placement advances after durable evidence.
+
+- [x] **CR-07 — Simon failure advances (local).** A wrong trial input saves one failed attempt and ends that ladder. No forced replay or apologetic retry prompt; ordinary practice retains replay. Browser regression verifies single completion.
+
+- [x] **CR-08 — Pairs reveal on touch (local).** All play starts face down with immediate click/keyboard reveal. Optional timed preview remains a counted hint and can be ended early. Mismatch timers clean up on hint, restart and unmount.
+
+- [x] **CR-09 — Shorter assessment (local).** New ladders stop after at most two stages (1/4), with conservative prior evidence on failure. Legacy higher stages remain compatible. Further calibration and client timing acceptance remain open; this is not a validated cognitive measurement.
 
 ### Public entry, registration and service access
 
-- [ ] **CR-10 — Explain the product before registration.** Add a public landing or
-  restructure the entry screen so a visitor understands the games, purpose and
-  next action before creating an account. Request/approve the explanatory copy
-  offered by the client; include CR-01 branding. Gate: readable public explanation,
-  clear paths to playing, registration and sign-in, and supplied non-medical copy.
-- [ ] **CR-11 — Visible registration action.** Expose “Crear cuenta” directly on the
-  access screen instead of requiring discovery inside “Continuar con correo”.
-  Reuse existing email/Google authentication and workspace selection. Gate: an
-  older first-time user can distinguish registration from sign-in; verification,
-  recovery and existing-account paths still work.
-- [ ] **CR-12 — Purchase before the initial trial.** Provide a visible subscription
-  action on the initial entry/home surface, accessible before assessment. Clarify
-  its placement on the public landing versus signed-in home. Reuse the existing
-  authenticated checkout/access flow; do not introduce anonymous entitlements or
-  imply paid access before server confirmation. Gate: purchase, cancellation and
-  return work without forcing assessment first, respecting billing availability.
-- [ ] **CR-13 — Visible sign-out on home.** Add an explicit “Cerrar sesión” action
-  on the initial signed-in screen, rather than requiring Settings. Gate: discoverable
-  with large text, keyboard and touch; uses existing logout and preserves queued
-  progress for the same account's next login.
-- [ ] **CR-14 — Explain the Muse connection action.** Replace icon-only Bluetooth
-  discovery with a visible label such as “Conectar Muse”, retaining the existing
-  connection/status service. Gate: disconnected, connecting and connected states
-  are understandable, and unsupported browsers have the existing usable fallback.
+- [x] **CR-10 — Public explanation (local).** Landing presents supplied non-medical copy, examples of actual games, direct entry actions and IGAPE funding before registration.
+
+- [x] **CR-11 — Visible registration (local).** Crear cuenta and Iniciar sesión are directly visible; inline forms preserve personal/professional intent, Google entry, confirmation and recovery.
+
+- [x] **CR-12 — Purchase before assessment (local).** Landing subscription entry explains required authentication. Existing access choices and Mi acceso expose the authenticated subscription flow before placement and from Mi cuenta. Server availability and Stripe confirmation remain required; repeat real Sandbox lifecycle acceptance before release.
+
+- [x] **CR-13 — Home sign-out (local).** Visible Cerrar sesión in Header and Mi cuenta reuses the existing logout; queued progress persistence is unchanged.
+
+- [x] **CR-14 — Muse label (local).** Visible Conectar Muse / Conectando Muse / Muse conectado uses the same service and unsupported-browser explanation. Check physical hardware before release.
+
 - [ ] **CR-15 — Firebase URLs in visible navigation.** Obtain the exact links and
   reproduce where the address bar changes. Separate app links/returns from Google
   OAuth helpers and email verification/reset handlers. Existing deployment guidance
   documents Firebase-hosted auth actions; a Firebase hostname alone is not proof of
-  a broken link. Gate: app navigation/returns use the intended app domain; review
+  a broken link. Local audit confirms `src/services/firebase.ts` intentionally uses
+  `ceoaberto-neuroia.firebaseapp.com`, documented in DEPLOYMENT.md. No speculative
+  auth-domain change was made. Gate: app navigation/returns use the intended app domain; review
   branded auth-domain feasibility if needed, without breaking secure verification,
   recovery or sign-in. Coordinate with the existing domain-migration backlog.
 
 ### Game copy and reinforcement
 
-- [ ] **CR-16 — Word-completion naming.** Replace the reported “Completar palabras
-  faltantes” with “Completar palabras” wherever it appears in active entry, catalog,
-  instructions or narration. Locate the exact current variant first. Preserve game
-  IDs, answer keys and saved history; update the active speech inventory if copy changes.
-- [ ] **CR-17 — Visible positive reinforcement.** Add a short positive on-screen
-  popup as requested, so success feedback does not depend on voice alone. Agree
-  the triggers and frequency; reuse shared feedback/dialog infrastructure. Gate:
-  readable with sound off and large text, respectful adult Spanish, accessible
-  focus/dismissal where applicable, no lost input, and no forced retry or added
-  assessment burden contrary to CR-07/CR-09.
+- [x] **CR-16 — Word-completion naming (local).** Active catalog and instruction title use Completar palabras; legacy IDs and saved history are unchanged. New spoken wording uses the existing recording fallback.
+
+- [x] **CR-17 — Visual positive reinforcement (local).** GameSession shows a short, dismissible, non-blocking status bubble after correct answers, alongside existing results. Uses the pausable clock and never takes focus. Target success verified with sound disabled.
 
 ### Verification before client approval
 
@@ -180,7 +147,7 @@ voice provider or new illustration set has been selected by this planning work.
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Approved towel/table style integrated across 80 objects, standalone stimuli and motor tokens | Physical-tablet recognition feedback |
 | 9 / LEVELS | Difficulty 1–10 | Versioned 1–10 configuration for all games, saved level and timed same-game promotion | User calibration and physical-device checks |
-| 10 / PLACEMENT | Guided initial level assessment | Selected games grouped by interest with existing 1/4/7/10 placement ladders, separate from access onboarding; thematic entry implemented locally (CR-04); pacing changes remain (CR-05–CR-09) | Client review acceptance and physical-device checks |
+| 10 / PLACEMENT | Guided initial level assessment | Selected games grouped by interest with bounded 1/4 placement with legacy 7/10 compatibility, separate from access onboarding; thematic entry implemented locally (CR-04); pacing changes implemented locally (CR-05–CR-09) | Client review acceptance and physical-device checks |
 | 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
 
 ### Current implementation sequence
@@ -495,3 +462,19 @@ release issue is lost during prioritization.
   extend that confirmation to unspecified OS/browser combinations.
 - [ ] Check longest account/session text and very large text on target devices;
   preserve accessible scrolling for content that cannot fit.
+
+## Calma local verification and release limits
+
+- Unit suite: 93 tests passed; demo Firestore/rules/proposals/Worker REST: 31 passed.
+- Demo Auth suite: 2 passed; build and strict lint pass.
+- Isolated placement browser suite: 9 passed, including delayed evidence and reload.
+- Interface suite: 8 passed (7 core checks plus advanced-board coverage), covering
+  three widths, eight instruction/play screens, funding
+  image/transcript, About focus return, keyboard pairs, failed Simon, trial
+  continuation, visible reinforcement, target bounds and enlarged text.
+- Production build succeeds with the existing large-bundle advisory (main chunk
+  remains above 500 kB); bundle splitting remains a performance follow-up.
+- No deployment, real-account writes, database backup, live-payment verification
+  or physical-device Bluetooth/installation verification is implied by these checks.
+- New instruction copy can fall back to browser speech; the existing pending
+  recordings and licensing items remain open.

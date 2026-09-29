@@ -40,7 +40,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, config, feedback } = useGameSession();
   // Preguntas seleccionadas al azar para esta sesión
   const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>(() => createQuestions(config));
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -79,6 +79,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
+      feedback('Bien hecho. Sigue a tu ritmo.');
       soundService.speak('Correcto');
       setCorrectCount(prev => prev + 1);
       setScore(prev => prev + 100);
@@ -201,7 +202,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
               disabled={selectedOption === null}
               tabIndex={selectedOption === null ? -1 : 0}
             >
-              <span>{currentIdx + 1 < sessionQuestions.length ? 'Siguiente Palabra' : 'Ver Resultados'}</span>
+              <span>{currentIdx + 1 < sessionQuestions.length ? 'Siguiente Palabra' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
               <ArrowRight size={24} />
             </button>
           </div>

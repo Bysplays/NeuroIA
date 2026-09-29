@@ -2,7 +2,8 @@
 
 ## Status and review
 
-These are **proposals, not the implemented product design**. The owner requested
+This board records the three proposals. **A — Calma editorial is selected**;
+[DESIGN.md](DESIGN.md) governs its implementation. The owner requested
 multiple Figma-style concepts before changing the application, then refined the
 brief toward the simplicity of Kit, Ahead and Brilliant and a clinical-blue
 palette. That explicit palette update supersedes the earlier request to retain
@@ -25,9 +26,8 @@ than stretching a screenshot. Example direct URLs:
 - `/design/concepts/?frame&direction=jardin&screen=home`
 - `/design/concepts/?frame&direction=estudio&screen=onboarding`
 
-No direction is approved yet. Select a direction or a concrete combination before
-replacing production components. The full redesign remains pending after concept
-delivery; this document does not mark the overall goal complete.
+The owner selected A — Calma editorial for the real application. B and C remain
+review artifacts only. The board is not a substitute for implementation verification.
 
 ## References inspected in Mobbin
 
@@ -53,7 +53,7 @@ Manrope, balanced whitespace, 24 px surfaces, a focused daily activity and a
 compact divided list. A pair of abstract blue cards illustrates the main action;
 mascots are secondary rather than the home focal point. Bottom navigation stays
 consistent across orientations. Recommended as the simplest starting point for
-the broad player audience, subject to owner selection and user validation.
+the broad player audience, selected by the owner; physical-device and user validation remain required.
 
 ### B — Jardín de juego
 

@@ -61,3 +61,11 @@ restoring brain functions, or providing rehabilitation. Disease and medical term
 in the supplied non-medical-purpose notice are exclusions, not promotional claims.
 Keep instructions, answer keys, scoring and persistence semantics intact. Internal
 legacy identifiers are not product copy and do not require a data migration.
+
+## Supplied institutional attribution
+
+The owner supplied the complete IGAPE funding notice on 2026-09-29. Render it
+unchanged on public entry and About with a full-size link and HTML transcript.
+The notice's AI project subtitle is funding attribution, not an additional claim
+that the current product ships all planned AI capabilities. See
+[asset provenance](assets/images/institutional/README.md).

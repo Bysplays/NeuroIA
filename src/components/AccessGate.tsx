@@ -1,10 +1,10 @@
+import { Brand } from './Brand';
 import { ConnectionRecovery } from './ConnectionRecovery';
 import { AccountAccessContext } from '../services/accountAccessContext';
 import { AppLoading } from './AppLoading';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { accessService, accessError, type AccountAccess } from '../services/accessService';
 import { OnboardingModal } from './OnboardingModal';
-import { usePortrait } from '../services/orientation';
 import { soundService } from '../services/soundService';
 
 export default function AccessGate({ onSignOut, children }: { onSignOut: () => void; children: ReactNode }) {
@@ -13,7 +13,6 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
   const [invitationIssue, setInvitationIssue] = useState<{ code: string; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [checkoutReturn, setCheckoutReturn] = useState(() => new URLSearchParams(location.search).get('checkout'));
-  const portrait = usePortrait();
   const alive = useRef(true);
   const locked = useRef(false);
   const version = useRef(0);
@@ -82,8 +81,8 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
   }
   if (access.active) return <AccountAccessContext.Provider value={access}>{children}</AccountAccessContext.Provider>;
   return <main className="access-entry">
-    <img src={`${import.meta.env.BASE_URL}brand/neuroia-logo.svg`} alt="NeuroIA" width="160" />
-    {!portrait && <OnboardingModal access={access} loadFailed={Boolean(error)} invitationIssue={invitationIssue} busy={busy}
+    <Brand/>
+    {<OnboardingModal access={access} loadFailed={Boolean(error)} invitationIssue={invitationIssue} busy={busy}
       onSignOut={onSignOut} onTrial={() => { void run(async () => { await accessService.trial(); await refresh(); }); }}
       onInvite={code => { void run(async () => {
         setInvitationIssue(null);

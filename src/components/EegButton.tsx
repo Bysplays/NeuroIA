@@ -1,5 +1,5 @@
 import { useState, useSyncExternalStore } from 'react';
-import { Activity, Battery, Bluetooth, X } from 'lucide-react';
+import { Activity, Battery, Bluetooth, AudioLines, X } from 'lucide-react';
 import { eegService } from '../services/eegService';
 import { ModalFrame } from './ModalFrame';
 
@@ -21,9 +21,9 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
     : 'Diadema desconectada';
 
   return <>
-    <button className={`header-icon-btn${state.status === 'connected' ? ' eeg-connected' : ''}`}
-      aria-label={state.status === 'connected' ? 'Diadema conectada' : 'Conectar diadema'}
-      title="Diadema EEG" onClick={() => toggle(true)}><Bluetooth size={20}/></button>
+    <button className={`header-icon-btn muse-entry${state.status === 'connected' ? ' eeg-connected' : ''}`}
+      aria-label={state.status === 'connected' ? 'Muse conectado' : state.status === 'connecting' ? 'Conectando Muse' : 'Conectar Muse'}
+      title="Diadema EEG" onClick={() => toggle(true)}><AudioLines size={20}/><span>{state.status === 'connected' ? 'Muse conectado' : state.status === 'connecting' ? 'Conectando Muse…' : 'Conectar Muse'}</span></button>
     {open && <ModalFrame labelledBy="eeg-title" onClose={() => toggle(false)}>
       <div className="preferences eeg-preferences">
         <header className="preferences-header">

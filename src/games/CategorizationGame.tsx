@@ -53,7 +53,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, assistanceTarget } = useGameSession();
+  const { clock, config, assistanceTarget, feedback } = useGameSession();
   const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => createItems(config));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -87,6 +87,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
+      feedback('Bien hecho. Sigue a tu ritmo.');
       soundService.speak(`¡Correcto! ${currentItem.name} pertenece a ${currentItem.categoryName}.`);
       setCorrectCount(prev => prev + 1);
     } else {
@@ -217,7 +218,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
               disabled={selectedCategory === null}
               tabIndex={selectedCategory === null ? -1 : 0}
             >
-              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Objeto' : 'Ver Resultados'}</span>
+              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Objeto' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
               <ArrowRight size={24} />
             </button>
           </div>

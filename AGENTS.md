@@ -314,7 +314,7 @@ appearance; the shared modal hides personal subscription controls.
 `ProductInformation` provides the switch through its optional children slot.
 The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
 localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the
-auth session through the bottom of Settings (not the home header). Entry and
+auth session from the visible home header, Mi cuenta or Settings. Entry and
 recovery screens retain their logout exits. After Firebase restores the UID, cached appearance is applied from
 that account before cloud loading; cached identity never grants access. `StorageService.setAccount` is set by the auth observer; cache
 and pending writes are scoped to the UID. Auth changes unmount the old boundary,
@@ -373,10 +373,10 @@ Totals remain self-reported, not medically verified. Publish the reviewed rules
 and Worker before this frontend; frontend builds deploy neither. See
 `docs/AUTHENTICATION.md` and `docs/TODO.md` for remaining release checks.
 
-`LandscapeGate` uses the portrait viewport media query and `ModalFrame`. Its
-context in `src/services/orientation.ts` pauses `GameSession` and the workspace
-fatigue timer without discarding answers. Locking is attempted only from an
-explicit fullscreen button, with a manual-rotation fallback.
+Portrait and landscape render the same workspace with responsive composition.
+There is no orientation gate or orientation-based clock pause. Fullscreen is
+explicit and never locks orientation; help, settings and background visibility
+still pause the game clock without discarding answers.
 
 `npm test` runs focused unit coverage; `npm run test:firestore` uses project
 `demo-neuroia` only and checks isolation, real transactions, idempotency, import
@@ -392,7 +392,7 @@ delivery, project password policy and physical-device OAuth remain release check
 
 ## Installable web metadata
 
-`public/manifest.webmanifest` defines standalone display, landscape preference,
+`public/manifest.webmanifest` defines standalone display, any-orientation preference,
 relative start URL/scope/ID and PNG icons for Android/tablets. `index.html` links
 the manifest and the 180px Apple touch icon; Vite rewrites their URLs for Pages.
 Keep manifest URLs relative so both `/NeuroIA/` and custom-domain roots work.
@@ -409,7 +409,7 @@ profile creation/import and is never updated by the settings input.
 
 ## Account activity statistics
 
-`ActivityStatistics` is embedded in the player dashboard’s Estadísticas tab, with an additional Logros tab rendering `AchievementShowcase`. Primary `TabletTabs` navigation uses a portal into Header’s navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
+`ActivityStatistics` is embedded in the player dashboard’s Actividad tab, with an additional Logros tab rendering `AchievementShowcase`. Primary `TabletTabs` navigation uses a portal into Header’s fixed bottom navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
 the shared `data-style` attribute and palette tokens; no separate theme state.
 `activityStats.ts` deduplicates results and computes local-day per-exercise means.
 It maps historical result IDs `visual-scan`, `daily-seq` and `motor-coord` to
@@ -487,13 +487,13 @@ navigation. `useViewportPanel` measures the height below surrounding toolbars an
 updates on resize; its min-height allows accessibility overflow. `useCompactViewport`
 reduces page sizes in short windows. Keep viewport rules in interface.css and
 game geometry in games.css; never hide overflow to simulate a fit.
-`FullscreenButton` and `services/fullscreen.ts` share explicit entry/exit and the
-once-per-page first-game Start attempt. Browser rejection must not block play.
-Orientation-lock rejection retains fullscreen and allows manual rotation.
+`FullscreenButton` and `services/fullscreen.ts` share explicit entry/exit. No game
+start requests fullscreen or orientation lock. Browser rejection must not block play.
 Run `npm test` for the fullscreen retry/exit contract; verify actual fullscreen
 entry, exit, tabs, pagination and dialog focus in an isolated browser context.
 
-Placement starts GameSession with `autoStart` for the current 1/4/7/10 stage in a shuffled game order.
+Placement starts GameSession with `autoStart` for its current stage in the selected thematic order.
+New ladders stop after at most levels 1 and 4; saved legacy 7/10 stages remain valid.
 Only the welcome and final level summary require progression buttons. Advance
 after the current trial appears in the parent progress snapshot; do not infer
 missing evidence or start the next game before that update. Manual help and pause
@@ -504,8 +504,8 @@ slot through a React portal. The slot sits beside manual help on the bottom
 navigation row (wrapping directly above it on narrow phones), keeping the current-object narration callback owned by the game.
 
 GameSession shares the viewport header and assistance/navigation footer between
-all placement and ordinary games, including daily sessions. Instruction cards reuse
-the shared `placement-*` layout classes without separate instruction-card styles; starting instructions and difficulty selection remain available outside placement. Narration uses the session instruction;
+all placement and ordinary games, including daily sessions. Instruction pages reuse
+the shared `placement-*` classes with responsive game-specific composition; starting instructions and difficulty selection remain available outside placement. Narration uses the session instruction;
 classification supplies current-object narration through the assistance portal.
 
 Object naming and word completion use shared instruction narration without hint or answer-reveal controls. New results preserve the hintsUsed field with a value of zero.
@@ -531,7 +531,7 @@ do not write all trials and levels together (Firestore expression budget).
 Nivel activity tab receives `gameLevels` from the current/authorized participant
 profile; `levelStatistics.ts` builds dated played-level series from archived results.
 
-`placementAssessment.ts` owns the 1/4/7/10 assessment ladder. New final trials carry
+`placementAssessment.ts` owns the two-stage (1/4) assessment and legacy 7/10 compatibility. New final trials carry
 optional `assessedLevel` (1, 4, 7 or 10; legacy 5 remains valid); trials without it keep the legacy mapping.
 PlacementOnboarding randomly interleaves unfinished games after each assessment turn
 (single round except motor-target, which uses its full level-specific target count), keeping
@@ -596,3 +596,27 @@ or progress services. Its only application component import is the read-only
 `GameObject` illustration renderer. See `docs/DESIGN-CONCEPTS.md` for references,
 scope, limits and the selection gate requested by the owner. Do not treat the
 prototype or its sample results as implemented production behavior.
+
+## Calma editorial and client-review entry
+
+`Brand` owns the shared transparent wordmark; `PracticeMotif` is CSS decoration,
+not a game stimulus. Default appearance uses clinical-blue Calma tokens and Manrope;
+`pageStyle: cozy` remains compatible as Papel. See docs/DESIGN.md.
+`ProjectFunding` presents the unmodified owner-supplied IGAPE notice, a full-size
+link and HTML transcript on public entry and About. Provenance lives in
+`docs/assets/images/institutional/README.md`.
+`LoginScreen` starts on the public landing and switches to inline email forms.
+`OnboardingModal` retains its existing API but now renders the access-choice page.
+`PlanButton` opens existing subscription management before placement and from
+Mi cuenta. Billing availability and entitlement checks remain server-owned.
+Dashboard passes its displayed exercise queue to the existing daily-plan callback.
+`GameSession.feedback` owns brief non-blocking correct-answer status using its
+pausable timer. Assessment failure in Simon finishes once; ordinary replay remains.
+Pairs start face down; voluntary preview remains a counted hint.
+
+`tests/interface/` is an isolated real-component browser fixture, never imported
+by the production entry; it stores results only in React state and blocks external
+network in the suite. Run `npm run test:interface` for entry/funding, eight-game
+layout, keyboard pairs, trial failure and fullscreen-regression checks. Screenshots
+are written to `/tmp`, not committed. `npm run test:placement` checks preference
+persistence and delayed evidence with its isolated backend.

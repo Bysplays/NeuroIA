@@ -321,7 +321,7 @@ between unfinished games within that area. No unselected game receives invented 
 which retains the full normal target count for the tested level (5/8/11/14).
 Each game retains its own next
 level and best result in the durable placement record. Each unfinished
-game tries levels 1 → 4 → 7 → 10; a stage passes only with nonzero question count and
+game tries at most levels 1 → 4; saved legacy 7/10 stages remain readable and can finish. A stage passes only with nonzero question count and
 all answers correct (not rounded displayed accuracy). On failure/omission, retain
 the last passed level, or level 1 if none passed. Advancing stages remounts the
 GameSession by game and tested level, resetting answers, layout configuration and

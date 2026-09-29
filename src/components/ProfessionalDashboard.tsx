@@ -1,3 +1,4 @@
+import { Brand } from './Brand';
 import { TabletTabs, TabletPager } from './TabletTabs';
 import { useCompactViewport, useViewportPanel } from '../services/viewport';
 import { FullscreenButton } from './FullscreenButton';
@@ -122,8 +123,8 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
   });
   return <div className="professional-workspace">
     <header className="main-header">
-      <button className="header-left" onClick={returnToPanel} aria-label="NeuroIA, volver al panel profesional"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="32" height="40"/><span className="header-title">Neuro<span className="brand-light">IA</span></span></button>
-      <div className="professional-account-actions"><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button><FullscreenButton/></div>
+      <button className="header-left" onClick={returnToPanel} aria-label="NeuroIA, volver al panel profesional"><Brand/></button>
+      <div className="professional-account-actions"><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button><FullscreenButton/><button className="header-signout" onClick={onSignOut}>Cerrar sesión</button></div>
     </header>
     {currentSeat ? personView === 'sessions' ? <ProfessionalSessions key={currentSeat.id + currentSeat.occupantUid} link={{ professionalId: uid, seatId: currentSeat.id, patientId: currentSeat.occupantUid! }} name={currentSeat.patientName || 'la persona invitada'} onBack={returnToPanel}/> : <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main ref={panel} className="professional-panel tablet-screen">
       <div className="professional-heading professional-home-heading"><span className="professional-section-icon"><BriefcaseBusiness size={24}/></span><h1>Espacio profesional</h1>

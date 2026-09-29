@@ -1,3 +1,4 @@
+import { Brand } from './Brand';
 import { useState } from 'react';
 import { Mail } from 'lucide-react';
 import type { User } from 'firebase/auth';
@@ -27,7 +28,7 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
     finally { setBusy(false); }
   };
   return <main className="email-verification">
-    <div className="login-brand"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="40" height="40" /><span>Neuro<strong>IA</strong></span></div>
+    <div className="login-brand"><Brand/></div>
     <section className="verification-card" aria-labelledby="verification-title">
       <header className="verification-heading">
         <span className="email-login-icon" aria-hidden="true"><Mail size={26} /></span>

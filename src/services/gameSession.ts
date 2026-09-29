@@ -11,6 +11,7 @@ export const SessionContext = createContext<{
   nextReady?: boolean;
   clock: ReturnType<typeof createGameClock>;
   finish: (completed: boolean) => void;
+  feedback: (message: string) => void;
   restart: () => void;
 } | null>(null);
 export function useGameSession() {

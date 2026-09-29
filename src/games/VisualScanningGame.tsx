@@ -126,7 +126,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, config, feedback } = useGameSession();
   const [initialRound] = useState(() => createRound(config));
   const [currentTarget, setCurrentTarget] = useState<SymbolDef>(initialRound.target);
   const [items, setItems] = useState<GridItem[]>(initialRound.items);
@@ -154,6 +154,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
     if (item.isTarget) {
       soundService.playSuccess();
+      feedback('Bien hecho. Sigue a tu ritmo.');
       const updated = items.map(i => (i.id === item.id ? { ...i, found: true } : i));
       setItems(updated);
 

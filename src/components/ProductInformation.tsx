@@ -1,3 +1,4 @@
+import { ProjectFunding } from './ProjectFunding';
 import { useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { ModalFrame } from './ModalFrame';
@@ -28,6 +29,7 @@ export function ProductInformation({ children }: { children?: ReactNode }) {
             </section>)}
             <p>Voz grabada con <a href="https://elevenlabs.io" target="_blank" rel="noreferrer">elevenlabs.io</a>.</p>
             <p>Conexión Muse 2 adaptada de MuseJS, © 2022 Respiire Health Systems (<a href={`${import.meta.env.BASE_URL}licenses/MuseJS.txt`} target="_blank" rel="noreferrer">licencia MIT</a>).</p>
+            <ProjectFunding/>
             <h3>Aviso legal</h3>
           </>}
           <p>{PRODUCT_NOTICE}</p>

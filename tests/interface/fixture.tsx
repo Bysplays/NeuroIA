@@ -1,0 +1,124 @@
+// Browser-only fixture. No production entry imports this file, no authenticated writes.
+import { useState } from "react";
+import { createRoot } from "react-dom/client";
+import { Header } from "../../src/components/Header";
+import { Dashboard } from "../../src/components/Dashboard";
+import { LoginScreen } from "../../src/components/LoginScreen";
+import { GameSession } from "../../src/components/GameSession";
+import { GameExercise } from "../../src/components/GameExercise";
+import { AccessibilityModal } from "../../src/components/AccessibilityModal";
+import { ProductInformation } from "../../src/components/ProductInformation";
+import { getInitialProfile } from "../../src/services/storageService";
+import { applyAppearance } from "../../src/services/appearance";
+import { soundService } from "../../src/services/soundService";
+import { getExercisesForDomain } from "../../src/services/exerciseCatalog";
+import type { ExerciseId, ExerciseResult } from "../../src/types";
+import "../../src/index.css";
+import "../../src/interface.css";
+import "../../src/games.css";
+const query = new URLSearchParams(location.search);
+soundService.setSoundEnabled(false);
+soundService.speak = (_text, end) => {
+  queueMicrotask(() => end?.());
+  return false;
+};
+export function Fixture() {
+  const [profile, setProfile] = useState(() => {
+    const p = getInitialProfile();
+    p.name = "Lucía";
+    p.settings.fontSize = query.has("large") ? "xlarge" : "normal";
+    p.settings.contrast = query.has("contrast") ? "high-contrast" : "standard";
+    p.settings.showCompanions = !query.has("hidden");
+    applyAppearance(p.settings);
+    return p;
+  });
+  const [game, setGame] = useState<ExerciseId | undefined>(
+    (query.get("game") as ExerciseId) || undefined,
+  );
+  const [results, setResults] = useState<ExerciseResult[]>([]);
+  const [settings, setSettings] = useState(false);
+  const [navigation, setNavigation] = useState<HTMLDivElement | null>(null);
+  const [loggedOut, setLoggedOut] = useState(query.has("entry"));
+  const back = () => setGame(undefined);
+  if (loggedOut)
+    return (
+      <LoginScreen
+        busy={false}
+        error=""
+        onClearError={() => {}}
+        onEmail={async () => {}}
+        onSignIn={() => {}}
+      />
+    );
+  return (
+    <>
+      {game ? (
+        <GameSession
+          key={game}
+          id={game}
+          onBack={back}
+          onSettings={() => setSettings(true)}
+          paused={settings}
+          initialLevel={Number(query.get("level") || 1)}
+          mode={query.has("placement") ? "placement" : "normal"}
+          autoStart={query.has("placement")}
+        >
+          <GameExercise
+            id={game}
+            profile={profile}
+            onBack={back}
+            onSaveResult={(result) => setResults((value) => [...value, result])}
+          />
+        </GameSession>
+      ) : (
+        <>
+          <Header
+            profile={profile}
+            sessionMinutes={0}
+            activeView="dashboard"
+            onNavigate={back}
+            navigationRef={setNavigation}
+            onOpenAccessibility={() => setSettings(true)}
+            onOpenFatigueAlert={() => {}}
+            onSignOut={() => setLoggedOut(true)}
+            signingOut={false}
+          />
+          <Dashboard
+            uid="isolated-interface-fixture"
+            profile={profile}
+            history={results}
+            navigationTarget={navigation}
+            onSelectDomain={(domain) =>
+              setGame(getExercisesForDomain(domain)[0].id)
+            }
+            onSelectExercise={setGame}
+            onStartDailyPlan={(queue) => setGame(queue?.[0])}
+            onOpenSettings={() => setSettings(true)}
+            onSignOut={() => setLoggedOut(true)}
+            signingOut={false}
+          />
+          <ProductInformation />
+        </>
+      )}
+      <AccessibilityModal
+        isOpen={settings}
+        settings={profile.settings}
+        name={profile.name}
+        showSubscription={false}
+        onUpdateName={(name) => setProfile({ ...profile, name })}
+        onClose={() => setSettings(false)}
+        onUpdateSettings={(patch) => {
+          const next = { ...profile.settings, ...patch };
+          applyAppearance(next);
+          setProfile({ ...profile, settings: next });
+        }}
+        onSignOut={() => setLoggedOut(true)}
+        signingOut={false}
+      />
+      <output data-testid="results" hidden>
+        {JSON.stringify(results)}
+      </output>
+    </>
+  );
+}
+createRoot(document.getElementById("root")!).render(<Fixture />);
