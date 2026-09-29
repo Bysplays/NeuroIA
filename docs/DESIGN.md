@@ -155,7 +155,10 @@ address stays copyable and wraps without inserted hyphens. Preserve manual resen
 verification check and sign-out actions, with readable inline status/error feedback.
 Registration sends verification automatically once; the verification page labels
 the manual action Reenviar. Disable resend during the initial delivery and show
-its success or failure accurately. Reloading/restoring a session never auto-sends.
+its success or failure accurately. Reloading/restoring a session never auto-sends. While visible and online, check
+verification every 10 seconds and on returning to the page. Continue automatically
+after verification and token refresh; keep the manual check as a fallback. Background
+checks do not show repeated error modals or loading indicators.
 Email verification checks that remain unverified, and manual send/check failures,
 use the same compact notification modal as registration, with a Volver action,
 Escape dismissal and focus return. Delivery success stays inline. During a manual

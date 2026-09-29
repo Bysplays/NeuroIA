@@ -36,6 +36,10 @@ no billing plan was changed. See [Firebase limits](https://firebase.google.com/d
 New password accounts enter `EmailVerification` before either workspace. Sending
 runs once after successful registration; restored sessions do not send again. Delivery failure keeps the created account and offers Reenviar; retries do not recreate the account. “Ya he verificado mi correo”
 reloads the Firebase user and forces a new ID token before mounting data access.
+The verification screen also checks every 10 seconds while visible and online,
+and on focus/reconnect. It stops on unmount or sign-out, avoids overlapping reads,
+and silently retries background failures. Only verified users trigger a forced
+ID-token refresh and automatic entry.
 Workspace intent is persisted per UID before this gate, including after reload.
 Signing out always remains available. Passwords only live in form/SDK memory.
 

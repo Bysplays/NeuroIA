@@ -51,6 +51,7 @@ export async function sendVerification(user: User) {
 
 export async function refreshVerification(user: User) {
   await reload(user);
+  if (needsEmailVerification(user)) return false;
   // Rules and billing must receive the refreshed email_verified claim too.
   await getIdToken(user, true);
   return !needsEmailVerification(user);

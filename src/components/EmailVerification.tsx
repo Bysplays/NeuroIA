@@ -1,5 +1,5 @@
 import { Brand } from './Brand';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CircleAlert, Mail } from 'lucide-react';
 import { ModalFrame } from './ModalFrame';
 import type { User } from 'firebase/auth';
@@ -16,8 +16,47 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const checking = useRef(false);
+  useEffect(() => {
+    if (signingOut || busy || initialDelivery === 'sending') return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const check = async () => {
+      clearTimeout(timer);
+      if (cancelled) return;
+      if (document.visibilityState !== 'visible' || !navigator.onLine) return;
+      if (!checking.current && auth.currentUser === user) {
+        checking.current = true;
+        try {
+          const verified = await refreshVerification(user);
+          if (!cancelled && auth.currentUser === user && verified) {
+            cancelled = true;
+            onVerified();
+          }
+        } catch {
+          // Background failures stay quiet; manual checking retains its error modal.
+        } finally { checking.current = false; }
+      }
+      if (!cancelled) {
+        clearTimeout(timer);
+        timer = setTimeout(() => { void check(); }, 10000);
+      }
+    };
+    const resume = () => { void check(); };
+    timer = setTimeout(resume, 10000);
+    document.addEventListener('visibilitychange', resume);
+    window.addEventListener('online', resume);
+    window.addEventListener('focus', resume);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', resume);
+      window.removeEventListener('online', resume);
+      window.removeEventListener('focus', resume);
+    };
+  }, [user, signingOut, busy, initialDelivery, onVerified]);
   const act = async (send: boolean) => {
-    if (busy || signingOut) return;
+    if (busy || signingOut || checking.current) return;
     setPendingAction(send ? 'send' : 'check'); setError(''); setNotice('');
     try {
       if (send) {

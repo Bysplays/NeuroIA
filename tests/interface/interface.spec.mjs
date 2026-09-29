@@ -205,3 +205,27 @@ test('brand returns from the catalog to today without changing the daily suggest
   await expect(page.getByRole('tab',{name:'Hoy',exact:true})).toHaveAttribute('aria-selected','true');
   await expect(page.locator('.editorial-home')).toHaveText(featured, {useInnerText:true});
 });
+
+
+test('verification polling enters automatically and stops after leaving', async ({page}) => {
+  // Test-only identity/SDK adapters; no real sign-in or email delivery.
+  await page.route('**/src/components/EmailVerification.tsx*', async route => {
+    const response = await route.fetch();
+    await route.fulfill({response, body:(await response.text()).replaceAll('auth.currentUser === user', 'true')});
+  });
+  await page.route('**/src/services/emailAuth.ts*', async route => {
+    const response = await route.fetch();
+    await route.fulfill({response, body:(await response.text()).replace(
+      /async function refreshVerification\(user\)\s*\{/,
+      'async function refreshVerification(user) { window.verificationChecks = (window.verificationChecks || 0) + 1; return window.verificationChecks >= 2;')});
+  });
+  await page.clock.install();
+  await page.goto(fixture+'?verification');
+  await page.clock.runFor(10000);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Verifica tu correo'})).toBeVisible();
+  await page.clock.runFor(10000);
+  await expect(page.getByRole('button',{name:'Comenzar',exact:true})).toBeVisible();
+  await page.clock.runFor(30000);
+  expect(await page.evaluate(()=>window.verificationChecks)).toBe(2);
+});

@@ -293,7 +293,7 @@ registration and recovery with recoverable Spanish errors. Its local
 personal/professional switch passes the selected intent through either sign-in
 callback and persists it before email verification so reload retains the workspace.
 `EmailVerification` precedes both workspaces for unverified password accounts;
-registration sends one verification email immediately after account creation; restored sessions never auto-send. Delivery failure preserves the account and offers Reenviar. Verification reloads the user plus ID token before entry.
+registration sends one verification email immediately after account creation; restored sessions never auto-send. Delivery failure preserves the account and offers Reenviar. Verification polls every 10 seconds while visible and online, also on focus/reconnect, with cleanup and account-identity guards. Unverified background checks stay silent; verified checks refresh the ID token before automatic entry. Manual checking remains available.
 Firestore rules and the Worker require `email_verified` for password-provider tokens;
 publish those changes before enabling Email/Password in the real project.
 Google access retains its existing behavior. Settings reuse `AccountPassword`
