@@ -10,7 +10,7 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [x] IGAPE funding page approved.
 - [x] About page approved.
 - [x] Legal/privacy page presentation approved; outstanding legal content remains tracked below.
-- [ ] Login and registration: revised locally; awaiting owner visual review.
+- [x] Login, registration, recovery and error notification presentation approved by owner.
 
 ## Current remaining scope
 
@@ -113,8 +113,10 @@ subject to the confirmed deadline and available client materials.
   OAuth helpers and email verification/reset handlers. Existing deployment guidance
   documents Firebase-hosted auth actions; a Firebase hostname alone is not proof of
   a broken link. Local audit confirms `src/services/firebase.ts` intentionally uses
-  `ceoaberto-neuroia.firebaseapp.com`, documented in DEPLOYMENT.md. No speculative
-  auth-domain change was made. Gate: app navigation/returns use the intended app domain; review
+  `ceoaberto-neuroia.firebaseapp.com`, documented in DEPLOYMENT.md. Feasibility confirmed: use `auth.neuroia.es` on Firebase Hosting for
+  OAuth and email actions while retaining the app on GitHub Pages. Setup sequence
+  is in DEPLOYMENT.md; DNS, certificate and provider configuration are pending.
+  The current authDomain remains unchanged until those prerequisites work. Gate: app navigation/returns use the intended app domain; review
   branded auth-domain feasibility if needed, without breaking secure verification,
   recovery or sign-in. Coordinate with the existing domain-migration backlog.
 
