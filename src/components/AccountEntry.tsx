@@ -7,6 +7,7 @@ import { firestoreProfessional, type ProfessionalProfile } from '../services/fir
 import { StorageService } from '../services/storageService';
 import { CloudProgress } from './CloudProgress';
 import { AppLoading } from './AppLoading';
+import { ConnectionRecovery } from './ConnectionRecovery';
 import { ProfessionalDashboard } from './ProfessionalDashboard';
 
 export default function AccountEntry({ user, professionalEntry, onSignOut, children }: {
@@ -36,11 +37,11 @@ function ProfessionalEntry({ user, onSignOut }: {
       .catch(() => { if (alive) setError(true); });
     return () => { alive = false; };
   }, [user, retry]);
-  if (!profile) return error ? <main className="cloud-entry">
-    <h1>No hemos podido abrir tu perfil profesional</h1><p role="alert">Vuelve a intentarlo o cierra sesión para acceder de nuevo.</p>
-    <button className="touch-btn touch-btn-primary" onClick={() => { setError(false); setRetry(value => value + 1); }}>Reintentar</button>
-    <button className="paper-nav-button" onClick={onSignOut}>Cerrar sesión</button>
-  </main> : <AppLoading />;
+  if (!profile) return error ? <ConnectionRecovery
+    title="No hemos podido abrir tu espacio"
+    message="No hemos podido cargar tu perfil profesional. Vuelve a intentarlo en unos instantes."
+    onRetry={() => { setError(false); setRetry(value => value + 1); }}
+    onSignOut={onSignOut}/> : <AppLoading />;
   return <CloudProgress user={user} onSignOut={onSignOut}>{(sync, data) => <ProfessionalDashboard uid={user.uid} onSignOut={onSignOut} profile={data.profile}
     onUpdateSettings={settings => sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings })}
     onUpdateName={name => sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings: {}, name })} />}</CloudProgress>;

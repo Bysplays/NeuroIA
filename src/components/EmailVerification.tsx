@@ -27,16 +27,16 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
     } catch (error) { setError(authErrorMessage(error, 'email')); }
     finally { setBusy(false); }
   };
-  return <main className="email-verification">
-    <div className="login-brand"><Brand/></div>
+  return <main className="entry-page email-verification">
+    <header className="entry-header"><Brand/></header>
+    <div className="verification-layout">
     <section className="verification-card" aria-labelledby="verification-title">
       <header className="verification-heading">
-        <span className="email-login-icon" aria-hidden="true"><Mail size={26} /></span>
-        <h1 id="verification-title">Verifica tu correo</h1>
+        <div className="verification-title-row"><Mail size={24} aria-hidden="true"/><h1 id="verification-title">Verifica tu correo</h1></div>
         <p>Un último paso para abrir tu espacio.</p>
       </header>
       <div className="verification-body">
-        <p>Te enviaremos un enlace de verificación a <strong>{user.email}</strong>.</p>
+        <p>Te enviaremos un enlace de verificación a <strong data-selectable="true">{user.email}</strong>.</p>
         <div className="verification-actions">
           <button className="touch-btn touch-btn-primary" disabled={busy || signingOut} onClick={() => act(true)}>{sent ? 'Reenviar correo' : 'Enviar correo'}</button>
           <button className="email-text-button" disabled={busy || signingOut} onClick={() => act(false)}>Ya he verificado mi correo</button>
@@ -49,5 +49,6 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
         </footer>
       </div>
     </section>
+    </div>
   </main>;
 }

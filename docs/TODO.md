@@ -434,8 +434,11 @@ release issue is lost during prioritization.
   Workspace owns tab selection; returning home does not remount the dashboard or
   regenerate the suggested daily queue.
 - [ ] Reproduce the reported blank background in object naming. It was not
-  reproduced through the catalog; inspect the domain entry and modal/scroll
-  state. Do not mark fixed without a reproduction and verification.
+  reproduced through the current catalog at 390, 820, 1280 or 844×390, including
+  answering, advancing and help/resume; sampled image assets loaded successfully.
+  Current home area shortcuts do not expose Language, so the historical domain
+  entry cannot be exercised there. Keep open for a reproducible owner path/device;
+  do not mark fixed from these negative checks.
 
 ## Accounts and professional access
 
@@ -502,7 +505,7 @@ release issue is lost during prioritization.
 - Unit suite: 93 tests passed; demo Firestore/rules/proposals/Worker REST: 31 passed.
 - Demo Auth suite: 2 passed; build and strict lint pass.
 - Isolated placement browser suite: 9 passed, including delayed evidence and reload.
-- Interface suite: 8 passed (7 core checks plus advanced-board coverage), covering
+- Interface suite: 12 passed (11-suite run plus focused home-navigation regression), covering
   three widths, eight instruction/play screens, funding
   image/transcript, About focus return, keyboard pairs, failed Simon, trial
   continuation, visible reinforcement, target bounds and enlarged text.

@@ -6,6 +6,9 @@ import { Header } from "../../src/components/Header";
 import { Dashboard } from "../../src/components/Dashboard";
 import { LoginScreen } from "../../src/components/LoginScreen";
 import { ConnectionRecovery } from "../../src/components/ConnectionRecovery";
+import { EmailVerification } from "../../src/components/EmailVerification";
+import { AppLoading } from "../../src/components/AppLoading";
+import type { User } from "firebase/auth";
 import { GameSession } from "../../src/components/GameSession";
 import { GameExercise } from "../../src/components/GameExercise";
 import { AccessibilityModal } from "../../src/components/AccessibilityModal";
@@ -45,6 +48,8 @@ export function Fixture() {
   const [dashboardTab, setDashboardTab] = useState("today");
   const [loggedOut, setLoggedOut] = useState(query.has("entry"));
   const back = () => setGame(undefined);
+  if (query.has("loading")) return <AppLoading/>;
+  if (query.has("verification") && !loggedOut) return <EmailVerification user={{ email: 'una.direccion.larga.de.prueba@example.com' } as User} onVerified={() => {}} onSignOut={() => setLoggedOut(true)} signingOut={false} externalError={query.has('error') ? 'No hemos podido enviar el correo. Vuelve a intentarlo.' : ''}/>;
   if (query.has("connection-error") && !loggedOut) return <ConnectionRecovery onRetry={() => setLoggedOut(true)} onSignOut={() => setLoggedOut(true)}/>;
   if (loggedOut)
     return (
