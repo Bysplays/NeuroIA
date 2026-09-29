@@ -39,7 +39,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
           <p>Todos los ejercicios, mes a mes.</p>
           <div className="onboarding-actions">
             <button className="touch-btn touch-btn-primary" disabled={busy || !access?.checkoutAvailable} onClick={onCheckout}>Suscribirme<ArrowRight size={20} aria-hidden="true"/></button>
-            <small>{access?.checkoutAvailable ? 'Verás el precio y las condiciones antes de confirmar el pago.' : 'La suscripción no está disponible en este momento.'}</small>
+            {!access?.checkoutAvailable && <small>La suscripción no está disponible en este momento.</small>}
             {!expired && <button className="onboarding-trial-link" disabled={busy || !access} onClick={onTrial}>Probar gratis 7 días</button>}
             {access?.canManageSubscription && <button className="paper-nav-button" disabled={busy} onClick={onPortal}>Gestionar suscripción</button>}
           </div>

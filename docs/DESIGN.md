@@ -184,7 +184,7 @@ short benefits beside one monthly-plan card, stacked on narrow screens. Keep
 Suscribirme primary and the seven-day trial visibly available below it when
 eligible. Explain unavailable checkout rather than leaving an unexplained disabled
 button. Do not invent a price: the current adapter exposes availability, not pricing;
-tell users they will see price and terms before confirmation. Place professional
+price and terms remain in Stripe checkout; do not add a helper paragraph below Suscribirme when checkout is available. Place professional
 invitations behind a full-width button with a right arrow below the plan. It opens
 a compact ModalFrame with Cerrar, Escape/backdrop dismissal and focus return, with a persistent
 input label, inline validation and the activity-sharing explanation. Preserve
