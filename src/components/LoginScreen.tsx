@@ -37,7 +37,8 @@ export function LoginScreen({
   const title = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     title.current?.focus({ preventScroll: true });
-    window.scrollTo(0, 0);
+    const dialog = title.current?.closest("dialog");
+    if (dialog) dialog.scrollTop = 0;
   }, [mode, professional]);
   const changeMode = (next: EmailAction | null) => {
     setMode(next);
@@ -71,20 +72,6 @@ export function LoginScreen({
   };
   return (
     <>
-      {(error || formError) && (
-        <ModalFrame labelledBy="entry-error-title" onClose={() => { setFormError(""); onClearError(); }}>
-          <section className="entry-error-notification">
-            <div className="entry-error-heading">
-              <CircleAlert size={24} aria-hidden="true" />
-              <h2 id="entry-error-title">No hemos podido continuar</h2>
-            </div>
-            <div className="entry-error-message" role="alert">
-              {(formError || error).split(/(?<=Google\.)\s+/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
-            </div>
-            <button className="touch-btn touch-btn-primary" onClick={() => { setFormError(""); onClearError(); }}>Volver al formulario</button>
-          </section>
-        </ModalFrame>
-      )}
       {information && (
         <InformationPage
           kind={information}
@@ -92,7 +79,7 @@ export function LoginScreen({
         />
       )}
       <div hidden={information !== null}>
-        <main className={`entry-page${mode === null ? " entry-home" : " entry-auth"}`}>
+        <main className="entry-page entry-home">
           <header className="entry-header">
             <button
               className="brand-button"
@@ -102,17 +89,12 @@ export function LoginScreen({
             >
               <Brand />
             </button>
-            {mode !== null && (
-              <button className="entry-toolbar-action" disabled={busy} onClick={() => changeMode(mode === "reset" ? "signin" : null)}>
-                <X size={18} aria-hidden="true"/> Cerrar
-              </button>
-            )}
+
           </header>
-          {mode === null ? (
-            <>
+          <>
               <section className="public-hero" aria-labelledby="entry-title">
                 <div className="public-copy">
-                  <h1 ref={title} tabIndex={-1} id="entry-title">
+                  <h1 tabIndex={-1} id="entry-title">
                     {professional ? (
                       <>
                         Un espacio para <em>acompañar.</em>
@@ -150,11 +132,31 @@ export function LoginScreen({
                   <PracticeMotif />
                 </div>
               </section>
-            </>
-          ) : (
+          </>
+          <ProductInformation onOpen={setInformation}>
+            <button
+              disabled={busy}
+              onClick={() => {
+                setProfessional((value) => !value);
+                changeMode(null);
+              }}
+            >
+              {professional
+                ? "Volver al acceso personal"
+                : "¿Eres un profesional?"}
+            </button>
+          </ProductInformation>
+        </main>
+      </div>
+      {mode !== null && !information && <ModalFrame labelledBy="auth-title" onClose={() => { if (!busy) changeMode(null); }}>
+        <div className="auth-modal">
+          <header className="auth-modal-header">
+            <Brand/>
+            <button className="entry-toolbar-action" disabled={busy} onClick={() => changeMode(null)}><X size={18} aria-hidden="true"/>Cerrar</button>
+          </header>
             <section
               className="account-entry-layout"
-              aria-labelledby="entry-title"
+              aria-labelledby="auth-title"
             >
               <div className={`account-entry-form${mode !== "reset" ? " account-entry-tabbed" : ""}`}>
                 {mode !== "reset" && <div
@@ -165,7 +167,7 @@ export function LoginScreen({
                   <button aria-pressed={mode === "signin"} disabled={busy} onClick={() => changeMode("signin")}>Iniciar sesión</button>
                   <button aria-pressed={mode === "register"} disabled={busy} onClick={() => changeMode("register")}>Crear cuenta</button>
                 </div>}
-                <h1 className={mode === "register" ? "entry-title-with-space" : undefined} ref={title} tabIndex={-1} id="entry-title">
+                <h1 className={mode === "register" ? "entry-title-with-space" : undefined} ref={title} tabIndex={-1} id="auth-title">
                   {mode === "register"
                     ? "Crea tu cuenta"
                     : mode === "reset"
@@ -293,22 +295,23 @@ export function LoginScreen({
                 </form>
               </div>
             </section>
-          )}
-          <ProductInformation onOpen={setInformation}>
-            <button
-              disabled={busy}
-              onClick={() => {
-                setProfessional((value) => !value);
-                changeMode(null);
-              }}
-            >
-              {professional
-                ? "Volver al acceso personal"
-                : "¿Eres un profesional?"}
-            </button>
-          </ProductInformation>
-        </main>
-      </div>
+          <ProductInformation onOpen={setInformation}/>
+        </div>
+      </ModalFrame>}
+      {(error || formError) && (
+        <ModalFrame labelledBy="entry-error-title" onClose={() => { setFormError(""); onClearError(); }}>
+          <section className="entry-error-notification">
+            <div className="entry-error-heading">
+              <CircleAlert size={24} aria-hidden="true" />
+              <h2 id="entry-error-title">No hemos podido continuar</h2>
+            </div>
+            <div className="entry-error-message" role="alert">
+              {(formError || error).split(/(?<=Google\.)\s+/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+            </div>
+            <button className="touch-btn touch-btn-primary" onClick={() => { setFormError(""); onClearError(); }}>Volver al formulario</button>
+          </section>
+        </ModalFrame>
+      )}
     </>
   );
 }

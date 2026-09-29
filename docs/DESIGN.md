@@ -495,4 +495,11 @@ with a 10px gap and no extra paragraph margin pushing the action down.
 
 Category choices form a joined row: only the first and last buttons have rounded
 outer corners; all inner corners remain square. Login/registration and information
-pages use the shared outlined Cerrar header action. Password recovery also uses Cerrar with the same styling, returning to sign-in.
+pages use the shared outlined Cerrar header action. Password recovery uses Cerrar to dismiss the entry modal and return home.
+
+Login, registration and password recovery share a native ModalFrame over the
+unauthenticated home. Close, Escape and backdrop dismiss the entire entry flow
+when idle, returning focus to Comenzar. Mode switches remain inside the modal;
+recovery Close also returns home. Error notifications stack above the form and
+return focus without discarding its fields. Information links open document pages
+and restore the entry modal afterward. Short viewports scroll within the dialog.

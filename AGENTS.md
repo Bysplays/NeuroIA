@@ -643,3 +643,8 @@ action never bypasses initial cloud loading or server-confirmed access.
 daily plans and assigned sessions; `ExerciseWrapper` derives progress from whole-level completion. Individual
 objects, answers, pairs and contact time must not fill stage segments. Help uses ModalFrame and pauses the existing game clock without
 unmounting the board.
+
+LoginScreen keeps the unauthenticated home mounted beneath one ModalFrame for
+sign-in, registration and recovery. Closing any mode returns home; mode changes
+reset the dialog scroll. Auth errors use a second ModalFrame above the preserved
+form. Information pages temporarily unmount the auth modal and restore it on close.

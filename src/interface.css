@@ -1808,3 +1808,15 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 
 .preferences-account-panel .account-password .preferences-action-row { align-items: flex-start; gap: 10px; }
 .preferences-account-panel .account-password .preferences-action-row p { margin: 0; }
+
+/* Authentication stays in one dialog above the unauthenticated home. */
+.modal-shell:has(> .auth-modal) { width: min(520px, calc(100vw - 32px)); border-radius: 6px; background: var(--color-bg); scrollbar-gutter: auto; }
+.auth-modal { padding: 24px 32px 16px; }
+.auth-modal-header { position: sticky; top: 0; z-index: 1; background: var(--color-bg); padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.auth-modal-header .brand { width: 140px; }
+.auth-modal .account-entry-layout { padding: 0; }
+.auth-modal .account-entry-tabbed { min-height: 0; }
+.auth-modal .account-entry-form h1 { font-size: 1.25rem; outline: none; }
+.auth-modal .account-entry-form > p { font-size: .8rem; }
+.auth-modal .product-information-links { padding: 16px 0 0; gap: 8px 24px; }
+@media (max-width: 600px) { .auth-modal { padding: 20px 20px 12px; } .auth-modal-header .brand { width: 120px; } }

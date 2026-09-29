@@ -403,3 +403,24 @@ test('finding an object or touching a target does not complete a progress stage'
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow','0');
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuemax','1');
 });
+
+test('authentication dialog closes to home and restores focus from every mode', async ({page}) => {
+  await page.goto(fixture+'?entry');
+  const opener=page.getByRole('button',{name:'Comenzar',exact:true});
+  await opener.click();
+  await expect(page.getByRole('dialog',{name:'Te damos la bienvenida'})).toBeVisible();
+  await page.getByRole('button',{name:'He olvidado mi contraseña'}).click();
+  await expect(page.getByRole('dialog',{name:'Recupera tu contraseña'})).toBeVisible();
+  await page.getByRole('button',{name:'Cerrar',exact:true}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(opener).toBeFocused();
+  await opener.click();
+  await page.getByRole('button',{name:'Crear cuenta',exact:true}).click();
+  await page.keyboard.press('Escape');
+  await expect(opener).toBeFocused();
+  await opener.click();
+  await page.getByRole('dialog').getByRole('button',{name:'Aviso legal',exact:true}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button',{name:'Cerrar',exact:true}).click();
+  await expect(page.getByRole('dialog',{name:'Te damos la bienvenida'})).toBeVisible();
+});
