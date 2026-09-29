@@ -471,3 +471,9 @@ closing settings resumes it without a separate rest screen or Retomar action.
 The Muse modal retains Bluetooth connection controls and a short Tus partidas
 explanation of EEG/PPG. It does not show a recording toggle, analytics-sharing
 copy or instructions to disconnect to change recording.
+
+The game progress track is inset an additional 16–48px per side inside the play
+area. Muse shows “No soportado” and no connection action or connection instructions
+when the adapter reports Web Bluetooth unavailable; detect API capability rather
+than browser names. Firefox and Safari currently do not implement Web Bluetooth.
+Reference: [MDN compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Bluetooth#browser_compatibility).

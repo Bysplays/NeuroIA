@@ -466,7 +466,7 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 .game-session .viewport-session-tools .muse-entry { width: auto; padding-inline: 14px; }
 
 /* Segmented stages share the onboarding indicator's palette and spacing. */
-.game-stage-progress { display: flex; gap: clamp(2px, .5vw, 6px); width: 100%; height: 5px; flex: 0 0 5px; margin: 0 0 12px; }
+.game-stage-progress { display: flex; gap: clamp(2px, .5vw, 6px); width: calc(100% - clamp(32px, 6vw, 96px)); height: 5px; flex: 0 0 5px; margin: 0 auto 12px; }
 .game-stage-progress > span { flex: 1; min-width: 0; height: 100%; border-radius: 4px; overflow: hidden; background: var(--color-border); }
 .game-stage-progress i { display: block; height: 100%; background: var(--color-action-bg); }
 .viewport-session-footer > .entry-toolbar-action, .viewport-navigation-row > .entry-toolbar-action { min-width: 104px; padding: 10px 14px; justify-content: center; }

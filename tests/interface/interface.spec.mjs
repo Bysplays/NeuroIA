@@ -362,3 +362,25 @@ test('game progress replaces title counters and help restores the same board', a
   expect(await page.locator('.scanning-grid').innerHTML()).toBe(board);
   await expect(page.locator('.cell-check-overlay')).toHaveCount(0);
 });
+
+test('Muse offers connection only when Web Bluetooth is supported', async ({page}) => {
+  await page.goto(fixture+'?game=language-naming&placement');
+  await page.evaluate(async () => {
+    Object.defineProperty(navigator, 'bluetooth', {configurable: true, value: undefined});
+    const {eegService} = await import('/src/services/eegService.ts');
+    const {createMuseAdapter} = await import('/src/services/museAdapter.ts');
+    eegService.install(createMuseAdapter());
+  });
+  await page.getByRole('button', {name:'Muse · No soportado',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Conectar diadema',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('status')).toHaveText('No soportado');
+  await page.keyboard.press('Escape');
+  await page.evaluate(async () => {
+    Object.defineProperty(navigator, 'bluetooth', {configurable: true, value: {requestDevice: async () => {throw new Error('Test only');}}});
+    const {eegService} = await import('/src/services/eegService.ts');
+    const {createMuseAdapter} = await import('/src/services/museAdapter.ts');
+    eegService.install(createMuseAdapter());
+  });
+  await page.getByRole('button',{name:'Conectar Muse',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Conectar diadema',exact:true})).toBeEnabled();
+});
