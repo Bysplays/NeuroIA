@@ -30,7 +30,7 @@ for (const size of [{width:390,height:844},{width:820,height:1180},{width:1280,h
     await page.getByRole('button',{name:'Cerrar',exact:true}).click();
     await expect(page.getByRole('button',{name:'Financiado por IGAPE'})).toBeFocused();
     await page.getByRole('button',{name:'Sobre NeuroIA',exact:true}).click();
-    await expect(page.locator('.information-page .project-funding')).toBeVisible();
+    await expect(page.locator('.information-page .project-funding')).toHaveCount(0);
     await page.getByRole('button',{name:'Cerrar',exact:true}).click();
     await page.getByRole('button',{name:'Aviso legal',exact:true}).click();
     await expect(page.getByRole('heading',{name:'Aviso legal',exact:true})).toBeVisible();

@@ -106,6 +106,12 @@ authentication actions, promotional eyebrows, illustration captions and explanat
 card grids. Do not show a subscription pitch or the full funding image inline; longer product
 explanations remain accessible through Sobre NeuroIA. Registration and sign-in are
 inline pages with labelled fields, Google access, recovery and a clear way back.
+The access page uses one 440 px maximum column, a single Iniciar sesión / Crear cuenta
+selector, then a compact heading, Google action, email divider and grouped fields.
+Use 8 px label/input gaps, 20 px between fields and 54 px minimum input/action
+heights. The header holds only the brand and Volver. Do not add a decorative side
+panel or duplicate access buttons. Reference: [Brilliant sign-in on Mobbin](https://mobbin.com/screens/a7afa68a-7e23-4fe5-8c0d-081a1eecc314),
+adapted as a full page with NeuroIA's palette and existing authentication.
 Personal/professional intent survives authentication. Existing verification,
 recent-authentication and account ownership requirements remain unchanged.
 

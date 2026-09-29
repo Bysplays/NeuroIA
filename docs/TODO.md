@@ -4,6 +4,14 @@ This is the canonical TODO. The [SDD](SDD.md) defines the target behavior,
 architecture, dependencies and acceptance criteria. Existing code is not proof
 of a production deployment. Keep project guidance in English and UI copy in Spanish.
 
+## Owner interface review
+
+- [x] Unauthenticated home approved.
+- [x] IGAPE funding page approved.
+- [x] About page approved.
+- [x] Legal/privacy page presentation approved; outstanding legal content remains tracked below.
+- [ ] Login and registration: revised locally; awaiting owner visual review.
+
 ## Current remaining scope
 
 - [x] Prepare three independent clinical-blue, tablet-first concepts using Mobbin

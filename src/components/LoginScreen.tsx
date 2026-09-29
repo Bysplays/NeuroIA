@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Brand } from "./Brand";
 import { PracticeMotif } from "./PracticeMotif";
-import { HeaderIllustration } from "./HeaderIllustration";
 import { ProductInformation } from "./ProductInformation";
 import { InformationPage, type InformationKind } from "./InformationPage";
 import { authErrorMessage } from "../services/authErrors";
@@ -89,24 +88,9 @@ export function LoginScreen({
               <Brand />
             </button>
             {mode !== null && (
-              <div className="entry-header-actions">
-                <button
-                  className="text-link"
-                  disabled={busy}
-                  onClick={() => changeMode("signin")}
-                >
-                  Iniciar sesión
-                </button>
-                {mode !== null && (
-                  <button
-                    className="paper-nav-button"
-                    disabled={busy}
-                    onClick={() => changeMode("register")}
-                  >
-                    Crear cuenta
-                  </button>
-                )}
-              </div>
+              <button className="text-link" disabled={busy} onClick={() => changeMode(null)}>
+                <ArrowLeft size={18} /> Volver
+              </button>
             )}
           </header>
           {mode === null ? (
@@ -157,63 +141,26 @@ export function LoginScreen({
               className="account-entry-layout"
               aria-labelledby="entry-title"
             >
-              <aside className="account-entry-welcome">
-                <p className="editorial-eyebrow">
-                  {professional
-                    ? "Tu espacio profesional"
-                    : "Un comienzo a tu medida"}
-                </p>
-                <h2>
-                  Empieza por
-                  <br />
-                  un pequeño
-                  <br />
-                  <em>momento.</em>
-                </h2>
-                <HeaderIllustration
-                  scene={professional ? "therapist" : "home"}
-                />
-              </aside>
               <div className="account-entry-form">
-                <button
-                  className="text-link"
-                  disabled={busy}
-                  onClick={() => changeMode(null)}
-                >
-                  <ArrowLeft size={18} />
-                  Volver
-                </button>
                 <div
                   className="entry-mode-switch"
                   role="group"
                   aria-label="Tipo de acceso"
                 >
-                  <button
-                    aria-pressed={mode === "register"}
-                    disabled={busy}
-                    onClick={() => changeMode("register")}
-                  >
-                    Crear cuenta
-                  </button>
-                  <button
-                    aria-pressed={mode === "signin"}
-                    disabled={busy}
-                    onClick={() => changeMode("signin")}
-                  >
-                    Iniciar sesión
-                  </button>
+                  <button aria-pressed={mode === "signin"} disabled={busy} onClick={() => changeMode("signin")}>Iniciar sesión</button>
+                  <button aria-pressed={mode === "register"} disabled={busy} onClick={() => changeMode("register")}>Crear cuenta</button>
                 </div>
                 <h1 ref={title} tabIndex={-1} id="entry-title">
                   {mode === "register"
-                    ? "Un buen comienzo."
+                    ? "Crea tu cuenta"
                     : mode === "reset"
-                      ? "Volvamos a tu cuenta."
-                      : "Qué bien verte de nuevo."}
+                      ? "Recupera tu contraseña"
+                      : "Te damos la bienvenida"}
                 </h1>
                 <p>
                   {mode === "reset"
                     ? "Te enviaremos un enlace para recuperar tu contraseña."
-                    : "Elige cómo quieres entrar."}
+                    : mode === "register" ? "Guarda tu progreso y vuelve cuando quieras." : professional ? "Accede a tu espacio profesional." : "Entra para continuar a tu ritmo."}
                 </p>
                 {mode !== "reset" && (
                   <>
@@ -233,6 +180,7 @@ export function LoginScreen({
                   </>
                 )}
                 <form className="email-form" onSubmit={submit} aria-busy={busy}>
+                  <div className="entry-field">
                   <label htmlFor="login-email">Correo electrónico</label>
                   <input
                     id="login-email"
@@ -246,8 +194,9 @@ export function LoginScreen({
                     required
                     disabled={busy}
                   />
+                  </div>
                   {mode !== "reset" && (
-                    <>
+                    <div className="entry-field">
                       <label htmlFor="login-password">Contraseña</label>
                       <input
                         id="login-password"
@@ -267,10 +216,10 @@ export function LoginScreen({
                           mode === "register" ? "password-hint" : undefined
                         }
                       />
-                    </>
+                    </div>
                   )}
                   {mode === "register" && (
-                    <>
+                    <div className="entry-field">
                       <p id="password-hint" className="entry-note">
                         Al menos 6 caracteres. Después verificaremos tu correo.
                       </p>
@@ -289,7 +238,7 @@ export function LoginScreen({
                         required
                         disabled={busy}
                       />
-                    </>
+                    </div>
                   )}
                   <button
                     className="touch-btn touch-btn-primary"

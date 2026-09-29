@@ -1579,26 +1579,28 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .public-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 70px); align-items: center; padding: 48px 0 64px; }
 .public-copy { min-width: 0; overflow-wrap: break-word; }
 .public-hero h1 { font-size: clamp(2.5rem, 5vw, 3.7rem); line-height: 1.08; margin: 22px 0; }
-.public-hero h1 em, .account-entry-welcome em { color: var(--color-primary); font-style: normal; }
+.public-hero h1 em { color: var(--color-primary); font-style: normal; }
 .public-hero > div > p:not(.editorial-eyebrow) { color: var(--color-text-muted); max-width: var(--entry-copy-width); line-height: 1.6; font-size: 1rem; }
 .public-actions { display: flex; width: min(100%, var(--entry-copy-width)); flex-direction: column; align-items: stretch; gap: 4px; margin-top: 28px; }
 .public-actions .touch-btn { font-size: .95rem; gap: 24px; min-height: 56px; }
 .entry-funding-link { background: none; border: 0; color: var(--color-primary); font: inherit; font-size: .82rem; text-align: center; text-decoration: underline; text-underline-offset: 4px; padding: 12px 0; min-height: 48px; cursor: pointer; }
 .public-art { padding: 32px; border-radius: 40% 40% 24px 24px; background: var(--panel-blue); display: grid; gap: 24px; text-align: center; }
-.account-entry-layout { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 7vw, 110px); align-items: start; padding: 32px 0 60px; }
-.account-entry-welcome { background: var(--panel-blue); padding: 40px; border-radius: 24px; overflow: hidden; }
-.account-entry-welcome h2 { font-size: clamp(2.3rem, 4vw, 3.3rem); line-height: 1.13; margin: 24px 0; }
-.account-entry-welcome .header-illustration { max-width: 260px; height: 190px; margin: 24px auto 0; }
-.account-entry-form { max-width: 460px; width: 100%; margin: auto; }
-.account-entry-form h1 { font-size: 1.9rem; margin: 22px 0; }
-.account-entry-form .email-form { display: grid; gap: 12px; }
-.account-entry-form input { width: 100%; min-height: 52px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-main); border-radius: 14px; padding: 12px 16px; font-size: 1rem; }
-.account-entry-form label { font-size: .85rem; font-weight: 600; }
-.account-entry-form .touch-btn { width: 100%; min-height: 54px; font-size: .9rem; margin-top: 12px; }
-.entry-mode-switch { display: flex; gap: 6px; padding: 5px; background: var(--color-primary-light); border-radius: 16px; margin: 20px 0; }
-.entry-mode-switch button { flex: 1; border: 0; background: none; border-radius: 12px; color: var(--color-text-main); padding: 12px; min-height: 48px; font-size: .85rem; cursor: pointer; }
-.entry-mode-switch button[aria-pressed="true"] { background: var(--color-surface); font-weight: 700; }
-.entry-divider { display: flex; align-items: center; gap: 12px; color: var(--color-text-muted); margin: 22px 0; font-size: .76rem; }
+.account-entry-layout { padding: 20px 0 56px; }
+.account-entry-form { max-width: 440px; width: 100%; margin: 0 auto; }
+.account-entry-form h1 { font-size: clamp(1.4rem, 3vw, 1.7rem); line-height: 1.25; margin: 28px 0 10px; letter-spacing: -.035em; }
+.account-entry-form > p { font-size: .85rem; line-height: 1.6; color: var(--color-text-muted); margin-bottom: 28px; }
+.account-entry-form .email-form { display: grid; gap: 20px; }
+.entry-field { display: grid; gap: 8px; min-width: 0; }
+.account-entry-form .email-form input:not([hidden]) { width: 100%; min-height: 54px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-main); border-radius: 12px; padding: 12px 16px; font-size: .9rem; }
+.account-entry-form label { font-size: .8rem; line-height: 1.4; font-weight: 600; }
+.account-entry-form .touch-btn { width: 100%; min-height: 54px; font-size: .9rem; margin-top: 4px; border-radius: 14px; }
+.account-entry-form .google-login-button { min-height: 54px; border-radius: 14px; font-size: .85rem; border-color: var(--color-border); }
+.account-entry-form .email-text-button { font-size: .78rem; text-align: center; color: var(--color-primary); margin-top: -12px; text-underline-offset: 4px; }
+.account-entry-form .entry-note { font-size: .72rem; line-height: 1.5; margin: -8px 0 4px; }
+.entry-mode-switch { display: flex; gap: 4px; padding: 5px; background: var(--color-primary-light); border-radius: 16px; }
+.entry-mode-switch button { flex: 1; border: 0; background: none; border-radius: 12px; color: var(--color-text-main); padding: 12px 8px; min-height: 48px; font-size: .8rem; font-weight: 500; cursor: pointer; }
+.entry-mode-switch button[aria-pressed="true"] { background: var(--color-surface); font-weight: 700; box-shadow: 0 2px 6px #173b550a; }
+.entry-divider { display: flex; align-items: center; gap: 12px; color: var(--color-text-muted); margin: 24px 0; font-size: .72rem; }
 .entry-divider::before, .entry-divider::after { content: ''; height: 1px; background: var(--color-border); flex: 1; }
 .account-overview { width: 100%; padding-block: 16px; }
 .account-overview h1 { font-size: 2rem; margin: 0 0 32px; }
@@ -1653,8 +1655,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
   .entry-header { padding: 16px 0; flex-wrap: wrap; gap: 10px; }
   .entry-header-actions { gap: 14px; }
   .entry-header-actions button { font-size: .75rem; }
-  .account-entry-layout { grid-template-columns: 1fr; padding-top: 12px; }
-  .account-entry-welcome { display: none; }
+  .account-entry-layout { padding-top: 12px; }
   .account-overview-grid { grid-template-columns: 1fr; }
   .access-choice-page { margin: 16px; }
 }
