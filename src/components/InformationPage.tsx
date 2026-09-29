@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Brand } from "./Brand";
 import { ProjectFunding } from "./ProjectFunding";
 import {
+  PRIVACY_SECTIONS,
   PRODUCT_INTRO,
   PRODUCT_NOTICE,
   PRODUCT_SECTIONS,
@@ -43,8 +44,8 @@ export function InformationPage({
       <header className="information-page-header">
         <Brand />
         <button className="text-link" onClick={back}>
-          {kind === "funding" ? <X size={20}/> : <ArrowLeft size={20}/>}
-          {kind === "funding" ? "Cerrar" : "Volver"}
+          <X size={20}/>
+          Cerrar
         </button>
       </header>
       <article className="information-page-content">
@@ -101,6 +102,15 @@ export function InformationPage({
               </>
             )}
             <p>{PRODUCT_NOTICE}</p>
+            {kind === "notice" && <>
+              {PRIVACY_SECTIONS.map(section => <section key={section.title}>
+                <h2>{section.title}</h2>
+                {section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+                {section.title === 'Responsable del tratamiento' && <p>Contacto de privacidad: <a href="mailto:david@ceoaberto.com">david@ceoaberto.com</a>.</p>}
+                {section.title === 'Tus derechos de privacidad' && <p>Para ejercer tus derechos, escribe a <a href="mailto:david@ceoaberto.com">david@ceoaberto.com</a> e indica tu solicitud y el correo de tu cuenta. No envíes tu contraseña.</p>}
+              </section>)}
+              <p><a href="https://www.aepd.es/derechos-y-deberes/conoce-tus-derechos" target="_blank" rel="noreferrer">Conoce tus derechos en la AEPD</a></p>
+            </>}
           </>
         )}
       </article>

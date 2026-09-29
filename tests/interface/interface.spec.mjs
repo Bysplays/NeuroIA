@@ -31,11 +31,11 @@ for (const size of [{width:390,height:844},{width:820,height:1180},{width:1280,h
     await expect(page.getByRole('button',{name:'Financiado por IGAPE'})).toBeFocused();
     await page.getByRole('button',{name:'Sobre NeuroIA',exact:true}).click();
     await expect(page.locator('.information-page .project-funding')).toBeVisible();
-    await page.getByRole('button',{name:'Volver',exact:true}).click();
+    await page.getByRole('button',{name:'Cerrar',exact:true}).click();
     await page.getByRole('button',{name:'Aviso legal',exact:true}).click();
     await expect(page.getByRole('heading',{name:'Aviso legal',exact:true})).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    await page.getByRole('button',{name:'Volver',exact:true}).click();
+    await page.getByRole('button',{name:'Cerrar',exact:true}).click();
     await page.getByRole('button',{name:'Comenzar',exact:true}).click();
     await expect(page.getByRole('button',{name:'Entrar',exact:true})).toBeVisible();
     await page.getByRole('button',{name:'Crear cuenta',exact:true}).first().click();
@@ -144,7 +144,7 @@ test('information pages return to settings without restarting the game',async({p
   await page.getByRole('button',{name:'Sobre NeuroIA',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Sobre NeuroIA',exact:true})).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('button',{name:'Volver',exact:true}).click();
+  await page.getByRole('button',{name:'Cerrar',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button',{name:'Cerrar ajustes',exact:true}).click();
   await expect(page.locator('.memory-card-tile').first()).toHaveAttribute('aria-label',revealed);

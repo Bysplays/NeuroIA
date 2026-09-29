@@ -70,3 +70,14 @@ unchanged on the IGAPE information page and About with an HTML transcript.
 The notice's AI project subtitle is funding attribution, not an additional claim
 that the current product ships all planned AI capabilities. See
 [asset provenance](assets/images/institutional/README.md).
+
+## Operational privacy notice
+
+`PRIVACY_SECTIONS` in `productCopy.ts` describes the implemented account, progress,
+professional sharing, optional Muse recordings, billing providers and local storage.
+It appears on the legal page, alongside the supplied non-medical notice. This is
+not yet a complete approved privacy policy: the owner has confirmed CEO Aberto S.L., NIF B36232361, the Vigo address
+and david@ceoaberto.com as privacy contact. Remaining approval covers legal bases (including optional signal recording),
+retention criteria, rights handling and provider transfer safeguards before release.
+Do not invent these details or imply that closing a session or cancelling billing
+deletes account data. Reference: [AEPD information duty](https://www.aepd.es/derechos-y-deberes/conoce-tus-derechos/derecho-de-informacion).

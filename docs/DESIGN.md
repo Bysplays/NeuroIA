@@ -181,14 +181,15 @@ Use native buttons, visible focus, descriptive input labels, live status regions
 and keyboard-operable tabs. Respect reduced motion. Use `ModalFrame` for transient
 settings, Muse and account dialogs: focus containment, Escape, close button,
 scroll handling and focus return remain required. IGAPE, About and the legal notice are ordinary pages, with the shared logo, a
-heading, readable text and a visible return action: Cerrar on IGAPE, Volver on
-About and the legal notice. IGAPE uses restrained 0.9rem body copy and a 1.5–2rem
-heading, respecting text-size preferences. Omit the repeated NEUROIA heading and
+heading, readable text and a visible Cerrar action on all three pages. Each uses restrained 0.9rem body copy,
+1.15rem section headings and a 1.5–2rem page heading, respecting text-size preferences. Omit the repeated NEUROIA heading and
 full-size-image link on its page. Leave 28 px above and below the funding details
 table to separate it from the surrounding paragraphs. IGAPE shows the full transcript
 and original image; About retains the complete product wording. Returning restores
 the previous entry/settings view without discarding form or game state. Long copy
-is selectable and scrollable. Sound and narration remain independent preferences.
+is selectable and scrollable. Justify document paragraphs at widths above 760 px
+with Spanish hyphenation; keep narrow-screen paragraphs left-aligned to avoid
+uneven word spacing. Titles, controls and data tables are not justified. Sound and narration remain independent preferences.
 
 Professional workspace, proposals, participant activity, recovery and verification
 share these tokens, controls and typography. Retain functional distinctions: free

@@ -477,3 +477,11 @@ release issue is lost during prioritization.
   or physical-device Bluetooth/installation verification is implied by these checks.
 - New instruction copy can fall back to browser speech; the existing pending
   recordings and licensing items remain open.
+
+## Privacy notice release requirements
+
+- [x] Owner confirmed CEO Aberto S.L., NIF B36232361, Vigo address and
+  david@ceoaberto.com as privacy contact; included in the legal page.
+- [ ] Complete rights-request handling, lawful bases (including EEG/PPG), retention
+  periods/criteria, provider agreements and international transfer safeguards.
+  Current legal page describes verified app behavior, not a complete approved policy.

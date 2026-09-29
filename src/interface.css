@@ -1686,16 +1686,17 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 /* Informational documents are ordinary pages, not dialogs or centered cards. */
 .information-page { width: min(100%, 1120px); min-height: 100dvh; margin: 0 auto; padding: 24px clamp(20px, 4vw, 48px) 64px; color: var(--color-text-main); user-select: text; -webkit-user-select: text; }
 .information-page-header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: clamp(32px, 6vh, 72px); }
-.information-page-content { max-width: 800px; margin: 0 auto; font-size: 1rem; line-height: 1.75; overflow-wrap: anywhere; }
-.information-page-content > h1 { margin: 0 0 28px; font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.2; outline: none; }
-.information-page-content h2 { font-size: 1.3rem; line-height: 1.35; margin: 32px 0 12px; }
+.information-page-content { max-width: 760px; margin: 0 auto; font-size: .9rem; line-height: 1.65; overflow-wrap: anywhere; }
+.information-page-content > h1 { margin: 0 0 28px; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.2; outline: none; }
+.information-page-content h2 { font-size: 1.15rem; line-height: 1.35; margin: 32px 0 12px; }
 .information-page-content p + p { margin-top: 16px; }
 .information-page-content ul { padding-left: 24px; margin-block: 16px; }
 .information-page-content a { color: var(--color-primary); text-underline-offset: 4px; }
 .information-page-content .project-funding { margin: 24px 0; }
-.information-page-content .funding-transcript { font-size: 1rem; }
+.information-page-content .funding-transcript { font-size: inherit; }
 
-.information-page-funding .information-page-content { max-width: 760px; font-size: .9rem; line-height: 1.65; }
-.information-page-funding .information-page-content > h1 { font-size: clamp(1.5rem, 3vw, 2rem); }
-.information-page-funding .funding-transcript { font-size: inherit; }
 .information-page-funding .project-funding > img { margin-top: 24px; }
+
+@media (min-width: 761px) {
+  .information-page-content p { text-align: justify; hyphens: auto; }
+}

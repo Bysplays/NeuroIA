@@ -621,7 +621,7 @@ are written to `/tmp`, not committed. `npm run test:placement` checks preference
 persistence and delayed evidence with its isolated backend.
 
 `InformationPage` renders IGAPE, About and the legal notice as ordinary pages with
-a shared Brand header and a return action (Cerrar on IGAPE; Volver elsewhere). `ProductInformation` is a controlled link list.
+a shared Brand header and a Cerrar action on all three pages. `ProductInformation` is a controlled link list.
 LoginScreen, player Workspace and ProfessionalDashboard own the selected
 information view in existing React state. The previous screen remains mounted but
 hidden; Settings temporarily closes its native dialog and retains its selected tab.
