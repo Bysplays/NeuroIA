@@ -59,9 +59,9 @@ service cloud.firestore {
         && (!('motor-tracking' in value) || value['motor-tracking'] == previous.get('motor-tracking', null) || validGameLevel(value['motor-tracking']));
     }
     function validConditionContext(value) {
-      return value is map && value.keys().hasAll(['kind', 'side', 'mobility', 'consentVersion'])
+      return value is map && value.keys().hasAll(['kind', 'side', 'mobility'])
         && value.keys().hasOnly(['kind', 'side', 'mobility', 'consentVersion'])
-        && value.consentVersion == 1 && value.kind in ['stroke', 'other', 'none']
+        && (!('consentVersion' in value) || value.consentVersion == 1) && value.kind in ['stroke', 'other', 'none']
         && value.side in ['unspecified', 'left', 'right', 'both', 'none']
         && value.mobility in ['unspecified', 'independent', 'support', 'limited']
         && (value.kind != 'none' || (value.side == 'unspecified' && value.mobility == 'unspecified'));

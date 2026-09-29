@@ -24,8 +24,8 @@ third-party mascot, clinical claim or external copy is shipped. The clinical-blu
    the moving-target tracking game from assessment. It does not block its later
    catalog entry or change game mechanics. This step only captures input preferences.
 3. Optionally provide condition context (stroke, other or none), affected side and
-   mobility. No response is the default. Explicit consent is required to store it;
-   linked professionals with progress-read permission can access it. This context
+   mobility. No response is the default. Invitation access requires the sharing checkbox; personal access does not show
+   it or record a sharing-consent marker. Linked professionals can read context. This context
    never changes exercise selection or difficulty.
 4. Start the selected games. Existing skip and resume behavior is preserved.
 
@@ -101,7 +101,7 @@ items. This change does not claim to resolve those game behaviors. Welcome copy
 no longer announces numeric ladder steps, but the internal ladder is unchanged.
 
 Optional `preferences.condition` contains bounded kind/side/mobility enums and
-`consentVersion: 1`; omission is backward-compatible and means no context supplied.
+optional `consentVersion: 1` for invitation sharing; omission is backward-compatible and means no context supplied.
 Choosing no response during editing removes this object from current preferences.
 Permanent operation receipts and backups are not a full erasure mechanism.
 The current Firestore preferences/stages/context rules have been published and

@@ -112,7 +112,7 @@ test('accepting a selective retake preserves other levels and preselects its sav
 
 
 test('condition context is optional, consented, saved and does not change the game plan', async ({page}) => {
-  await page.goto(fixture);
+  await page.goto(fixture+'?invited');
   await choose(page);
   await page.getByRole('button',{name:'Continuar',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Tu condición',exact:true})).toBeFocused();
@@ -132,4 +132,15 @@ test('condition context is optional, consented, saved and does not change the ga
   await page.getByRole('radio',{name:'Prefiero no responder',exact:true}).check();
   await page.getByRole('button',{name:'Preparar mis juegos'}).click();
   await expect.poll(async()=> (await saved(page)).placement?.preferences?.condition).toBeUndefined();
+});
+
+
+test('personal condition context has no professional consent checkbox', async ({page}) => {
+  await page.goto(fixture); await choose(page);
+  await page.getByRole('button',{name:'Continuar',exact:true}).click();
+  await page.getByRole('radio',{name:'He sufrido un ictus',exact:true}).check();
+  await expect(page.getByRole('checkbox',{name:/Consiento/})).toHaveCount(0);
+  await expect(page.getByText(/Estos datos de salud/)).toHaveCount(0);
+  await page.getByRole('button',{name:'Preparar mis juegos'}).click();
+  await expect.poll(async()=> (await saved(page)).placement?.preferences?.condition).toEqual({kind:'stroke',side:'unspecified',mobility:'unspecified'});
 });

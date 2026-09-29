@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Brain, Check, Hand, Layers, MessageCircle, Search } from 'lucide-react';
 import { INTEREST_AREAS, type PlacementPreferences as Preferences } from '../services/placementPreferences';
+import { useAccountAccess } from '../services/accountAccessContext';
 import { SlidersHorizontal } from 'lucide-react';
 import { ConditionPreferences, type ConditionDraft } from './ConditionPreferences';
 import { Brand } from './Brand';
@@ -15,6 +16,7 @@ const movementOptions = [
 export function PlacementPreferences({ initial, onSave, onBack, onSettings }: {
   initial?: Preferences; onSave: (value: Preferences) => void; onBack?: () => void; onSettings: () => void;
 }) {
+  const invited = useAccountAccess()?.kind === 'invitation';
   const [step, setStep] = useState(0);
   const [interests, setInterests] = useState<Preferences['interests']>(() => initial?.interests ?? []);
   const [movement, setMovement] = useState<Preferences['movement']>(initial?.movement ?? 'unspecified');
@@ -23,8 +25,8 @@ export function PlacementPreferences({ initial, onSave, onBack, onSettings }: {
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { heading.current?.focus(); window.scrollTo(0, 0); }, [step]);
   const save = () => {
-    if (condition.kind !== 'unspecified' && !conditionConsent) return;
-    onSave({ interests, movement, ...(condition.kind !== 'unspecified' ? { condition: { ...condition, kind: condition.kind, consentVersion: 1 as const } } : {}) });
+    if (invited && condition.kind !== 'unspecified' && !conditionConsent) return;
+    onSave({ interests, movement, ...(condition.kind !== 'unspecified' ? { condition: { ...condition, kind: condition.kind, ...(invited ? { consentVersion: 1 as const } : {}) } } : {}) });
   };
   return <main className="placement-screen placement-preferences">
     <header className="placement-toolbar"><Brand/><button className="entry-toolbar-action" aria-haspopup="dialog" onClick={onSettings}><SlidersHorizontal size={18} aria-hidden="true"/>Ajustes</button></header>
@@ -44,9 +46,9 @@ export function PlacementPreferences({ initial, onSave, onBack, onSettings }: {
             <input type="radio" name="movement" value={option.value} checked={movement === option.value} onChange={() => setMovement(option.value)}/>
             <span><strong>{option.title}</strong><small>{option.description}</small></span><span className="interest-check" aria-hidden="true">{movement === option.value && <Check size={18}/>}</span>
           </label>)}
-        </fieldset> : <ConditionPreferences value={condition} onChange={setCondition} consent={conditionConsent} onConsent={setConditionConsent}/> }
+        </fieldset> : <ConditionPreferences invited={invited} value={condition} onChange={setCondition} consent={conditionConsent} onConsent={setConditionConsent}/> }
         <div className="interest-actions">
-          <button className="touch-btn touch-btn-primary" disabled={!interests.length || (step === 2 && condition.kind !== 'unspecified' && !conditionConsent)} onClick={() => step < 2 ? setStep(step + 1) : save()}>{step < 2 ? 'Continuar' : 'Preparar mis juegos'}</button>
+          <button className="touch-btn touch-btn-primary" disabled={!interests.length || (step === 2 && invited && condition.kind !== 'unspecified' && !conditionConsent)} onClick={() => step < 2 ? setStep(step + 1) : save()}>{step < 2 ? 'Continuar' : 'Preparar mis juegos'}</button>
         </div>
         {(step > 0 || onBack) && <button className="placement-text-action interest-back" onClick={() => step > 0 ? setStep(step - 1) : onBack?.()}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}
       </div>

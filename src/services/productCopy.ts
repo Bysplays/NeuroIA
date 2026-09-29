@@ -59,7 +59,7 @@ export const PRIVACY_SECTIONS = [
     title: 'Tu cuenta y tus preferencias',
     paragraphs: [
       'Para acceder utilizas una cuenta de Google o un correo electrónico y una contraseña. Firebase Authentication gestiona la identificación y la sesión. NeuroIA utiliza el identificador de tu cuenta, tu correo y tu nombre para reconocer tu perfil y asociar tu actividad. La contraseña no se guarda.',
-      'Se guardan tus preferencias de presentación, los intereses que eliges y los niveles iniciales de los juegos. El paso opcional «Tu condición» permite indicar si has sufrido un ictus, otra condición o ninguna, el lado afectado y tu movilidad. Solo se guardan estas respuestas si consientes expresamente. Son contexto del perfil: no cambian los juegos ni la dificultad y no constituyen una valoración clínica. Puedes elegir «Prefiero no responder» para continuar sin aportar estos datos.',
+      'Se guardan tus preferencias de presentación, los intereses que eliges y los niveles iniciales de los juegos. El paso opcional «Tu condición» permite indicar si has sufrido un ictus, otra condición o ninguna, el lado afectado y tu movilidad. Puedes decidir no responder. Si accedes por invitación, se solicita tu consentimiento para guardar y compartir estas respuestas con el profesional vinculado. Son contexto del perfil: no cambian los juegos ni la dificultad y no constituyen una valoración clínica. Puedes elegir «Prefiero no responder» para continuar sin aportar estos datos.',
     ],
   },
   {

@@ -105,7 +105,7 @@ subject to the confirmed deadline and available client materials.
   follow those choices. Preferences, passed stages and completed trials resume
   through the existing durable progress queue. Unselected games stay untested;
   choices can be edited before completion and through a selective retake afterward.
-  Condition context requires explicit consent; no free-text health information is collected. See [implementation,
+  Invitation access requires explicit sharing consent; personal access has no sharing checkbox. No free-text health information is collected. See [implementation,
   Mobbin references and checks](PLACEMENT.md).
 - [x] **CR-04 rules —** Published and verified onboarding preferences/stages and
   bounded optional condition context rules in `ceoaberto-neuroia` after demo tests.

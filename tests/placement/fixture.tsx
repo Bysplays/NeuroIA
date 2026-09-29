@@ -1,4 +1,5 @@
 // Isolated component fixture. Never imported by the application entry or production build.
+import { AccountAccessContext } from '../../src/services/accountAccessContext';
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { PlacementOnboarding } from '../../src/components/PlacementOnboarding';
@@ -41,8 +42,8 @@ export function Fixture() {
   }, () => {}, value => { setTimeout(() => setData(value), query.has('delay') ? 250 : 0); }));
   useEffect(() => { sync.start(); return () => sync.stop(); }, [sync]);
   const Component = query.has('retake') ? Reassessment : PlacementOnboarding;
-  return <><div style={{ padding: 8, textAlign: 'center', fontSize: 12 }}>Vista de prueba · sin cuentas ni datos reales</div>
+  return <AccountAccessContext.Provider value={query.has('invited') ? {kind:'invitation',active:true,serverNow:1790683200000,checkoutAvailable:false} : null}><div style={{ padding: 8, textAlign: 'center', fontSize: 12 }}>Vista de prueba · sin cuentas ni datos reales</div>
     {done ? <h1>Juegos preparados</h1> : <Component profile={data.profile} sync={sync} onDone={() => setDone(true)} onSettings={() => {}}/>}
-    <output data-testid="profile" hidden>{JSON.stringify(data.profile)}</output></>;
+    <output data-testid="profile" hidden>{JSON.stringify(data.profile)}</output></AccountAccessContext.Provider>;
 }
 createRoot(document.getElementById('root')!).render(<Fixture/>);

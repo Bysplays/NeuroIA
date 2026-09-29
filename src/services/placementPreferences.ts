@@ -12,12 +12,13 @@ export interface ConditionContext {
   kind: 'stroke' | 'other' | 'none';
   side: 'unspecified' | 'left' | 'right' | 'both' | 'none';
   mobility: 'unspecified' | 'independent' | 'support' | 'limited';
-  consentVersion: 1;
+  consentVersion?: 1;
 }
 export function validConditionContext(value: unknown): value is ConditionContext {
   if (!value || typeof value !== 'object') return false;
   const c = value as ConditionContext;
-  return Object.keys(c).length === 4 && c.consentVersion === 1
+  return Object.keys(c).every(key => ['kind', 'side', 'mobility', 'consentVersion'].includes(key))
+    && (!('consentVersion' in c) || c.consentVersion === 1)
     && ['stroke', 'other', 'none'].includes(c.kind)
     && ['unspecified', 'left', 'right', 'both', 'none'].includes(c.side)
     && ['unspecified', 'independent', 'support', 'limited'].includes(c.mobility)

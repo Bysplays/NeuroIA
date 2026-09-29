@@ -479,4 +479,7 @@ test('optional condition context round-trips with bounded values and consent', a
   }
   await backend.commit({id:'remove-context',kind:'placement',preferences:{interests:['memory'],movement:'unspecified'}});
   assert.equal((await backend.load()).profile.placement.preferences.condition,undefined);
+  const personal = {kind:'other',side:'unspecified',mobility:'unspecified'};
+  await backend.commit({id:'personal-context',kind:'placement',preferences:{interests:['memory'],movement:'unspecified',condition:personal}});
+  assert.deepEqual((await backend.load()).profile.placement.preferences.condition,personal);
 });

@@ -239,8 +239,8 @@ use one column on very narrow screens. Require at least one area and omit the
 explore-all shortcut. Movement preferences retain labelled rows, including Prefiero no elegir ahora,
 with Continuar and no separate skip button. The final step offers stroke, other
 condition, none, or no response, with optional affected side and mobility. Never
-request free-text diagnoses. Require explicit consent before storing condition
-context; disclose linked-professional access. Prefiero no responder stores no
+request free-text diagnoses. Show the sharing consent checkbox only for invitation access. Personal access
+stores context without a sharing-consent marker. Prefiero no responder stores no
 condition object. This context never selects games or changes difficulty. Only selected areas enter initial assessment; tap preference excludes
 continuous tracking. Untested games remain accessible with their default level.
 

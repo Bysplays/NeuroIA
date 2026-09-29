@@ -629,7 +629,7 @@ GameSession remains paused while Settings owns that navigation. No router, histo
 rewrite or new persistence is introduced.
 
 PlacementPreferences now has three steps; ConditionPreferences owns optional
-bounded health-context choices and explicit consent. `PlacementPreferences.condition`
+bounded health-context choices and invitation-only sharing consent. `PlacementPreferences.condition`
 is optional, validated identically by the reducer and Firestore rules, and never
 influences `placementExercises` or difficulty. The existing progress authorization
 means an active linked professional can read it; disclose that before saving. Do

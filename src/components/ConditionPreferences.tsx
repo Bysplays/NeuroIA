@@ -9,9 +9,9 @@ const conditions = [
   ['unspecified', 'Prefiero no responder'],
 ] as const;
 
-export function ConditionPreferences({ value, onChange, consent, onConsent }: {
+export function ConditionPreferences({ value, onChange, consent, onConsent, invited }: {
   value: ConditionDraft; onChange: (value: ConditionDraft) => void;
-  consent: boolean; onConsent: (value: boolean) => void;
+  invited: boolean; consent: boolean; onConsent: (value: boolean) => void;
 }) {
   return <div className="condition-preferences">
     <fieldset className="interest-options"><legend>¿Cuál es tu situación?</legend>
@@ -34,10 +34,8 @@ export function ConditionPreferences({ value, onChange, consent, onConsent }: {
         </select>
       </label>
     </div>}
-    {value.kind !== 'unspecified' && <div className="condition-privacy">
-      <p>Estos datos de salud son opcionales. Se guardan como contexto en tu perfil y puede consultarlos tu profesional vinculado. No cambian los juegos ni la dificultad.</p>
-      <label><input type="checkbox" checked={consent} onChange={event => onConsent(event.target.checked)}/><span>Consiento guardar estas respuestas y compartirlas con mi profesional vinculado, si lo hay.</span></label>
-      <p>Puedes continuar sin compartirlos eligiendo «Prefiero no responder».</p>
+    {invited && value.kind !== 'unspecified' && <div className="condition-privacy">
+      <label><input type="checkbox" checked={consent} onChange={event => onConsent(event.target.checked)}/><span>Consiento guardar estas respuestas y compartirlas con mi profesional vinculado.</span></label>
     </div>}
   </div>;
 }
