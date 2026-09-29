@@ -225,7 +225,6 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
   return (
     <ExerciseWrapper
-      progress={{ done: matchedCount, total: config.pairs }}
       exerciseId="memory-pairs"
       title="Parejas de memoria"
       domain="memory"

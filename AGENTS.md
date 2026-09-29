@@ -640,6 +640,6 @@ action never bypasses initial cloud loading or server-confirmed access.
 
 `src/services/sessionProgress.ts` owns stage weights and bounded progress aggregation.
 `GameSession.progressScope` carries completed and remaining stages for placement,
-daily plans and assigned sessions; each game supplies its current progress through
-`ExerciseWrapper`. Help uses ModalFrame and pauses the existing game clock without
+daily plans and assigned sessions; `ExerciseWrapper` derives progress from whole-level completion. Individual
+objects, answers, pairs and contact time must not fill stage segments. Help uses ModalFrame and pauses the existing game clock without
 unmounting the board.

@@ -174,7 +174,6 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
 
   return (
     <ExerciseWrapper
-      progress={{ done: currentIdx, total: sessionItems.length }}
       exerciseId="word-completion"
       title="Completar palabras"
       domain="language"

@@ -138,7 +138,6 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
   return (
     <ExerciseWrapper
-      progress={{ done: targetIdx, total: targets.length }}
       exerciseId="motor-target"
       title="Toca la diana"
       domain="motor"

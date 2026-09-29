@@ -16,7 +16,6 @@ interface PlanProgress {
 interface ExerciseWrapperProps {
   exerciseId: ExerciseId;
   title: React.ReactNode;
-  progress: { done: number; total: number };
   domain: CognitiveDomain;
   instructionText: string;
   onBack: () => void;
@@ -32,7 +31,6 @@ interface ExerciseWrapperProps {
 
 export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   title,
-  progress,
   exerciseId,
   domain,
   onBack,
@@ -45,7 +43,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 }) => {
   const session = useGameSession();
   const { finish } = session;
-  const bar = sessionProgress(progress.done, progress.total, session.progressScope);
+  const bar = sessionProgress(isCompleted ? 1 : 0, 1, session.progressScope);
   useEffect(() => { finish(isCompleted); }, [isCompleted, finish]);
   useEffect(() => {
     if (isCompleted) {

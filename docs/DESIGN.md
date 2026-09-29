@@ -449,11 +449,13 @@ pause the game clock without unmounting the board, and restore focus on dismissa
 The initial instruction screen remains a full page before starting ordinary play.
 
 Active exercises use a full-width segmented progress track below the task title and above the
-play area, without numeric counters in the title. Individual games show their own
-stages; daily and professional paths sum all configured stages. Placement reserves
+play area, without numeric counters in the title. Each complete exercise at a given level contributes one stage; daily and
+professional paths sum those complete exercises. Objects, pairs, targets and
+individual questions never advance the global stage bar. Placement reserves
 its two possible assessment stages per selected game; finishing early or skipping
 resolves that game's remaining allocation, so changing games never resets the bar.
-Continuous scanning/tracking arenas contribute one stage with fractional progress.
+A stage fills only when that entire level is completed; there is no fractional
+fill from individual answers or contact time.
 Footer Back and Skip actions share the same compact outlined dimensions. Scanning
 keeps its found-state treatment without checkmark overlays obscuring the objects.
 

@@ -387,3 +387,19 @@ test('Muse offers connection only when Web Bluetooth is supported', async ({page
   await page.getByRole('button',{name:'Conectar Muse',exact:true}).click();
   await expect(page.getByRole('button',{name:'Conectar diadema',exact:true})).toBeEnabled();
 });
+
+test('finding an object or touching a target does not complete a progress stage', async ({page}) => {
+  await page.goto(fixture+'?game=visual-scanning&placement');
+  const cells = page.locator('.scanning-cell');
+  for (let index = 0; index < await cells.count(); index++) {
+    await cells.nth(index).click();
+    if (await page.locator('.cell-found').count()) break;
+  }
+  await expect(page.locator('.cell-found')).toHaveCount(1);
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow','0');
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuemax','1');
+  await page.goto(fixture+'?game=motor-target&placement');
+  await page.getByRole('button',{name:'Tocar diana de coordinación'}).click();
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow','0');
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuemax','1');
+});

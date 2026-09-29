@@ -173,7 +173,6 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
 
   return (
     <ExerciseWrapper
-      progress={{ done: contactTime / REQUIRED_CONTACT_SECONDS, total: 1 }}
       exerciseId="motor-tracking"
       title="Sigue a tu compañero"
       domain="motor"

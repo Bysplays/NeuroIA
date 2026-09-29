@@ -229,7 +229,6 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
   return (
     <ExerciseWrapper
-      progress={{ done: round - 1, total: maxRounds }}
       exerciseId="memory-path"
       title="Secuencia de memoria"
       domain="memory"

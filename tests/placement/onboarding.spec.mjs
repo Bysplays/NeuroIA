@@ -88,8 +88,8 @@ test('a passed target stage survives reload and continues at its saved difficult
   await page.getByRole('button', { name: 'Empezar', exact: true }).click();
   await expect(page.getByText('A tu ritmo', { exact: true })).toHaveCount(0);
   await expect(page.getByText('Nivel 4', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('progressbar', { name: 'Progreso de la sesión' })).toHaveAttribute('aria-valuenow', '5');
-  await expect(page.getByRole('progressbar', { name: 'Progreso de la sesión' })).toHaveAttribute('aria-valuemax', '13');
+  await expect(page.getByRole('progressbar', { name: 'Progreso de la sesión' })).toHaveAttribute('aria-valuenow', '1');
+  await expect(page.getByRole('progressbar', { name: 'Progreso de la sesión' })).toHaveAttribute('aria-valuemax', '2');
   const back = await page.getByRole('button', {name: 'Volver', exact: true}).boundingBox();
   const skip = await page.getByRole('button', {name: 'Omitir', exact: true}).boundingBox();
   expect(Math.abs(back.width - skip.width)).toBeLessThan(1);

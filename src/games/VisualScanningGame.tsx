@@ -223,7 +223,6 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   return (
     <ExerciseWrapper
-      progress={{ done: foundCount / totalTargets, total: 1 }}
       exerciseId="visual-scanning"
       title={
         <span>
