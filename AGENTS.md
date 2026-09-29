@@ -1,5 +1,17 @@
 # Working on NeuroIA
 
+## Locally protected design archive
+
+The owner archived `codex/neuroia-ahead-redesign` on 2026-09-29. Preserve this
+branch and the `archive/neuroia-ahead-redesign-2026-09-29` tag. Do not commit,
+reset, rebase, force-update or delete either reference without an explicit new
+instruction to reopen or remove this archive. New experiments must start on a
+separate branch. A local Git reference-transaction hook enforces this protection
+in the shared Git directory; its maintenance notes are in
+`.git/info/neuroia-protected-design.md` (resolved against the common Git directory).
+This is a local archive, not a remote branch-protection rule or a published backup.
+
+
 This is the repository-wide guide for coding agents. Read [DESIGN.md](docs/DESIGN.md)
 before changing any interface, interaction, copy, or visual asset. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) for branch, commit, and merge conventions.
