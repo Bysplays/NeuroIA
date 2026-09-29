@@ -115,7 +115,8 @@ subject to the confirmed deadline and available client materials.
   a broken link. Local audit confirms `src/services/firebase.ts` intentionally uses
   `ceoaberto-neuroia.firebaseapp.com`, documented in DEPLOYMENT.md. Feasibility confirmed: use `auth.neuroia.es` on Firebase Hosting for
   OAuth and email actions while retaining the app on GitHub Pages. Setup sequence
-  is in DEPLOYMENT.md; DNS, certificate and provider configuration are pending.
+  is in DEPLOYMENT.md. Owner confirmed DNS, authorized domain and Google
+  OAuth callback; certificate and email-template configuration remain pending.
   The current authDomain remains unchanged until those prerequisites work. Gate: app navigation/returns use the intended app domain; review
   branded auth-domain feasibility if needed, without breaking secure verification,
   recovery or sign-in. Coordinate with the existing domain-migration backlog.
