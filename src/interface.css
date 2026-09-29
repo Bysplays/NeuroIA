@@ -1602,7 +1602,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .account-entry-form .touch-btn { width: 100%; min-height: 54px; font-size: .9rem; margin-top: 4px; border-radius: 14px; }
 .account-entry-form .google-login-button { min-height: 54px; border-radius: 14px; font-size: .85rem; border-color: var(--color-border); }
 .account-entry-form .email-text-button { font-size: .78rem; text-align: center; color: var(--color-primary); margin-top: -12px; text-underline-offset: 4px; }
-.account-entry-form .entry-note { font-size: .72rem; line-height: 1.5; margin: -8px 0 4px; }
+.account-entry-form .entry-note { font-size: .72rem; line-height: 1.5; margin: 0; }
 .entry-mode-switch { display: flex; gap: 4px; padding: 5px; background: var(--color-primary-light); border-radius: 16px; }
 .entry-mode-switch button { flex: 1; border: 0; background: none; border-radius: 12px; color: var(--color-text-main); padding: 12px 8px; min-height: 48px; font-size: .8rem; font-weight: 500; cursor: pointer; }
 .entry-mode-switch button[aria-pressed="true"] { background: var(--color-surface); font-weight: 700; box-shadow: 0 2px 6px #173b550a; }

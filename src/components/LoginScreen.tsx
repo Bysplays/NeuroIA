@@ -231,15 +231,13 @@ export function LoginScreen({
                   )}
                   {mode === "register" && (
                     <div className="entry-field">
-                      <p id="password-hint" className="entry-note">
-                        Al menos 6 caracteres. Después verificaremos tu correo.
-                      </p>
                       <label htmlFor="login-confirmation">
                         Repite la contraseña
                       </label>
                       <input
                         id="login-confirmation"
                         name="confirmation"
+                        aria-describedby="password-hint"
                         type="password"
                         autoComplete="new-password"
                         value={confirmation}
@@ -249,6 +247,9 @@ export function LoginScreen({
                         required
                         disabled={busy}
                       />
+                      <p id="password-hint" className="entry-note">
+                        Al menos 6 caracteres. Después verificaremos tu correo.
+                      </p>
                     </div>
                   )}
                   <button
