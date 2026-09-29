@@ -191,7 +191,8 @@ and MuseJS attribution for the Muse 2 integration. Returning restores
 the previous entry/settings view without discarding form or game state. Long copy
 is selectable and scrollable. Justify document paragraphs at widths above 760 px
 with Spanish hyphenation; keep narrow-screen paragraphs left-aligned to avoid
-uneven word spacing. Titles, controls and data tables are not justified. Sound and narration remain independent preferences.
+uneven word spacing. Titles, controls and data tables are not justified. Separate the AEPD rights link
+from the preceding section with 24 px of top spacing. Sound and narration remain independent preferences.
 
 Professional workspace, proposals, participant activity, recovery and verification
 share these tokens, controls and typography. Retain functional distinctions: free

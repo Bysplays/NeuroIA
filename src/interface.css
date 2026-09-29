@@ -1690,6 +1690,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .information-page-content > h1 { margin: 0 0 28px; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.2; outline: none; }
 .information-page-content h2 { font-size: 1.15rem; line-height: 1.35; margin: 32px 0 12px; }
 .information-page-content p + p { margin-top: 16px; }
+.information-page-content .information-rights-link { margin-top: 24px; }
 .information-page-content ul { padding-left: 24px; margin-block: 16px; }
 .information-page-content a { color: var(--color-primary); text-underline-offset: 4px; }
 .information-page-content .project-funding { margin: 24px 0; }

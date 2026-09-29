@@ -58,7 +58,7 @@ export const PRIVACY_SECTIONS = [
   {
     title: 'Tu cuenta y tus preferencias',
     paragraphs: [
-      'Para acceder utilizas una cuenta de Google o un correo electrónico y una contraseña. Firebase Authentication gestiona la identificación y la sesión. NeuroIA utiliza el identificador de tu cuenta, tu correo y tu nombre para reconocer tu perfil y asociar tu actividad. La contraseña no se guarda en el historial de juego.',
+      'Para acceder utilizas una cuenta de Google o un correo electrónico y una contraseña. Firebase Authentication gestiona la identificación y la sesión. NeuroIA utiliza el identificador de tu cuenta, tu correo y tu nombre para reconocer tu perfil y asociar tu actividad. La contraseña no se guarda.',
       'Se guardan tus preferencias de presentación, los intereses que eliges y los niveles iniciales de los juegos. No necesitas indicar un diagnóstico para realizar la configuración inicial.',
     ],
   },

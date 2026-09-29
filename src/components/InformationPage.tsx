@@ -84,7 +84,7 @@ export function InformationPage({
                 {section.title === 'Responsable del tratamiento' && <p>Contacto de privacidad: <a href="mailto:david@ceoaberto.com">david@ceoaberto.com</a>.</p>}
                 {section.title === 'Tus derechos de privacidad' && <p>Para ejercer tus derechos, escribe a <a href="mailto:david@ceoaberto.com">david@ceoaberto.com</a> e indica tu solicitud y el correo de tu cuenta. No envíes tu contraseña.</p>}
               </section>)}
-              <p><a href="https://www.aepd.es/derechos-y-deberes/conoce-tus-derechos" target="_blank" rel="noreferrer">Conoce tus derechos en la AEPD</a></p>
+              <p className="information-rights-link"><a href="https://www.aepd.es/derechos-y-deberes/conoce-tus-derechos" target="_blank" rel="noreferrer">Conoce tus derechos en la AEPD</a></p>
               <section>
                 <h2>Licencias</h2>
                 <p>
