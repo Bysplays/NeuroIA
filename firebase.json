@@ -1,6 +1,7 @@
 {
   "firestore": {
-    "rules": "vendor/firebase/firestore.rules"
+    "rules": "vendor/firebase/firestore.rules",
+    "indexes": "vendor/firebase/firestore.indexes.json"
   },
   "emulators": {
     "auth": {

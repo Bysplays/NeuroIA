@@ -16,13 +16,13 @@ of a production deployment. Keep project guidance in English and UI copy in Span
   pending checkout automatically; completed payments remain protected.
   Presentation approval does not certify live payments or change release requirements.
 - [ ] Review authenticated home and catalog with the owner.
-- [ ] Implement account deletion in Mi cuenta: pale enabled action, paid-subscription
-  guard verified by the server, typed confirmation, resumable deletion of Auth,
-  progress, archives and professional/invitation associations. Trial and invited
-  access must not block deletion. Retain only a server-owned pseudonymous trial-use
-  identifier that survives account recreation; a deleted Firebase UID alone is
-  insufficient. Update privacy copy, enforce concurrent-write protection and
-  verify with demo emulators before enabling. No deletion endpoint is shipped yet.
+- [x] Implement account deletion with typed confirmation, recent identity verification,
+  server Stripe checks, resumable cleanup and pseudonymous trial-use retention.
+- [ ] Activate account lifecycle: provision the stable trial HMAC secret, scoped Auth
+  get/delete IAM, collection-group indexes, Worker cron/modules and deletion-lock
+  rules before enabling ACCOUNT_DELETION_ENABLED and releasing the frontend.
+  Verify using a disposable account after deployment.
+  No live account deletion or production deployment has been performed for this change.
 - [ ] Review refreshed onboarding preferences and assessment entry with the owner;
   visual styling now matches account entry. Existing assessment acceptance checks remain open.
 
@@ -481,7 +481,7 @@ release issue is lost during prioritization.
   read-only analytics and participant departure with code rotation.
 - [ ] Verify professional credentials before adding any clinical permissions.
 - [ ] Add private clinical notes and patient-facing instructions with distinct
-  permissions, account deletion, and explicit merge of retained local backups
+  permissions and explicit merge of retained local backups
   into an already-existing cloud account. Initial empty-account import is available.
 
 ## Onboarding and subscriptions

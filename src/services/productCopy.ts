@@ -101,7 +101,8 @@ export const PRIVACY_SECTIONS = [
     title: 'Conservación y control de tus datos',
     paragraphs: [
       'El historial guardado permanece asociado a tu cuenta. Cancelar una suscripción, desconectar Muse o cerrar sesión no lo elimina. La vista reciente puede mostrar solo una parte del historial sin que eso signifique que los resultados anteriores se hayan borrado.',
-      'Puedes consultar tu actividad y cambiar tu nombre y preferencias desde la aplicación. No hay actualmente un botón para eliminar por completo la cuenta y sus datos. La cancelación del servicio y la supresión de datos son gestiones diferentes.',
+      'Puedes solicitar el borrado desde Ajustes, Mi cuenta, Borrar cuenta. Se pide confirmar tu identidad y escribir ELIMINAR MI CUENTA. Si tienes una suscripción vigente, debes cancelarla en Stripe y esperar a que termine su periodo; las pruebas gratuitas y las invitaciones no impiden el borrado.',
+      'El borrado elimina el perfil, la actividad y los vínculos de NeuroIA y se completa en segundo plano. Se conserva un identificador protegido del correo verificado cuando se ha utilizado la prueba gratuita, para impedir repetirla; no se guarda el correo en ese registro. El bloqueo técnico de la cuenta se retira cuando han caducado las sesiones anteriores. Los datos de facturación conservados por Stripe y las copias de otros dispositivos no se eliminan con esta solicitud.',
     ],
   },
   {

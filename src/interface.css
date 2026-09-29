@@ -926,7 +926,7 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 .subscription-upgrade:disabled { opacity: .65; cursor: wait; }
 
 .preferences-account { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0; border-top: 1px solid var(--color-border); }
-.preferences-signout { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 0; border: 0; background: transparent; color: var(--color-text-main); font-size: .78rem; cursor: pointer; }
+.preferences-signout { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 0; border-radius: 8px; background: var(--color-primary); color: white; font-size: .78rem; cursor: pointer; }
 .preferences-signout:disabled, .subscription-action:disabled { opacity: .6; cursor: wait; }
 
 /* Stable entry presentation shared by every initial asynchronous boundary. */
@@ -1806,8 +1806,8 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .preferences-account-panel .paper-nav-button { width: var(--account-action-width); max-width: 100%; flex-shrink: 0; box-sizing: border-box; text-align: center; justify-content: center; }
 .preferences-account-panel .preferences-name .paper-nav-button { font-size: .72rem; }
 
-.preferences-account-panel .account-password .preferences-action-row { align-items: flex-start; gap: 10px; }
-.preferences-account-panel .account-password .preferences-action-row p { margin: 0; }
+.preferences-account-panel .preferences-action-row { align-items: flex-start; gap: 10px; }
+.preferences-account-panel .preferences-action-row p { margin: 0; }
 
 /* Authentication stays in one dialog above the unauthenticated home. */
 .modal-shell:has(> .auth-modal) { width: min(520px, calc(100vw - 32px)); border-radius: 6px; background: var(--color-bg); scrollbar-gutter: auto; }
@@ -1839,3 +1839,14 @@ body .main-header .header-right .header-icon-btn,
 body .main-header .header-right .header-signout { min-height: 44px; height: 44px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); box-shadow: none; }
 .main-header .header-right .header-icon-btn:not(.muse-entry) { width: 44px; padding: 0; }
 .main-header .header-right .muse-entry, .main-header .header-right .header-signout { padding: 10px 14px; }
+
+body .main-header .header-right .header-signout { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+.preferences-action-button.account-delete-trigger { background: var(--color-primary-light); color: var(--color-text-muted); border-color: var(--color-border); }
+.account-delete-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.account-delete-heading h2 { display: flex; align-items: center; gap: 10px; margin: 0; }
+.account-delete-dialog p { font-size: .82rem; line-height: 1.6; text-align: justify; }
+.account-delete-dialog .text-link { display: block; margin: 18px auto 0; }
+
+.account-delete-dialog > p { margin-block: 16px; }
+
+.account-delete-heading .preferences-close { width: 32px; height: 32px; min-height: 32px; border-radius: 6px; padding: 0; flex: 0 0 32px; }

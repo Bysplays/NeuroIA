@@ -1,3 +1,4 @@
+import { startTrial, deletionEligibility, requestDeletion, processDeletion } from './accountLifecycle.mjs';
 // Cloudflare Worker: Web APIs only, no Firebase Functions or Node runtime.
 const encoder = new TextEncoder();
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
@@ -42,7 +43,7 @@ async function googleToken(env) {
   const account = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
   if (account.project_id !== env.FIREBASE_PROJECT_ID) throw Error('project-mismatch');
   const now = Math.floor(Date.now() / 1000);
-  const unsigned = `${json64({ alg: 'RS256', typ: 'JWT' })}.${json64({ iss: account.client_email, scope: 'https://www.googleapis.com/auth/datastore', aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 })}`;
+  const unsigned = `${json64({ alg: 'RS256', typ: 'JWT' })}.${json64({ iss: account.client_email, scope: 'https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/identitytoolkit', aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 })}`;
   const key = await crypto.subtle.importKey('pkcs8', bytes(account.private_key.replace(/-----[^-]+-----|\s/g, '')), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
   const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, encoder.encode(unsigned));
   const response = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: `${unsigned}.${base64(new Uint8Array(signature))}` }) });
@@ -62,8 +63,23 @@ export function database(env) {
     return data;
   }
   return {
+    async find(collection, field, value, allDescendants = false, limit = 100) {
+      const rows = await api(':runQuery', 'POST', { structuredQuery: { from: [{ collectionId: collection, allDescendants }], where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: encodeValue(value) } }, limit } });
+      return (rows || []).filter(row => row.document).map(row => ({ path: row.document.name.slice(root.length + 1), ...decode(row.document.fields) }));
+    },
+    async nextDeletion() {
+      const rows = await api(':runQuery', 'POST', { structuredQuery: { from: [{ collectionId: 'accountDeletions' }], orderBy: [{ field: { fieldPath: 'lastRunAt' }, direction: 'ASCENDING' }], limit: 1 } });
+      return rows?.find(row => row.document)?.document.name.split('/').at(-1);
+    },
+    async list(path, cursor, showMissing = false) {
+      const params = new URLSearchParams({ pageSize: '25', ...(cursor ? { pageToken: cursor } : {}), ...(showMissing ? { showMissing: 'true' } : {}) });
+      const page = await api(`/${path}?${params}`);
+      return { ...page, documents: (page?.documents || []).map(doc => ({ path: doc.name.slice(root.length + 1), ...decode(doc.fields) })) };
+    },
+    async collections(path, cursor) { return await api(`/${path}:listCollectionIds`, 'POST', { pageSize: 25, ...(cursor ? { pageToken: cursor } : {}) }) || {}; },
+    async erase(paths) { if (paths.length) await api(':commit', 'POST', { writes: paths.map(path => ({ delete: `${root}/${path}` })) }); },
     // Shared server-only transaction primitive for seats and reciprocal care links.
-    async runTransaction(callback, maxAttempts = 4) {
+    async runTransaction(callback, maxAttempts = 4, allowDeleting = false) {
       let retryTransaction;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const { transaction } = await api(':beginTransaction', 'POST', { options: { readWrite: retryTransaction ? { retryTransaction } : {} } });
@@ -72,11 +88,26 @@ export function database(env) {
           const tx = {
             async getMany(paths) {
               if (writes.length) throw Error('reads-after-writes');
+              if (!allowDeleting) {
+                const ids = [...new Set(paths.filter(path => /^(users|professionals)\/[^/]+/.test(path)).map(path => path.split('/')[1]))];
+                if (ids.length) {
+                  const locks = await api(':batchGet', 'POST', { documents: ids.map(id => `${root}/accountDeletions/${id}`), transaction });
+                  if (locks.some(row => row.found)) fail(409, 'La cuenta se está eliminando.');
+                }
+              }
               const rows = await api(':batchGet', 'POST', { documents: paths.map(path => `${root}/${path}`), transaction });
-              return paths.map(path => {
+              const values = paths.map(path => {
                 const found = rows.find(row => row.found?.name === `${root}/${path}`)?.found;
                 return found ? decode(found.fields) : null;
               });
+              if (!allowDeleting) {
+                const owners = [...new Set(values.map(value => value?.ownerUid).filter(id => typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id)))];
+                if (owners.length) {
+                  const locks = await api(':batchGet', 'POST', { documents: owners.map(id => `${root}/accountDeletions/${id}`), transaction });
+                  if (locks.some(row => row.found)) fail(409, 'La cuenta profesional se está eliminando.');
+                }
+              }
+              return values;
             },
             async get(path) { return (await this.getMany([path]))[0]; },
             set(path, values, merge = true) {
@@ -106,9 +137,10 @@ export function database(env) {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const { transaction } = await api(':beginTransaction', 'POST', { options: { readWrite: retryTransaction ? { retryTransaction } : {} } });
         try {
-          const paths = [`users/${uid}/access/main`, `billing/${uid}`];
+          const paths = [`users/${uid}/access/main`, `billing/${uid}`, `accountDeletions/${uid}`];
           const read = await api(':batchGet', 'POST', { documents: paths.map(path => `${root}/${path}`), transaction });
           const docs = paths.map(path => read.find(item => item.found?.name === `${root}/${path}`)?.found);
+          if (docs[2]) { await api(':rollback', 'POST', { transaction }); return; }
           const writes = [];
           const patch = (index, values) => writes.push({ update: { name: `${root}/${paths[index]}`, fields: Object.fromEntries(Object.entries(values).map(([k,v]) => [k, encodeValue(v)])) }, updateMask: { fieldPaths: Object.keys(values) } });
           const result = await callback(decode(docs[0]?.fields), decode(docs[1]?.fields), patch);
@@ -288,6 +320,7 @@ export async function seatCheckout(uid, id, env, db, stripe) {
 export async function syncSeatSubscription(uid, id, subscriptionId, env, db, stripe, maxAttempts = 4) {
   if (typeof id !== 'string' || !seatIdPattern.test(id)) return;
   await db.runTransaction(async tx => {
+    if (await tx.get(`accountDeletions/${uid}`)) return;
     const [seat, billing] = await tx.getMany([seatPath(uid, id), proBillingPath(uid)]);
     if (!seat) return;
     // Read current Stripe state on every retry, never trust event order or URL parameters.
@@ -305,14 +338,15 @@ export async function syncSeatSubscription(uid, id, subscriptionId, env, db, str
     const status = expiresAt > Date.now() ? 'active' : 'inactive';
     const invitation = await tx.get(`seatInvitations/${seat.invitationCode}`);
     if (invitation && (invitation.professionalId !== uid || invitation.seatId !== id)) throw Error('invitation-collision');
-    const access = seat.occupantUid ? await tx.get(`users/${seat.occupantUid}/access/main`) : null;
+    const participantDeleting = seat.occupantUid ? await tx.get(`accountDeletions/${seat.occupantUid}`) : null;
+    const access = seat.occupantUid && !participantDeleting ? await tx.get(`users/${seat.occupantUid}/access/main`) : null;
     tx.set(seatPath(uid, id), { status, expiresAt, autoRenew, subscriptionStatus: sub.status, subscriptionId: sub.id, checkoutId: null, billingCheckedAt: Date.now() });
     if (status === 'active' && !invitation) tx.set(`seatInvitations/${seat.invitationCode}`, { professionalId: uid, seatId: id }, false);
     tx.set(proBillingPath(uid), { customerId: sub.customer, ...(billing?.pendingSeatId === id ? { pendingSeatId: null } : {}) });
     if (access?.kind === 'invitation' && access.professionalId === uid && access.seatId === id) {
       tx.set(`users/${seat.occupantUid}/access/main`, { expiresAt, autoRenew });
     }
-  }, maxAttempts);
+  }, maxAttempts, true);
 }
 
 export async function redeemSeat(uid, input, db) {
@@ -355,7 +389,7 @@ export async function leaveSeat(uid, db) {
     const seat = await tx.get(path);
     if (!seat || seat.occupantUid !== uid) fail(409, 'No hemos podido confirmar tu invitación.');
     const code = await availableInvitation(tx);
-    tx.set(`users/${uid}/access/main`, { kind: 'revoked', leftAt: Date.now() }, false);
+    tx.set(`users/${uid}/access/main`, { kind: 'revoked', leftAt: Date.now(), ...(access.trialStartedAt != null ? { trialStartedAt: access.trialStartedAt } : {}) }, false);
     tx.delete(`professionals/${access.professionalId}/patients/${uid}`);
     tx.set(path, { occupantUid: null, patientName: null, invitationCode: code });
     tx.set(`seatInvitations/${code}`, { professionalId: access.professionalId, seatId: access.seatId }, false);
@@ -439,6 +473,19 @@ export async function professionalRequest(path, uid, input, env, db, stripe) {
   return { ok: true };
 }
 
+export async function authAdmin(env, action, uid) {
+  const response = await fetch(`https://identitytoolkit.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/accounts:${action === 'delete' ? 'delete' : 'lookup'}`, {
+    method: 'POST', headers: { Authorization: `Bearer ${await googleToken(env)}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ localId: action === 'delete' ? uid : [uid] }),
+  });
+  const data = await response.json();
+  if (!response.ok && !(action === 'delete' && data.error?.message === 'USER_NOT_FOUND')) throw Error('account-admin-failed');
+  if (action === 'delete') return;
+  const user = data.users?.[0];
+  if (!user || user.disabled || !user.emailVerified) fail(403, 'Verifica tu identidad antes de continuar.');
+  return user;
+}
+
 export function createHandler(deps = {}) {
   return async (request, env) => {
     const origin = request.headers.get('Origin');
@@ -460,10 +507,30 @@ export function createHandler(deps = {}) {
         await webhook(JSON.parse(body), env, db, stripe);
         return reply({ received: true });
       }
-      if (!['/checkout','/portal','/cancel-checkout','/status','/access', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
+      if (!['/checkout','/portal','/cancel-checkout','/status','/access','/trial','/account/deletion-status','/account/delete', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
       const token = request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1];
       if (!token) fail(401, 'Inicia sesión para continuar.');
       const uid = await (deps.verifyUser || verifyUser)(token, env.FIREBASE_PROJECT_ID);
+      if (path === '/account/delete' || path === '/account/deletion-status' || path === '/trial') {
+        if (path.startsWith('/account/') && env.ACCOUNT_DELETION_ENABLED !== 'true') fail(503, 'El borrado de cuentas todavía no está activado. Inténtalo más tarde.');
+        const admin = deps.authAdmin || ((action, id) => authAdmin(env, action, id));
+        if (path === '/account/deletion-status') {
+          const state = await deletionEligibility(uid, db, stripe);
+          const { proof: _proof, ...publicState } = state;
+          return reply(publicState);
+        }
+        if (path === '/account/delete' && await db.runTransaction(tx => tx.get(`accountDeletions/${uid}`), 4, true)) return reply({ accepted: true });
+        const user = await admin('lookup', uid);
+        const claims = JSON.parse(new TextDecoder().decode(bytes(token.split('.')[1])));
+        if (Number(user.validSince || 0) > claims.auth_time) fail(401, 'Vuelve a confirmar tu identidad.');
+        if (path === '/trial') return reply(await startTrial(uid, user.email, env, db));
+        const body = await request.text();
+        if (body.length > 1024) fail(413, 'Solicitud demasiado grande.');
+        let input; try { input = JSON.parse(body); } catch { fail(400, 'Solicitud no válida.'); }
+        return reply(await requestDeletion(uid, { email: user.email, authTime: claims.auth_time }, input, env, db, stripe));
+      }
+      const deleting = await db.runTransaction(tx => tx.get(`accountDeletions/${uid}`), 4, true);
+      if (deleting) fail(409, 'La cuenta se está eliminando.');
       if (path === '/access') return reply(await confirmedAccess(uid, db));
       if (path.startsWith('/professional/') || path === '/redeem-seat' || path === '/leave-seat') {
         const body = await request.text();
@@ -488,8 +555,15 @@ export function createHandler(deps = {}) {
       }
       return reply({ ok: true });
     } catch (error) {
-      return reply({ error: error instanceof HttpError ? error.message : 'No hemos podido gestionar el pago. Inténtalo de nuevo.' }, error.status || 500);
+      return reply({ error: error instanceof HttpError || (error.status >= 400 && error.status < 500) || error.status === 503 ? error.message : (new URL(request.url).pathname.startsWith('/account/') ? 'No hemos podido gestionar tu cuenta. Inténtalo de nuevo.' : 'No hemos podido gestionar el pago. Inténtalo de nuevo.') }, error.status || 500);
     }
   };
 }
-export default { fetch: createHandler(), async scheduled(_event, env) { await reconcileDaily(env); } };
+export async function runDeletionQueue(env, db = database(env), admin = (action, uid) => authAdmin(env, action, uid)) {
+  const uid = await db.nextDeletion();
+  if (uid) await processDeletion(uid, db, admin, newInvitation);
+}
+export default { fetch: createHandler(), async scheduled(event, env) {
+  if (event.cron === '* * * * *') await runDeletionQueue(env);
+  else await reconcileDaily(env);
+} };

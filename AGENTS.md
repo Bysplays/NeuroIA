@@ -70,7 +70,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/ProfessionalPageHeader.tsx` | Shared icon-led title and separate back/participant/action row for professional sessions and standalone statistics |
 | `src/components/ProfessionalSessions.tsx`, `AssignedSessions.tsx`, `src/services/assignedSessions.ts` and `firestoreSessions.ts` | Immutable professional game proposals, per-step result reconciliation and participant play; see `docs/PROFESSIONALS.md` |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Personal account entry before progress and games |
-| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
+| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, Worker trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
 | `vendor/cloudflare/` | Cloudflare Stripe backend, signed webhooks, daily reconciliation and Firestore REST transactions; see `vendor/cloudflare/README.md` |
 | `vendor/firebase/functions/` | Previous Firebase billing backend and administrator-only professional ownership script |
 | `src/App.tsx` | View state, profile refresh, game dispatch, daily-plan progression |
@@ -648,3 +648,20 @@ LoginScreen keeps the unauthenticated home mounted beneath one ModalFrame for
 sign-in, registration and recovery. Closing any mode returns home; mode changes
 reset the dialog scroll. Auth errors use a second ModalFrame above the preserved
 form. About/legal links are available on the home, not inside the auth modal.
+
+
+## Account deletion
+
+`DeleteAccount` in Mi cuenta uses the shared ModalFrame and Worker eligibility API.
+Confirmation requires `ELIMINAR MI CUENTA` and Firebase reauthentication; no client
+batch deletion or local entitlement check can authorize it. `accountLifecycle.mjs`
+implements server-only trial identity and resumable deletion jobs, with one-minute
+cleanup and separate five-minute billing reconciliation. See the Worker README
+for secret/IAM/index/rule deployment order and temporary old-token locks.
+`trialUsage` is a keyed verified-email ledger; do not replace it with UID-only
+retention. Personal and professional subscriptions must both be terminal in Stripe.
+Keep other participants' own activity when removing a professional workspace.
+`StorageService.forgetAccount` clears only the accepted account's device cache and
+outbox after sign-out. No production fixture deletion is permitted in tests.
+Include `vendor/cloudflare/accountLifecycle.test.mjs` with Worker unit checks; the
+combined demo Firestore suite exercises the REST cleanup and deletion write locks.

@@ -452,3 +452,40 @@ test('today session checks only completed games from today', async ({page}) => {
     await expect(page.locator('.editorial-streak svg')).toHaveAttribute('fill', 'none');
   }
 });
+
+test('account deletion confirmation, subscription guard and keyboard dismissal at phone and desktop sizes', async ({page}) => {
+  await page.route('**/src/services/accessService.ts*', async route => {
+    const response=await route.fetch();
+    const body=(await response.text()).replace(/export async function billingRequest\(path, body\)\s*\{/, `export async function billingRequest(path, body) { if (path === '/account/deletion-status') return location.search.includes('paid') ? {allowed:false,reason:'subscription'} : {allowed:true};`);
+    await route.fulfill({response,body});
+  });
+  for(const width of [390,820,1280]) {
+    await page.setViewportSize({width,height:900});
+    await page.goto(fixture);
+    await page.evaluate(async()=>{
+      const {auth}=await import('/src/services/firebase.ts');
+      await auth.authStateReady();
+      Object.defineProperty(auth,'currentUser',{configurable:true,value:{email:'player@example.test',providerData:[{providerId:'password'}]}});
+    });
+    await page.getByRole('button',{name:'Ajustes de accesibilidad'}).click();
+    await page.getByRole('tablist',{name:'Secciones de ajustes'}).getByRole('tab',{name:'Mi cuenta',exact:true}).click();
+    await page.getByRole('button',{name:'Borrar cuenta',exact:true}).click();
+    const modal=page.getByRole('dialog',{name:'Borrar cuenta',exact:true});
+    await expect(modal.getByLabel('Escribe ELIMINAR MI CUENTA')).toBeVisible();
+    await expect(modal.getByRole('button',{name:'Borrar mi cuenta'})).toBeDisabled();
+    await modal.getByLabel('Escribe ELIMINAR MI CUENTA').fill('ELIMINAR MI CUENTA');
+    await modal.getByLabel('Tu contraseña',{exact:true}).fill('example');
+    await expect(modal.getByRole('button',{name:'Borrar mi cuenta'})).toBeEnabled();
+    expect(await modal.evaluate(e=>e.scrollWidth <= e.clientWidth)).toBe(true);
+    await page.screenshot({path:`/tmp/neuroia-delete-${width}.png`});
+    await page.keyboard.press('Escape');
+    await expect(modal).toHaveCount(0);
+    await expect(page.getByRole('button',{name:'Borrar cuenta',exact:true})).toBeFocused();
+  }
+  await page.goto(fixture+'?paid');
+  await page.getByRole('button',{name:'Ajustes de accesibilidad'}).click();
+  await page.getByRole('tablist',{name:'Secciones de ajustes'}).getByRole('tab',{name:'Mi cuenta',exact:true}).click();
+  await page.getByRole('button',{name:'Borrar cuenta',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Gestionar suscripción',exact:true})).toBeVisible();
+  await expect(page.getByLabel('Escribe ELIMINAR MI CUENTA')).toHaveCount(0);
+});

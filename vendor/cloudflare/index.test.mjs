@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHandler, verifyWebhook, verifyUser, checkout, webhook, reconcileDaily } from './index.mjs';
 const env = { APP_URL:'https://neuroia.es/', FIREBASE_PROJECT_ID:'demo-neuroia', STRIPE_MONTHLY_PRICE_ID:'price_monthly', STRIPE_MODE:'test', STRIPE_WEBHOOK_SECRET:'test-secret' };
 function store(access={}, billing={}) {
-  return { access, billing, async transaction(uid, callback) {
+  return { access, billing, async runTransaction(callback) { return callback({ get: async () => null }); }, async transaction(uid, callback) {
     assert.equal(uid,'user-a'); const patches=[];
     const result=await callback({...this.access},{...this.billing},(i,v)=>patches.push([i,v]));
     for(const [i,v] of patches) Object.assign(i===0?this.access:this.billing,v);

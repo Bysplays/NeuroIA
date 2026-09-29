@@ -122,7 +122,7 @@ export function Fixture() {
           <ProductInformation onOpen={setInformation}/>
         </>
       )}
-      <AccessibilityModal onInformation={setInformation}
+      <AccessibilityModal onReassess={() => setSettings(false)} onInformation={setInformation}
         isOpen={settings && information === null}
         settings={profile.settings}
         name={profile.name}

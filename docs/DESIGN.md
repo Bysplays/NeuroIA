@@ -524,3 +524,17 @@ the card stretches on wider screens. Fine separators frame both ends and divide
 the rows; compact layouts keep natural content height. The streak flame is filled
 with primary color only when a non-practice game was completed today; otherwise
 it remains an outline.
+
+
+Mi cuenta includes a separate account-deletion section. Its enabled action has a
+pale surface and readable muted text, with normal keyboard focus and hit area.
+The confirmation uses the shared compact, nearly square dialog: icon and heading
+on one row, exact typed phrase, identity confirmation, explicit irreversible scope.
+Paid subscribers first see a Stripe-management action; trials/invitations proceed
+to confirmation. Closing or Escape restores focus without starting deletion.
+Acceptance signs out; durable server cleanup continues independently of the tab.
+Cerrar sesión uses a filled primary-color button in both header and settings.
+
+All Mi cuenta action rows align buttons with the top of their text block, including
+Rehacer prueba and Borrar cuenta; multiline descriptions do not vertically center
+the button lower than the section heading.

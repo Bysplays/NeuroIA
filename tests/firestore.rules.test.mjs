@@ -26,7 +26,7 @@ test('password accounts must verify email before progress, trials, invitations o
     await assertFails(setDoc(doc(db, `professionals/${uid}`), { ownerUid: uid, name: 'Persona', active: true, createdAt: serverTimestamp() }));
   }
   const db = env.authenticatedContext(uid, { firebase: { sign_in_provider: 'password' }, email_verified: true }).firestore();
-  await assertSucceeds(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
+  await assertFails(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
   await assertSucceeds(firestoreProgress(uid, db).initialize(fresh()));
 });
 
@@ -136,10 +136,10 @@ test('Spark: deny forged code, entitlement without reverse link, ownership theft
 test('Spark: trial uses server time, cannot restart and can become a permanent invitation', async () => {
   const uid = 'spark-trial'; const db = env.authenticatedContext(uid).firestore();
   const adapter = firestoreAccess(uid, db);
-  await adapter.trial();
+  await env.withSecurityRulesDisabled(async context => setDoc(doc(context.firestore(), `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: Date.now() }));
   const trial = await adapter.load();
   assert.equal(trial.expiresAt - trial.trialStartedAt, 7*86400000);
-  await assert.rejects(adapter.trial());
+  await assertFails(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
   await assertFails(updateDoc(doc(db, `users/${uid}/access/main`), {trialStartedAt:serverTimestamp()}));
   await adapter.invite('CEOABERTO');
   const permanent = await adapter.load();
@@ -177,7 +177,7 @@ test('Spark: leaving removes both access and care link atomically, preserves pro
   assert.equal((await adapter.load()).active, false);
   assert.equal((await getDoc(patient)).exists(), false);
   assert.ok(await progress.load());
-  await assert.rejects(adapter.trial());
+  await assertFails(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
   await assert.rejects(adapter.leaveInvitation());
   await adapter.invite('CEOABERTO');
   assert.equal((await adapter.load()).active, true);
@@ -482,4 +482,17 @@ test('optional condition context round-trips with bounded values and consent', a
   const personal = {kind:'other',side:'unspecified',mobility:'unspecified'};
   await backend.commit({id:'personal-context',kind:'placement',preferences:{interests:['memory'],movement:'unspecified',condition:personal}});
   assert.deepEqual((await backend.load()).profile.placement.preferences.condition,personal);
+});
+
+
+test('deletion locks deny old-token writes and trial ledgers are server-only', async () => {
+  const uid='deleting-user'; const db=env.authenticatedContext(uid).firestore();
+  await assertSucceeds(firestoreProgress(uid,db).initialize(fresh()));
+  await env.withSecurityRulesDisabled(async context=>setDoc(doc(context.firestore(),`accountDeletions/${uid}`),{phase:'seats'}));
+  await assertFails(getDoc(doc(db,`users/${uid}/progress/main`)));
+  await assertFails(setDoc(doc(db,`professionals/${uid}`),{ownerUid:uid,name:'Private',active:true,createdAt:serverTimestamp()}));
+  await assertFails(setDoc(doc(db,`users/${uid}/access/main`),{kind:'trial',trialStartedAt:serverTimestamp()}));
+  await assertFails(deleteDoc(doc(db,`accountDeletions/${uid}`)));
+  await assertFails(setDoc(doc(db,'trialUsage/forged'),{used:false}));
+  await assertFails(getDoc(doc(db,'trialUsage/forged')));
 });

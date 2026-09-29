@@ -47,7 +47,7 @@ export const accessService = {
       validForMs: lifetime,
       checkoutAvailable: billingEnabled, canManageSubscription: billingEnabled && access.canManageSubscription };
   },
-  async trial() { await accountAccess().trial(); },
+  async trial() { await billingRequest('/trial'); },
   async invite(code: string) {
     if (/^NIA-(?:[A-Z2-9]{4}-[A-Z2-9]{2}|[A-F0-9]{32})$/.test(code.trim().toUpperCase())) {
       try { await billingRequest('/redeem-seat', { code, name: auth.currentUser?.displayName || 'Persona invitada' }); }

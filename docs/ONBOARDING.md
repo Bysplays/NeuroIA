@@ -8,7 +8,8 @@ bypasses personal entitlement checks; see [PROFESSIONALS.md](PROFESSIONALS.md). 
 Worker `/access` endpoint before mounting `CloudProgress` and games. The API URL
 is required even when purchases are disabled. Server time, a maximum 60-second
 lease and fail-closed refresh prevent device-clock or stale-access bypasses.
-The permanent invitation and trials use `src/services/firestoreAccess.ts` and server-enforced Firestore rules.
+The permanent invitation uses `src/services/firestoreAccess.ts` and server-enforced Firestore rules.
+Trials are granted by the authenticated Worker `/trial` endpoint with a server-only trial-use ledger.
 They do not call Cloud Functions and require no Blaze plan.
 
 ## CEOABERTO
@@ -46,14 +47,13 @@ professional workspaces use paid seats and explicit participant redemption inste
 
 ## Trial and subscription
 
-A trial creates one access record with `trialStartedAt: serverTimestamp()`.
-Rules require the actual request time and reject restarts, deletes and timestamp
-changes. The UI derives the end date as seven days later. It requires no card
-and does not turn into a paid subscription. Existing numeric trial timestamps
-remain readable. Display countdowns use the browser clock; entitlement timestamps
-are server-controlled. Progress write rules remain unchanged for durable pending
-saves; the public frontend and downloadable exercise assets are not a secure DRM
-boundary.
+The Worker creates a server-timed access record and a keyed identifier of the
+verified email in one transaction. Firestore rules deny client trial grants and
+changes to that ledger. Deleting and recreating the account with the same email
+cannot restart the trial. Access expires seven days after the server timestamp,
+requires no card and does not turn into a paid subscription. Legacy Firestore
+Timestamp and numeric values remain readable. See the account lifecycle and
+activation requirements in [the Worker guide](../vendor/cloudflare/README.md#account-deletion-and-trial-identity-implementation-awaiting-deployment).
 
 Stripe Checkout, webhook and portal now use the standalone Cloudflare Worker in
 `vendor/cloudflare/`, without deploying Firebase Cloud Functions or enabling Blaze. See

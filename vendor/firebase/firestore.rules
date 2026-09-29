@@ -3,6 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function authenticated() {
       return request.auth != null
+        && !exists(/databases/$(database)/documents/accountDeletions/$(request.auth.uid))
         && (request.auth.token.get('firebase', {}).get('sign_in_provider', '') != 'password'
           || request.auth.token.get('email_verified', false) == true);
     }
@@ -19,7 +20,7 @@ service cloud.firestore {
       let seatId = access.seatId;
       let seat = get(/databases/$(database)/documents/professionals/$(id)/seats/$(seatId)).data;
       let link = get(/databases/$(database)/documents/professionals/$(id)/patients/$(uid)).data;
-      return request.auth != null && professionalOwner(id)
+      return request.auth != null && !exists(/databases/$(database)/documents/accountDeletions/$(uid)) && professionalOwner(id)
         && access.kind == 'invitation' && access.expiresAt > request.time.toMillis()
         && seat.status == 'active' && seat.expiresAt > request.time.toMillis()
         && seat.occupantUid == uid && link.patientId == uid && link.seatId == seatId;
@@ -209,7 +210,8 @@ service cloud.firestore {
       let seat = get(/databases/$(database)/documents/professionals/$(owner)/seats/$(seatId)).data;
       let access = get(/databases/$(database)/documents/users/$(uid)/access/main).data;
       let link = get(/databases/$(database)/documents/professionals/$(owner)/patients/$(uid)).data;
-      return authenticated() && (request.auth.uid == owner || request.auth.uid == uid)
+      return authenticated() && !exists(/databases/$(database)/documents/accountDeletions/$(owner))
+        && !exists(/databases/$(database)/documents/accountDeletions/$(uid)) && (request.auth.uid == owner || request.auth.uid == uid)
         && professional.active == true && professional.ownerUid == owner
         && seat.status == 'active' && seat.expiresAt > request.time.toMillis() && seat.occupantUid == uid
         && access.kind == 'invitation' && access.professionalId == owner && access.seatId == seatId
@@ -282,7 +284,8 @@ service cloud.firestore {
     }
     function reservedProfessional() {
       let professional = getAfter(/databases/$(database)/documents/professionals/ceoaberto).data;
-      return professional.name == 'CeoAberto' && professional.active == true;
+      return professional.name == 'CeoAberto' && professional.active == true
+        && (professional.get('ownerUid', null) == null || !exists(/databases/$(database)/documents/accountDeletions/$(professional.ownerUid)));
     }
     function invitation(value) {
       return value.kind == 'invitation' && value.invitationCode == 'CEOABERTO'
@@ -296,10 +299,7 @@ service cloud.firestore {
     match /users/{uid}/access/main {
       allow get: if owns(uid);
       allow create: if owns(uid) && noBilling(uid) && (
-        (request.resource.data.keys().hasOnly(['kind', 'trialStartedAt'])
-          && request.resource.data.kind == 'trial'
-          && request.resource.data.trialStartedAt == request.time)
-        || (request.resource.data.keys().hasOnly(['kind', 'invitationCode', 'professionalId',
+        (request.resource.data.keys().hasOnly(['kind', 'invitationCode', 'professionalId',
             'professionalName', 'expiresAt', 'linkedAt'])
           && invitation(request.resource.data) && reservedProfessional()
           && request.resource.data.linkedAt == request.time
@@ -314,7 +314,8 @@ service cloud.firestore {
         && matchingPatient(uid, request.resource.data.linkedAt);
       allow update: if owns(uid) && noBilling(uid) && resource.data.kind == 'invitation'
         && resource.data.professionalId == 'ceoaberto' && !('seatId' in resource.data)
-        && request.resource.data.keys().hasOnly(['kind', 'leftAt'])
+        && request.resource.data.keys().hasOnly(['kind', 'leftAt', 'trialStartedAt'])
+        && request.resource.data.get('trialStartedAt', null) == resource.data.get('trialStartedAt', null)
         && request.resource.data.kind == 'revoked' && request.resource.data.leftAt == request.time
         && !existsAfter(/databases/$(database)/documents/professionals/ceoaberto/patients/$(uid));
     }

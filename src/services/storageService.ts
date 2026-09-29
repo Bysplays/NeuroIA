@@ -54,6 +54,17 @@ export class StorageService {
     this.knownOutbox = new Set();
   }
 
+  /** Remove only this account's local cache/outbox after deletion has been accepted. */
+  public static forgetAccount(uid: string): void {
+    const suffix = ':' + encodeURIComponent(uid);
+    const prefixes = ['neuroia_profile_v1', 'neuroia_history_v1', 'neuroia_local_backup_v1', 'neuroia_entry_v1'];
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (prefixes.some(prefix => key === prefix + suffix) || key.startsWith('neuroia_outbox_v1' + suffix + ':')) localStorage.removeItem(key);
+      }
+    } catch { /* Cloud deletion does not depend on writable browser storage. */ }
+  }
+
   // Navigation preference only; Firebase and Firestore still enforce access.
   public static readProfessionalEntry(uid: string): boolean {
     try { return localStorage.getItem('neuroia_entry_v1:' + encodeURIComponent(uid)) === 'professional'; }

@@ -1,3 +1,4 @@
+import { DeleteAccount } from './DeleteAccount';
 import type { InformationKind } from "./InformationPage";
 import { TabletTabs } from './TabletTabs';
 import { ProductInformation } from './ProductInformation';
@@ -93,6 +94,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
               <button className="subscription-upgrade preferences-action-button" onClick={onReassess}>Rehacer prueba</button>
             </div>
           </section>}
+          <DeleteAccount />
           </div> }
           ]}/>
           <div className="preferences-account">
