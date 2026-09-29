@@ -484,3 +484,7 @@ Reference: [MDN compatibility](https://developer.mozilla.org/en-US/docs/Web/API/
 Within Settings → Mi cuenta, action buttons share a 9rem width sized for Cambiar
 contraseña. The joined name Save action uses the same width. All these actions shrink
 together to at most 42vw on narrow screens so the name input remains usable.
+
+The account name input uses compact .78rem text with a 16px floor for mobile
+input usability. Password action rows align at the top like invitation actions,
+with a 10px gap and no extra paragraph margin pushing the action down.

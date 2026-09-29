@@ -1018,7 +1018,7 @@ body[data-companions="hidden"] .achievement-symbol-pending { border-style: dashe
 body[data-contrast="high-contrast"] #invitation-error:not(:empty) { color: var(--color-text-main); }
 
 .preferences-name { display: flex; align-items: stretch; gap: 0; flex-wrap: nowrap; border: 1px solid var(--color-border); border-radius: 4px; }
-.preferences-name input { flex: 1; min-width: 0; width: 100%; padding: 12px 16px; border: 0; border-radius: 4px 0 0 4px; background: var(--color-bg); color: var(--color-text-main); font: inherit; }
+.preferences-name input { flex: 1; min-width: 0; width: 100%; padding: 12px 16px; border: 0; border-radius: 4px 0 0 4px; background: var(--color-bg); color: var(--color-text-main); font: inherit; font-size: max(16px, .78rem); }
 .preferences-name .paper-nav-button { flex-shrink: 0; margin: 0; border: 0; border-radius: 0 3px 3px 0; background: var(--color-action-bg); color: var(--color-action-text); padding: 12px 16px; }
 .preferences-name button:disabled { opacity: .6; cursor: default; }
 
@@ -1805,3 +1805,6 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .preferences-account-panel .subscription-upgrade,
 .preferences-account-panel .paper-nav-button { width: var(--account-action-width); max-width: 100%; flex-shrink: 0; box-sizing: border-box; text-align: center; justify-content: center; }
 .preferences-account-panel .preferences-name .paper-nav-button { font-size: .72rem; }
+
+.preferences-account-panel .account-password .preferences-action-row { align-items: flex-start; gap: 10px; }
+.preferences-account-panel .account-password .preferences-action-row p { margin: 0; }
