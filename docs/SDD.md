@@ -42,7 +42,7 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | Billing | Worker Checkout, signed webhooks, reconciliation, portal, seat redemption/rotation | Production deployment and sandbox lifecycle not fully verified |
 | Access | Server-owned entitlement records; browser refresh on focus/every 30 seconds | Worker-confirmed time and expiry; 60-second lease, fail-closed refresh; Worker deployed, real-account lifecycle pending |
 | Narration | Shared recorded-player service and browser fallback | 91/370 clips missing; full audition and commercial rights unresolved |
-| EEG / AI | MuseJS-based EEG/PPG Web Bluetooth adapter and recording implemented; physical validation pending | Hardware integration and AI implementation/validation required |
+| EEG / AI | MuseJS-based EEG/PPG adapter and recording implemented; core real-device flow confirmed by owner | AI implementation/validation remains pending; retain tested-device scope |
 | Brand / objects | Supplied mint mark integrated; existing paper sprite atlases | New object style pending integration |
 
 Historical result IDs, totals, achievements and account data remain compatible.
@@ -88,7 +88,9 @@ flowchart TD
 ### EEG — optional headband
 
 Confirmed target: Muse 2 using the owner-selected MIT Respiire/MuseJS protocol
-over Web Bluetooth. Physical hardware/browser validation remains a release gate.
+over Web Bluetooth. The owner confirms real connection, EEG/PPG, battery,
+reconnection and saved charts on the tested setup; exact platform versions remain
+unspecified. Do not infer support for untested browsers.
 
 Adapter states: unsupported, disconnected, requesting permission, connecting,
 connected, reconnecting and error. Expose timestamped samples, signal quality and

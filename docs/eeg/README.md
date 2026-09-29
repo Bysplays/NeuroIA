@@ -3,8 +3,9 @@
 The target is **Muse 2**. The application now installs an independent Web Bluetooth
 adapter based on the owner-selected [Respiire/MuseJS](https://github.com/Respiire/MuseJS).
 No official SDK is required for this path. See [source/license](../../vendor/muse/README.md).
-Physical Muse 2 validation remains pending; do not describe simulated tests as
-successful real-device pairing.
+The owner confirms real Muse 2 connection, EEG/PPG, battery, reconnection and
+saved charts. This is owner-reported hardware acceptance, separate from the
+automated and browser-fixture checks.
 
 ## Signals and platforms
 
@@ -94,14 +95,16 @@ self-reported values are not authenticated device evidence.
 The EEG/PPG Firestore rules are published to `ceoaberto-neuroia` (2026-09-29),
 with the active release verified against `vendor/firebase/firestore.rules` after
 29 demo-emulator adapter/rules/Worker tests passed. Frontend delivery uses the
-main-branch Pages workflow; physical-device acceptance remains pending.
+main-branch Pages workflow; the owner has confirmed the core physical-device flow.
 Old results remain readable without EEG.
 Players and professionals open a per-exercise detail from Statistics > Historial;
 professional assigned-session analytics also link each confirmed step to that view.
 
-## Remaining acceptance
+## Hardware acceptance scope
 
-Use a real headband to verify permission denial, disconnect/reconnect, contact
-quality, all eight game layouts with the chart, background/portrait/help/settings,
-Bluetooth and fullscreen interaction, and physical Android/iPad compatibility.
-Check paired-account saved-chart access and revocation, actual BLE rate/CPU use, EEG/PPG amplitudes and battery telemetry. Browser fixtures and emulator tests do not replace these checks.
+The owner confirms real connection, EEG/PPG, battery, reconnection and saved charts,
+as well as installation and fullscreen on the tested devices. Exact OS/browser and
+firmware versions were not supplied; this does not establish support for every
+Android/iPad/browser combination. Keep contact/artifact classification, raw-signal
+research export, heart-rate/attention inference and untested platform support outside
+the confirmed feature set. Account/data deletion and retention controls remain open.

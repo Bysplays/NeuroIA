@@ -4,6 +4,25 @@ This is the canonical TODO. The [SDD](SDD.md) defines the target behavior,
 architecture, dependencies and acceptance criteria. Existing code is not proof
 of a production deployment. Keep project guidance in English and UI copy in Spanish.
 
+## Current remaining scope
+
+The owner confirms real Muse 2 connection, EEG/PPG, battery, reconnection and saved
+charts; the payment/seat lifecycle (purchase, renewal, failed payment, cancellation
+and reassignment) in Sandbox; and real email delivery, cross-device sync,
+installation and fullscreen on the tested devices. Sandbox is sufficient for the
+current stage; this is not confirmation of live-money payments. Specific OS/browser
+versions were not supplied, so do not infer a universal compatibility matrix.
+
+The remaining work, in the owner's order, is:
+
+1. Narration: finish the 91 clips, audition them and resolve commercial licensing.
+2. Notes, reports and local AI: implement the pending workflows.
+3. Finishing work: the two recorded interface issues, bundle optimization and
+   account/data deletion management.
+
+The detailed inventory below retains future extensions and specific acceptance
+conditions; it does not reopen the owner-confirmed checks above.
+
 ## Product priorities
 
 The order below follows the owner's priorities. Dependencies can be implemented
@@ -12,11 +31,11 @@ voice provider or new illustration set has been selected by this planning work.
 
 | Order / ID | Deliverable | Current state | Completion gate |
 | --- | --- | --- | --- |
-| 1 / EEG | Bluetooth EEG headband | Connection UI, adapter contract, live chart and per-exercise recording/detail prepared; MuseJS-based Web Bluetooth adapter implemented; physical hardware validation pending | Real-device connection, signal quality, disconnect/reconnect and supported-device matrix |
-| 2 / SEATS | Monthly professional seats and code validity | Checkout, Worker, redemption and rules implemented; production lifecycle unverified | Unused and redeemed codes follow paid entitlement; expired access blocks games and linked reads |
+| 1 / EEG | Bluetooth EEG headband | Connection UI, adapter contract, live chart and per-exercise recording/detail prepared; MuseJS-based Web Bluetooth adapter implemented; real-device connection, signals, battery, reconnection and saved charts confirmed by owner | Retain tested-device scope; do not infer support for untested browsers |
+| 2 / SEATS | Monthly professional seats and code validity | Payment and seat lifecycle confirmed by owner in Sandbox | Sandbox accepted for current stage; live-money validation is separate |
 | 3 / AI | Browser-local report/note assistance | No runtime integration; professional view is read-only | Spanish evidence-linked drafts, human review, supported-device benchmark and non-AI fallback |
 | 4 / SESSIONS | Professional-assigned game sequences | Versioned proposals, editor, participant entry, fixed levels, durable completion and resume implemented | Check real paired accounts on physical tablets |
-| 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Verify real email delivery; magic links deferred because Spark allows five sign-in emails/day |
+| 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Real email delivery confirmed by owner; magic links deferred because Spark allows five sign-in emails/day |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Approved towel/table style integrated across 80 objects, standalone stimuli and motor tokens | Physical-tablet recognition feedback |
@@ -29,7 +48,7 @@ voice provider or new illustration set has been selected by this planning work.
 The first priority/ease steps are: 0 — mergeable baseline; 1 — retire daily
 actions; 2 — supplied logo; 3 — email/password entry. Steps 0–2 are complete.
 Step 3 is implemented and locally verified; backend/provider activation is complete.
-Seats, difficulty/placement and professional session proposals are also implemented. The main-branch Pages workflow publishes these frontend features; real email-delivery and physical-device checks remain open below. The product-priority table above is separate from this sequence.
+Seats, difficulty/placement and professional session proposals are also implemented. The main-branch Pages workflow publishes these frontend features; the owner has confirmed real email delivery and the listed device checks. The product-priority table above is separate from this sequence.
 
 ### EEG
 
@@ -41,24 +60,22 @@ Seats, difficulty/placement and professional session proposals are also implemen
   Player/professional history and confirmed proposal steps open individual analytics.
 - [x] Publish EEG/PPG result rules to `ceoaberto-neuroia` (2026-09-29);
   verify the active release against the tested source.
-- [ ] Test real Muse 2 quality, dropped packets, reconnect, permissions and supported
-  physical browsers before declaring hardware support verified.
-- [ ] Validate physical amplitudes, electrode contact handling and retention with the owner. Current
-  design saves no raw EEG and retains opted-in charts with completed results;
-  dedicated deletion/retention controls remain absent. No EEG-driven adaptation.
+- [x] Owner confirms real Muse 2 connection, EEG/PPG, battery, reconnection and
+  saved charts on their tested setup.
+- [ ] Implement account/data deletion and retention controls. Current design saves
+  no raw EEG and retains opted-in charts with completed results. No EEG-driven adaptation.
   See [EEG handoff](eeg/README.md).
 
 ### Seats and expiry
 
-- [ ] Complete the deployment and sandbox checklist below for both unused and
-  occupied seats; test expiry while the app is already open, sleep/resume and offline recovery.
+- [x] Owner confirms the Sandbox payment/seat lifecycle: purchase, renewal, failed
+  payment, cancellation and reassignment. Sandbox is accepted for this stage.
 - [x] Implement authoritative Worker access checks with server time, reciprocal
   seat validation and a 60-second maximum lease; failed refresh/offline/resume
   closes play until confirmed. Professional codes/activity use confirmed time.
 - [x] Deploy Worker `/access`, `/professional/status` and the per-seat portal flow;
   verify health, localhost CORS and unauthenticated/unsigned-request rejection.
-- [ ] Configure period-end cancellation in the Stripe portal and finish the
-  authenticated sandbox purchase, redemption and cancellation checklist.
+- [x] Owner confirms end-to-end Sandbox purchase and cancellation.
 - [ ] Preserve CEOABERTO as the explicitly documented permanent exception unless
   the owner separately changes that contract; paid `NIA-` codes are never permanent.
 
@@ -89,8 +106,8 @@ Seats, difficulty/placement and professional session proposals are also implemen
   or history. Test credentials, verification, reset and server enforcement locally.
 - [x] Publish the verified-email Firestore rules and Worker, then enable Firebase
   Email/Password, keeping Google. Spark billing remains unchanged.
-- [ ] Release the frontend and verify hosted verification/reset emails, configured
-  password policy, domain restrictions and real Google/password use on one UID.
+- [x] Owner confirms real email delivery and account/device checks. Local automated
+  coverage also checks verification/reset and Google/password access on one UID.
   Magic links need an explicit quota solution before replacing passwords: Spark
   permits five sign-in emails/day. See `docs/AUTHENTICATION.md`.
 - [x] Integrate the supplied logo reference, preserve its proportions, and verify
@@ -285,7 +302,7 @@ release issue is lost during prioritization.
 - [x] Implement Firestore profile/settings/results synchronization, transaction
   receipts, local pending queue, initial import choice and emulator tests.
 - [x] Publish the reviewed `vendor/firebase/firestore.rules` in the real Firebase project.
-- [ ] Verify real-account cloud saving from two devices after publishing rules.
+- [x] Owner confirms real-account synchronization between devices.
 - [x] Confirm `bysplays.github.io` is authorized in Firebase Authentication.
 - [ ] Complete the `neuroia.es` migration in [deployment](DEPLOYMENT.md): GitHub Pages
   domain, Hostinger DNS, HTTPS, Firebase authorized domains/API-key referrers,
@@ -304,17 +321,15 @@ release issue is lost during prioritization.
   redemption with care links; CEOABERTO remains permanent and reusable. Paid-seat
   codes are unique, single-occupant and valid only during confirmed paid access.
 - [x] Add Stripe Checkout, signed webhook and customer portal integration code.
-- [ ] Supply monthly Stripe Price ID, configure secrets, APP_URL, webhook and
-  portal; run the payment lifecycle in Stripe test mode. See `docs/ONBOARDING.md`.
+- [x] Owner confirms the configured payment lifecycle works in Sandbox. See `docs/ONBOARDING.md`.
 - [ ] Assign CeoAberto's actual Firebase owner UID before any migration of its
   legacy links. New professional workspaces do not inherit those links.
 - [x] Publish reviewed Spark-compatible rules for real-account invitation/trial
   access. No Cloud Functions or Blaze required; localhost:5173 keeps real Google login.
 - [x] Deploy the reviewed professional-seat Worker and Firestore rules before
   publishing the professional frontend.
-- [ ] Verify one sandbox purchase, unique code,
-  redemption, read-only analytics, renewal failure, portal cancellation and
-  departure/reassignment end to end. See `docs/PROFESSIONALS.md`.
+- [x] Owner confirms Sandbox purchase, renewal, failed payment, cancellation and
+  seat reassignment end to end. See `docs/PROFESSIONALS.md`.
 
 ## Cloudflare billing deployment
 
@@ -331,11 +346,12 @@ release issue is lost during prioritization.
 - [ ] Verify daily reconciliation and Stripe test-clock failed renewal/recovery/cancellation.
   See `vendor/cloudflare/README.md` for bounded batches and checkpoint monitoring.
 
-- [ ] Verify home-screen installation, standalone launch, landscape handling and Google sign-in on physical Android tablets and iPad; manifest and icons are provided, offline entry is not supported.
+- [x] Owner confirms installation and fullscreen on the tested devices. Specific
+  Android/iPad/browser versions were not supplied; offline entry is not supported.
 
 ### Tablet release checks
 
-- [ ] Verify fullscreen entry/exit, landscape lock fallback, touch, software
-  keyboard and browser chrome resizing on physical Android tablets and iPad.
+- [x] Owner confirms fullscreen and tablet checks on the tested devices. Do not
+  extend that confirmation to unspecified OS/browser combinations.
 - [ ] Check longest account/session text and very large text on target devices;
   preserve accessible scrolling for content that cannot fit.

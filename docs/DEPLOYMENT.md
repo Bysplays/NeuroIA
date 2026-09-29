@@ -123,6 +123,6 @@ The production `ceoaberto-neuroia` Firestore release includes the optional bound
 EEG/PPG result fields (verified 2026-09-29 against `vendor/firebase/firestore.rules`).
 The combined demo adapter/rules/Worker suite passed 29 tests before publication.
 The rules deployment is independent of the main-branch Pages workflow that
-publishes the Muse frontend. Physical-device acceptance remains in [TODO](TODO.md). Existing account and linked-professional
+publishes the Muse frontend. Owner-confirmed device checks and the remaining scope are recorded in [TODO](TODO.md). Existing account and linked-professional
 permissions are unchanged. Future rules changes use `firebase deploy --only
 firestore:rules --project ceoaberto-neuroia` after emulator verification.

@@ -36,11 +36,10 @@ result feedback describes the game and avoids inferred improvement or efficacy.
 The PDF describes professional session access, AI-driven adaptation and summaries,
 and EEG/Muse 2 interaction as existing features. The professional workspace now
 implements read-only activity for explicitly redeemed paid seats; it is not
-clinical session management. AI remains unavailable. The MuseJS-based EEG/PPG adapter is implemented but still
-awaits physical-device validation; neither feature may be
-advertised as available. They can be
-published when implemented or when the owner explicitly chooses future-feature
-wording. The PDF's short introduction and “Entrena jugando” claim mention AI;
+clinical session management. AI remains unavailable and must not be advertised as implemented. The owner
+confirms the MuseJS-based Muse 2 EEG/PPG connection, battery, reconnection and saved
+charts on the tested setup. Describe these as signal amplitudes, without claims of
+attention, mental effort, heart rate or universal device/browser compatibility. The PDF's short introduction and “Entrena jugando” claim mention AI;
 the current introduction uses the cover paragraph without that claim instead.
 
 ## Professional entry
