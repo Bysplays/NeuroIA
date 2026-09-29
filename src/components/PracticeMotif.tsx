@@ -5,11 +5,11 @@ export function PracticeMotif({ professional = false }: { professional?: boolean
     <div className="practice-motif professional-motif" aria-hidden="true">
       <span className="motif-orbit"/>
       <span className="professional-profile professional-profile-back">
-        <span className="professional-avatar"><UserRound strokeWidth={2.4}/></span>
+        <span className="motif-profile-avatar"><UserRound strokeWidth={2.4}/></span>
         <span className="professional-profile-lines"><i/><i/></span>
       </span>
       <span className="professional-profile professional-profile-front">
-        <span className="professional-avatar"><UsersRound strokeWidth={2.4}/></span>
+        <span className="motif-profile-avatar"><UsersRound strokeWidth={2.4}/></span>
         <span className="professional-profile-lines"><i/><i/></span>
       </span>
       <span className="motif-spark"/>
