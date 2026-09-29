@@ -14,11 +14,10 @@ import { getExerciseById } from '../services/exerciseCatalog';
 import { soundService } from '../services/soundService';
 import { GameSession } from './GameSession';
 import { GameExercise } from './GameExercise';
-import { HeaderIllustration } from './HeaderIllustration';
 import { PlacementPreferences } from './PlacementPreferences';
 
-export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial, onStage, onPreferences, onCancel, choosePreferences = false, doneLabel = 'Ir a mis juegos' }: {
-  profile: UserProfile; sync: ProgressSync; doneLabel?: string; choosePreferences?: boolean;
+export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial, onStage, onPreferences, onCancel, choosePreferences = false, paused = false, doneLabel = 'Ir a mis juegos' }: {
+  profile: UserProfile; sync: ProgressSync; paused?: boolean; doneLabel?: string; choosePreferences?: boolean;
   onTrial?: (id: ExerciseId, trial: PlacementTrial) => void;
   onStage?: (id: ExerciseId, stage: PlacementStage) => void;
   onPreferences?: (preferences: Preferences) => void;
@@ -37,7 +36,6 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
   const submitted = useRef<string | null>(null);
   const [waiting, setWaiting] = useState<{ id: ExerciseId; nextLevel?: number } | null>(null);
   const [phase, setPhase] = useState<'welcome' | 'trial' | 'feedback'>('welcome');
-  const [paused, setPaused] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const count = selected.filter(key => trials[key]).length;
   useEffect(() => { soundService.stopSpeaking(); heading.current?.focus(); window.scrollTo(0, 0); }, [phase, id, editing]);
@@ -49,7 +47,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
     || (waiting.nextLevel && (profile.placement?.stages?.[waiting.id]?.level ?? 1) >= waiting.nextLevel)))
     || (phase !== 'welcome' && (!selected.includes(id) || (phase === 'trial' && trials[id])))) {
     const remaining = nextThematicGame(available, id);
-    setPaused(false); setWaiting(null);
+    setWaiting(null);
     if (remaining) { setId(remaining); setPhase('trial'); }
     else setPhase('welcome');
   }
@@ -79,7 +77,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
   };
   const next = () => {
     const remaining = nextThematicGame(available);
-    if (remaining) { submitted.current = null; setPaused(false); setId(remaining); setPhase('trial'); }
+    if (remaining) { submitted.current = null; setId(remaining); setPhase('trial'); }
   };
   if (savingPreferences && !preferences && !complete) return <main className="placement-screen"><p role="status">Preparando tus juegos…</p></main>;
   if (editing && !complete) return <PlacementPreferences initial={preferences} onSave={savePreferences}
@@ -97,8 +95,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
     return scope;
   }, { before: 0, after: 0 });
   if (phase === 'trial') return <div className="placement-play">
-    {paused && <section className="placement-card"><HeaderIllustration scene="rest" className="placement-art" /><div><h1>Hacemos una pausa</h1><p>Descansa lo que necesites. Seguiremos por donde lo dejaste.</p><button autoFocus className="touch-btn touch-btn-primary" onClick={() => setPaused(false)}>Retomar</button></div></section>}
-    <div hidden={paused}><GameSession progressScope={progressScope} paused={paused} key={`${id}-${level}-${phase}`} id={id} onSkip={() => save()} onSettings={() => { setPaused(true); onSettings(); }} autoStart initialLevel={level} mode="placement" onBack={() => setPhase('welcome')}>
+    <div><GameSession progressScope={progressScope} paused={paused} key={`${id}-${level}-${phase}`} id={id} onSkip={() => save()} onSettings={onSettings} autoStart initialLevel={level} mode="placement" onBack={() => setPhase('welcome')}>
       <GameExercise id={id} profile={profile} onBack={() => setPhase('welcome')} onSaveResult={save} />
     </GameSession></div>
   </div>;

@@ -25,9 +25,9 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
       aria-label={state.status === 'connected' ? 'Muse conectado' : state.status === 'connecting' ? 'Conectando Muse' : 'Conectar Muse'}
       title="Diadema EEG" onClick={() => toggle(true)}><AudioLines size={20}/><span>{state.status === 'connected' ? 'Muse conectado' : state.status === 'connecting' ? 'Conectando Muse…' : 'Conectar Muse'}</span></button>
     {open && <ModalFrame labelledBy="eeg-title" onClose={() => toggle(false)}>
-      <div className="preferences eeg-preferences">
+      <div className="preferences entry-preferences eeg-preferences">
         <header className="preferences-header">
-          <div><h2 id="eeg-title">Muse 2</h2><p>EEG y PPG para acompañar tus partidas.</p></div>
+          <div><h2 id="eeg-title"><AudioLines size={24} aria-hidden="true"/>Muse 2</h2><p>EEG y PPG para acompañar tus partidas.</p></div>
           <button className="preferences-close" aria-label="Cerrar diadema" onClick={() => toggle(false)}><X size={22}/></button>
         </header>
         <div className="preferences-body">
@@ -37,7 +37,7 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
             <div className="eeg-connection-row">
               <p id="eeg-connection-status" role="status">{status}</p>
               {active
-                ? <button className="paper-nav-button" onClick={() => eegService.disconnect()}>{state.status === 'connecting' ? 'Cancelar conexión' : 'Desconectar'}</button>
+                ? <button className="entry-toolbar-action" onClick={() => eegService.disconnect()}>{state.status === 'connecting' ? 'Cancelar conexión' : 'Desconectar'}</button>
                 : <button className="subscription-upgrade" disabled={!available} aria-describedby="eeg-connection-status" onClick={() => void eegService.connect(record)}>Conectar diadema</button>}
             </div>
             {state.status === 'connected' && <p className="eeg-battery"><Battery size={18} aria-hidden="true"/>Batería: {state.battery === null ? 'esperando datos…' : `${state.battery} %`}</p>}

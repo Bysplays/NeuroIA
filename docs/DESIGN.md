@@ -461,3 +461,9 @@ Progress segments use the onboarding indicator’s blue fill, muted track and sm
 gaps, within the play area’s lateral padding. The active header keeps the clock
 on the left and utilities aligned right at every width. The placement welcome
 shows the selected count (e.g. “2 juegos preparados”), without a completed fraction.
+
+Game help places Escuchar at the top right alongside its title. Muse uses the
+shared compact preferences modal. The account name field and contrasting Save
+action form one joined row. The clock is a noninteractive outlined chip matching
+the transparent utility controls. Opening settings pauses placement in place;
+closing settings resumes it without a separate rest screen or Retomar action.

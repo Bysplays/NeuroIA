@@ -260,7 +260,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
         />
       )}
 
-      {reassessing ? <Reassessment profile={profile} sync={sync} onDone={() => setReassessing(false)} onSettings={() => setIsAccessibilityOpen(true)}/> : placement ? <PlacementOnboarding profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
+      {reassessing ? <Reassessment paused={isAccessibilityOpen} profile={profile} sync={sync} onDone={() => setReassessing(false)} onSettings={() => setIsAccessibilityOpen(true)}/> : placement ? <PlacementOnboarding paused={isAccessibilityOpen} profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
         {playingProposal && <AssignedSessionPlayer key={playingProposal.id} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isAccessibilityOpen} />}
         {activeView === 'dashboard' && !playingProposal && (
           <Dashboard uid={uid} history={history} navigationTarget={navigationTarget} selectedTab={dashboardTab} onTabChange={setDashboardTab}

@@ -541,3 +541,5 @@ release issue is lost during prioritization.
 - [ ] Complete rights-request handling, lawful bases (including EEG/PPG), retention
   periods/criteria, provider agreements and international transfer safeguards.
   Current legal page describes verified app behavior, not a complete approved policy.
+
+- [ ] Investigate intermittent horizontal overflow in the level-10 categorization browser fixture with large text (advanced-board check failed once and passed on repeat); verify long category labels across generated sets.

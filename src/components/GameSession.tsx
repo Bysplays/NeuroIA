@@ -134,10 +134,9 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     </div>}
     {help && started && <ModalFrame labelledBy="game-help-title" onClose={() => { soundService.stopSpeaking(); setHelp(false); }}>
       <section className="entry-error-notification game-help-dialog">
-        <div className="entry-error-heading"><CircleHelp size={24} aria-hidden="true"/><h2 id="game-help-title">Cómo jugar</h2></div>
+        <div className="entry-error-heading"><CircleHelp size={24} aria-hidden="true"/><h2 id="game-help-title">Cómo jugar</h2><button className="entry-toolbar-action" onClick={() => soundService.speak(instruction)}><Volume2 size={18} aria-hidden="true"/>Escuchar</button></div>
         <h3>{exercise?.title}</h3>
         <div className="entry-error-message"><p>{instruction}</p></div>
-        <button className="entry-toolbar-action" onClick={() => soundService.speak(instruction)}><Volume2 size={18} aria-hidden="true"/>Escuchar</button>
         <button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setHelp(false); }}>Continuar jugando</button>
       </section>
     </ModalFrame>}

@@ -149,3 +149,20 @@ test('personal condition context has no professional consent checkbox', async ({
   await page.getByRole('button',{name:'Preparar mis juegos'}).click();
   await expect.poll(async()=> (await saved(page)).placement?.preferences?.condition).toEqual({kind:'stroke',side:'unspecified',mobility:'unspecified'});
 });
+
+
+test('settings pause in place and closing resumes without a rest screen', async ({page}) => {
+  await page.goto(fixture);
+  await choose(page, 'Memoria');
+  await page.getByRole('button', {name: 'Continuar', exact: true}).click();
+  await page.getByRole('button', {name: 'Preparar mis juegos'}).click();
+  await page.getByRole('button', {name: 'Empezar', exact: true}).click();
+  await page.getByRole('button', {name: 'Ajustes', exact: true}).click();
+  const clock = await page.locator('.game-session-time').textContent();
+  await page.waitForTimeout(1200);
+  expect(await page.locator('.game-session-time').textContent()).toBe(clock);
+  await page.getByRole('button', {name: 'Cerrar ajustes'}).click();
+  await expect(page.getByText('Hacemos una pausa', {exact: true})).toHaveCount(0);
+  await expect(page.getByRole('button', {name: 'Retomar', exact: true})).toHaveCount(0);
+  await expect.poll(() => page.locator('.game-session-time').textContent()).not.toBe(clock);
+});

@@ -1,3 +1,4 @@
+import { ModalFrame } from '../../src/components/ModalFrame';
 // Isolated component fixture. Never imported by the application entry or production build.
 import { AccountAccessContext } from '../../src/services/accountAccessContext';
 import { useEffect, useState } from 'react';
@@ -29,6 +30,7 @@ soundService.speak = (_text, onEnd) => { queueMicrotask(() => onEnd?.()); return
 export function Fixture() {
   const [data, setData] = useState(remote);
   const [done, setDone] = useState(false);
+  const [settings, setSettings] = useState(false);
   const [sync] = useState(() => new ProgressSync(remote, [], {
     load: async () => remote,
     initialize: async value => value,
@@ -43,7 +45,8 @@ export function Fixture() {
   useEffect(() => { sync.start(); return () => sync.stop(); }, [sync]);
   const Component = query.has('retake') ? Reassessment : PlacementOnboarding;
   return <AccountAccessContext.Provider value={query.has('invited') ? {kind:'invitation',active:true,serverNow:1790683200000,checkoutAvailable:false} : null}><div style={{ padding: 8, textAlign: 'center', fontSize: 12 }}>Vista de prueba · sin cuentas ni datos reales</div>
-    {done ? <h1>Juegos preparados</h1> : <Component profile={data.profile} sync={sync} onDone={() => setDone(true)} onSettings={() => {}}/>}
+    {done ? <h1>Juegos preparados</h1> : <Component paused={settings} profile={data.profile} sync={sync} onDone={() => setDone(true)} onSettings={() => setSettings(true)}/>}
+    {settings && <ModalFrame labelledBy="fixture-settings" onClose={() => setSettings(false)}><h2 id="fixture-settings">Ajustes de prueba</h2><button onClick={() => setSettings(false)}>Cerrar ajustes</button></ModalFrame>}
     <output data-testid="profile" hidden>{JSON.stringify(data.profile)}</output></AccountAccessContext.Provider>;
 }
 createRoot(document.getElementById('root')!).render(<Fixture/>);

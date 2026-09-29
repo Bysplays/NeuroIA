@@ -6,8 +6,8 @@ import { placementExercises } from '../services/placementPreferences';
 import { PlacementOnboarding } from './PlacementOnboarding';
 
 /** A retake only replaces levels when all selected trials are finished and accepted. */
-export function Reassessment({ profile, sync, onDone, onSettings }: {
-  profile: UserProfile; sync: ProgressSync; onDone: () => void; onSettings: () => void;
+export function Reassessment({ profile, sync, onDone, onSettings, paused = false }: {
+  profile: UserProfile; sync: ProgressSync; paused?: boolean; onDone: () => void; onSettings: () => void;
 }) {
   const [draft, setDraft] = useState(() => {
     const copy = structuredClone(profile);
@@ -17,7 +17,7 @@ export function Reassessment({ profile, sync, onDone, onSettings }: {
     return copy;
   });
   const [operationId] = useState(() => `placement:retake:${crypto.randomUUID()}`);
-  return <PlacementOnboarding profile={{ ...draft, settings: profile.settings }} sync={sync} onSettings={onSettings}
+  return <PlacementOnboarding paused={paused} profile={{ ...draft, settings: profile.settings }} sync={sync} onSettings={onSettings}
     choosePreferences doneLabel="Guardar niveles" onCancel={onDone}
     onPreferences={preferences => setDraft(previous => { const next = structuredClone(previous); applyPlacementPreferences(next, preferences); return next; })}
     onStage={(id, stage) => setDraft(previous => { const next = structuredClone(previous); applyPlacementStage(next, id, stage); return next; })}
