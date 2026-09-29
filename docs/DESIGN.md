@@ -468,15 +468,16 @@ action form one joined row. The clock is a noninteractive outlined chip matching
 the transparent utility controls. Opening settings pauses placement in place;
 closing settings resumes it without a separate rest screen or Retomar action.
 
-The Muse modal retains Bluetooth connection controls and a short Tus partidas
-explanation of EEG/PPG. It does not show a recording toggle, analytics-sharing
+The Muse modal places the EEG/PPG explanation beneath its title and introduction,
+without a Tus partidas heading. It retains Bluetooth connection controls. It does not show a recording toggle, analytics-sharing
 copy or instructions to disconnect to change recording.
 
 The game progress track is inset an additional 16–48px per side inside the play
-area. Muse keeps its Conectar Muse entry and modal, showing Tus partidas before
+area. Muse keeps its Conectar Muse entry and modal, showing the EEG/PPG explanation before
 Conexión Bluetooth. When Web Bluetooth is unavailable, the modal connection button
-is disabled and reads “Navegador no soportado”, without redundant status copy or
-connection instructions; detect API capability rather
+is disabled and reads “Navegador no soportado”, without redundant status copy. Connection instructions remain visible regardless
+of support, starting with selecting Muse and then reminding users to disconnect
+it from other applications; detect API capability rather
 than browser names. Firefox and Safari currently do not implement Web Bluetooth.
 Reference: [MDN compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Bluetooth#browser_compatibility).
 

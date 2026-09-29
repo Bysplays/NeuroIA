@@ -1,5 +1,5 @@
 import { useState, useSyncExternalStore } from 'react';
-import { Activity, Battery, Bluetooth, AudioLines, X } from 'lucide-react';
+import { Battery, Bluetooth, AudioLines, X } from 'lucide-react';
 import { eegService } from '../services/eegService';
 import { ModalFrame } from './ModalFrame';
 
@@ -23,17 +23,13 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
     {open && <ModalFrame labelledBy="eeg-title" onClose={() => toggle(false)}>
       <div className="preferences entry-preferences eeg-preferences">
         <header className="preferences-header">
-          <div><h2 id="eeg-title"><AudioLines size={24} aria-hidden="true"/>Muse 2</h2><p>EEG y PPG para acompañar tus partidas.</p></div>
+          <div><h2 id="eeg-title"><AudioLines size={24} aria-hidden="true"/>Muse 2</h2><p>EEG y PPG para acompañar tus partidas.</p><p>EEG muestra amplitud eléctrica y PPG la señal óptica. No representan atención ni saturación de oxígeno.</p></div>
           <button className="preferences-close" aria-label="Cerrar diadema" onClick={() => toggle(false)}><X size={22}/></button>
         </header>
         <div className="preferences-body">
-          <section className="preferences-section" aria-labelledby="eeg-saving-title">
-            <h3 id="eeg-saving-title"><Activity size={20} aria-hidden="true"/>Tus partidas</h3>
-            <p>EEG muestra amplitud eléctrica y PPG la señal óptica. No representan atención ni saturación de oxígeno.</p>
-          </section>
           <section className="preferences-section" aria-labelledby="eeg-connection-title">
             <h3 id="eeg-connection-title"><Bluetooth size={20} aria-hidden="true"/>Conexión Bluetooth</h3>
-            {available && <p>Desconecta la diadema de la app Muse y enciéndela. Pulsa «Conectar diadema» y selecciona tu Muse en la ventana del navegador.</p>}
+            <p>Pulsa «Conectar diadema» y selecciona tu Muse en la ventana del navegador. Asegúrate de que tu diadema esté desconectada de otras aplicaciones.</p>
             <div className="eeg-connection-row">
               {available && <p id="eeg-connection-status" role="status">{status}</p>}
               {active
