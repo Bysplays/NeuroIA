@@ -1580,14 +1580,14 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .motif-dot { position: absolute; right: 6%; top: 17%; width: 9%; aspect-ratio: 1; background: var(--color-primary); border-radius: 50%; }
 .entry-page { max-width: 1224px; padding: 0 32px 24px; margin: 0 auto; width: 100%; }
 .entry-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 0; }
-.entry-header-actions, .public-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; }
+.entry-header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; }
 .public-hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 70px; align-items: center; padding: 48px 0 64px; }
 .public-hero h1 { font-size: clamp(2.5rem, 5vw, 3.7rem); line-height: 1.08; margin: 22px 0; }
 .public-hero h1 em, .account-entry-welcome em { color: var(--color-primary); font-style: normal; }
 .public-hero > div > p:not(.editorial-eyebrow) { color: var(--color-text-muted); max-width: 430px; line-height: 1.6; font-size: 1rem; }
-.public-actions { margin-top: 28px; }
+.public-actions { display: inline-flex; flex-direction: column; align-items: stretch; gap: 4px; margin-top: 28px; }
 .public-actions .touch-btn { font-size: .95rem; gap: 24px; min-height: 56px; }
-.entry-purchase-link { background: none; border: 0; color: var(--color-primary); font: inherit; font-size: .82rem; text-decoration: underline; text-underline-offset: 4px; padding: 16px 0; min-height: 48px; cursor: pointer; }
+.entry-funding-link { background: none; border: 0; color: var(--color-primary); font: inherit; font-size: .82rem; text-align: center; text-decoration: underline; text-underline-offset: 4px; padding: 12px 0; min-height: 48px; cursor: pointer; }
 .public-art { padding: 32px; border-radius: 40% 40% 24px 24px; background: var(--panel-blue); display: grid; gap: 24px; text-align: center; }
 .account-entry-layout { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 7vw, 110px); align-items: start; padding: 32px 0 60px; }
 .account-entry-welcome { background: var(--panel-blue); padding: 40px; border-radius: 24px; overflow: hidden; }

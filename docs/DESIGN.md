@@ -90,24 +90,25 @@ remain within their section; they must not be confused with the primary navigati
 
 ## Public entry and institutional funding
 
-The unauthenticated landing explains NeuroIA before asking for credentials. It has
+The unauthenticated app home introduces NeuroIA before asking for credentials. It has
 one short headline (“Juega a tu ritmo”), one sentence about the games, a primary
-**Crear mi cuenta** action and **Iniciar sesión** in the header. Avoid repeated
+**Iniciar sesión** action. The centered “Financiación IGAPE” link sits directly
+below it and opens the shared native dialog with the complete funding notice. Avoid repeated
 authentication actions, promotional eyebrows, illustration captions and explanatory
-card grids. Keep the subscription link and supplied funding notice; longer product
+card grids. Do not show a subscription pitch or the full funding image inline; longer product
 explanations remain accessible through Sobre NeuroIA. Registration and sign-in are
 inline pages with labelled fields, Google access, recovery and a clear way back.
 Personal/professional intent survives authentication. Existing verification,
 recent-authentication and account ownership requirements remain unchanged.
 
-“Quiero suscribirme” leads through registration/authentication; purchases remain
-server-confirmed. Access choice is a page, with subscription, the existing trial
+Registration remains available within the sign-in page. Purchases are available
+after authentication and remain server-confirmed. Access choice is a page, with subscription, the existing trial
 and invitation redemption. “Mi acceso” is available before assessment and within
 Mi cuenta, using the existing subscription service. Never imply payment has
 completed based only on a browser return URL.
 
 `ProjectFunding` displays the **entire unchanged owner-supplied IGAPE image** on
-the public landing and in Sobre NeuroIA. Do not crop or recolor its institutional
+the unauthenticated home’s IGAPE dialog and in Sobre NeuroIA. Do not crop or recolor its institutional
 logos. Preserve aspect ratio, offer the original-size image, and include a selectable
 HTML transcript for narrow screens and assistive technology. The supplied AI project
 subtitle is attribution, not a claim of a currently available adaptive AI feature.

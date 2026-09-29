@@ -45,7 +45,7 @@ subject to the confirmed deadline and available client materials.
 ### Delivery dependencies and recovery
 
 - [x] **CR-01 — IGAPE attribution and logos (local).** Complete owner-supplied
-  notice appears on the public landing and About, unmodified, with full-size link
+  notice appears in the unauthenticated home’s IGAPE dialog and About, unmodified, with full-size link
   and selectable HTML transcript. Image loading, mobile layout and About focus
   return checked. Client approval of publicity compliance/placement remains a
   release check; this is not a legal certification.
@@ -91,11 +91,11 @@ subject to the confirmed deadline and available client materials.
 
 ### Public entry, registration and service access
 
-- [x] **CR-10 — Public explanation (local).** Landing presents supplied non-medical copy, examples of actual games, direct entry actions and IGAPE funding before registration.
+- [x] **CR-10 — Public explanation (local).** The unauthenticated app home presents a short non-medical introduction and Iniciar sesión. Full product information and IGAPE funding are accessible in dialogs before authentication.
 
-- [x] **CR-11 — Visible registration (local).** Crear cuenta and Iniciar sesión are directly visible; inline forms preserve personal/professional intent, Google entry, confirmation and recovery.
+- [x] **CR-11 — Visible registration (local).** Iniciar sesión is the unauthenticated home action; Crear cuenta is visible on the access page. Inline forms preserve personal/professional intent, Google entry, confirmation and recovery.
 
-- [x] **CR-12 — Purchase before assessment (local).** Landing subscription entry explains required authentication. Existing access choices and Mi acceso expose the authenticated subscription flow before placement and from Mi cuenta. Server availability and Stripe confirmation remain required; repeat real Sandbox lifecycle acceptance before release.
+- [x] **CR-12 — Purchase before assessment (local).** The unauthenticated home has no purchase pitch; existing signed-in access choices and Mi acceso expose the authenticated subscription flow before placement and from Mi cuenta. Server availability and Stripe confirmation remain required; repeat real Sandbox lifecycle acceptance before release.
 
 - [x] **CR-13 — Home sign-out (local).** Visible Cerrar sesión in Header and Mi cuenta reuses the existing logout; queued progress persistence is unchanged.
 

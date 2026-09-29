@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { Brand } from "./Brand";
 import { PracticeMotif } from "./PracticeMotif";
 import { HeaderIllustration } from "./HeaderIllustration";
 import { ProductInformation } from "./ProductInformation";
+import { ModalFrame } from "./ModalFrame";
 import { ProjectFunding } from "./ProjectFunding";
 import { authErrorMessage } from "../services/authErrors";
 import type { EmailAction } from "../services/emailAuth";
@@ -26,6 +27,7 @@ export function LoginScreen({
   busy: boolean;
   error: string;
 }) {
+  const [fundingOpen, setFundingOpen] = useState(false);
   const [professional, setProfessional] = useState(false);
   const [mode, setMode] = useState<EmailAction | null>(null);
   const [email, setEmail] = useState("");
@@ -79,24 +81,26 @@ export function LoginScreen({
         >
           <Brand />
         </button>
-        <div className="entry-header-actions">
-          <button
-            className="text-link"
-            disabled={busy}
-            onClick={() => changeMode("signin")}
-          >
-            Iniciar sesión
-          </button>
-          {mode !== null && (
+        {mode !== null && (
+          <div className="entry-header-actions">
             <button
-              className="paper-nav-button"
+              className="text-link"
               disabled={busy}
-              onClick={() => changeMode("register")}
+              onClick={() => changeMode("signin")}
             >
-              Crear cuenta
+              Iniciar sesión
             </button>
-          )}
-        </div>
+            {mode !== null && (
+              <button
+                className="paper-nav-button"
+                disabled={busy}
+                onClick={() => changeMode("register")}
+              >
+                Crear cuenta
+              </button>
+            )}
+          </div>
+        )}
       </header>
       {mode === null ? (
         <>
@@ -122,30 +126,48 @@ export function LoginScreen({
                 <button
                   className="touch-btn touch-btn-primary"
                   disabled={busy}
-                  onClick={() => changeMode("register")}
+                  onClick={() => changeMode("signin")}
                 >
-                  Crear mi cuenta
+                  Iniciar sesión
                   <ArrowRight size={21} />
                 </button>
+                <button
+                  className="entry-funding-link"
+                  onClick={() => setFundingOpen(true)}
+                  aria-haspopup="dialog"
+                >
+                  Financiación IGAPE
+                </button>
               </div>
-              <button
-                className="entry-purchase-link"
-                disabled={busy}
-                onClick={() => {
-                  changeMode("register");
-                  setNotice(
-                    "Después de entrar podrás elegir suscripción o prueba gratuita, antes de jugar.",
-                  );
-                }}
-              >
-                Quiero suscribirme
-              </button>
             </div>
             <div className="public-art">
               <PracticeMotif />
             </div>
           </section>
-          <ProjectFunding />
+          {fundingOpen && (
+            <ModalFrame
+              labelledBy="entry-funding-title"
+              onClose={() => setFundingOpen(false)}
+            >
+              <article className="product-information">
+                <header className="modal-header">
+                  <h2 id="entry-funding-title" className="modal-title">
+                    IGAPE
+                  </h2>
+                  <button
+                    className="modal-close-btn"
+                    aria-label="Cerrar financiación"
+                    onClick={() => setFundingOpen(false)}
+                  >
+                    <X size={22} />
+                  </button>
+                </header>
+                <div className="product-information-body">
+                  <ProjectFunding />
+                </div>
+              </article>
+            </ModalFrame>
+          )}
         </>
       ) : (
         <section className="account-entry-layout" aria-labelledby="entry-title">

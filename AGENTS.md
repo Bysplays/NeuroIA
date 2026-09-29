@@ -603,9 +603,9 @@ prototype or its sample results as implemented production behavior.
 not a game stimulus. Default appearance uses clinical-blue Calma tokens and Manrope;
 `pageStyle: cozy` remains compatible as Papel. See docs/DESIGN.md.
 `ProjectFunding` presents the unmodified owner-supplied IGAPE notice, a full-size
-link and HTML transcript on public entry and About. Provenance lives in
+link and HTML transcript in the unauthenticated home’s IGAPE dialog and About. Provenance lives in
 `docs/assets/images/institutional/README.md`.
-`LoginScreen` starts on the public landing and switches to inline email forms.
+`LoginScreen` starts on the unauthenticated app home and switches to inline email forms.
 `OnboardingModal` retains its existing API but now renders the access-choice page.
 `PlanButton` opens existing subscription management before placement and from
 Mi cuenta. Billing availability and entitlement checks remain server-owned.
