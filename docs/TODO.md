@@ -430,9 +430,9 @@ release issue is lost during prioritization.
 
 ## Unresolved interface issues
 
-- [ ] Make the header home action close the catalog when already in the
-  dashboard view. The catalog currently keeps its internal selection state;
-  its own “Volver al inicio” action works.
+- [x] Header home action returns to Hoy from the catalog and other dashboard tabs.
+  Workspace owns tab selection; returning home does not remount the dashboard or
+  regenerate the suggested daily queue.
 - [ ] Reproduce the reported blank background in object naming. It was not
   reproduced through the catalog; inspect the domain entry and modal/scroll
   state. Do not mark fixed without a reproduction and verification.

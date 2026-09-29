@@ -42,6 +42,7 @@ export function Fixture() {
   const [settings, setSettings] = useState(false);
   const [navigation, setNavigation] = useState<HTMLDivElement | null>(null);
   const [authError, setAuthError] = useState("");
+  const [dashboardTab, setDashboardTab] = useState("today");
   const [loggedOut, setLoggedOut] = useState(query.has("entry"));
   const back = () => setGame(undefined);
   if (query.has("connection-error") && !loggedOut) return <ConnectionRecovery onRetry={() => setLoggedOut(true)} onSignOut={() => setLoggedOut(true)}/>;
@@ -83,7 +84,7 @@ export function Fixture() {
             profile={profile}
             sessionMinutes={0}
             activeView="dashboard"
-            onNavigate={back}
+            onNavigate={() => { back(); setDashboardTab("today"); }}
             navigationRef={setNavigation}
             onOpenAccessibility={() => setSettings(true)}
             onOpenFatigueAlert={() => {}}
@@ -91,6 +92,7 @@ export function Fixture() {
             signingOut={false}
           />
           <Dashboard
+            selectedTab={dashboardTab} onTabChange={setDashboardTab}
             uid="isolated-interface-fixture"
             profile={profile}
             history={results}

@@ -195,3 +195,13 @@ test('email and Google failures use the dismissible notification', async ({page}
   await expect(dialog).toHaveCount(0);
   await expect(page.getByLabel('Correo electrónico')).toHaveValue('preview@example.invalid');
 });
+
+test('brand returns from the catalog to today without changing the daily suggestion', async ({page}) => {
+  await page.goto(fixture);
+  const featured = await page.locator('.editorial-home').innerText();
+  await page.getByRole('tab', {name:'Juegos', exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Ocho formas de jugar.'})).toBeVisible();
+  await page.getByRole('button',{name:'NeuroIA, ir al inicio'}).click();
+  await expect(page.getByRole('tab',{name:'Hoy',exact:true})).toHaveAttribute('aria-selected','true');
+  await expect(page.locator('.editorial-home')).toHaveText(featured, {useInnerText:true});
+});

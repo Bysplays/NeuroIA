@@ -37,6 +37,8 @@ interface DashboardProps {
   uid: string;
   history: ExerciseResult[];
   navigationTarget?: HTMLElement | null;
+  selectedTab?: string;
+  onTabChange?: (tab: string) => void;
   proposedSessions?: ReactNode;
   profile: UserProfile;
   onSelectDomain: (domain: CognitiveDomain) => void;
@@ -50,6 +52,8 @@ export function Dashboard({
   uid,
   history,
   navigationTarget,
+  selectedTab,
+  onTabChange,
   profile,
   proposedSessions,
   onSelectDomain,
@@ -59,7 +63,9 @@ export function Dashboard({
   onSignOut,
   signingOut,
 }: DashboardProps) {
-  const [tab, setTab] = useState("today");
+  const [localTab, setLocalTab] = useState("today");
+  const tab = selectedTab ?? localTab;
+  const setTab = onTabChange ?? setLocalTab;
   const [progressTab, setProgressTab] = useState("overview");
   const [queue] = useState(() =>
     StorageService.generateDailyPlanQueue(profile).map((domain) => {

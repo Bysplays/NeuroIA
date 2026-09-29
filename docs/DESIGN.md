@@ -44,6 +44,10 @@ Manrope is the interface family with a system sans-serif fallback. Headings have
 compact line height and moderate weight, body copy comfortable line spacing.
 Keep type in rem so normal, large (118%) and very large (135%) settings work.
 Controls target 48 px or more, primary actions 54–56 px. Do not disable browser zoom.
+Prevent accidental mouse/touch text selection in app chrome, buttons, tabs and game
+surfaces. Preserve selection in inputs, textareas, editable content, code and public
+information documents. Use `data-selectable="true"` for additional copyable content;
+never prevent pointer defaults globally or interfere with keyboard editing.
 
 Use flat opaque panels, approximately 24 px corners, 16–24 px internal gaps and
 24–40 px major spacing. Shadows are reserved for floating navigation and brief
@@ -89,6 +93,9 @@ statistics, archive pagination and cumulative milestone logic. Secondary tabs
 remain within their section; they must not be confused with the primary navigation.
 
 ## Public entry and institutional funding
+
+The signed-in header brand returns to Hoy from every dashboard tab, including
+the catalog, without regenerating the suggested daily queue.
 
 The unauthenticated app home introduces NeuroIA before asking for credentials. It has
 one short headline (“Juega a tu ritmo”), the subtitle “Practica memoria, atención y

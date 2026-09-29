@@ -173,6 +173,17 @@ html, body {
   -webkit-user-select: none;
 }
 
+/* Keep app chrome and game gestures free from accidental text selection.
+   Preserve copying and editing where text is useful to the user. */
+input, textarea, [contenteditable="true"], code, [data-selectable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+button, [role="button"], [role="tab"], label, .brand {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 #root {
   min-height: 100vh;
   background-image: var(--color-page-glow);
@@ -3296,5 +3307,4 @@ body:has(.dashboard-area-selection-active),
   pointer-events: none !important;
   cursor: default !important;
 }
-
 

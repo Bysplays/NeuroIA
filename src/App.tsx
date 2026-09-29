@@ -118,6 +118,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   const [reassessing, setReassessing] = useState(false);
   const [placementOpen, setPlacementOpen] = useState(() => !hasPlacement(profile));
   const [activeView, setActiveView] = useState<'dashboard' | 'therapist' | 'achievements' | 'statistics' | CognitiveDomain | ExerciseId>('dashboard');
+  const [dashboardTab, setDashboardTab] = useState('today');
 
   useEffect(() => {
     if (window.location.hash === '#achievements') window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -219,6 +220,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   };
 
   const handleBackToDashboard = () => {
+    setDashboardTab('today');
     setProposal(null);
     soundService.stopSpeaking();
     soundService.playTap();
@@ -248,6 +250,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
           sessionMinutes={sessionMinutes}
           activeView={activeView === 'statistics' ? 'statistics' : activeView === 'therapist' ? 'therapist' : 'dashboard'}
           onNavigate={view => {
+            if (view === 'dashboard') setDashboardTab('today');
             soundService.stopSpeaking();
             setDailyPlanSession(null);
             setActiveView(view);
@@ -264,7 +267,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
       {reassessing ? <Reassessment profile={profile} sync={sync} onDone={() => setReassessing(false)} onSettings={() => setIsAccessibilityOpen(true)}/> : placement ? <PlacementOnboarding profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
         {playingProposal && <AssignedSessionPlayer key={playingProposal.id} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isFatigueOpen || isRestModalOpen} />}
         {activeView === 'dashboard' && !playingProposal && (
-          <Dashboard uid={uid} history={history} navigationTarget={navigationTarget}
+          <Dashboard uid={uid} history={history} navigationTarget={navigationTarget} selectedTab={dashboardTab} onTabChange={setDashboardTab}
             onOpenSettings={() => setIsAccessibilityOpen(true)} onSignOut={onSignOut} signingOut={signingOut}
             proposedSessions={sessionLink && <AssignedSessionInbox key={sessionLink.professionalId + sessionLink.seatId} link={sessionLink} onStart={value => { setDailyPlanSession(null); setProposal(value); window.scrollTo(0, 0); }} />}
             profile={profile}
