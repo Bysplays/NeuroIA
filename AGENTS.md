@@ -208,7 +208,7 @@ Existing unscoped data is preserved and never imported automatically.
 Settings expose text size, the Cozy style (`contrast: standard`) and a subscription
 section (`SubscriptionSettings`) using the existing access service and Stripe portal.
 Legacy speech, hand-position and contrast values remain compatible; their controls
-are hidden. Audio attribution is in “Sobre NeuroIA”.
+are hidden. Audio and MuseJS attribution are in “Aviso legal”, under “Licencias”.
 Narrator preference remains device-wide and managed by the sound service. Preserve compatibility with existing profiles and history. `leftSideAnchor` is
 a legacy persisted setting, defaults to false, and is neither rendered nor
 configurable; keep the field for compatibility without restoring its visual guide. Use

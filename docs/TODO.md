@@ -45,7 +45,7 @@ subject to the confirmed deadline and available client materials.
 ### Delivery dependencies and recovery
 
 - [x] **CR-01 — IGAPE attribution and logos (local).** Complete owner-supplied
-  notice appears on the IGAPE information page and About, unmodified, with a selectable HTML transcript. Image loading, mobile layout and About focus
+  notice appears on the IGAPE information page, unmodified, with a selectable HTML transcript. Image loading, mobile layout and About focus
   return checked. Client approval of publicity compliance/placement remains a
   release check; this is not a legal certification.
 - [ ] **CR-02 — Recovery and review environment.** Inventory the deployed version,

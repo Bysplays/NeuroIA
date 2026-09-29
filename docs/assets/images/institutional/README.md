@@ -7,7 +7,7 @@ No generation, cropping, logo reconstruction or color alteration was performed.
 
 The notice identifies CEO Aberto S.L., expediente IG408M-2026-000-000102,
 convocatoria IA360, line B, and Xunta de Galicia funding through IGAPE.
-`ProjectFunding` presents the notice on the IGAPE information page and About, with an HTML transcript. Its project title is supplied attribution,
+`ProjectFunding` presents the notice on the IGAPE information page, with an HTML transcript. Its project title is supplied attribution,
 not a claim that all funded AI features are currently available in the application.
 This records the owner's material and placement request, not verification of
 regulatory attribution requirements or a grant-compliance determination.

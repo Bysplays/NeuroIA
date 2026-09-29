@@ -116,7 +116,7 @@ Mi cuenta, using the existing subscription service. Never imply payment has
 completed based only on a browser return URL.
 
 `ProjectFunding` displays the **entire unchanged owner-supplied IGAPE image** on
-the IGAPE information page and in Sobre NeuroIA. Do not crop or recolor its institutional
+the IGAPE information page. Do not crop or recolor its institutional
 logos. Preserve aspect ratio and include a selectable
 HTML transcript for narrow screens and assistive technology. The supplied AI project
 subtitle is attribution, not a claim of a currently available adaptive AI feature.
@@ -185,7 +185,9 @@ heading, readable text and a visible Cerrar action on all three pages. Each uses
 1.15rem section headings and a 1.5–2rem page heading, respecting text-size preferences. Omit the repeated NEUROIA heading and
 full-size-image link on its page. Leave 28 px above and below the funding details
 table to separate it from the surrounding paragraphs. IGAPE shows the full transcript
-and original image; About retains the complete product wording. Returning restores
+and original image; About contains only the product explanation. The legal page contains the
+non-medical notice, privacy information and a Licencias section with ElevenLabs
+and MuseJS attribution for the Muse 2 integration. Returning restores
 the previous entry/settings view without discarding form or game state. Long copy
 is selectable and scrollable. Justify document paragraphs at widths above 760 px
 with Spanish hyphenation; keep narrow-screen paragraphs left-aligned to avoid
