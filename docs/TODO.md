@@ -21,18 +21,20 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [x] Implement account deletion with typed confirmation, recent identity verification,
   server Stripe checks, resumable cleanup and pseudonymous trial-use retention.
 - [x] Prepare live account-lifecycle infrastructure: Worker modules/cron published
-  with deletion disabled, stable trial secret configured and scoped Auth IAM granted.
+  with deletion enabled, stable trial secret configured and scoped Auth IAM granted.
   All four collection-group indexes confirmed READY; no real account was deleted.
 - [x] Remove the two owner-approved trial access records, retaining both pseudonymous
   trial-use markers atomically. Read-back confirmed both removals and markers;
   profiles, results, invitations and Auth accounts were preserved.
 - [x] Publish the account-deletion Firestore rules to `ceoaberto-neuroia` at the
   owner's explicit request. The active rules match the repository file.
-- [ ] Complete the frontend migration and enable ACCOUNT_DELETION_ENABLED.
+- [x] Enable ACCOUNT_DELETION_ENABLED on the deployed Worker; retain both cleanup
+  and billing cron triggers. Resume offers say “Seguir prueba gratuita”.
+- [ ] Complete the frontend migration.
   The old published frontend still attempts direct trial grants, now denied by
   the deployed rules; publish the Worker-backed trial flow to restore new web trials.
   GitHub authorization and the required explicit merge approval remain pending. Verify with a disposable account
-  after activation; backend preparation has already been authorized.
+  to verify the full live deletion lifecycle; backend activation is complete.
 - [ ] Review refreshed onboarding preferences and assessment entry with the owner;
   visual styling now matches account entry. Existing assessment acceptance checks remain open.
 

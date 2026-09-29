@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHandler } from './index.mjs';
-import { trialIdentity, startTrial, deletionEligibility, requestDeletion, processDeletion } from './accountLifecycle.mjs';
+import { trialOffer, trialIdentity, startTrial, deletionEligibility, requestDeletion, processDeletion } from './accountLifecycle.mjs';
 const env = { TRIAL_IDENTITY_SECRET: 'test-only-secret-with-at-least-32-characters' };
 const identity = () => ({ email: 'player@example.test', authTime: Date.now()/1000 });
 function store(initial = {}) {
@@ -167,4 +167,20 @@ test('a paid seat with missing customer billing still blocks deletion', async()=
   const db=store({'professionals/u':{ownerUid:'u'},'professionals/u/seats/s':{subscriptionId:'sub_paid',status:'active'}});
   const state=await deletionEligibility('u',db,async()=>({status:'active'}));
   assert.equal(state.allowed,false);assert.equal(state.professional,true);
+});
+
+ test('access offers distinguish new, remaining and expired trials using verified identity', async t => {
+  t.mock.timers.enable({apis:['Date'],now:1800000000000});
+  const db=store();
+  assert.equal(await trialOffer(identity().email,env,db),'new');
+  await startTrial('old',identity().email,env,db);
+  const handler=createHandler({database:()=>db,stripe:()=>noStripe,verifyUser:async()=> 'new',authAdmin:async()=>({email:identity().email})});
+  const response=await handler(new Request('https://worker/access',{method:'POST',headers:{Authorization:'Bearer fixture'}}),{...env,APP_URL:'https://example.test/'});
+  const access=await response.json();
+  assert.equal(response.status,200);
+  assert.equal(access.trialOffer,'resume');
+  assert.equal(access.active,false);
+  assert.equal(db.docs.has('users/new/access/main'),false);
+  t.mock.timers.tick(7*86400000);
+  assert.equal(await trialOffer(identity().email,env,db),'expired');
 });

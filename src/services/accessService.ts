@@ -11,6 +11,7 @@ export interface AccountAccess {
   canManageSubscription?: boolean;
   kind?: 'trial' | 'subscription' | 'invitation' | 'revoked';
   trialStartedAt?: number;
+  trialOffer?: 'new' | 'resume' | 'expired';
   expiresAt?: number | null;
   autoRenew?: boolean;
   professionalName?: string;

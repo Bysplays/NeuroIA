@@ -11,7 +11,7 @@
     "FIREBASE_PROJECT_ID": "ceoaberto-neuroia",
     "STRIPE_MONTHLY_PRICE_ID": "price_1UItenAWZtSdGYThrex9dsNh",
     "STRIPE_MODE": "test",
-    "ACCOUNT_DELETION_ENABLED": "false",
+    "ACCOUNT_DELETION_ENABLED": "true",
     "ALLOWED_ORIGINS": "http://localhost:5173,https://neuroia.es"
   }
 }

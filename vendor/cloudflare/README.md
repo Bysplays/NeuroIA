@@ -8,7 +8,7 @@ No domain purchase or Firebase Blaze deployment is required.
 
 The reviewed Worker is deployed with verified-email enforcement, `/access`,
 `/professional/status`, per-seat portal cancellation, reserved short invitation codes and the five-minute
-reconciliation trigger. Current version: `9595cefc-f0e0-4f03-8a2d-21065c441504`. Runtime secrets are retained, Stripe stays in test mode,
+reconciliation trigger. Current version: `8b7afab5-f6dd-46af-b4c0-f8d90caf1981`. Runtime secrets are retained, Stripe stays in test mode,
 preview URLs remain disabled and existing observability is enabled. Health,
 localhost CORS, unauthenticated access and unsigned-webhook rejection were verified;
 signed payment lifecycle and scheduled reconciliation still need live validation.
@@ -21,7 +21,7 @@ Set these ordinary runtime variables on the Worker (also recorded in `vendor/clo
 - `FIREBASE_PROJECT_ID=ceoaberto-neuroia`
 - `STRIPE_MONTHLY_PRICE_ID=price_1UItenAWZtSdGYThrex9dsNh`
 - `STRIPE_MODE=test`
-- `ACCOUNT_DELETION_ENABLED=false` until the activation sequence is complete.
+- `ACCOUNT_DELETION_ENABLED=true` (rules, indexes, Auth IAM and cleanup cron are deployed).
 - `ALLOWED_ORIGINS=http://localhost:5173,https://neuroia.es` (comma-separated extra exact origins).
 
 Set these **Secret** bindings directly in Cloudflare:
@@ -159,7 +159,7 @@ Run `node --test vendor/cloudflare/index.test.mjs vendor/cloudflare/seats.test.m
 and the combined sequential emulator command in the professional guide.
 
 
-## Account deletion and trial identity (staged, activation pending)
+## Account deletion and trial identity
 
 `accountLifecycle.mjs` owns POST `/trial`, `/account/deletion-status` and
 `/account/delete`. Client rules prohibit direct trial grants. `/trial` atomically
@@ -167,7 +167,10 @@ writes access and `trialUsage/{HMAC-SHA256(normalizedVerifiedEmail)}` with only
 `{used:true, trialStartedAt}`. This pseudonymous marker survives UID recreation; raw email and the
 old UID are not stored in it. A recreated account with the same verified email can
 resume the remaining trial until exactly seven days after the original start.
-Reactivation never changes that timestamp. Expired trials and legacy markers without
+Reactivation never changes that timestamp. For accounts without access, `/access`
+returns `trialOffer` (`new`, `resume`, or `expired`) using the server ledger and
+live verified Auth email. The frontend labels recovery “Seguir prueba gratuita”
+and hides the trial action when the original period has expired. Expired trials and legacy markers without
 a known start cannot grant new time. It prevents restarting with the same verified email,
 not a new/different email or all provider aliases. Existing trial timestamps are
 backfilled when deletion is requested; irrecoverable historical trial evidence
@@ -202,7 +205,7 @@ Observe failed scheduled invocations and jobs whose `lastRunAt` stops advancing.
 The existing five-minute Stripe reconciliation runs separately.
 
 Deployment state: Worker modules and both cron triggers are published, with
-`ACCOUNT_DELETION_ENABLED=false`. The stable secret is configured in Cloudflare
+`ACCOUNT_DELETION_ENABLED=true`. The stable secret is configured in Cloudflare
 and a mode-0600 local backup is kept outside the repository under
 `~/.config/neuroia/secrets/trial-identity-secret`. The billing service account has
 `projects/ceoaberto-neuroia/roles/neuroiaAccountLifecycle` with only Auth get/delete
@@ -221,7 +224,7 @@ both deletions and markers. Their original trial start dates were subsequently
 backfilled from the pre-cleanup backup to support remaining-time recovery. No
 access was granted by that backfill. Profiles, results, invitations and Auth accounts remain intact.
 
-Activation sequence (finish coordinated with frontend publication):
+Provisioning sequence for future environments (current backend activation is complete):
 
 1. Back up/configure `TRIAL_IDENTITY_SECRET` and grant the dedicated service account
    `firebaseauth.users.get` and `firebaseauth.users.delete` through a scoped custom

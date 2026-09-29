@@ -489,3 +489,17 @@ test('account deletion confirmation, subscription guard and keyboard dismissal a
   await expect(page.getByRole('button',{name:'Gestionar suscripción',exact:true})).toBeVisible();
   await expect(page.getByLabel('Escribe ELIMINAR MI CUENTA')).toHaveCount(0);
 });
+
+test('remaining trial uses continue wording and expired recreated accounts cannot start a new trial', async ({page}) => {
+  for(const width of [390,820,1280]) {
+    await page.setViewportSize({width,height:900});
+    await page.goto(fixture+'?subscription&resume-trial');
+    await expect(page.getByRole('button',{name:'Seguir prueba gratuita',exact:true})).toBeVisible();
+    await expect(page.getByRole('button',{name:'Probar gratis 7 días'})).toHaveCount(0);
+    await page.screenshot({path:`/tmp/neuroia-resume-trial-${width}.png`,fullPage:true});
+    await page.getByRole('button',{name:'Seguir prueba gratuita'}).click();
+    await expect(page.getByRole('heading',{name:/Juega a tu ritmo/})).toBeVisible();
+  }
+  await page.goto(fixture+'?subscription&used-trial');
+  await expect(page.locator('.onboarding-trial-link')).toHaveCount(0);
+});

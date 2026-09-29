@@ -539,3 +539,7 @@ and settings, following the surface token in contrast themes.
 All Mi cuenta action rows align buttons with the top of their text block, including
 Rehacer prueba and Borrar cuenta; multiline descriptions do not vertically center
 the button lower than the section heading.
+
+Trial access copy distinguishes first use (“Probar gratis 7 días”) from remaining-time
+recovery (“Seguir prueba gratuita”), based on the server-confirmed offer. An expired
+trial is not offered again; recovery preserves its original expiry.

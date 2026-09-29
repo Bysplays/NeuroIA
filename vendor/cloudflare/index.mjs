@@ -1,4 +1,4 @@
-import { startTrial, deletionEligibility, requestDeletion, processDeletion } from './accountLifecycle.mjs';
+import { trialOffer, startTrial, deletionEligibility, requestDeletion, processDeletion } from './accountLifecycle.mjs';
 // Cloudflare Worker: Web APIs only, no Firebase Functions or Node runtime.
 const encoder = new TextEncoder();
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
@@ -531,7 +531,14 @@ export function createHandler(deps = {}) {
       }
       const deleting = await db.runTransaction(tx => tx.get(`accountDeletions/${uid}`), 4, true);
       if (deleting) fail(409, 'La cuenta se está eliminando.');
-      if (path === '/access') return reply(await confirmedAccess(uid, db));
+      if (path === '/access') {
+        const access = await confirmedAccess(uid, db);
+        if (!access.kind && env.TRIAL_IDENTITY_SECRET) {
+          const user = await (deps.authAdmin || ((action, id) => authAdmin(env, action, id)))('lookup', uid);
+          access.trialOffer = await trialOffer(user.email, env, db);
+        }
+        return reply(access);
+      }
       if (path.startsWith('/professional/') || path === '/redeem-seat' || path === '/leave-seat') {
         const body = await request.text();
         if (body.length > 4096) fail(413, 'Solicitud demasiado grande.');

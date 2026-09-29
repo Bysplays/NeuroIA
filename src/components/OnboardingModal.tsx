@@ -36,7 +36,7 @@ export function OnboardingModal({ access, busy, loadFailed, errorMessage, invita
           <div className="onboarding-actions">
             <button className="touch-btn touch-btn-primary" disabled={busy || !access?.checkoutAvailable} onClick={() => invoke('checkout', onCheckout)}>{label('checkout', 'Suscribirme')}<ArrowRight size={20} aria-hidden="true"/></button>
             {!access?.checkoutAvailable && <small>La suscripción no está disponible en este momento.</small>}
-            {!expired && <button className="onboarding-trial-link" disabled={busy || !access} onClick={() => invoke('trial', onTrial)}>{label('trial', 'Probar gratis 7 días')}</button>}
+            {!expired && access?.trialOffer !== 'expired' && <button className="onboarding-trial-link" disabled={busy || !access} onClick={() => invoke('trial', onTrial)}>{label('trial', access?.trialOffer === 'resume' ? 'Seguir prueba gratuita' : 'Probar gratis 7 días')}</button>}
             {access?.canManageSubscription && <button className="paper-nav-button" disabled={busy} onClick={() => invoke('portal', onPortal)}>{label('portal', 'Gestionar suscripción')}</button>}
           </div>
         </section>

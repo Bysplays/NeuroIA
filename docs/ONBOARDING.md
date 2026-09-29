@@ -55,7 +55,7 @@ the remaining time using the ledger’s original `trialStartedAt`; expired or un
 legacy dates never grant a new period. Access expires seven days after the server timestamp,
 requires no card and does not turn into a paid subscription. Legacy Firestore
 Timestamp and numeric values remain readable. See the account lifecycle and
-activation requirements in [the Worker guide](../vendor/cloudflare/README.md#account-deletion-and-trial-identity-staged-activation-pending).
+activation requirements in [the Worker guide](../vendor/cloudflare/README.md#account-deletion-and-trial-identity).
 
 Stripe Checkout, webhook and portal now use the standalone Cloudflare Worker in
 `vendor/cloudflare/`, without deploying Firebase Cloud Functions or enabling Blaze. See

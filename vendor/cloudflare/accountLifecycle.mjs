@@ -11,6 +11,12 @@ export async function trialIdentity(email, secret) {
   const digest = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(email.trim().toLowerCase()));
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
 }
+export async function trialOffer(email, env, db) {
+  const identity = await trialIdentity(email, env.TRIAL_IDENTITY_SECRET);
+  const used = await db.runTransaction(tx => tx.get(`trialUsage/${identity}`));
+  if (!used) return 'new';
+  return validTrialStart(used.trialStartedAt) && used.trialStartedAt + trialDuration > Date.now() ? 'resume' : 'expired';
+}
 export async function startTrial(uid, email, env, db) {
   const identity = await trialIdentity(email, env.TRIAL_IDENTITY_SECRET);
   await db.runTransaction(async tx => {
