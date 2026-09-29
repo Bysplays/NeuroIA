@@ -2,7 +2,7 @@ import { advanceAssessment } from '../services/placementAssessment';
 import { SlidersHorizontal } from 'lucide-react';
 import { Brand } from './Brand';
 import { useEffect, useRef, useState } from 'react';
-import { Volume2 } from 'lucide-react';
+import { ArrowLeft, Volume2 } from 'lucide-react';
 import type { ExerciseId, ExerciseResult, UserProfile } from '../types';
 import type { PlacementStage, PlacementTrial } from '../services/difficulty';
 import type { ProgressSync } from '../services/progressSync';
@@ -107,7 +107,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
           <button className="touch-btn touch-btn-primary" onClick={onDone}>{doneLabel}</button>
         </> : <div className="placement-actions">
           <button className="touch-btn touch-btn-primary" onClick={() => { next(); }}>{count ? 'Continuar' : 'Empezar'}</button>
-          <button className="placement-text-action" onClick={() => { setSavingPreferences(false); setEditing(true); }}>Cambiar mis elecciones</button>
+          <button className="placement-text-action interest-back" onClick={() => { setSavingPreferences(false); setEditing(true); }}><ArrowLeft size={18} aria-hidden="true"/>Cambiar mis elecciones</button>
         </div>}
       </div>
     </section>
