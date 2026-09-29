@@ -130,3 +130,8 @@ ordinary activity. Existing cloud placement resumes; new/local-imported profiles
 need assessment. The version-1 progress/rules contract is deployed to
 `ceoaberto-neuroia`; see [SDD.md](SDD.md#placement--initial-guided-level-assessment-implemented)
 for scoring, manual tracking and calibration limits. This does not deploy the frontend.
+
+After initial access approval, transient focus/visibility revalidation and connection
+failures retain the mounted workspace behind a blocking dialog. Its interaction and
+game clock remain suspended until server approval. Confirmed denial removes the
+workspace and shows access options; this does not enable offline play.

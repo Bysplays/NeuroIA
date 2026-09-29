@@ -54,6 +54,7 @@ export function Fixture() {
   const [accessAction, setAccessAction] = useState('');
   const [accessBusy, setAccessBusy] = useState(false);
   const back = () => setGame(undefined);
+  if (query.has('resume-game')) return <AccessGate onSignOut={()=>setLoggedOut(true)}><GameSession id="visual-scanning" onBack={()=>setLoggedOut(true)}><GameExercise id="visual-scanning" profile={profile} onBack={()=>setLoggedOut(true)} onSaveResult={()=>{}}/></GameSession></AccessGate>;
   if (query.has('access-gate')) return <AccessGate onSignOut={()=>setLoggedOut(true)}><p>Acceso confirmado</p></AccessGate>;
   if (query.has('subscription') && !loggedOut) return <main className="entry-page access-entry"><header className="entry-header"><Brand/></header><OnboardingModal access={{active:false, serverNow:1790683200000, checkoutAvailable:!query.has('unavailable'), trialOffer:query.has('resume-trial') ? 'resume' : query.has('used-trial') ? 'expired' : 'new', kind:query.has('expired') ? 'trial' : undefined}} busy={query.has('busy') || accessBusy} loadFailed={false} invitationIssue={accessAction ? {code:accessAction,message:'Este código no es válido. Revísalo e inténtalo de nuevo.'} : null} onTrial={()=>setLoggedOut(true)} onInvite={setAccessAction} onCheckout={()=>query.has('pending') ? setAccessBusy(true) : setLoggedOut(true)} onSignOut={()=>setLoggedOut(true)} onPortal={()=>setLoggedOut(true)} checkoutReturn={query.get('checkout')}/></main>;
 

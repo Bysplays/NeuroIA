@@ -1852,3 +1852,6 @@ body .main-header .header-right .header-signout { background: var(--color-surfac
 .account-delete-dialog > p { margin-block: 16px; }
 
 .account-delete-heading .preferences-close { width: 32px; height: 32px; min-height: 32px; border-radius: 6px; padding: 0; flex: 0 0 32px; }
+
+.access-recheck-dialog { display: grid; gap: 20px; }
+.access-recheck-dialog > h2, .access-recheck-dialog > p { margin: 0; }

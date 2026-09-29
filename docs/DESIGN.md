@@ -264,9 +264,16 @@ letters, sequence, pairs, sorting, target and tracking). Never reuse the login/h
 and a compact copy/action column; narrow screens stack a small illustration above
 centered instructions. Keep listen separate above the title. Group the ordinary-play
 level selector and **Empezar a jugar** side by side at equal height, with a small
-gap and generous hit areas, including on phones. Keep the back action separate.
+gap and generous hit areas, including on phones. Level minus/plus controls have
+flat internal edges and only the outer group corners are rounded. Keep the back action separate.
 Short landscape viewports reduce artwork and spacing; allow scrolling when needed. Help
 opens a compact Cómo jugar modal, preserves answers and pauses the existing game clock.
+
+Leaving the tab or window during active play pauses the game clock and retains
+answers. On return, revalidate access without resetting navigation, then show a
+compact “¿Seguimos?” dialog with “Continuar actividad”. Escape/backdrop must not
+restart the clock; only the explicit action resumes. This return dialog is distinct
+from the retired fatigue/rest screen and does not appear on game introductions.
 
 Active play has utilities/time above the task, a clear stimulus and response area,
 and reachable assistance/back/next controls. Use the shared GameSession and

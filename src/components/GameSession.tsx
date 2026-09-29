@@ -1,4 +1,5 @@
 import { ModalFrame } from './ModalFrame';
+import { useAccessSuspended } from '../services/accountAccessContext';
 import { Brand } from './Brand';
 import { EegButton } from './EegButton';
 import { EegLive } from './EegLive';
@@ -18,6 +19,8 @@ import type { CognitiveDomain, ExerciseId } from '../types';
 import { soundService } from '../services/soundService';
 
 export function GameSession({ id, step, progressScope, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true, autoStart = false, onSettings, onSkip }: { progressScope?: { before: number; after: number }; onSettings?: () => void; onSkip?: () => void; autoStart?: boolean; id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
+  const accessSuspended = useAccessSuspended();
+  const [resumeRequired, setResumeRequired] = useState(false);
   const panel = useViewportPanel<HTMLDivElement>();
   const [assistanceTarget, setAssistanceTarget] = useState<HTMLDivElement | null>(null);
   const [eegOpen, setEegOpen] = useState(false);
@@ -27,7 +30,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
   const [savedPpgRecorder] = useState(createEegRecorder);
   const [ppg, setPpg] = useState<EegRecording>();
   const [background, setBackground] = useState(document.hidden);
-  useEffect(() => { const update = () => setBackground(document.hidden); document.addEventListener('visibilitychange', update); return () => document.removeEventListener('visibilitychange', update); }, []);
+
   const [eeg, setEeg] = useState<EegRecording>();
   const [level, setLevel] = useState(initialLevel);
   const config = gameConfig(level, mode);
@@ -35,6 +38,22 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
   const [started, setStarted] = useState(autoStart);
   const [help, setHelp] = useState(!autoStart);
   const [completed, finish] = useState(false);
+  useEffect(() => {
+    const pause = () => {
+      setBackground(true);
+      if (started && !completed) { setResumeRequired(true); soundService.stopSpeaking(); }
+    };
+    const focus = () => setBackground(document.hidden);
+    const visibility = () => document.hidden ? pause() : focus();
+    window.addEventListener('blur', pause);
+    window.addEventListener('focus', focus);
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      window.removeEventListener('blur', pause);
+      window.removeEventListener('focus', focus);
+      document.removeEventListener('visibilitychange', visibility);
+    };
+  }, [started, completed]);
   const [seconds, setSeconds] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const helpButton = useRef<HTMLButtonElement>(null);
@@ -56,10 +75,11 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     else helpButton.current?.focus();
   }, [help, paused, started]);
   useEffect(() => {
-    if (paused || help || completed || !started || eegOpen || background) return;
+    if (paused || help || completed || !started || eegOpen || background || resumeRequired || accessSuspended) return;
     let previous = performance.now();
     let frame: number;
     const tick = (now: number) => {
+      if (document.hidden) return;
       clock.advance(Math.min(now - previous, 100));
       previous = now;
       setSeconds(Math.floor(clock.performanceNow() / 1000));
@@ -67,7 +87,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [clock, help, completed, started, paused, eegOpen, background]);
+  }, [clock, help, completed, started, paused, eegOpen, background, resumeRequired, accessSuspended]);
   useEffect(() => {
     const timer = clock.setInterval(() => {
       const state = eegService.getSnapshot();
@@ -133,6 +153,13 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         </div>
       </footer>}
     </div>}
+    {resumeRequired && !background && !accessSuspended && !help && !eegOpen && !paused && !completed && <ModalFrame labelledBy="activity-resume-title" onClose={() => {}} dismissOnBackdrop={false}>
+      <section className="entry-error-notification game-resume-dialog">
+        <h2 id="activity-resume-title">¿Seguimos?</h2>
+        <p>Tu actividad está en pausa. Continúa donde la dejaste.</p>
+        <button className="touch-btn touch-btn-primary" onClick={() => setResumeRequired(false)}>Continuar actividad</button>
+      </section>
+    </ModalFrame>}
     {help && started && <ModalFrame labelledBy="game-help-title" onClose={() => { soundService.stopSpeaking(); setHelp(false); }}>
       <section className="entry-error-notification game-help-dialog">
         <div className="entry-error-heading"><CircleHelp size={24} aria-hidden="true"/><h2 id="game-help-title">Cómo jugar</h2><button className="entry-toolbar-action" onClick={() => soundService.speak(instruction)}><Volume2 size={18} aria-hidden="true"/>Escuchar</button></div>

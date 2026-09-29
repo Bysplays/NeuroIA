@@ -526,3 +526,69 @@ test('game entry groups level with start and preserves the chosen level through 
     await expect(page.getByRole('heading',{name:'Hola, Lucía.'})).toBeVisible();
   }
 });
+
+
+test('returning to a game preserves its mounted board, revalidates access and waits for explicit resume', async ({page}) => {
+  await page.clock.install();
+  await page.route('**/src/services/accessService.ts*', async route => {
+    const response=await route.fetch();
+    const body=(await response.text()).replace(/async load\(\)\s*\{/, `async load() {
+      window.accessReads=(window.accessReads||0)+1;
+      if(window.delayAccess) await new Promise(resolve=>window.releaseAccess=resolve);
+      if(window.failAccess) throw new Error('offline');
+      return {active:!window.deniedAccess,serverNow:Date.now(),validForMs:60000,checkoutAvailable:true};`);
+    await route.fulfill({response,body});
+  });
+  await page.goto(fixture+'?resume-game');
+  await page.getByRole('button',{name:'Empezar a jugar'}).click();
+  await page.clock.runFor(2200);
+  const timer=page.getByLabel('Tiempo de juego');
+  const before=await timer.textContent();
+  await page.locator('.game-session').evaluate(el=>el.dataset.preserved='yes');
+  await page.evaluate(()=>{window.delayAccess=true;window.dispatchEvent(new Event('blur'));});
+  await page.clock.runFor(5000);
+  expect(await timer.textContent()).toBe(before);
+  await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+  await expect(page.getByRole('dialog',{name:'Comprobando tu acceso'})).toBeVisible();
+  await expect(page.locator('.game-session')).toBeHidden();
+  await page.evaluate(()=>{window.delayAccess=false;window.releaseAccess();});
+  const resume=page.getByRole('dialog',{name:'¿Seguimos?'});
+  await expect(resume).toBeVisible();
+  await expect(page.locator('.game-session')).toHaveAttribute('data-preserved','yes');
+  await page.clock.runFor(2000);
+  expect(await timer.textContent()).toBe(before);
+  await page.keyboard.press('Escape');
+  await expect(resume).toBeVisible();
+  for (const width of [390,820,1280]) {
+    await page.setViewportSize({width,height:900});
+    await page.screenshot({path:`/tmp/neuroia-resume-modal-${width}.png`});
+  }
+  await resume.getByRole('button',{name:'Continuar actividad'}).click();
+  await page.clock.runFor(1200);
+  expect(await timer.textContent()).not.toBe(before);
+  const after=await timer.textContent();
+  await page.evaluate(()=>{
+    Object.defineProperty(document,'hidden',{configurable:true,value:true});
+    Object.defineProperty(document,'visibilityState',{configurable:true,value:'hidden'});
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.clock.runFor(4500);
+  expect(await timer.textContent()).toBe(after);
+  await page.evaluate(()=>{
+    Object.defineProperty(document,'hidden',{configurable:true,value:false});
+    Object.defineProperty(document,'visibilityState',{configurable:true,value:'visible'});
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await expect(resume).toBeVisible();
+  await resume.getByRole('button',{name:'Continuar actividad'}).click();
+  await page.evaluate(()=>{window.failAccess=true;window.dispatchEvent(new Event('offline'));});
+  await expect(page.getByRole('dialog',{name:'Vamos a reconectar'})).toBeVisible();
+  await expect(page.locator('.game-session')).toBeHidden();
+  await page.evaluate(()=>{window.failAccess=false;});
+  await page.getByRole('button',{name:'Reintentar',exact:true}).click();
+  await expect(page.locator('.game-session')).toBeVisible();
+  await expect(page.locator('.game-session')).toHaveAttribute('data-preserved','yes');
+  await page.evaluate(()=>{window.deniedAccess=true;window.dispatchEvent(new Event('neuroia-access-changed'));});
+  await expect(page.getByRole('button',{name:'Suscribirme'})).toBeVisible();
+  await expect(page.locator('.game-session')).toHaveCount(0);
+});

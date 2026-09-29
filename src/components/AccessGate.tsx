@@ -1,6 +1,7 @@
 import { Brand } from './Brand';
 import { ConnectionRecovery } from './ConnectionRecovery';
-import { AccountAccessContext } from '../services/accountAccessContext';
+import { ModalFrame } from './ModalFrame';
+import { AccountAccessContext, AccessSuspendedContext } from '../services/accountAccessContext';
 import { AppLoading } from './AppLoading';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { accessService, accessError, type AccountAccess } from '../services/accessService';
@@ -9,6 +10,7 @@ import { soundService } from '../services/soundService';
 
 export default function AccessGate({ onSignOut, children }: { onSignOut: () => void; children: ReactNode }) {
   const [access, setAccess] = useState<AccountAccess | null>(null);
+  const [retainedAccess, setRetainedAccess] = useState<AccountAccess | null>(null);
   const [error, setError] = useState('');
   const [invitationIssue, setInvitationIssue] = useState<{ code: string; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -21,7 +23,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     try {
       const value = await accessService.load();
       if (alive.current && request === version.current) {
-        setAccess(value); setError('');
+        setAccess(value); setRetainedAccess(value.active ? value : null); setError('');
         if (value.active) {
           const url = new URL(location.href);
           url.searchParams.delete('checkout'); window.history.replaceState(null, '', url);
@@ -36,7 +38,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     alive.current = true;
     const initial = window.setTimeout(() => { void refresh(); }, 0);
     const interval = window.setInterval(() => { if (!locked.current) void refresh(); }, 30000);
-    const onFocus = () => { if (!locked.current) void refresh(); };
+    const onFocus = () => { if (!locked.current) { version.current++; setAccess(null); setError(''); void refresh(); } };
     window.addEventListener('focus', onFocus);
     const invalidate = () => { version.current++; setAccess(null); setError('Comprueba la conexión y vuelve a intentarlo.'); };
     const onVisibility = () => { if (document.visibilityState === 'visible') { invalidate(); onFocus(); } };
@@ -80,12 +82,27 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     if (url.protocol !== 'https:' || !['checkout.stripe.com', 'billing.stripe.com'].includes(url.hostname)) throw new Error('invalid-checkout');
     window.location.assign(url.href);
   };
+  // Keep the React tree during transient revalidation, but block interaction and its clock.
+  if (access?.active || retainedAccess) {
+    const suspended = !access?.active;
+    return <AccountAccessContext.Provider value={access ?? { ...retainedAccess!, active: false }}>
+      <AccessSuspendedContext.Provider value={suspended}>
+        <div hidden={suspended} inert={suspended}>{children}</div>
+        {suspended && <ModalFrame labelledBy="access-recheck-title" onClose={() => {}} dismissOnBackdrop={false}>
+          <section className="entry-error-notification access-recheck-dialog">
+            <h2 id="access-recheck-title">{error ? 'Vamos a reconectar' : 'Comprobando tu acceso'}</h2>
+            <p role="status">{error || 'Tu actividad sigue aquí. Un momento…'}</p>
+            {error && <><button className="touch-btn touch-btn-primary" onClick={() => { setError(''); void refresh(); }}>Reintentar</button><button className="text-link" onClick={onSignOut}>Cerrar sesión</button></>}
+          </section>
+        </ModalFrame>}
+      </AccessSuspendedContext.Provider>
+    </AccountAccessContext.Provider>;
+  }
   // Unknown entitlement is not a denied entitlement: never show purchase options yet.
   if (!access) {
     if (!error) return <AppLoading />;
     return <ConnectionRecovery message={error} onRetry={() => { setError(''); void refresh(); }} onSignOut={onSignOut}/>;
   }
-  if (access.active) return <AccountAccessContext.Provider value={access}>{children}</AccountAccessContext.Provider>;
   return <main className="entry-page access-entry">
     <header className="entry-header"><Brand/></header>
     {<OnboardingModal access={access} loadFailed={Boolean(error)} errorMessage={error} invitationIssue={invitationIssue} busy={busy}

@@ -387,7 +387,10 @@ body[data-contrast="standard"] .game-session .category-bin-card { background: #f
 .instruction-brand { display: block; min-width: 0; width: 150px; max-width: 50%; height: 44px; object-fit: contain; object-position: left center; }
 .instruction-level-control { display: inline-flex; align-items: center; gap: 0; padding: 0; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); flex-shrink: 0; }
 .instruction-level-control > span { min-width: 58px; text-align: center; font-size: .75rem; font-variant-numeric: tabular-nums; }
-.instruction-level-control > button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--color-surface); color: var(--color-text-main); cursor: pointer; }
+.instruction-level-control > button { display: grid; place-items: center; width: 44px; min-height: 44px; align-self: stretch; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--color-primary); box-shadow: none; cursor: pointer; }
+.instruction-level-control { overflow: hidden; }
+.instruction-level-control > button:first-child { border-right: 1px solid var(--color-border); }
+.instruction-level-control > button:last-child { border-left: 1px solid var(--color-border); }
 .instruction-level-control > button:hover:not(:disabled) { background: var(--color-action-bg); color: var(--color-action-text); }
 .instruction-level-control > button:disabled { opacity: .4; cursor: default; }
 
@@ -472,8 +475,7 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 
 /* The same controls as onboarding, scoped away from game targets and stimuli. */
 .game-session .viewport-session-tools .header-icon-btn,
-.game-session .game-help-button,
-.game-session .instruction-level-control > button { width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); box-shadow: none; }
+.game-session .game-help-button { width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); box-shadow: none; }
 .game-session .paper-nav-button { min-height: 44px; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); }
 .game-session .paper-nav-button.touch-btn-primary { background: var(--color-primary); color: var(--color-action-text); }
 .game-session .naming-option-btn, .game-session .letter-option-btn { border-radius: 12px; box-shadow: none; }
@@ -487,3 +489,6 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 .game-stage-progress > span { flex: 1; min-width: 0; height: 100%; border-radius: 4px; overflow: hidden; background: var(--color-border); }
 .game-stage-progress i { display: block; height: 100%; background: var(--color-action-bg); }
 .viewport-session-footer > .entry-toolbar-action, .viewport-navigation-row > .entry-toolbar-action { min-width: 104px; padding: 10px 14px; justify-content: center; }
+
+.game-resume-dialog { display: grid; gap: 20px; }
+.game-resume-dialog > h2, .game-resume-dialog > p { margin: 0; }
