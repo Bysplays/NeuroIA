@@ -20,8 +20,8 @@ of a production deployment. Keep project guidance in English and UI copy in Span
   server Stripe checks, resumable cleanup and pseudonymous trial-use retention.
 - [x] Prepare live account-lifecycle infrastructure: Worker modules/cron published
   with deletion disabled, stable trial secret configured and scoped Auth IAM granted.
-  Collection-group indexes submitted; no real account was deleted.
-- [ ] Confirm index readiness, then coordinate the frontend migration with new
+  All four collection-group indexes confirmed READY; no real account was deleted.
+- [ ] Coordinate the frontend migration with new
   Firestore rules and ACCOUNT_DELETION_ENABLED. The currently published frontend
   still grants trials directly; changing rules alone would break existing signups.
   Owner choice on frontend publication is pending. Verify with a disposable account

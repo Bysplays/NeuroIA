@@ -203,8 +203,7 @@ Deployment state: Worker modules and both cron triggers are published, with
 and a mode-0600 local backup is kept outside the repository under
 `~/.config/neuroia/secrets/trial-identity-secret`. The billing service account has
 `projects/ceoaberto-neuroia/roles/neuroiaAccountLifecycle` with only Auth get/delete
-permissions. Collection-group indexes have been submitted; readiness still needs
-confirmation. Production Firestore rules are unchanged.
+permissions. All four collection-group indexes are confirmed READY. Production Firestore rules are unchanged.
 
 The published frontend (`index-B8AG4Q-I.js`) still grants trials directly through
 Firestore. Do not switch rules or enable deletion independently of the frontend
