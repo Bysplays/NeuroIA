@@ -123,7 +123,7 @@ export function LoginScreen({
                   </h1>
                   <p>
                     {professional
-                      ? "Gestiona perfiles de varios jugadores"
+                      ? "Gestiona los perfiles de varios jugadores"
                       : "Practica memoria, atención y coordinación"}
                   </p>
                   <div className="public-actions">

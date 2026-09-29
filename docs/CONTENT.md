@@ -46,7 +46,7 @@ the current introduction uses the cover paragraph without that claim instead.
 ## Professional entry
 
 The login offers “¿Eres un profesional?” and a reversible professional presentation.
-Its owner-approved subtitle is “Gestiona perfiles de varios jugadores”. It addresses
+Its owner-approved subtitle is “Gestiona los perfiles de varios jugadores”. It addresses
 professionals who want to follow other people's exercise activity.
 Keep “Para profesionales”, the heading and Google/email access actions in its panel;
 omit the explanatory and availability paragraphs. Signing in opens a free
