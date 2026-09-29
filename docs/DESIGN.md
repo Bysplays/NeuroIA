@@ -542,4 +542,6 @@ the button lower than the section heading.
 
 Trial access copy distinguishes first use (“Probar gratis 7 días”) from remaining-time
 recovery (“Seguir prueba gratuita”), based on the server-confirmed offer. An expired
-trial is not offered again; recovery preserves its original expiry.
+trial is not offered again; recovery preserves its original expiry. In account deletion,
+keep the retention and recovery sentences on separate lines and highlight the
+required phrase “ELIMINAR MI CUENTA” in the primary color.
