@@ -189,7 +189,8 @@ completed based only on a browser return URL.
 The subscription entry uses a brand header and an 880 px content region: three
 short benefits beside one monthly-plan card. On narrow screens, center the heading
 and use a single compact white surface, capped at 440 px, ordered as plan,
-benefit checklist, then the invitation action. Keep
+benefit checklist, then the invitation action. Separate the invitation from the
+checklist with a fine divider and leave generous space above Suscribirme. Keep
 Suscribirme primary and the seven-day trial visibly available below it when
 eligible. Explain unavailable checkout rather than leaving an unexplained disabled
 button. Do not invent a price: the current adapter exposes availability, not pricing;
