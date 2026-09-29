@@ -1845,6 +1845,7 @@ body .main-header .header-right .header-signout { background: var(--color-surfac
 .account-delete-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .account-delete-heading h2 { display: flex; align-items: center; gap: 10px; margin: 0; }
 .account-delete-dialog p { font-size: .82rem; line-height: 1.6; text-align: justify; }
+.account-delete-dialog label[for="delete-confirmation"] { margin-top: 16px; }
 .account-delete-phrase { color: var(--color-primary); }
 .account-delete-dialog .text-link { display: block; margin: 18px auto 0; }
 
