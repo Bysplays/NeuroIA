@@ -44,6 +44,10 @@ Manrope is the interface family with a system sans-serif fallback. Headings have
 compact line height and moderate weight, body copy comfortable line spacing.
 Keep type in rem so normal, large (118%) and very large (135%) settings work.
 Controls target 48 px or more, primary actions 54–56 px. Do not disable browser zoom.
+Use a restrained 2 px primary-color focus outline: 2 px offset for actions, flush
+with the border for fields. Apply focus-visible rather than outlining every pointer
+click; interest cards highlight only keyboard-visible input focus. Preserve contrast
+and keyboard focus indication in all themes instead of removing outlines.
 Prevent accidental mouse/touch text selection in app chrome, buttons, tabs and game
 surfaces. Preserve selection in inputs, textareas, editable content, code and public
 information documents. Use `data-selectable="true"` for additional copyable content;
