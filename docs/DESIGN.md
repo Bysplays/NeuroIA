@@ -495,5 +495,4 @@ with a 10px gap and no extra paragraph margin pushing the action down.
 
 Category choices form a joined row: only the first and last buttons have rounded
 outer corners; all inner corners remain square. Login/registration and information
-pages use the shared outlined Cerrar header action. Password recovery retains
-Volver to sign-in with the same button styling.
+pages use the shared outlined Cerrar header action. Password recovery also uses Cerrar with the same styling, returning to sign-in.
