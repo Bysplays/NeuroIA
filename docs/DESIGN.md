@@ -93,7 +93,12 @@ remain within their section; they must not be confused with the primary navigati
 The unauthenticated app home introduces NeuroIA before asking for credentials. It has
 one short headline (“Juega a tu ritmo”), one sentence about the games, a primary
 **Iniciar sesión** action. The centered “Financiación IGAPE” link sits directly
-below it and opens the shared native dialog with the complete funding notice. Avoid repeated
+below it and opens the shared native dialog with the complete funding notice.
+Center this home’s hero vertically in the space between header and footer, allowing
+the page to grow and scroll on short viewports or with enlarged text. The sign-in
+button matches the subtitle column width, capped at 430 px; its funding link is
+centered underneath. This vertical centering applies only to the unauthenticated
+home, not the credential forms or signed-in workspace. Avoid repeated
 authentication actions, promotional eyebrows, illustration captions and explanatory
 card grids. Do not show a subscription pitch or the full funding image inline; longer product
 explanations remain accessible through Sobre NeuroIA. Registration and sign-in are

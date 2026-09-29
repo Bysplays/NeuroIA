@@ -71,7 +71,7 @@ export function LoginScreen({
     }
   };
   return (
-    <main className="entry-page">
+    <main className={`entry-page${mode === null ? " entry-home" : ""}`}>
       <header className="entry-header">
         <button
           className="brand-button"
