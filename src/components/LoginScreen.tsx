@@ -157,11 +157,11 @@ export function LoginScreen({
                       ? "Recupera tu contraseña"
                       : "Te damos la bienvenida"}
                 </h1>
-                <p>
+                {mode !== "register" && <p>
                   {mode === "reset"
                     ? "Te enviaremos un enlace para recuperar tu contraseña."
-                    : mode === "register" ? "Las cuentas de terceros no necesitan registro. Accede desde «Iniciar sesión»." : professional ? "Accede a tu espacio profesional." : "Entra para continuar a tu ritmo."}
-                </p>
+                    : professional ? "Accede a tu espacio profesional." : "Entra para continuar a tu ritmo."}
+                </p>}
                 {mode === "signin" && (
                   <>
                     <button
@@ -254,6 +254,11 @@ export function LoginScreen({
                           : "Entrar"}
                     <ArrowRight size={20} />
                   </button>
+                  {mode === "register" && (
+                    <p className="entry-provider-note">
+                      Las cuentas de terceros no necesitan registro. Accede desde «Iniciar sesión».
+                    </p>
+                  )}
                   {mode === "signin" && (
                     <button
                       className="email-text-button"

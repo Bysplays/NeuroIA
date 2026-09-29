@@ -1593,6 +1593,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .account-entry-form h1 { font-size: clamp(1.4rem, 3vw, 1.7rem); line-height: 1.25; margin: 18px 0 8px; letter-spacing: -.035em; }
 .account-entry-form > p { font-size: .85rem; line-height: 1.5; color: var(--color-text-muted); margin-bottom: 18px; }
 .account-entry-form .email-form { display: grid; gap: 14px; }
+.account-entry-form .entry-provider-note { font-size: .7rem; line-height: 1.5; color: var(--color-text-muted); text-align: center; margin: 0; }
 .entry-field { display: grid; gap: 6px; min-width: 0; }
 .account-entry-form .email-form input:not([hidden]) { width: 100%; min-height: 48px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-main); border-radius: 12px; padding: 9px 14px; font-size: .9rem; }
 .account-entry-form label { font-size: .8rem; line-height: 1.4; font-weight: 600; }
