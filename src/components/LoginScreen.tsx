@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Brain, Hand, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Brand } from "./Brand";
 import { PracticeMotif } from "./PracticeMotif";
 import { HeaderIllustration } from "./HeaderIllustration";
 import { ProductInformation } from "./ProductInformation";
 import { ProjectFunding } from "./ProjectFunding";
-import { PRODUCT_INTRO } from "../services/productCopy";
 import { authErrorMessage } from "../services/authErrors";
 import type { EmailAction } from "../services/emailAuth";
 
@@ -88,45 +87,36 @@ export function LoginScreen({
           >
             Iniciar sesión
           </button>
-          <button
-            className="paper-nav-button"
-            disabled={busy}
-            onClick={() => changeMode("register")}
-          >
-            Crear cuenta
-          </button>
+          {mode !== null && (
+            <button
+              className="paper-nav-button"
+              disabled={busy}
+              onClick={() => changeMode("register")}
+            >
+              Crear cuenta
+            </button>
+          )}
         </div>
       </header>
       {mode === null ? (
         <>
           <section className="public-hero" aria-labelledby="entry-title">
             <div>
-              <p className="editorial-eyebrow">
-                {professional
-                  ? "Para profesionales"
-                  : "Juega. Practica. Progresa a tu ritmo."}
-              </p>
               <h1 ref={title} tabIndex={-1} id="entry-title">
                 {professional ? (
                   <>
-                    Acompaña la práctica
-                    <br />
-                    de otras personas.
+                    Un espacio para <em>acompañar.</em>
                   </>
                 ) : (
                   <>
-                    Jugar también
-                    <br />
-                    puede ser una forma
-                    <br />
-                    de <em>entrenar.</em>
+                    Juega a <em>tu ritmo.</em>
                   </>
                 )}
               </h1>
               <p>
                 {professional
-                  ? "Un espacio para proponer juegos y consultar la actividad de las personas que vinculen su acceso contigo."
-                  : PRODUCT_INTRO}
+                  ? "Propón juegos y consulta la actividad de las personas vinculadas contigo."
+                  : "Juegos para practicar memoria, atención y coordinación."}
               </p>
               <div className="public-actions">
                 <button
@@ -136,13 +126,6 @@ export function LoginScreen({
                 >
                   Crear mi cuenta
                   <ArrowRight size={21} />
-                </button>
-                <button
-                  className="text-link"
-                  disabled={busy}
-                  onClick={() => changeMode("signin")}
-                >
-                  Ya tengo cuenta
                 </button>
               </div>
               <button
@@ -160,35 +143,6 @@ export function LoginScreen({
             </div>
             <div className="public-art">
               <PracticeMotif />
-              <span>Un pequeño momento para ti</span>
-            </div>
-          </section>
-          <section className="public-explanation" aria-label="Qué puedes hacer">
-            <h2>Pequeños juegos. Muchas formas de practicar.</h2>
-            <div>
-              {[
-                {
-                  icon: Search,
-                  title: "Observar",
-                  copy: "Busca figuras y encuentra lo que tienen en común.",
-                },
-                {
-                  icon: Brain,
-                  title: "Recordar",
-                  copy: "Descubre parejas y repite pequeñas secuencias.",
-                },
-                {
-                  icon: Hand,
-                  title: "Participar",
-                  copy: "Completa palabras, agrupa objetos y toca dianas.",
-                },
-              ].map(({ icon: Icon, title: label, copy }) => (
-                <article key={label}>
-                  <Icon size={26} />
-                  <h3>{label}</h3>
-                  <p>{copy}</p>
-                </article>
-              ))}
             </div>
           </section>
           <ProjectFunding />

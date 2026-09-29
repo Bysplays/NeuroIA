@@ -91,8 +91,11 @@ remain within their section; they must not be confused with the primary navigati
 ## Public entry and institutional funding
 
 The unauthenticated landing explains NeuroIA before asking for credentials. It has
-visible **Crear cuenta** and **Iniciar sesión**, examples of actual games, an entry
-to subscription, and the supplied funding notice. Registration and sign-in are
+one short headline (“Juega a tu ritmo”), one sentence about the games, a primary
+**Crear mi cuenta** action and **Iniciar sesión** in the header. Avoid repeated
+authentication actions, promotional eyebrows, illustration captions and explanatory
+card grids. Keep the subscription link and supplied funding notice; longer product
+explanations remain accessible through Sobre NeuroIA. Registration and sign-in are
 inline pages with labelled fields, Google access, recovery and a clear way back.
 Personal/professional intent survives authentication. Existing verification,
 recent-authentication and account ownership requirements remain unchanged.

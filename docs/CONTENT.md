@@ -9,8 +9,9 @@ not a determination of regulatory status or legal compliance.
 
 `src/services/productCopy.ts` holds the public introduction, information sections
 and supplied general notice. `ProductInformation` makes these accessible before
-sign-in and from the settings footer using the shared dialog. The login heading
-and dashboard claim come from the PDF. Browser title and description follow the
+sign-in and from the settings footer using the shared dialog. The concise landing heading “Juega a tu ritmo” adapts the supplied claim; its
+one-sentence introduction names actual practice areas. The complete product
+explanation remains in About. Browser title and description follow the
 same positioning. Keep descriptions grounded in observable in-game activity.
 
 ## Included sections

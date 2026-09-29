@@ -1581,22 +1581,14 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .entry-page { max-width: 1224px; padding: 0 32px 24px; margin: 0 auto; width: 100%; }
 .entry-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 0; }
 .entry-header-actions, .public-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; }
-.public-hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 70px; align-items: center; padding: 60px 0 80px; }
+.public-hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 70px; align-items: center; padding: 48px 0 64px; }
 .public-hero h1 { font-size: clamp(2.5rem, 5vw, 3.7rem); line-height: 1.08; margin: 22px 0; }
 .public-hero h1 em, .account-entry-welcome em { color: var(--color-primary); font-style: normal; }
-.public-hero > div > p:not(.editorial-eyebrow) { color: var(--color-text-muted); max-width: 550px; line-height: 1.7; font-size: .95rem; }
+.public-hero > div > p:not(.editorial-eyebrow) { color: var(--color-text-muted); max-width: 430px; line-height: 1.6; font-size: 1rem; }
 .public-actions { margin-top: 28px; }
 .public-actions .touch-btn { font-size: .95rem; gap: 24px; min-height: 56px; }
 .entry-purchase-link { background: none; border: 0; color: var(--color-primary); font: inherit; font-size: .82rem; text-decoration: underline; text-underline-offset: 4px; padding: 16px 0; min-height: 48px; cursor: pointer; }
 .public-art { padding: 32px; border-radius: 40% 40% 24px 24px; background: var(--panel-blue); display: grid; gap: 24px; text-align: center; }
-.public-art > span { color: var(--color-text-muted); font-size: .82rem; }
-.public-explanation { border-top: 1px solid var(--color-border); padding: 40px 0 64px; }
-.public-explanation h2 { font-size: 1.7rem; margin: 0 0 28px; }
-.public-explanation > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-.public-explanation article { background: var(--color-surface); border-radius: 24px; padding: 28px; }
-.public-explanation article > svg { color: var(--color-primary); }
-.public-explanation h3 { font-size: 1.2rem; margin: 16px 0 8px; }
-.public-explanation p { font-size: .88rem; color: var(--color-text-muted); line-height: 1.6; margin: 0; }
 .account-entry-layout { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 7vw, 110px); align-items: start; padding: 32px 0 60px; }
 .account-entry-welcome { background: var(--panel-blue); padding: 40px; border-radius: 24px; overflow: hidden; }
 .account-entry-welcome h2 { font-size: clamp(2.3rem, 4vw, 3.3rem); line-height: 1.13; margin: 24px 0; }
@@ -1667,9 +1659,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
   .public-hero { grid-template-columns: 1fr; padding: 36px 0; gap: 36px; }
   .public-hero h1 { font-size: 2.5rem; }
   .public-art { max-width: 350px; width: 100%; margin: auto; padding: 24px; }
-  .public-art .practice-motif { max-width: 230px; }
-  .public-explanation > div { grid-template-columns: 1fr; gap: 16px; }
-  .public-explanation h2 { font-size: 1.5rem; }
+  .public-art .practice-motif { max-width: 170px; }
   .account-entry-layout { grid-template-columns: 1fr; padding-top: 12px; }
   .account-entry-welcome { display: none; }
   .account-overview-grid { grid-template-columns: 1fr; }

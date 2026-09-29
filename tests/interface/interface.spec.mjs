@@ -16,7 +16,7 @@ for (const size of [{width:390,height:844},{width:820,height:1180},{width:1280,h
   test(`entry, funding, home and eight games at ${size.width}`, async ({ page }) => {
     await page.setViewportSize(size);
     await page.goto(fixture+'?entry');
-    await expect(page.getByRole('heading',{name:/Jugar también/})).toBeVisible();
+    await expect(page.getByRole('heading',{name:/Juega a tu ritmo/})).toBeVisible();
     const image = page.locator('.project-funding > img');
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate(e=>e.complete && e.naturalWidth > 0)).toBe(true);
@@ -27,7 +27,7 @@ for (const size of [{width:390,height:844},{width:820,height:1180},{width:1280,h
     await expect(page.getByRole('dialog').locator('.project-funding')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button',{name:'Sobre NeuroIA',exact:true})).toBeFocused();
-    await page.getByRole('button',{name:'Crear cuenta',exact:true}).first().click();
+    await page.getByRole('button',{name:'Crear mi cuenta',exact:true}).click();
     await expect(page.getByLabel('Repite la contraseña')).toBeVisible();
     await page.goto(fixture);
     await expect(page.getByRole('heading',{name:'Hola, Lucía.'})).toBeVisible();
