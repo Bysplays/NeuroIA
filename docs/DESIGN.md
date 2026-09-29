@@ -188,7 +188,8 @@ Mi cuenta, using the existing subscription service. Never imply payment has
 completed based only on a browser return URL.
 The subscription entry uses a brand header and an 880 px content region: three
 short benefits beside one monthly-plan card. On narrow screens, center the heading
-and combine benefits and plan in a single compact white surface, capped at 440 px. Keep
+and use a single compact white surface, capped at 440 px, ordered as plan,
+invitation action, then the benefit checklist. Keep
 Suscribirme primary and the seven-day trial visibly available below it when
 eligible. Explain unavailable checkout rather than leaving an unexplained disabled
 button. Do not invent a price: the current adapter exposes availability, not pricing;

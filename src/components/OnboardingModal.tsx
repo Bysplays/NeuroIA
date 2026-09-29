@@ -29,15 +29,6 @@ export function OnboardingModal({ access, busy, loadFailed, errorMessage, invita
       {checkoutReturn === 'cancelled' && <p>Has vuelto sin terminar el pago. Puedes retomarlo o elegir otra opción.</p>}
       {errorMessage && !inviteOpen && <p role="alert">{errorMessage}</p>}
       <div className="onboarding-options" aria-busy={busy}>
-        <div className="onboarding-benefits">
-          <span className="onboarding-plan-icon" aria-hidden="true"><Layers size={30}/></span>
-          <h2>Tu momento para practicar.</h2>
-          <ul>
-            <li><Check size={19} aria-hidden="true"/><span>Ocho juegos para practicar</span></li>
-            <li><Check size={19} aria-hidden="true"/><span>Dificultad adaptada a tu ritmo</span></li>
-            <li><Check size={19} aria-hidden="true"/><span>Tu actividad y tus logros, a mano</span></li>
-          </ul>
-        </div>
         <section className="onboarding-option onboarding-paid" aria-labelledby="membership-title">
           <span className="onboarding-plan-label">TU ACCESO</span>
           <h2 id="membership-title">NeuroIA mensual</h2>
@@ -49,8 +40,18 @@ export function OnboardingModal({ access, busy, loadFailed, errorMessage, invita
             {access?.canManageSubscription && <button className="paper-nav-button" disabled={busy} onClick={() => invoke('portal', onPortal)}>{label('portal', 'Gestionar suscripción')}</button>}
           </div>
         </section>
-      </div>
       <button className="onboarding-invite" aria-haspopup="dialog" disabled={busy} onClick={() => setInviteOpen(true)}><Ticket size={20} aria-hidden="true"/><span>Tengo un código de invitación</span><ArrowRight size={20} aria-hidden="true"/></button>
+        <div className="onboarding-benefits">
+          <span className="onboarding-plan-icon" aria-hidden="true"><Layers size={30}/></span>
+          <h2>Tu momento para practicar.</h2>
+          <ul>
+            <li><Check size={19} aria-hidden="true"/><span>Ocho juegos para practicar</span></li>
+            <li><Check size={19} aria-hidden="true"/><span>Dificultad adaptada a tu ritmo</span></li>
+            <li><Check size={19} aria-hidden="true"/><span>Tu actividad y tus logros, a mano</span></li>
+          </ul>
+        </div>
+      </div>
+
       {inviteOpen && <ModalFrame labelledBy="invitation-title" onClose={() => setInviteOpen(false)}>
         <section className="invitation-dialog">
         <div className="entry-error-heading"><Ticket size={24} aria-hidden="true"/><h2 id="invitation-title">Tu invitación</h2></div>
