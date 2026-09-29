@@ -9,7 +9,7 @@ import { FullscreenButton } from './FullscreenButton';
 import { useViewportPanel } from '../services/viewport';
 import { gameConfig, type GameMode } from '../services/difficulty';
 import { SessionContext } from '../services/gameSession';
-import { HeaderIllustration } from './HeaderIllustration';
+import { PracticeMotif } from './PracticeMotif';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Minus, Plus, CircleHelp, Clock, Settings2, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { createGameClock } from '../services/gameClock';
@@ -91,14 +91,9 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>
       <div className="placement-card">
-        <HeaderIllustration scene={exercise?.id ?? "home"} className="placement-art" />
+        <div className="instruction-art"><PracticeMotif /></div>
         <div className="placement-content">
         <div className="placement-progress-heading">
-        {!started && mode === 'normal' && !lockedLevel ? <div className="instruction-level-control" role="group" aria-label="Dificultad del juego">
-          <button type="button" aria-label="Bajar nivel" disabled={level <= 1} onClick={() => setLevel(value => Math.max(1, value - 1))}><Minus size={16}/></button>
-          <span aria-live="polite">Nivel {level}</span>
-          <button type="button" aria-label="Subir nivel" disabled={level >= 10} onClick={() => setLevel(value => Math.min(10, value + 1))}><Plus size={16}/></button>
-        </div> : mode !== 'placement' ? <span className="soft-label">Nivel {level}</span> : null}
         <button className="paper-nav-button" onClick={() => soundService.speak(instruction)}><Volume2 size={20} />Escuchar</button>
         </div>
         <div className="placement-copy">
@@ -106,7 +101,13 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         <p>{instruction}</p>
         {mode === 'practice' && <p className="soft-label">Ejemplo sin puntuación</p>}
         </div>
-        <div className="placement-actions"><button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setStarted(true); setHelp(false); }}>{started ? 'Continuar jugando' : 'Empezar a jugar'}</button></div>
+        <div className="placement-actions">
+        {!started && mode === 'normal' && !lockedLevel ? <div className="instruction-level-control" role="group" aria-label="Dificultad del juego">
+          <button type="button" aria-label="Bajar nivel" disabled={level <= 1} onClick={() => setLevel(value => Math.max(1, value - 1))}><Minus size={16}/></button>
+          <span aria-live="polite">Nivel {level}</span>
+          <button type="button" aria-label="Subir nivel" disabled={level >= 10} onClick={() => setLevel(value => Math.min(10, value + 1))}><Plus size={16}/></button>
+        </div> : mode !== 'placement' ? <span className="soft-label">Nivel {level}</span> : null}
+        <button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setStarted(true); setHelp(false); }}>{started ? 'Continuar jugando' : 'Empezar a jugar'}</button></div>
         </div>
       </div>
       {(!lockedLevel || step) && <footer className="instruction-navigation">{!lockedLevel && <button className="entry-toolbar-action" onClick={onBack}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}{step && <span className="instruction-step soft-label">{step}</span>}</footer>}

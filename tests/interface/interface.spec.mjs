@@ -503,3 +503,26 @@ test('remaining trial uses continue wording and expired recreated accounts canno
   await page.goto(fixture+'?subscription&used-trial');
   await expect(page.locator('.onboarding-trial-link')).toHaveCount(0);
 });
+
+test('game entry groups level with start and preserves the chosen level through help', async ({page}) => {
+  for(const size of [{width:320,height:740},{width:390,height:844},{width:820,height:1180},{width:1280,height:800},{width:844,height:390},{width:390,height:844,large:true}]) {
+    await page.setViewportSize(size);
+    await page.goto(fixture+'?game=visual-scanning'+(size.large ? '&large' : ''));
+    const start=page.getByRole('button',{name:'Empezar a jugar'});
+    const levels=page.getByRole('group',{name:'Dificultad del juego'});
+    const a=await start.boundingBox(), b=await levels.boundingBox();
+    expect(Math.abs(a.y-b.y)).toBeLessThan(2);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await expect(page.locator('.game-instruction-screen .header-illustration')).toHaveCount(0);
+    await page.getByRole('button',{name:'Subir nivel'}).click();
+    await expect(levels).toContainText('Nivel 2');
+    await page.screenshot({path:`/tmp/neuroia-game-entry-${size.width}.png`,fullPage:true});
+    await start.click();
+    await expect(page.locator('.viewport-session-footer')).toContainText('Nivel 2');
+    await page.getByRole('button',{name:'Mostrar instrucciones'}).click();
+    await page.getByRole('button',{name:'Continuar jugando'}).click();
+    await expect(page.locator('.viewport-session-footer')).toContainText('Nivel 2');
+    await page.getByRole('button',{name:'Volver',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'Hola, Lucía.'})).toBeVisible();
+  }
+});

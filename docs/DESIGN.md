@@ -257,10 +257,13 @@ unselected levels and existing history.
 
 ## Game instructions, play and feedback
 
-Each game starts with a full instruction page: supporting illustration, title,
-short instruction, optional listen control, ordinary-play level control and one
-primary **Empezar a jugar** action. Keep the back action separate. Landscape uses
-two columns; portrait stacks a compact illustration above the instruction. Help
+Each game starts with a full instruction page using the approved blue-card
+`PracticeMotif`, never a legacy companion. Desktop uses an illustration column
+and a compact copy/action column; narrow screens stack a small illustration above
+centered instructions. Keep listen separate above the title. Group the ordinary-play
+level selector and **Empezar a jugar** side by side at equal height, with a small
+gap and generous hit areas, including on phones. Keep the back action separate.
+Short landscape viewports reduce artwork and spacing; allow scrolling when needed. Help
 opens a compact Cómo jugar modal, preserves answers and pauses the existing game clock.
 
 Active play has utilities/time above the task, a clear stimulus and response area,
