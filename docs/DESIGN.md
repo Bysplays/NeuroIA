@@ -98,7 +98,8 @@ Center this home’s hero vertically in the space between header and footer, all
 the page to grow and scroll on short viewports or with enlarged text. The sign-in
 button matches the subtitle column width, capped at 430 px; its funding link is
 centered underneath. This vertical centering applies only to the unauthenticated
-home, not the credential forms or signed-in workspace. At widths up to 760 px,
+home. Credential forms also center within their own header/footer shell; the
+signed-in workspace keeps its existing alignment. At widths up to 760 px,
 copy and illustration share a centered column capped at 430 px; retain side gutters
 and allow heading wrapping. Test intermediate widths around the breakpoint as well
 as standard devices so neither the text nor artwork drifts to a different axis. Avoid repeated
@@ -112,7 +113,8 @@ email divider; registration is email-only with a short note explaining that
 third-party accounts can use Iniciar sesión without separate registration.
 Use 6 px label/input gaps, 14 px between fields, 48 px minimum inputs and
 54 px primary actions. Keep the auth header and footer compact and use a minimum
-viewport-height shell; allow natural scrolling on short screens, with a keyboard
+viewport-height shell. Center the auth form vertically in the available space
+between header and footer; allow natural scrolling on short screens, with a keyboard
 or enlarged text. Registration uses the third-party note as its only subtitle. The header holds only the brand and Volver. Do not add a decorative side
 panel or duplicate access buttons. Reference: [Brilliant sign-in on Mobbin](https://mobbin.com/screens/a7afa68a-7e23-4fe5-8c0d-081a1eecc314),
 adapted as a full page with NeuroIA's palette and existing authentication.

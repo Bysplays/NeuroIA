@@ -1587,8 +1587,8 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .public-art { padding: 32px; border-radius: 40% 40% 24px 24px; background: var(--panel-blue); display: grid; gap: 24px; text-align: center; }
 .entry-auth { min-height: 100dvh; display: flex; flex-direction: column; padding-bottom: 8px; }
 .entry-auth .entry-header { padding-block: 12px; }
-.entry-auth > .product-information-links { margin-top: auto; padding: 8px 0 0; gap: 0 20px; }
-.account-entry-layout { padding: 8px 0 16px; }
+.entry-auth > .product-information-links { margin-top: 0; padding: 8px 0 0; gap: 0 20px; }
+.account-entry-layout { flex: 1; display: flex; align-items: center; padding: 8px 0 16px; }
 .account-entry-form { max-width: 440px; width: 100%; margin: 0 auto; }
 .account-entry-form h1 { font-size: clamp(1.4rem, 3vw, 1.7rem); line-height: 1.25; margin: 18px 0 8px; letter-spacing: -.035em; }
 .account-entry-form > p { font-size: .85rem; line-height: 1.5; color: var(--color-text-muted); margin-bottom: 18px; }
