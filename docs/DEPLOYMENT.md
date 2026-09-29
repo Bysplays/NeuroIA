@@ -83,6 +83,15 @@ The production-domain migration does not enable live Stripe charges.
 
 ## Identity and external services
 
+Local authenticated entry requires `VITE_BILLING_API_URL` even when purchases are
+disabled. For the existing hosted access service, put
+`VITE_BILLING_API_URL=https://neuroia-billing.kikefontanlorenzo.workers.dev`
+in ignored root `.env.local`, alongside the auth-domain setting. Preserve existing
+environment entries when editing this file. Without this URL, Google can sign in
+successfully but AccessGate cannot confirm access. Restart Vite after changes.
+The endpoint currently allows `http://localhost:5173`; an unauthenticated request
+returning 401 confirms connectivity only, not an account's entitlement.
+
 The current `authDomain` is `ceoaberto-neuroia.firebaseapp.com`. The recommended
 branded target is **auth.neuroia.es**, served by Firebase Hosting in the same
 `ceoaberto-neuroia` project. Keep the application at `neuroia.es` on GitHub Pages.

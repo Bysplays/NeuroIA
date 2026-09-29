@@ -1,21 +1,18 @@
 import { Brand } from './Brand';
-import { RotateCw } from 'lucide-react';
-import { FullscreenButton } from './FullscreenButton';
-import { HeaderIllustration } from './HeaderIllustration';
+import { CircleAlert, RotateCw } from 'lucide-react';
 
-export function ConnectionRecovery({ title = 'Vamos a reconectar', message = 'Comprueba tu conexión y vuelve a intentarlo.', onRetry, onSignOut }: {
+export function ConnectionRecovery({ title = 'No hemos podido continuar', message = 'No hemos podido cargar tu cuenta. Vuelve a intentarlo en unos instantes.', onRetry, onSignOut }: {
   title?: string; message?: string; onRetry: () => void; onSignOut: () => void;
 }) {
-  return <main className="login-screen connection-recovery">
-    <header className="login-brand"><Brand/><FullscreenButton/></header>
-    <section className="login-card" aria-labelledby="connection-title">
-      <div className="login-welcome"><HeaderIllustration scene="rest" className="login-art"/></div>
-      <div className="login-actions">
-        <h1 id="connection-title">{title}</h1>
+  return <main className="entry-page connection-recovery">
+    <header className="entry-header"><Brand/></header>
+    <div className="connection-recovery-body">
+    <section className="connection-recovery-panel" aria-labelledby="connection-title">
+        <div className="connection-recovery-heading"><CircleAlert size={24} aria-hidden="true"/><h1 id="connection-title">{title}</h1></div>
         <p role="alert">{message}</p>
-        <button className="touch-btn touch-btn-primary" onClick={onRetry}><RotateCw size={20} aria-hidden="true"/>Reintentar conexión</button>
+        <button className="touch-btn touch-btn-primary" onClick={onRetry}><RotateCw size={20} aria-hidden="true"/>Volver a intentar</button>
         <button className="placement-text-action" onClick={onSignOut}>Cerrar sesión</button>
-      </div>
     </section>
+    </div>
   </main>;
 }

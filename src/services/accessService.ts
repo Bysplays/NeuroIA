@@ -65,6 +65,7 @@ export const accessService = {
   async portal() { return (await billingRequest('/portal')).url; },
 };
 export function accessError(error: unknown): string {
+  if (error instanceof Error && error.message === 'billing-unavailable') return 'El servicio de acceso no está disponible. Inténtalo más tarde.';
   const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
   if (code.startsWith('billing/') && error instanceof Error) return error.message;
   if (code.startsWith('invitation/') && error instanceof Error) return error.message;

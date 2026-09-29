@@ -1374,11 +1374,15 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .level-game-label select { width: 100%; min-width: 0; min-height: 48px; border-radius: 16px; border: 1px solid var(--color-border); padding: 8px; color: var(--color-text-main); background: var(--color-bg); font: inherit; }
 @media (max-width: 760px) { .level-statistics { grid-template-columns: 1fr; } }
 
-.connection-recovery .login-actions .touch-btn { width: 100%; }
-.connection-recovery .login-actions .placement-text-action { align-self: center; }
-.connection-recovery .login-actions > p { margin: 0; color: var(--color-text-muted); }
-.connection-recovery .login-actions h1 { margin: 0; }
-.connection-recovery .login-art { max-height: 38dvh; object-fit: contain; mix-blend-mode: multiply; }
+.entry-page.connection-recovery { min-height: 100dvh; display: flex; flex-direction: column; }
+.connection-recovery-body { flex: 1; display: grid; place-items: center; padding: 32px 0 80px; }
+.connection-recovery-panel { width: min(100%, 440px); padding: clamp(20px, 4vw, 32px); background: var(--color-surface); border-radius: 6px; }
+.connection-recovery-heading { display: flex; align-items: center; gap: 12px; }
+.connection-recovery-heading svg { flex-shrink: 0; color: var(--color-primary); }
+.connection-recovery-heading h1 { margin: 0; font-size: 1.1rem; line-height: 1.4; }
+.connection-recovery-panel p { margin: 20px 0 28px; color: var(--color-text-muted); font-size: .9rem; line-height: 1.7; text-align: justify; hyphens: auto; }
+.connection-recovery-panel .touch-btn { width: 100%; min-height: 54px; border-radius: 4px; }
+.connection-recovery-panel .placement-text-action { display: block; min-height: 48px; margin: 12px auto 0; }
 
 /* Session list and its read-only, session-scoped detail. */
 .professional-page-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }

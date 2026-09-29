@@ -130,6 +130,9 @@ subject to the confirmed deadline and available client materials.
   Google OAuth callback configuration. The local authDomain override is enabled;
   the API-key referrer restriction has been corrected for the new helper, and an
   isolated local popup reaches Google sign-in. Full account sign-in remains to verify;
+  the missing local `VITE_BILLING_API_URL` has also been restored and browser CORS
+  connectivity checked. Verify entry through AccessGate and cloud progress with
+  the owner's existing account; no real account was used for automated checks.
   production remains unchanged. Keep existing email links working while the
   ticket is unresolved. Setup and rollback are in [DEPLOYMENT.md](DEPLOYMENT.md).
 

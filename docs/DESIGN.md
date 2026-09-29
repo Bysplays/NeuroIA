@@ -136,6 +136,12 @@ Justify error paragraphs with Spanish hyphenation; start Google troubleshooting
 in a separate paragraph after the Google sentence;
 Escape/backdrop also dismiss and return focus while preserving entered values.
 Keep recovery success as an inline status. Reference: [Workable error notification](https://mobbin.com/screens/d66e2824-c0f4-415f-ac20-aaf9d46ff1da).
+Post-authentication access/progress failures use a full page with the brand and a
+centered 440 px maximum recovery panel, 6 px corners and no decorative illustration
+or fullscreen control. Keep icon and compact heading together, justify the specific
+error message, and offer Volver a intentar followed by Cerrar sesión. Allow natural
+scrolling on short viewports. Do not describe missing service configuration as a
+problem with the user's internet connection.
 Personal/professional intent survives authentication. Existing verification,
 recent-authentication and account ownership requirements remain unchanged.
 

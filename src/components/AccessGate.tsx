@@ -77,7 +77,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
   // Unknown entitlement is not a denied entitlement: never show purchase options yet.
   if (!access) {
     if (!error) return <AppLoading />;
-    return <ConnectionRecovery onRetry={() => { setError(''); void refresh(); }} onSignOut={onSignOut}/>;
+    return <ConnectionRecovery message={error} onRetry={() => { setError(''); void refresh(); }} onSignOut={onSignOut}/>;
   }
   if (access.active) return <AccountAccessContext.Provider value={access}>{children}</AccountAccessContext.Provider>;
   return <main className="access-entry">
