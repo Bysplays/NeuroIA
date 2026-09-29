@@ -1554,6 +1554,16 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
   .interest-panel { padding-block: 24px; }
   .interest-option { padding: 12px; }
 }
+/* Interest areas use tiles; movement preferences retain descriptive rows. */
+.interest-area-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.interest-area-grid .interest-option { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-content: start; padding: 16px; }
+.interest-area-grid .interest-icon { grid-column: 1; grid-row: 1; }
+.interest-area-grid .interest-check { grid-column: 2; grid-row: 1; }
+.interest-area-grid .interest-option > span:first-of-type { grid-column: 1 / -1; grid-row: 2; }
+.interest-area-grid .interest-option:last-child { grid-column: 1 / -1; }
+@media (max-width: 359px) {
+  .interest-area-grid { grid-template-columns: minmax(0, 1fr); }
+}
 .interest-options legend { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 .interest-actions .touch-btn:disabled { opacity: .5; cursor: default; }

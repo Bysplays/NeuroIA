@@ -28,7 +28,7 @@ export function PlacementPreferences({ initial, onSave, onBack, onSettings }: {
         <div className="interest-step-indicator" aria-hidden="true"><i className="is-active"/><i className={step === 1 ? 'is-active' : ''}/></div>
         <h1 id="interests-title" ref={heading} tabIndex={-1}>{step === 0 ? '¿Qué te apetece practicar?' : '¿Cómo te resulta más cómodo jugar?'}</h1>
         <p className="interest-description">{step === 0 ? 'Elige una o varias áreas para tus primeros juegos.' : 'Elige cómo prefieres interactuar. Puedes omitir este paso.'}</p>
-        {step === 0 ? <fieldset className="interest-options"><legend className="sr-only">Áreas que quieres practicar</legend>
+        {step === 0 ? <fieldset className="interest-options interest-area-grid"><legend className="sr-only">Áreas que quieres practicar</legend>
           {INTEREST_AREAS.map(area => { const Icon = icons[area.id]; const selected = interests.includes(area.id); return <label key={area.id} className={`interest-option${selected ? ' is-selected' : ''}`}>
             <input type="checkbox" checked={selected} onChange={() => setInterests(previous => selected ? previous.filter(id => id !== area.id) : INTEREST_AREAS.filter(item => previous.includes(item.id) || item.id === area.id).map(item => item.id))}/>
             <Icon className="interest-icon" size={25} aria-hidden="true"/><span><strong>{area.title}</strong><small>{area.description}</small></span><span className="interest-check" aria-hidden="true">{selected && <Check size={18}/>}</span>
@@ -41,7 +41,7 @@ export function PlacementPreferences({ initial, onSave, onBack, onSettings }: {
         </fieldset>}
         <div className="interest-actions">
           <button className="touch-btn touch-btn-primary" disabled={!interests.length} onClick={() => step === 0 ? setStep(1) : save()}>{step === 0 ? 'Continuar' : 'Preparar mis juegos'}</button>
-          <button className="placement-text-action" onClick={() => { if (step === 0) { setInterests(INTEREST_AREAS.map(area => area.id)); setStep(1); } else save('unspecified'); }}>{step === 0 ? 'No sé qué elegir: explorar todas' : 'Omitir esta preferencia'}</button>
+          {step === 1 && <button className="placement-text-action" onClick={() => save('unspecified')}>Omitir esta preferencia</button>}
         </div>
         {(step > 0 || onBack) && <button className="placement-text-action interest-back" onClick={() => step > 0 ? setStep(0) : onBack?.()}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}
       </div>

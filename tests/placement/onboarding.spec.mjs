@@ -56,9 +56,11 @@ test('taps plan excludes tracking, choices can change and large text remains usa
   await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
-test('skip interests offers all areas, and reassessment starts with editable preferences', async ({ page }) => {
+test('explicit area choices persist when editing reassessment', async ({ page }) => {
   await page.goto(fixture + '?retake');
-  await page.getByRole('button', { name: 'No sé qué elegir: explorar todas' }).click();
+  await expect(page.getByRole('button', { name: /No sé qué elegir/ })).toHaveCount(0);
+  for (const checkbox of await page.getByRole('checkbox').all()) await checkbox.check();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Omitir esta preferencia' }).click();
   await expect(page.getByText('0 de 8 juegos preparados')).toBeVisible();
   await page.getByRole('button', { name: 'Cambiar mis elecciones' }).click();

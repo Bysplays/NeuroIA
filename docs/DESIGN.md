@@ -226,7 +226,9 @@ actions. Selected choices use a pale blue surface and an explicit check; preserv
 keyboard focus and readable descriptions on mobile and with enlarged text.
 
 Ask one question at a time: desired areas, then optional interaction preference.
-Present labelled choices, selected state and an explicit skip. Avoid collecting a
+Present areas in a two-column tile grid, with the final tile spanning both columns;
+use one column on very narrow screens. Require at least one area and omit the
+explore-all shortcut. Movement preferences retain labelled rows and an explicit skip. Avoid collecting a
 diagnosis. Only selected areas enter initial assessment; tap preference excludes
 continuous tracking. Untested games remain accessible with their default level.
 
