@@ -926,7 +926,7 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 .subscription-upgrade:disabled { opacity: .65; cursor: wait; }
 
 .preferences-account { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 0; border-top: 1px solid var(--color-border); }
-.preferences-signout { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 0; border-radius: 8px; background: var(--color-primary); color: white; font-size: .78rem; cursor: pointer; }
+.preferences-signout { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 0; border-radius: 8px; background: var(--color-surface); color: var(--color-primary); font-size: .78rem; cursor: pointer; }
 .preferences-signout:disabled, .subscription-action:disabled { opacity: .6; cursor: wait; }
 
 /* Stable entry presentation shared by every initial asynchronous boundary. */
@@ -1840,7 +1840,7 @@ body .main-header .header-right .header-signout { min-height: 44px; height: 44px
 .main-header .header-right .header-icon-btn:not(.muse-entry) { width: 44px; padding: 0; }
 .main-header .header-right .muse-entry, .main-header .header-right .header-signout { padding: 10px 14px; }
 
-body .main-header .header-right .header-signout { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+body .main-header .header-right .header-signout { background: var(--color-surface); color: var(--color-primary); border-color: var(--color-border); }
 .preferences-action-button.account-delete-trigger { background: var(--color-primary-light); color: var(--color-text-muted); border-color: var(--color-border); }
 .account-delete-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .account-delete-heading h2 { display: flex; align-items: center; gap: 10px; margin: 0; }

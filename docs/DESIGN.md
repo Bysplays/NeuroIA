@@ -533,7 +533,8 @@ on one row, exact typed phrase, identity confirmation, explicit irreversible sco
 Paid subscribers first see a Stripe-management action; trials/invitations proceed
 to confirmation. Closing or Escape restores focus without starting deletion.
 Acceptance signs out; durable server cleanup continues independently of the tab.
-Cerrar sesión uses a filled primary-color button in both header and settings.
+Cerrar sesión uses a white surface with primary-blue text and icon in both header
+and settings, following the surface token in contrast themes.
 
 All Mi cuenta action rows align buttons with the top of their text block, including
 Rehacer prueba and Borrar cuenta; multiline descriptions do not vertically center
