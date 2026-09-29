@@ -6,7 +6,6 @@ import { ModalFrame } from './ModalFrame';
 export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
   const state = useSyncExternalStore(eegService.subscribe, eegService.getSnapshot);
   const [open, setOpen] = useState(false);
-  const [record, setRecord] = useState(true);
   const toggle = (value: boolean) => { setOpen(value); onOpenChange?.(value); };
   const available = state.status !== 'unavailable' && eegService.supported();
   const active = state.status === 'connected' || state.status === 'connecting';
@@ -38,22 +37,15 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
               <p id="eeg-connection-status" role="status">{status}</p>
               {active
                 ? <button className="entry-toolbar-action" onClick={() => eegService.disconnect()}>{state.status === 'connecting' ? 'Cancelar conexión' : 'Desconectar'}</button>
-                : <button className="subscription-upgrade" disabled={!available} aria-describedby="eeg-connection-status" onClick={() => void eegService.connect(record)}>Conectar diadema</button>}
+                : <button className="subscription-upgrade" disabled={!available} aria-describedby="eeg-connection-status" onClick={() => void eegService.connect(true)}>Conectar diadema</button>}
             </div>
             {state.status === 'connected' && <p className="eeg-battery"><Battery size={18} aria-hidden="true"/>Batería: {state.battery === null ? 'esperando datos…' : `${state.battery} %`}</p>}
           </section>
-          {available && <section className="preferences-section" aria-labelledby="eeg-saving-title">
+          <section className="preferences-section" aria-labelledby="eeg-saving-title">
             <h3 id="eeg-saving-title"><Activity size={20} aria-hidden="true"/>Tus partidas</h3>
             <p>EEG muestra amplitud eléctrica y PPG la señal óptica. No representan atención ni saturación de oxígeno.</p>
-            <button className="preferences-companions eeg-saving-switch" role="switch"
-              aria-checked={active ? state.recording : record} disabled={active}
-              aria-describedby="eeg-saving-description" onClick={() => setRecord(!record)}>
-              <span>Guardar las gráficas con cada partida</span>
-              <span className="preferences-switch-track" aria-hidden="true"><span/></span>
-            </button>
-            <p id="eeg-saving-description">Podrás verlas en tus analíticas y también el profesional que tenga acceso a tu actividad. Se conservan con la partida; no se guardan las señales brutas.</p>
-            {active && <p>Para cambiar esta opción, desconecta la diadema.</p>}
-          </section>}
+
+          </section>
         </div>
       </div>
     </ModalFrame>}

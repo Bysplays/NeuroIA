@@ -467,3 +467,7 @@ shared compact preferences modal. The account name field and contrasting Save
 action form one joined row. The clock is a noninteractive outlined chip matching
 the transparent utility controls. Opening settings pauses placement in place;
 closing settings resumes it without a separate rest screen or Retomar action.
+
+The Muse modal retains Bluetooth connection controls and a short Tus partidas
+explanation of EEG/PPG. It does not show a recording toggle, analytics-sharing
+copy or instructions to disconnect to change recording.
