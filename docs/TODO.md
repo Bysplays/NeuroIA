@@ -108,25 +108,28 @@ subject to the confirmed deadline and available client materials.
 
 - [x] **CR-14 — Muse label (local).** Visible Conectar Muse / Conectando Muse / Muse conectado uses the same service and unsupported-browser explanation. Check physical hardware before release.
 
-- [ ] **CR-15 — Firebase URLs in visible navigation.** Obtain the exact links and
-  reproduce where the address bar changes. Separate app links/returns from Google
-  OAuth helpers and email verification/reset handlers. Existing deployment guidance
-  documents Firebase-hosted auth actions; a Firebase hostname alone is not proof of
-  a broken link. Local audit confirms `src/services/firebase.ts` intentionally uses
-  `ceoaberto-neuroia.firebaseapp.com`, documented in DEPLOYMENT.md. Feasibility confirmed: use `auth.neuroia.es` on Firebase Hosting for
-  OAuth and email actions while retaining the app on GitHub Pages. Setup sequence
-  is in DEPLOYMENT.md. Owner confirmed DNS, authorized domain and Google
-  OAuth callback. HTTPS and both auth endpoints now pass read-only checks; local
-  authDomain override is enabled. Email-template changes and end-to-end Google/email
-  verification remain pending; production authDomain is unchanged. The owner
-  captured HTTP 400 `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED` when updating
-  `notification.sendEmail.callbackUri`. Keep the existing email action URL; ask
-  Firebase Support to diagnose the project restriction before retrying migration.
-  HTTPS readiness does not resolve this backend rejection. A terminal retry with
-  Firebase CLI OAuth credentials and the official admin API reproduced the same
-  400; read-back confirmed the original callback URL remains unchanged. Gate: app navigation/returns use the intended app domain; review
-  branded auth-domain feasibility if needed, without breaking secure verification,
-  recovery or sign-in. Coordinate with the existing domain-migration backlog.
+- [ ] **CR-15 — HIGH PRIORITY: branded authentication email URLs / support follow-up.**
+  The owner has submitted a Firebase Support ticket about HTTP 400
+  `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED` when updating
+  `notification.sendEmail.callbackUri`. Await the response; ticket ID/link has not
+  been supplied. The error reproduces both in Firebase Console and through the
+  official admin API using Firebase CLI OAuth credentials. Read-back confirms
+  that the original email action URL remains unchanged.
+
+  `auth.neuroia.es` is connected to Firebase Hosting with valid HTTPS; both auth
+  endpoints respond successfully. The owner confirmed DNS, authorized domain and
+  Google OAuth callback configuration. The local authDomain override is enabled;
+  production remains unchanged. Keep existing email links working while the
+  ticket is unresolved. Setup and rollback are in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+  After Support responds, verify the permitted callback update and read it back.
+  Check newly issued verification and password-reset emails use
+  `https://auth.neuroia.es/__/auth/action`, complete both flows, exercise expired
+  and reused links, and verify return navigation and Google sign-in on the tested
+  browsers. Confirm existing accounts and progress remain intact. Close this item
+  only after the actual email flows pass, not merely on ticket resolution or an
+  HTTP 200 from the helper endpoint. Production activation remains a separate
+  deployment step.
 
 ### Game copy and reinforcement
 
