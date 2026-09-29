@@ -1,6 +1,7 @@
 import { Brand } from './Brand';
 import { useState } from 'react';
-import { Mail } from 'lucide-react';
+import { CircleAlert, Mail } from 'lucide-react';
+import { ModalFrame } from './ModalFrame';
 import type { User } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { refreshVerification, sendVerification } from '../services/emailAuth';
@@ -24,11 +25,21 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
         setNotice('Correo enviado. Abre el enlace y vuelve aquí. Revisa también la carpeta de spam.');
       } else if (await refreshVerification(user)) {
         if (auth.currentUser === user) onVerified();
-      } else setNotice('Tu correo aún no está verificado. Abre el enlace recibido y vuelve a comprobarlo.');
+      } else setError('Tu correo aún no está verificado. Abre el enlace recibido y vuelve a comprobarlo.');
     } catch (error) { setError(authErrorMessage(error, 'email')); }
     finally { setBusy(false); }
   };
   return <main className="entry-page email-verification">
+    {error && <ModalFrame labelledBy="verification-error-title" onClose={() => setError('')}>
+      <section className="entry-error-notification">
+        <div className="entry-error-heading">
+          <CircleAlert size={24} aria-hidden="true"/>
+          <h2 id="verification-error-title">No hemos podido continuar</h2>
+        </div>
+        <div className="entry-error-message" role="alert"><p>{error}</p></div>
+        <button className="touch-btn touch-btn-primary" onClick={() => setError('')}>Volver</button>
+      </section>
+    </ModalFrame>}
     <header className="entry-header"><Brand/></header>
     <div className="verification-layout">
     <section className="verification-card" aria-labelledby="verification-title">
@@ -47,7 +58,7 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
         {!notice && !error && initialDelivery === 'sending' && <p className="email-feedback" role="status">Enviando el correo de verificación…</p>}
         {!notice && !error && initialDelivery === 'sent' && <p className="email-feedback" role="status">Correo de verificación enviado.</p>}
         {!sent && !notice && !error && initialDelivery === 'failed' && <p className="email-feedback" role="alert">Tu cuenta está creada, pero no hemos podido enviar el correo. Pulsa Reenviar para intentarlo de nuevo.</p>}
-        {(error || externalError) && <p className="email-feedback" role="alert">{error || externalError}</p>}
+        {externalError && <p className="email-feedback" role="alert">{externalError}</p>}
         <footer className="verification-footer">
           <button className="email-text-button" disabled={busy || signingOut} onClick={onSignOut}>Cerrar sesión</button>
         </footer>
