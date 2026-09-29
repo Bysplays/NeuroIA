@@ -67,6 +67,7 @@ export const accessService = {
 export function accessError(error: unknown): string {
   if (error instanceof Error && error.message === 'billing-unavailable') return 'El servicio de acceso no está disponible. Inténtalo más tarde.';
   const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+  if (code === 'permission-denied') return 'No hemos podido activar el acceso con esta cuenta. Si tienes un pago pendiente, cancélalo antes de usar la invitación. Si continúa, contacta con tu profesional.';
   if (code.startsWith('billing/') && error instanceof Error) return error.message;
   if (code.startsWith('invitation/') && error instanceof Error) return error.message;
   if (['functions/not-found', 'functions/invalid-argument'].includes(code)) return 'El código no es válido';

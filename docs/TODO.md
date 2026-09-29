@@ -20,6 +20,10 @@ of a production deployment. Keep project guidance in English and UI copy in Span
   to **NeuroAI**, as requested by the owner. Keep the price and billing interval.
   Requires authenticated Stripe Dashboard/API access; no remote change performed.
 
+- [x] Pending checkout no longer makes CEOABERTO fail silently: Usar mi código
+  cancels the pending checkout before redemption; completed-payment/cancellation
+  errors stop redemption and remain visible. Isolated browser regression covers both paths.
+
 ## Project access handoff
 
 - [ ] Give `david@ceoaberto.com` access to the NeuroIA GitHub repository. Confirm

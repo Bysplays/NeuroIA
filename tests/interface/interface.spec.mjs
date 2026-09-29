@@ -250,3 +250,28 @@ test('subscription offers trial and accessible invitation without bypassing avai
   await expect(page.getByRole('status')).toContainText('comprobando tu pago');
   await expect(page.getByRole('button',{name:'Cancelar pago pendiente'})).toBeVisible();
 });
+
+
+test('invitation automatically cancels pending checkout before redemption', async ({page}) => {
+  await page.route('**/src/services/accessService.ts*', async route => {
+    const response = await route.fetch();
+    let body = await response.text();
+    body = body.replace(/async load\(\)\s*\{/, 'async load() { return {active:!!window.invited,serverNow:Date.now(),validForMs:60000,checkoutAvailable:true,pendingCheckout:!window.cancelledCheckout};');
+    body = body.replace(/async invite\(code\)\s*\{/, 'async invite(code) { if (!window.cancelledCheckout) throw new Error("checkout still pending"); window.invited = true; return;');
+    body = body.replace(/async cancelCheckout\(\)\s*\{/, 'async cancelCheckout() { if (location.search.includes("paid")) throw Object.assign(new Error("Estamos confirmando tu pago. Espera unos instantes."), {code: "billing/request-failed"}); window.cancelledCheckout = true; return;');
+    await route.fulfill({response,body});
+  });
+  await page.goto(fixture+'?access-gate');
+  await page.getByRole('button',{name:'Tengo un código de invitación'}).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Código de invitación').fill('CEOABERTO');
+  await dialog.getByRole('button',{name:'Usar mi código'}).click();
+  expect(await page.evaluate(()=>window.cancelledCheckout)).toBe(true);
+  await expect(page.getByText('Acceso confirmado',{exact:true})).toBeVisible();
+  await page.goto(fixture+'?access-gate&paid');
+  await page.getByRole('button',{name:'Tengo un código de invitación'}).click();
+  await page.getByLabel('Código de invitación').fill('CEOABERTO');
+  await page.getByRole('button',{name:'Usar mi código'}).click();
+  await expect(page.getByRole('dialog').getByRole('alert')).toContainText('Estamos confirmando tu pago');
+  expect(await page.evaluate(()=>!!window.invited)).toBe(false);
+});

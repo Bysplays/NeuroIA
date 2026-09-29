@@ -3,8 +3,9 @@ import { ArrowRight, Check, Ticket, Layers } from 'lucide-react';
 import { ModalFrame } from './ModalFrame';
 import type { AccountAccess } from '../services/accessService';
 
-export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onTrial, onInvite, onCheckout, onSignOut, onPortal, checkoutReturn, onCancelCheckout }: {
+export function OnboardingModal({ access, busy, loadFailed, errorMessage, invitationIssue, onTrial, onInvite, onCheckout, onSignOut, onPortal, checkoutReturn, onCancelCheckout }: {
   access: AccountAccess | null; busy: boolean; loadFailed: boolean;
+  errorMessage?: string;
   invitationIssue: { code: string; message: string } | null;
   onTrial: () => void; onInvite: (code: string) => void; onCheckout: () => void;
   onSignOut: () => void; onPortal: () => void;
@@ -26,6 +27,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
       {!access && !loadFailed && <p role="status">Preparando tus opciones…</p>}
       {checkoutReturn === 'success' && <p role="status">Estamos comprobando tu pago. El acceso se abrirá cuando se confirme.</p>}
       {checkoutReturn === 'cancelled' && <p>Has vuelto sin terminar el pago. Puedes retomarlo o elegir otra opción.</p>}
+      {errorMessage && !inviteOpen && <p role="alert">{errorMessage}</p>}
       <div className="onboarding-options" aria-busy={busy}>
         <div className="onboarding-benefits">
           <span className="onboarding-plan-icon" aria-hidden="true"><Layers size={30}/></span>
@@ -61,6 +63,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
           </div>
           {codeError && <p id="invitation-error" role="alert" aria-atomic="true">{codeError}</p>}
         </form>
+        {errorMessage && !codeError && <p role="alert">{errorMessage}</p>}
         <button className="email-text-button invitation-close" onClick={() => setInviteOpen(false)}>Cerrar</button>
         </section>
       </ModalFrame>}

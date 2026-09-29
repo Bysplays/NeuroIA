@@ -82,14 +82,19 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
   if (access.active) return <AccountAccessContext.Provider value={access}>{children}</AccountAccessContext.Provider>;
   return <main className="entry-page access-entry">
     <header className="entry-header"><Brand/></header>
-    {<OnboardingModal access={access} loadFailed={Boolean(error)} invitationIssue={invitationIssue} busy={busy}
+    {<OnboardingModal access={access} loadFailed={Boolean(error)} errorMessage={error} invitationIssue={invitationIssue} busy={busy}
       onSignOut={onSignOut} onTrial={() => { void run(async () => { await accessService.trial(); await refresh(); }); }}
       onInvite={code => { void run(async () => {
         setInvitationIssue(null);
-        try { await accessService.invite(code); }
+        try {
+          if (access.pendingCheckout) {
+            await accessService.cancelCheckout();
+            clearReturn();
+          }
+          await accessService.invite(code);
+        }
         catch (cause) {
-          const errorCode = cause && typeof cause === 'object' && 'code' in cause ? cause.code : '';
-          if (alive.current && (String(errorCode).startsWith('invitation/') || ['functions/not-found', 'functions/invalid-argument', 'functions/failed-precondition'].includes(String(errorCode)))) {
+          if (alive.current) {
             setInvitationIssue({ code, message: accessError(cause) });
           }
           throw cause;
@@ -98,6 +103,6 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
       }); }}
       onCheckout={() => { void run(() => redirect('checkout')); }} onPortal={() => { void run(() => redirect('portal')); }}
       checkoutReturn={checkoutReturn}
-      onCancelCheckout={() => { void run(async () => { await accessService.cancelCheckout(); clearReturn(); await refresh(); }); }} />}
+      onCancelCheckout={() => { void run(async () => { await accessService.cancelCheckout(); setInvitationIssue(null); clearReturn(); await refresh(); }); }} />}
   </main>;
 }

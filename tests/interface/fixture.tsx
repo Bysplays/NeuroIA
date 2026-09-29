@@ -8,6 +8,7 @@ import { LoginScreen } from "../../src/components/LoginScreen";
 import { ConnectionRecovery } from "../../src/components/ConnectionRecovery";
 import { EmailVerification } from "../../src/components/EmailVerification";
 import { Brand } from "../../src/components/Brand";
+import AccessGate from "../../src/components/AccessGate";
 import { OnboardingModal } from "../../src/components/OnboardingModal";
 import { AppLoading } from "../../src/components/AppLoading";
 import type { User } from "firebase/auth";
@@ -52,6 +53,7 @@ export function Fixture() {
   const [accessAction, setAccessAction] = useState('');
   const [accessBusy, setAccessBusy] = useState(false);
   const back = () => setGame(undefined);
+  if (query.has('access-gate')) return <AccessGate onSignOut={()=>setLoggedOut(true)}><p>Acceso confirmado</p></AccessGate>;
   if (query.has('subscription') && !loggedOut) return <main className="entry-page access-entry"><header className="entry-header"><Brand/></header><OnboardingModal access={{active:false, serverNow:1790683200000, checkoutAvailable:!query.has('unavailable'), kind:query.has('expired') ? 'trial' : undefined}} busy={query.has('busy') || accessBusy} loadFailed={false} invitationIssue={accessAction ? {code:accessAction,message:'Este código no es válido. Revísalo e inténtalo de nuevo.'} : null} onTrial={()=>setLoggedOut(true)} onInvite={setAccessAction} onCheckout={()=>query.has('pending') ? setAccessBusy(true) : setLoggedOut(true)} onSignOut={()=>setLoggedOut(true)} onPortal={()=>setLoggedOut(true)} checkoutReturn={query.get('checkout')} onCancelCheckout={()=>setLoggedOut(true)}/></main>;
 
   if (query.has("loading")) return <AppLoading/>;

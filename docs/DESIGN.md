@@ -190,7 +190,10 @@ a compact ModalFrame with Cerrar, Escape/backdrop dismissal and focus return, wi
 input label, inline validation and the activity-sharing explanation. Preserve
 pending-payment cancellation, subscription management and sign-out. Pending actions
 show Un momento… inside the activated button; do not add a separate footer or
-invitation loading message.
+invitation loading message. Using an invitation automatically cancels any pending
+checkout through the existing server endpoint before redeeming the code. If payment
+is already complete or cancellation fails, stop and show the error inside the modal;
+never silently discard redemption or payment errors.
 Reference: [Brilliant membership benefits](https://mobbin.com/screens/36a35dc6-cede-421e-8cf1-a4d831fc8a94),
 adapted to NeuroIA's real monthly plan and independent trial rather than copying
 Brilliant's annual pricing or automatic trial billing.
