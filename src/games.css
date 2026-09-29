@@ -20,7 +20,8 @@
 .paper-game-instruction { color: inherit; font-size: .78rem; line-height: 1.6; max-width: 650px; }
 .paper-game-companions { width: 145px; height: 145px; object-fit: contain; mix-blend-mode: multiply; }
 body:not([data-contrast="standard"]) .paper-game-companions { mix-blend-mode: normal; }
-.exercise-viewport { min-height: 0; }
+.exercise-viewport { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.game-playground { position: absolute; top: 0; left: 0; width: 100%; display: flex; flex-direction: column; gap: 12px; transform-origin: top center; }
 .exercise-container .card { box-shadow: none; }
 .exercise-container .touch-btn { box-shadow: none; border-radius: 12px; font-size: .8rem; min-height: 48px; }
 .exercise-container .touch-btn-primary { border: 0; background: var(--color-action-bg); color: var(--color-action-text); }
@@ -273,10 +274,10 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 
 .scanning-grid .cell-emoji { font-size: clamp(32px, 5vw, 64px); }
 
-/* Tablet play: adapt geometry to available height without shrinking text or clipping controls. */
+/* Active play: keep navigation fixed and fit the complete board to the remaining height. */
 .game-session { min-height: var(--panel-height, 100dvh); display: flex; flex-direction: column; }
-.game-session-play:not([hidden]) { min-height: var(--panel-height, 100dvh); display: flex; flex-direction: column; }
-.game-session-play > .exercise-container { flex: 1; justify-content: center; gap: 14px; padding: 16px 24px; }
+.game-session-play:not([hidden]) { height: var(--panel-height, 100dvh); min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.game-session-play > .exercise-container { flex: 1; min-height: 0; justify-content: flex-start; gap: 12px; padding: 0; }
 .game-session-play > .exercise-container-completed { min-height: 0; }
 .game-session-bar { padding: 8px 24px; gap: 16px; }
 .game-help-button { width: 48px; height: 48px; }
@@ -313,14 +314,14 @@ body:not([data-contrast="standard"]) .game-object { mix-blend-mode: normal; bord
 }
 
 /* Classification: centered stimulus above a joined row of category choices. */
-.game-session .categorization-game-container { flex: 0 0 auto; width: 100%; transform: translateY(16px); }
+.game-session .categorization-game-container { flex: 0 0 auto; width: 100%; }
 .game-session .categorization-card { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0; }
 .game-session .category-object-card { min-width: 0; min-height: 0; padding: 0; gap: 16px; background: transparent; }
 .game-session .category-object-card .large-object-emoji { font-size: clamp(84px, calc((var(--panel-height, 100dvh) - 414px) * .6), 160px); }
 .category-object-caption { width: 100%; text-align: center; }
 .game-session .object-name-title { font-size: 1.1rem; }
 .game-session .object-voice-btn { min-height: 44px; padding: 8px 16px; font-size: .75rem; }
-.game-session .category-bins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin-top: 60px; }
+.game-session .category-bins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin-top: 16px; }
 .game-session .category-bin-card { min-height: 80px; padding: 12px; border: 1px solid var(--color-border); border-radius: 0; background: var(--color-surface); flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; }
 body[data-contrast="standard"] .game-session .category-bin-card { background: #fff; }
 .game-session .category-bin-card:first-child { border-radius: 24px 0 0 24px; }
@@ -333,11 +334,11 @@ body[data-contrast="standard"] .game-session .category-bin-card { background: #f
 .game-session .category-bin-card .bin-check-badge { justify-content: center; font-size: .75rem; }
 
 /* Active games share the instruction screen’s bounded viewport layout. */
-.game-session-viewport .game-session-play { position: relative; width: 100%; max-width: 1120px; margin-inline: auto; padding: 16px 24px; gap: 16px; }
+.game-session-viewport .game-session-play { position: relative; width: 100%; max-width: 1120px; margin-inline: auto; padding: 12px 24px; gap: 12px; }
 .viewport-session-header { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0; gap: 16px; }
 .viewport-session-tools { position: relative; z-index: 1; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
 .viewport-session-tools > button { width: 48px; height: 48px; padding: 0; display: grid; place-items: center; }
-.game-session-viewport .game-task-title { position: static; transform: none; width: 100%; margin: 8px 0 16px; font-size: 1.2rem; line-height: 1.4; text-align: center; }
+.game-session-viewport .game-task-title { position: static; transform: none; width: 100%; margin: 8px 0; font-size: 1.2rem; line-height: 1.4; text-align: center; }
 .game-session-viewport .game-session-play > .exercise-container { padding: 0; }
 .viewport-session-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0; }
 .viewport-session-footer > .entry-toolbar-action { justify-self: start; }
@@ -492,3 +493,5 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 
 .game-resume-dialog { display: grid; gap: 20px; }
 .game-resume-dialog > h2, .game-resume-dialog > p { margin: 0; }
+
+.game-session-play > .viewport-session-header, .game-session-play > .viewport-session-footer, .game-task-title, .game-stage-progress { flex-shrink: 0; }

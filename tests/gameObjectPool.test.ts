@@ -48,3 +48,11 @@ test('specific and generic names never compete as answers for the same drawing',
     }
   }
 });
+
+test('classification avoids shared-room objects while preserving naming vocabulary', () => {
+  for(const name of ['Vaso','Taza','Toalla','Jabón','Esponja','Tijeras']) {
+    assert.ok(GAME_OBJECT_POOL.some(item=>item.name===name));
+    assert.ok(!CLASSIFICATION_POOL.some(item=>item.name===name));
+  }
+  for(let level=1;level<=10;level++) assert.equal(selectPool(gameConfig(level),CLASSIFICATION_POOL).length,gameConfig(level).rounds);
+});

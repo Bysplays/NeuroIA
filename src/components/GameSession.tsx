@@ -150,10 +150,10 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         </div>
       </footer>}
     </div>}
-    {resumeRequired && !background && !accessSuspended && !help && !eegOpen && !paused && !completed && <ModalFrame labelledBy="activity-resume-title" onClose={() => {}} dismissOnBackdrop={false}>
+    {resumeRequired && !accessSuspended && !help && !eegOpen && !paused && !completed && <ModalFrame labelledBy="activity-resume-title" onClose={() => {}} dismissOnBackdrop={false}>
       <section className="entry-error-notification game-resume-dialog">
         <h2 id="activity-resume-title">¿Seguimos?</h2>
-        <p>Tu actividad está en pausa. Continúa donde la dejaste.</p>
+        <p>Tu actividad está pausada.</p>
         <button className="touch-btn touch-btn-primary" onClick={() => setResumeRequired(false)}>Continuar actividad</button>
       </section>
     </ModalFrame>}

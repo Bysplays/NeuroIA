@@ -1,4 +1,5 @@
-import { sessionProgress } from '../services/sessionProgress';
+import { exerciseStages, sessionProgress } from '../services/sessionProgress';
+import { FittedGameArea } from './FittedGameArea';
 import { useGameSession } from '../services/gameSession';
 import { HeaderIllustration } from './HeaderIllustration';
 import React, { useEffect } from 'react';
@@ -25,6 +26,7 @@ interface ExerciseWrapperProps {
   planProgress?: PlanProgress | null;
   onNextPlanExercise?: () => void;
   children: React.ReactNode;
+  completedStages?: number;
   hideBadges?: boolean;
   hideInstructionBanner?: boolean;
 }
@@ -40,10 +42,12 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   planProgress,
   onNextPlanExercise,
   children,
+  completedStages = 0,
 }) => {
   const session = useGameSession();
   const { finish } = session;
-  const bar = sessionProgress(isCompleted ? 1 : 0, 1, session.progressScope);
+  const stages = exerciseStages(exerciseId, session.config);
+  const bar = sessionProgress(isCompleted ? stages : completedStages, stages, session.progressScope);
   useEffect(() => { finish(isCompleted); }, [isCompleted, finish]);
   useEffect(() => {
     if (isCompleted) {
@@ -65,11 +69,11 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 
   return (
     <div className={`exercise-container${isCompleted && result ? ' exercise-container-completed' : ''}`} data-domain={domain}>
-      {!isCompleted && <><h1 className="game-task-title">{title}</h1><div className="game-stage-progress" role="progressbar" aria-valuemin={0} aria-valuenow={bar.value} aria-valuemax={bar.max} aria-label={session.progressScope ? "Progreso de la sesión" : "Progreso del juego"}>
+      {!isCompleted && <h1 className="game-task-title">{title}</h1>}<div className="game-stage-progress" role="progressbar" aria-valuemin={0} aria-valuenow={bar.value} aria-valuemax={bar.max} aria-label={session.progressScope ? "Progreso de la sesión" : "Progreso del juego"}>
         {Array.from({ length: Math.ceil(bar.max) }, (_, index) => <span key={index} aria-hidden="true"><i style={{ width: `${Math.max(0, Math.min(1, bar.value - index)) * 100}%` }}/></span>)}
-      </div></>}
+      </div>
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}
-      <div className="exercise-viewport">
+      <FittedGameArea>
         {isCompleted && result ? (
           <section className="exercise-result" aria-labelledby="result-title">
             <div className="result-heading">
@@ -112,7 +116,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
         ) : (
           children
         )}
-      </div>
+      </FittedGameArea>
 
 
     </div>

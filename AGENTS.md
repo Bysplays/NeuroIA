@@ -87,6 +87,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
 | `src/services/gameSession.ts` | Shared session context and `useGameSession` hook, separate from component exports |
 | `src/services/memorySequence.ts` | Memory-round sequence generation, called only on round start |
+| `src/components/FittedGameArea.tsx` | Measures and scales the playground within the available viewport, keeping the title, progress and navigation outside it |
 | `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and repeat |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
@@ -668,3 +669,10 @@ Keep other participants' own activity when removing a professional workspace.
 outbox after sign-out. No production fixture deletion is permitted in tests.
 Include `vendor/cloudflare/accountLifecycle.test.mjs` with Worker unit checks; the
 combined demo Firestore suite exercises the REST cleanup and deletion write locks.
+
+Game progress uses `exerciseStages` and `ExerciseWrapper.completedStages`: count
+whole search boards, naming/completion/classification questions and full memory
+sequences. Pair matching, target practice and tracking remain single-stage games.
+Search aggregates all configured rounds into one result. `FittedGameArea` scales
+boards only; tracking contact radius must use rendered scale, not raw CSS pixels.
+Classification excludes multi-context objects without removing them from naming.

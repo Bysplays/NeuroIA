@@ -130,6 +130,8 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   const [currentTarget, setCurrentTarget] = useState<SymbolDef>(initialRound.target);
   const [items, setItems] = useState<GridItem[]>(initialRound.items);
   const [totalTargets, setTotalTargets] = useState(initialRound.total);
+  const [completedRounds, setCompletedRounds] = useState(0);
+  const [completedTargets, setCompletedTargets] = useState(0);
   const [foundCount, setFoundCount] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
@@ -143,13 +145,10 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
     setItems(next.items);
     setTotalTargets(next.total);
     setFoundCount(0);
-    setMistakes(0);
-    setMistakesList([]);
-    setStartTime(clock.now());
   };
 
   const handleItemClick = (item: GridItem) => {
-    if (item.found || isCompleted) return;
+    if (item.found || isCompleted || foundCount >= totalTargets) return;
 
     if (item.isTarget) {
       soundService.playSuccess();
@@ -160,7 +159,11 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
       setFoundCount(newFound);
 
       if (newFound >= totalTargets) {
-        finishGame(mistakes);
+        if (completedRounds + 1 < config.rounds) {
+          setCompletedRounds(value => value + 1);
+        } else {
+          finishGame(mistakes);
+        }
       }
     } else {
       soundService.playGentlePrompt();
@@ -183,8 +186,9 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   const finishGame = (currentMistakes: number) => {
     const elapsedSeconds = Math.max(10, Math.round((clock.now() - startTime) / 1000));
-    const accuracy = Math.max(0, Math.round((totalTargets / (totalTargets + currentMistakes)) * 100));
-    const baseScore = totalTargets * 80;
+    const allTargets = completedTargets + totalTargets;
+    const accuracy = Math.max(0, Math.round((allTargets / (allTargets + currentMistakes)) * 100));
+    const baseScore = allTargets * 80;
     const score = Math.max(120, baseScore - currentMistakes * 10);
 
     const gameResult: ExerciseResult = {
@@ -198,8 +202,8 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
       durationSeconds: elapsedSeconds,
       accuracy,
       score,
-      correctAnswers: totalTargets,
-      totalQuestions: totalTargets + currentMistakes,
+      correctAnswers: allTargets,
+      totalQuestions: allTargets + currentMistakes,
       feedbackMessage:
         accuracy >= 85
           ? '¡Buen trabajo! Has encontrado las figuras con precisión.'
@@ -215,6 +219,11 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   const handleRestart = () => {
     setIsCompleted(false);
     setResult(null);
+    setCompletedRounds(0);
+    setCompletedTargets(0);
+    setMistakes(0);
+    setMistakesList([]);
+    setStartTime(clock.now());
     initRound();
   };
 
@@ -223,6 +232,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   return (
     <ExerciseWrapper
+      completedStages={completedRounds}
       exerciseId="visual-scanning"
       title={
         <span>
@@ -256,6 +266,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
           ))}
         </div>
       </div>
+      {foundCount >= totalTargets && !isCompleted && <div className="actions-bar"><button className="touch-btn touch-btn-primary game-next-action" onClick={() => { setCompletedTargets(value => value + totalTargets); initRound(); }}>Continuar</button></div>}
     </ExerciseWrapper>
   );
 };

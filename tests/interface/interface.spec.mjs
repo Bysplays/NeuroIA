@@ -559,6 +559,13 @@ test('returning to a game preserves its mounted board, revalidates access and wa
   expect(await timer.textContent()).toBe(before);
   await page.keyboard.press('Escape');
   await expect(resume).toBeVisible();
+  await page.mouse.click(4,4);
+  await expect(resume).toBeVisible();
+  await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+  await expect(resume).toBeVisible();
+  await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+  await expect(resume).toBeVisible();
+  await expect(resume).toContainText('Tu actividad está pausada.');
   for (const width of [390,820,1280]) {
     await page.setViewportSize({width,height:900});
     await page.screenshot({path:`/tmp/neuroia-resume-modal-${width}.png`});
@@ -591,4 +598,44 @@ test('returning to a game preserves its mounted board, revalidates access and wa
   await page.evaluate(()=>{window.deniedAccess=true;window.dispatchEvent(new Event('neuroia-access-changed'));});
   await expect(page.getByRole('button',{name:'Suscribirme'})).toBeVisible();
   await expect(page.locator('.game-session')).toHaveCount(0);
+});
+
+
+test('search fills three stages only after completing each board', async ({page}) => {
+  await page.goto(fixture+'?game=visual-scanning');
+  await page.getByRole('button',{name:'Empezar a jugar'}).click();
+  const bar=page.getByRole('progressbar');
+  await expect(bar).toHaveAttribute('aria-valuemax','3');
+  for(let round=0;round<3;round++) {
+    const cells=page.locator('.scanning-cell');
+    const count=await cells.count();
+    for(let i=0;i<count;i++) {
+      await cells.nth(i).click();
+      if(await page.locator('.exercise-result').count()) break;
+    }
+    await expect(bar).toHaveAttribute('aria-valuenow',String(round+1));
+    expect(await bar.locator('i').evaluateAll(items=>items.filter(e=>e.style.width==='100%').length)).toBe(round+1);
+    if(round<2) await page.getByRole('button',{name:'Continuar',exact:true}).click();
+  }
+  await expect(page.locator('.exercise-result')).toBeVisible();
+});
+
+test('every board fits below its fixed title and progress without page scrolling', async ({page}) => {
+  for(const size of [{width:390,height:844},{width:820,height:1180},{width:844,height:390}]) {
+    await page.setViewportSize(size);
+    for(const mode of ['', '&placement']) for(const id of games) {
+      await page.goto(fixture+'?game='+id+'&level=10'+mode);
+      if(!mode) await page.getByRole('button',{name:'Empezar a jugar'}).click();
+      await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1)).toBe(true);
+      const header=await page.locator('.viewport-session-header').boundingBox();
+      const title=await page.locator('.game-task-title').boundingBox();
+      const bar=await page.locator('.game-stage-progress').boundingBox();
+      expect(title.y-header.y-header.height).toBeLessThanOrEqual(24);
+      expect(bar.y-title.y-title.height).toBeLessThanOrEqual(24);
+      const area=await page.locator('.exercise-viewport').boundingBox();
+      const board=await page.locator('.game-playground').boundingBox();
+      expect(board.y+board.height).toBeLessThanOrEqual(area.y+area.height+2);
+      if(!mode) await page.screenshot({path:`/tmp/neuroia-fitted-${id}-${size.width}.png`});
+    }
+  }
 });

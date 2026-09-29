@@ -272,14 +272,17 @@ opens a compact Cómo jugar modal, preserves answers and pauses the existing gam
 
 Leaving the tab or window during active play pauses the game clock and retains
 answers. On return, revalidate access without resetting navigation, then show a
-compact “¿Seguimos?” dialog with “Continuar actividad”. Escape/backdrop must not
+compact “¿Seguimos?” dialog with “Tu actividad está pausada.” and “Continuar actividad”. Escape/backdrop must not
 restart the clock; only the explicit action resumes. This return dialog is distinct
 from the retired fatigue/rest screen and does not appear on game introductions.
 
 Active play has utilities/time above the task, a clear stimulus and response area,
 and reachable assistance/back/next controls. Use the shared GameSession and
 ExerciseWrapper; do not fork navigation, timers or results. Boards may reflow and
-pages may scroll. Keep complete motor hit areas inside their measured arenas.
+active boards must fit the remaining viewport without page scrolling. Keep the
+navigation, title and segmented progress anchored at the top, with modest spacing
+above and below the title. Uniformly scale only the playground when necessary;
+keep footer controls outside it. Keep complete motor hit areas inside their measured arenas.
 
 - Search: retain the exact target and all matching objects.
 - Naming and words: distinguish stimulus, choices and next action.
@@ -303,8 +306,10 @@ settings must not automatically unmute the page. Completion retains the existing
 **Portrait and landscape are both supported.** Do not render an orientation gate,
 automatically request fullscreen or lock orientation. Fullscreen is only an explicit
 optional control. Rotation must preserve the active game and answers. Narrow pages
-stack their major regions; do not merely shrink desktop text or game targets.
-Allow scrolling on short landscape phones and when text is enlarged.
+stack their major regions. Active games keep navigation, title, progress and footer
+fixed in the viewport and fit the playground into the remaining space, reducing it
+when necessary. Information pages and dialogs may scroll on short screens or with
+enlarged text.
 
 Use native buttons, visible focus, descriptive input labels, live status regions
 and keyboard-operable tabs. Respect reduced motion. Use `ModalFrame` for transient
@@ -460,13 +465,15 @@ pause the game clock without unmounting the board, and restore focus on dismissa
 The initial instruction screen remains a full page before starting ordinary play.
 
 Active exercises use a full-width segmented progress track below the task title and above the
-play area, without numeric counters in the title. Each complete exercise at a given level contributes one stage; daily and
-professional paths sum those complete exercises. Objects, pairs, targets and
-individual questions never advance the global stage bar. Placement reserves
+play area, without numeric counters in the title. Search boards, naming/letter/
+classification questions and complete memory sequences each contribute one stage.
+Pairs, target practice and tracking each have one continuous stage. Individual
+objects within a search board, matched pairs, target taps and contact time never
+fill a stage on their own. Daily and professional paths sum the actual stage counts. Placement reserves
 its two possible assessment stages per selected game; finishing early or skipping
 resolves that game's remaining allocation, so changing games never resets the bar.
-A stage fills only when that entire level is completed; there is no fractional
-fill from individual answers or contact time.
+A stage fills only when its complete round is resolved; there is no fractional fill.
+Search uses the configured number of boards and saves one aggregated result.
 Footer Back and Skip actions share the same compact outlined dimensions. Scanning
 keeps its found-state treatment without checkmark overlays obscuring the objects.
 

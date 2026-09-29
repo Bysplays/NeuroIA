@@ -137,6 +137,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
   return (
     <ExerciseWrapper
+      completedStages={currentIdx + (selectedOption !== null ? 1 : 0)}
       exerciseId="language-naming"
       title="¿Qué objeto es este?"
       domain="language"

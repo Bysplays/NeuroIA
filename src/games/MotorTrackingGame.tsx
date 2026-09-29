@@ -133,8 +133,10 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     let newVx = velocity.vx;
     let newVy = velocity.vy;
     const arena = arenaRef.current?.getBoundingClientRect();
-    const marginX = Math.min(50, Math.max(14, (TARGET_SIZE / 2 + 8) / (arena?.width || 600) * 100));
-    const marginY = Math.min(50, Math.max(14, (TARGET_SIZE / 2 + 8) / (arena?.height || 400) * 100));
+    const scale = arena && arenaRef.current?.offsetWidth ? arena.width / arenaRef.current.offsetWidth : 1;
+    const renderedTargetSize = TARGET_SIZE * scale;
+    const marginX = Math.min(50, Math.max(14, (renderedTargetSize / 2 + 8 * scale) / (arena?.width || 600) * 100));
+    const marginY = Math.min(50, Math.max(14, (renderedTargetSize / 2 + 8 * scale) / (arena?.height || 400) * 100));
     if (newX < marginX) { newX = marginX; newVx = Math.abs(newVx); }
     else if (newX > 100 - marginX) { newX = 100 - marginX; newVx = -Math.abs(newVx); }
     if (newY < marginY) { newY = marginY; newVy = Math.abs(newVy); }
@@ -143,7 +145,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     setVelocity({ vx: newVx, vy: newVy });
     const point = pointer.current;
     const contact = keyboard.current || (!!arena && !!point && isTouchingRef.current
-      && Math.hypot(point.x - (arena.left + newX / 100 * arena.width), point.y - (arena.top + newY / 100 * arena.height)) <= TARGET_SIZE / 2);
+      && Math.hypot(point.x - (arena.left + newX / 100 * arena.width), point.y - (arena.top + newY / 100 * arena.height)) <= renderedTargetSize / 2);
     setIsHoveringOrTouching(contact);
     if (contact) {
       const next = contactTime + deltaMs / 1000;
