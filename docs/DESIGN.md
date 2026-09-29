@@ -717,31 +717,44 @@ type above 90% and under three minutes each, capped at 10). Other game types do 
 break that run. Repeat reopens instructions at the updated base level.
 
 
-After player access and cloud loading, unassessed accounts see one calm companion
-panel with progress, one instruction, optional listening and a primary Empezar.
-Empezar launches a randomly selected unfinished game. After each assessment turn, randomly
-choose another unfinished game, avoiding immediate repeats while alternatives remain.
-Keep the next level and last passed evidence separately for each game. Each
-game tries levels 1, 4, 7 and 10 in sequence, advancing only after a perfect completed
-stage (use correct/total counts rather than rounded accuracy). A failed or skipped
-stage ends that game at its last passed level; with none passed, use level 1.
-Objects come randomly from the existing level-appropriate pools. Move directly
-between stages and games without automatic instruction/result screens. Help,
-settings and landscape pauses remain available. The bottom actions stay ← Volver
-and Omitir →. Skipping before passing anything is marked unmeasured; after a pass,
-retain that successful evidence. Returning preserves the pending stage of each game; reloading restarts unfinished
-games at level 1, while completed games remain saved. Pause keeps the current stage.
+After player access and cloud loading, unassessed accounts choose their interests
+before any game starts. Use two full-page steps, not a modal: “¿Qué te apetece
+practicar?” and “¿Cómo te resulta más cómodo jugar?”. Reuse the original mint/ink
+palette and paper companions. On broad screens use a quiet illustration column
+beside the question; on phones keep only the question and choices. Long content
+scrolls, including short landscape and enlarged text.
 
-Place Escuchar at the right of the prepared-game count on welcome and completion,
-above the progress bar. Keep a stable panel width, 24–32px card padding and
-20–24px spacing between content groups, with a balanced illustration column.
-Wait for the completed trial in the parent progress snapshot before advancing;
-show only a brief preparing status during that wait. Never infer missing evidence.
-Do not describe placement as a diagnosis or ability score. Professional entry
-has no placement flow.
+Show five labelled multi-select rows with area icons, short explanations, visible
+checks and keyboard focus: Atención, Memoria, Lenguaje, Organización, Coordinación.
+Continue requires a selection; “No sé qué elegir: explorar todas” selects all five.
+The second step is optional: both input styles, taps only, or no preference.
+Explain that taps exclude the moving-target tracking game from this assessment,
+not from the catalog. Do not ask for a diagnosis or a free-text medical history.
+The choice is functional comfort, not a measured limitation.
 
-Show all eight starting levels at completion, then “Ir a mis juegos”. Settings remain accessible; logout is available inside Settings without a
-duplicate button on the placement screen. Respect hidden companions, large text and contrast.
+A summary names the selected areas and prepared-game count, offers Empezar and
+Cambiar mis elecciones, and keeps listening/settings available. Work through one
+selected area before the next. Each game retains the existing 1/4/7/10 ladder and
+perfect-answer rule; the introduction describes the experience without announcing
+numeric stages. Objects still use the existing level-appropriate pools. Help,
+settings, orientation pauses, ← Volver and Omitir → keep their existing behavior.
+
+Preferences, passed intermediate stages and finished-game evidence use durable
+progress operations. Reload resumes the next saved stage; an unfinished current
+attempt restarts. Wait for the parent projection before advancing. Completion
+requires only the selected games. The summary distinguishes measured levels,
+“Prueba omitida” and “Sin probar”; never invent a level for an unselected game.
+Unassessed games remain playable at the default starting level. Their first actual
+ordinary result can establish a practice level. Statistics do not draw missing
+levels as zero-valued radar points.
+
+“Rehacer prueba” under Ajustes → Tu cuenta reopens the same choices, prefilled
+from the last accepted preferences. A retake keeps its draft in memory and updates
+only chosen levels on Guardar niveles; cancelling preserves saved activity and
+levels. Respect hidden companions, large text, contrast and native input semantics.
+Professional entry has no placement gate. Research, persistence and release gates
+are in [interest onboarding](PLACEMENT.md).
+
 Ordinary instructions start at the recommended level and offer a compact minus/plus control for levels 1–10; the chosen level
 stays fixed during play and is shown in the game bar and result. Repeats start at the updated base. Help
 and portrait continue pausing the existing clock. Tracking offers holding Space as

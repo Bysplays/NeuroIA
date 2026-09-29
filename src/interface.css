@@ -1499,3 +1499,46 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .eeg-battery { display: flex; align-items: center; gap: 8px; padding-top: 18px; }
 
 .eeg-connection-row .subscription-upgrade:disabled { cursor: not-allowed; }
+
+/* Interest onboarding: one question per step, generous labelled choices. */
+.placement-preferences { justify-content: flex-start; }
+.interest-panel { display: grid; grid-template-columns: minmax(210px, .7fr) minmax(0, 1.3fr); gap: 40px; width: 100%; max-width: 1040px; margin: auto; padding: 24px; border-radius: 28px; background: var(--color-surface); }
+.interest-intro { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; border-radius: 22px; background: var(--panel-blue); text-align: center; color: var(--color-text-main); }
+.interest-art { width: 100%; max-width: 260px; height: 230px; object-fit: contain; mix-blend-mode: multiply; }
+.interest-intro p { font-size: 1.15rem; font-weight: 600; margin: 24px 0 12px; }
+.interest-intro > span { font-size: .95rem; line-height: 1.5; }
+.interest-content { min-width: 0; }
+.interest-content > .soft-label { margin: 0 0 12px; }
+.interest-content h1 { font-size: clamp(1.5rem, 2.5vw, 2rem); line-height: 1.2; margin: 16px 0 10px; }
+.interest-content h1:focus { outline: none; }
+.interest-description { color: var(--color-text-muted); font-size: .9rem; line-height: 1.4; margin: 0 0 16px; }
+.interest-step-indicator { display: flex; gap: 6px; width: 84px; }
+.interest-step-indicator i { width: 39px; height: 5px; border-radius: 4px; background: var(--color-bg); }
+.interest-step-indicator .is-active { background: var(--color-action-bg); }
+.interest-options { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.interest-option { display: flex; align-items: center; position: relative; gap: 14px; padding: 10px 14px; min-height: 68px; border: 2px solid var(--color-bg); border-radius: 16px; cursor: pointer; color: var(--color-text-main); }
+.interest-option.is-selected { border-color: var(--color-action-bg); background: var(--color-bg); }
+.interest-option:focus-within { outline: 3px solid var(--color-action-bg); outline-offset: 3px; }
+.interest-option input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.interest-option > span:first-of-type { flex: 1; min-width: 0; }
+.interest-option strong { display: block; font-weight: 600; font-size: 1rem; }
+.interest-option small { display: block; color: var(--color-text-muted); line-height: 1.4; font-size: .83rem; margin-top: 3px; }
+.interest-icon { flex: none; color: var(--color-action-bg); }
+.interest-check { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid var(--color-text-muted); border-radius: 50%; flex: none; }
+.is-selected .interest-check { background: var(--color-action-bg); color: var(--color-action-text, #fff); border-color: var(--color-action-bg); }
+.interest-actions { display: grid; gap: 10px; margin-top: 18px; }
+.interest-actions .touch-btn { width: 100%; }
+.interest-back { display: flex; align-items: center; gap: 6px; margin-top: 12px; }
+.placement-plan-note { color: var(--color-text-muted); font-size: .9rem; }
+@media (max-width: 760px) {
+  .interest-panel { grid-template-columns: minmax(0, 1fr); padding: 24px 18px; gap: 0; }
+  .interest-intro { display: none; }
+  .interest-option { padding: 14px; }
+}
+@media (orientation: landscape) and (max-height: 650px) {
+  .interest-panel { margin-block: 12px; padding: 24px; }
+  .interest-art { height: 150px; }
+}
+.interest-options legend { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.interest-actions .touch-btn:disabled { opacity: .5; cursor: default; }

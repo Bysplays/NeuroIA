@@ -25,15 +25,15 @@ export function LevelStatistics({ levels, history, complete, busy, onRetry, erro
   return <div className="level-statistics">
     <section className="stats-card level-bars"><h2>Nivel actual</h2>
       {EXERCISE_IDS.map((id, i) => <div className="level-bar" key={id}>
-        <div><span title={title(id)}>{i + 1}. {shortNames[id]}</span><strong>{values[i] === null ? 'Sin asignar' : `${values[i]} / 10`}</strong></div>
+        <div><span title={title(id)}>{i + 1}. {shortNames[id]}</span><strong>{values[i] === null ? 'Sin probar' : `${values[i]} / 10`}</strong></div>
         <progress max={10} value={values[i] ?? 0} aria-label={`Nivel de ${title(id)}`} style={{ '--level-color': activityExerciseStyle(id).color } as import('react').CSSProperties}/>
       </div>)}
     </section>
-    <section className="stats-card level-star"><h2>Mapa de niveles</h2><p>Cada número es un juego. Del 1 al 10.</p>
+    <section className="stats-card level-star"><h2>Mapa de niveles</h2><p>Cada número es un juego. Del 1 al 10. Los juegos sin probar no tienen un nivel medido.</p>
       <svg viewBox="0 0 300 285" role="img" aria-label="Niveles actuales del 1 al 10. Valores en las barras de nivel actual.">
         {[2, 4, 6, 8, 10].map(level => <polygon key={level} points={values.map((_, i) => point(i, level).join(',')).join(' ')} className="stats-grid-line" fill="none"/>)}
         {values.map((_, i) => <g key={i}><line x1="150" y1="135" x2={point(i, 10)[0]} y2={point(i, 10)[1]} className="stats-grid-line"/><text x={point(i, 12)[0]} y={point(i, 12)[1] + 5} textAnchor="middle">{i + 1}</text></g>)}
-        <polygon points={values.map((value, i) => point(i, value ?? 0).join(',')).join(' ')} className="stats-radar-fill"/>
+        <polygon points={values.flatMap((value, i) => value === null ? [] : [point(i, value).join(',')]).join(' ')} className="stats-radar-fill" visibility={values.every(value => value !== null) ? 'visible' : 'hidden'}/>
         {values.map((value, i) => value !== null && <circle key={i} cx={point(i, value)[0]} cy={point(i, value)[1]} r="4" fill={activityExerciseStyle(EXERCISE_IDS[i]).color}><title>{title(EXERCISE_IDS[i])}: nivel {value}</title></circle>)}
       </svg>
     </section>

@@ -1,10 +1,14 @@
-import { adaptDifficulty, applyPlacement, hasPlacement, EXERCISE_IDS, type PlacementTrial } from './difficulty.ts';
+import { placementExercises, validPlacementPreferences, type PlacementPreferences } from './placementPreferences.ts';
+import { adaptDifficulty, applyPlacement, applyPlacementPreferences, applyPlacementStage, hasPlacement, EXERCISE_IDS, type PlacementTrial, type PlacementStage } from './difficulty.ts';
 import type { ExerciseId } from '../types/index.ts';
 import type { AccessibilitySettings, ExerciseResult, UserProfile } from '../types/index.ts';
 
 export interface ProgressData { profile: UserProfile; history: ExerciseResult[] }
 export type ProgressOperation =
-  | { id: string; kind: 'placement'; trials: Record<ExerciseId, PlacementTrial> }
+  | { id: string; kind: 'placement'; trials: Partial<Record<ExerciseId, PlacementTrial>>; preferences?: PlacementPreferences }
+  | { id: string; kind: 'placement'; preferences: PlacementPreferences }
+  | { id: string; kind: 'placement'; retakePreferences: PlacementPreferences }
+  | { id: string; kind: 'placement'; exerciseId: ExerciseId; stage: PlacementStage }
   | { id: string; kind: 'placement'; exerciseId: ExerciseId; trial: PlacementTrial }
   | { id: string; kind: 'result'; result: ExerciseResult }
   | { id: string; kind: 'settings'; settings: Partial<AccessibilitySettings>; name?: string };
@@ -15,15 +19,23 @@ export function applyProgressOperation(data: ProgressData, operation: ProgressOp
   const profile = next.profile;
   if (operation.kind === 'placement') {
     if ('trials' in operation) {
-      if (Object.keys(operation.trials).length !== EXERCISE_IDS.length || EXERCISE_IDS.some(id => !operation.trials[id])) throw new Error('incomplete-reassessment');
+      const selected = operation.preferences ? placementExercises(operation.preferences) : EXERCISE_IDS;
+      if (Object.keys(operation.trials).length !== selected.length || selected.some(id => !operation.trials[id])) throw new Error('incomplete-reassessment');
       if (!hasPlacement(profile)) throw new Error('missing-initial-placement');
       const assessment = structuredClone(profile);
       delete assessment.placement;
-      delete assessment.gameLevels;
-      for (const id of EXERCISE_IDS) applyPlacement(assessment, id, operation.trials[id]);
-      // Preserve the original onboarding record; a retake recalibrates base levels only.
-      profile.gameLevels = assessment.gameLevels;
-    } else applyPlacement(profile, operation.exerciseId, operation.trial);
+      assessment.gameLevels = {};
+      if (operation.preferences) applyPlacementPreferences(assessment, operation.preferences);
+      for (const id of selected) applyPlacement(assessment, id, operation.trials[id]!);
+      profile.gameLevels = { ...profile.gameLevels, ...assessment.gameLevels };
+      // Keep the whole initial record unchanged in this write: the eight-level
+      // recalibration already uses most of the Firestore expression budget.
+    } else if ('retakePreferences' in operation) {
+      if (!validPlacementPreferences(operation.retakePreferences) || !hasPlacement(profile)) throw new Error('invalid-retake-preferences');
+      profile.placement = { ...profile.placement!, retakePreferences: structuredClone(operation.retakePreferences) };
+    } else if ('preferences' in operation) applyPlacementPreferences(profile, operation.preferences);
+    else if ('stage' in operation) applyPlacementStage(profile, operation.exerciseId, operation.stage);
+    else applyPlacement(profile, operation.exerciseId, operation.trial);
     return next;
   }
   if (operation.kind === 'settings') {

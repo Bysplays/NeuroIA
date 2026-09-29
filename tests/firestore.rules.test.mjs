@@ -405,3 +405,59 @@ test('bounded EEG and PPG recordings persist with its result and receipt, with e
   await assertFails(setDoc(doc(db, `users/${uid}/results/oversized`), { ...operation.result, id: 'oversized', eeg: { ...operation.result.eeg, points: '0'.repeat(6001) } }));
   await assertFails(setDoc(doc(db, `users/${uid}/results/raw-eeg`), { ...operation.result, id: 'raw-eeg', eeg: { ...operation.result.eeg, raw: [1,2,3] } }));
 });
+
+test('thematic interests, intermediate stages and partial completion round-trip across devices', async () => {
+  const uid = 'thematic-placement';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  const otherDevice = firestoreProgress(uid, env.authenticatedContext(uid).firestore());
+  await backend.initialize(fresh());
+  const preferences = { interests: ['memory'], movement: 'taps' };
+  await assert.doesNotReject(() => backend.commit({ id: 'interests', kind: 'placement', preferences }), 'save preferences');
+  const trial = { accuracy: 100, questions: 2, hints: 0, skipped: false, assessedLevel: 1 };
+  const stage = { id: 'stage-4', kind: 'placement', exerciseId: 'memory-path', stage: { level: 4, best: trial } };
+  await assert.doesNotReject(() => Promise.all([backend.commit(stage), otherDevice.commit(stage)]), 'save stage');
+  let data = await otherDevice.load();
+  assert.deepEqual(data.profile.placement.preferences, preferences);
+  assert.equal(data.profile.placement.stages['memory-path'].level, 4);
+  await assert.doesNotReject(() => backend.commit({ id: 'path', kind: 'placement', exerciseId: 'memory-path', trial }), 'finish path');
+  await assert.doesNotReject(() => otherDevice.commit({ id: 'pairs', kind: 'placement', exerciseId: 'memory-pairs', trial: { ...trial, skipped: true, questions: 0, accuracy: 0 } }), 'finish pairs');
+  data = await backend.load();
+  assert.equal(data.profile.placement.completed, true);
+  assert.equal(data.profile.gameLevels['motor-target'], undefined);
+  assert.equal(data.profile.totalSessions, 0);
+  assert.deepEqual(data.history, []);
+  await assert.doesNotReject(() => backend.commit({ id: 'thematic-retake', kind: 'placement', preferences: { interests: ['motor'], movement: 'taps' }, trials: { 'motor-target': trial } }), 'save retake');
+  await backend.commit({ id: 'retake-preferences', kind: 'placement', retakePreferences: { interests: ['motor'], movement: 'taps' } });
+  assert.equal((await backend.load()).profile.placement.retakePreferences.interests[0], 'motor');
+  for (const preferences of [{ interests: [], movement: 'taps' }, { interests: ['memory', 'memory'], movement: 'taps' }, { interests: ['memory'], movement: 'other' }, { interests: ['memory'], movement: 'taps', diagnosis: 'not-allowed' }]) {
+    const invalid = structuredClone(data); invalid.profile.placement.preferences = preferences;
+    await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), { schemaVersion: 1, data: invalid, updatedAt: serverTimestamp() }));
+  }
+  const invalid = structuredClone(data); delete invalid.profile.placement.trials['memory-pairs'];
+  await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), { schemaVersion: 1, data: invalid, updatedAt: serverTimestamp() }));
+  const badStage = structuredClone(data); badStage.profile.placement.stages = { 'memory-path': { level: 7, best: trial } };
+  await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), { schemaVersion: 1, data: badStage, updatedAt: serverTimestamp() }));
+  await assertFails(getDoc(doc(env.authenticatedContext('unrelated-thematic').firestore(), `users/${uid}/progress/main`)));
+});
+
+test('all-area preferences and retake stay within the rules budget and preserve initial trials', async () => {
+  const uid = 'all-area-placement';
+  const backend = firestoreProgress(uid, env.authenticatedContext(uid).firestore());
+  await backend.initialize(fresh());
+  const preferences = { interests: ['attention', 'memory', 'language', 'executive', 'motor'], movement: 'unspecified' };
+  await assert.doesNotReject(() => backend.commit({ id: 'all-preferences', kind: 'placement', preferences }), 'all preferences');
+  const ids = ['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
+  const trial = { accuracy: 100, questions: 2, hints: 0, skipped: false, assessedLevel: 1 };
+  for (const id of ids) {
+    await assert.doesNotReject(() => backend.commit({ id: 'stage:' + id, kind: 'placement', exerciseId: id, stage: { level: 4, best: trial } }), 'stage ' + id);
+    await assert.doesNotReject(() => backend.commit({ id: 'trial:' + id, kind: 'placement', exerciseId: id, trial }), 'trial ' + id);
+  }
+  await assert.doesNotReject(() => backend.commit({ id: 'all-retake', kind: 'placement', preferences, trials: Object.fromEntries(ids.map(id => [id, { ...trial, assessedLevel: 7 }])) }), 'eight-game retake');
+  await backend.commit({ id: 'all-retake-preferences', kind: 'placement', retakePreferences: preferences });
+  const saved = await backend.load();
+  for (const id of ids) {
+    assert.equal(saved.profile.gameLevels[id].level, 7);
+    assert.equal(saved.profile.placement.trials[id].assessedLevel, 1);
+  }
+});

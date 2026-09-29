@@ -81,6 +81,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/services/exerciseCatalog.ts` | Eight active exercise definitions and short summaries |
 | `src/services/activityExercises.ts` | Historical names and stable chart styles, including retired daily sequencing |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
+| `src/components/PlacementPreferences.tsx` and `src/services/placementPreferences.ts` | Two-step interests/functional movement choices and thematic assessment selection; see `docs/PLACEMENT.md` |
 | `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
 | `src/services/gameSession.ts` | Shared session context and `useGameSession` hook, separate from component exports |
@@ -130,6 +131,7 @@ npm run dev
 npm run build
 npm run lint
 npm test
+npm run test:placement # isolated interest-onboarding browser checks
 npm run test:firestore
 npm ci --prefix vendor/firebase/functions # when backend dependencies are needed
 npm run test:onboarding
@@ -432,6 +434,13 @@ No new writes, authorization rules or progress storage are introduced.
 `GameExercise` dispatches the same eight implementations for ordinary and placement play.
 `PlacementOnboarding` gates only player Workspace after access/cloud load. It runs
 unscored assessment stages, using durable `placement` operations in ProgressSync for each finished game ladder.
+`PlacementPreferences` precedes trials. It saves interests and an optional functional
+movement preference under `placement.preferences`, using the existing `placement`
+operation and receipt kind. `placement.stages` preserves passed ladder stages.
+Only chosen games are required for completion; untested games get no fabricated
+trial or level. Legacy placement without preferences still requires all eight.
+Selective retakes keep original trials and nonselected levels; accepted choices
+are stored in `placement.retakePreferences`. See docs/PLACEMENT.md for rules rollout.
 `profile.placement` records bounded per-game evidence; optional `profile.gameLevels`
 contains provisional levels/evidence until the final trial marks placement complete.
 The reducer, adapter and Firestore rules use the existing atomic progress/receipt
@@ -565,3 +574,15 @@ before deploying the adapter frontend; existing read permissions and permanent r
 apply. See [EEG handoff](docs/eeg/README.md) for the adapter contract, retention,
 bounds and hardware acceptance. Tests: `tests/eeg.test.ts`, `tests/muse.test.ts` and the EEG/PPG transaction
 case in the demo Firestore rules suite; no production simulated data or users.
+
+
+## Interest-onboarding verification
+
+`npm run test:placement` runs Playwright on port 5197 against
+`tests/placement/index.html`. The fixture mounts real onboarding/game components
+with a ProgressSync test backend and fixture-only sessionStorage; it is not imported
+by the production entry. Browser requests are restricted to local assets and fonts.
+It covers selected areas, optional movement, changing choices, keyboard input,
+large text, contrast, delayed parent updates, reload, actual target-stage completion,
+skip and retake cancellation. Server persistence and permissions use the real demo
+Firestore adapter/rules tests separately; never seed a real account for screenshots.

@@ -1,3 +1,4 @@
+import { placementExercises, validPlacementPreferences, type PlacementPreferences } from './placementPreferences.ts';
 import { validAssessmentLevel, type AssessmentLevel } from './placementAssessment.ts';
 import type { ExerciseId, ExerciseResult, UserProfile } from '../types/index.ts';
 
@@ -6,20 +7,26 @@ export const EXERCISE_IDS: ExerciseId[] = ['visual-scanning', 'language-naming',
 export interface GameLevel { level: number; evidence: number[]; qualifyingRuns?: number }
 export type GameLevels = Record<ExerciseId, GameLevel>;
 export interface PlacementTrial { assessedLevel?: AssessmentLevel | 5; accuracy: number; questions: number; hints: number; skipped: boolean }
-export interface Placement { version: number; trials: Partial<Record<ExerciseId, PlacementTrial>>; completed: boolean }
+export interface PlacementStage { level: 4 | 7 | 10; best: PlacementTrial }
+export interface Placement {
+  version: number; trials: Partial<Record<ExerciseId, PlacementTrial>>; completed: boolean;
+  preferences?: PlacementPreferences;
+  retakePreferences?: PlacementPreferences;
+  stages?: Partial<Record<ExerciseId, PlacementStage>>;
+}
 export type GameMode = 'normal' | 'practice' | 'placement';
 export function validLevel(value: unknown): value is number { return Number.isInteger(value) && Number(value) >= 1 && Number(value) <= 10; }
 export function placementTrials(profile: UserProfile): Partial<Record<ExerciseId, PlacementTrial>> {
   if (profile.placement?.version !== DIFFICULTY_VERSION) return {};
   // A completed record with missing levels must be reassessed, not trap entry.
-  if (profile.placement.completed && !EXERCISE_IDS.every(id => validLevel(profile.gameLevels?.[id]?.level))) return {};
+  if (profile.placement.completed && !placementExercises(profile.placement.preferences).every(id => validLevel(profile.gameLevels?.[id]?.level))) return {};
   return Object.fromEntries(Object.entries(profile.placement.trials ?? {}).filter(([id, trial]) => EXERCISE_IDS.includes(id as ExerciseId)
     && trial && (trial.assessedLevel === undefined || validAssessmentLevel(trial.assessedLevel)) && Number.isFinite(trial.accuracy) && trial.accuracy >= 0 && trial.accuracy <= 100
     && Number.isInteger(trial.questions) && trial.questions >= 0 && trial.questions <= 1000 && Number.isInteger(trial.hints) && trial.hints >= 0 && trial.hints <= 1000 && typeof trial.skipped === 'boolean'));
 }
 export function hasPlacement(profile: UserProfile) {
   return profile.placement?.version === DIFFICULTY_VERSION && profile.placement.completed === true
-    && EXERCISE_IDS.every(id => validLevel(profile.gameLevels?.[id]?.level) && placementTrials(profile)[id] !== undefined);
+    && placementExercises(profile.placement.preferences).every(id => validLevel(profile.gameLevels?.[id]?.level) && placementTrials(profile)[id] !== undefined);
 }
 export function assignedLevel(profile: UserProfile, id: ExerciseId) { return validLevel(profile.gameLevels?.[id]?.level) ? profile.gameLevels![id]!.level : 1; }
 
@@ -57,19 +64,53 @@ export function applyPlacement(profile: UserProfile, id: ExerciseId, trial: Plac
     || !Number.isInteger(trial.questions) || trial.questions < 0 || trial.questions > 1000
     || !Number.isInteger(trial.hints) || trial.hints < 0 || trial.hints > 1000 || typeof trial.skipped !== 'boolean') throw new Error('invalid-placement');
   if (hasPlacement(profile)) return;
+  if (!placementExercises(profile.placement?.preferences).includes(id)) return;
   const previous = placementTrials(profile);
   if (previous[id]) return; // First committed trial wins across devices and retry IDs.
   const trials = { ...previous, [id]: { ...trial } };
-  const completed = EXERCISE_IDS.every(key => trials[key]);
-  profile.placement = { version: DIFFICULTY_VERSION, trials, completed };
-  profile.gameLevels = Object.fromEntries(EXERCISE_IDS.filter(key => trials[key]).map(key => [key, { level: placementLevel(trials[key]!, key), evidence: [] }]));
+  const completed = placementExercises(profile.placement?.preferences).every(key => trials[key]);
+  const stages = { ...profile.placement?.stages };
+  delete stages[id];
+  profile.placement = { ...profile.placement, version: DIFFICULTY_VERSION, trials, completed, stages };
+  if (Object.keys(stages).length === 0) delete profile.placement.stages;
+  profile.gameLevels = { ...profile.gameLevels, [id]: { level: placementLevel(trial, id), evidence: [] } };
+}
+
+/** Preferences never manufacture evidence for games outside the chosen plan. */
+export function applyPlacementPreferences(profile: UserProfile, preferences: PlacementPreferences) {
+  if (!validPlacementPreferences(preferences)) throw new Error('invalid-placement-preferences');
+  if (hasPlacement(profile)) return;
+  const trials = placementTrials(profile);
+  profile.placement = { ...profile.placement, version: DIFFICULTY_VERSION, trials,
+    preferences: structuredClone(preferences), completed: placementExercises(preferences).every(id => trials[id]) };
+}
+export function validPlacementStage(stage: PlacementStage) {
+  const previous = { 4: 1, 7: 4, 10: 7 }[stage.level];
+  return previous !== undefined && stage.best?.assessedLevel === previous && stage.best.accuracy === 100
+    && Number.isInteger(stage.best.questions) && stage.best.questions > 0 && stage.best.questions <= 1000
+    && Number.isInteger(stage.best.hints) && stage.best.hints >= 0 && stage.best.hints <= 1000 && stage.best.skipped === false;
+}
+export function applyPlacementStage(profile: UserProfile, id: ExerciseId, stage: PlacementStage) {
+  if (!EXERCISE_IDS.includes(id) || !validPlacementStage(stage)) throw new Error('invalid-placement-stage');
+  if (hasPlacement(profile) || placementTrials(profile)[id] || !placementExercises(profile.placement?.preferences).includes(id)) return;
+  const current = profile.placement?.stages?.[id]?.level ?? 1;
+  if (stage.level <= current) return;
+  if ({ 1: 4, 4: 7, 7: 10, 10: 10 }[current] !== stage.level) throw new Error('invalid-placement-stage-order');
+  profile.placement = { ...profile.placement, version: DIFFICULTY_VERSION,
+    trials: placementTrials(profile), completed: false,
+    stages: { ...profile.placement?.stages, [id]: structuredClone(stage) } };
 }
 
 export function adaptDifficulty(profile: UserProfile, result: ExerciseResult) {
   const id = result.exerciseId as ExerciseId;
+  if (result.configVersion !== DIFFICULTY_VERSION
+    || result.practice === true || !validLevel(result.level) || result.totalQuestions <= 0 || !EXERCISE_IDS.includes(id)) return;
+  // A previously unassessed game acquires a practice level only after actual play.
+  if (!profile.gameLevels?.[id] && hasPlacement(profile)) {
+    profile.gameLevels = { ...profile.gameLevels, [id]: { level: 1, evidence: [] } };
+  }
   const current = profile.gameLevels?.[id];
-  if (!current || result.configVersion !== DIFFICULTY_VERSION
-    || result.practice === true || !validLevel(result.level) || result.totalQuestions <= 0) return;
+  if (!current) return;
   // Easier/manual sessions break the run; they must not raise the recommended base.
   const validTiming = Number.isFinite(result.durationSeconds) && result.durationSeconds > 0;
   const measured = 100 * result.correctAnswers / result.totalQuestions;

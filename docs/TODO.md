@@ -55,13 +55,16 @@ subject to the confirmed deadline and available client materials.
 
 ### Initial assessment: correctness and pacing
 
-- [ ] **CR-04 — Interests before assessment.** Ask what the person wants to work
-  on (for example memory or coordination) before any trials, and offer optional
-  mobility/accessibility preferences. Define how selections choose thematic trials,
-  how preferences can be changed/skipped, and how unassessed games are represented.
-  Gate: assessment follows selected areas, does not infer a tested level or a
-  clinical weakness for untested areas, and resumes without losing choices/results.
-  Decide the minimum needed preference data and persistence before implementation.
+- [x] **CR-04 — Interests before assessment (implemented locally).** Two accessible
+  steps select practice areas and an optional taps-only preference; thematic trials
+  follow those choices. Preferences, passed stages and completed trials resume
+  through the existing durable progress queue. Unselected games stay untested;
+  choices can be edited before completion and through a selective retake afterward.
+  No diagnosis or free-text health information is collected. See [implementation,
+  Mobbin references and checks](PLACEMENT.md).
+- [ ] **CR-04 release —** Review with the client and publish the updated Firestore
+  rules before the frontend. Verify the deployed flow on the target devices; no
+  production rules or frontend have been published as part of local implementation.
 - [ ] **CR-05 — Pressure-free assessment wording.** Remove announcements of numeric
   trial levels and use neutral invitations to play with gradually changing
   difficulty. The client cites levels 2/5/7; the current documented ladder is
@@ -168,7 +171,7 @@ voice provider or new illustration set has been selected by this planning work.
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Approved towel/table style integrated across 80 objects, standalone stimuli and motor tokens | Physical-tablet recognition feedback |
 | 9 / LEVELS | Difficulty 1–10 | Versioned 1–10 configuration for all games, saved level and timed same-game promotion | User calibration and physical-device checks |
-| 10 / PLACEMENT | Guided initial level assessment | Eight shuffled games with 1/4/7/10 placement ladders, separate from access onboarding; client requests thematic entry and pacing changes (CR-04–CR-09) | Client review acceptance and physical-device checks |
+| 10 / PLACEMENT | Guided initial level assessment | Selected games grouped by interest with existing 1/4/7/10 placement ladders, separate from access onboarding; thematic entry implemented locally (CR-04); pacing changes remain (CR-05–CR-09) | Client review acceptance and physical-device checks |
 | 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
 
 ### Current implementation sequence
