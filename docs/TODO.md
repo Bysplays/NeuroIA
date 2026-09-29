@@ -18,11 +18,14 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [ ] Review authenticated home and catalog with the owner.
 - [x] Implement account deletion with typed confirmation, recent identity verification,
   server Stripe checks, resumable cleanup and pseudonymous trial-use retention.
-- [ ] Activate account lifecycle: provision the stable trial HMAC secret, scoped Auth
-  get/delete IAM, collection-group indexes, Worker cron/modules and deletion-lock
-  rules before enabling ACCOUNT_DELETION_ENABLED and releasing the frontend.
-  Verify using a disposable account after deployment.
-  No live account deletion or production deployment has been performed for this change.
+- [x] Prepare live account-lifecycle infrastructure: Worker modules/cron published
+  with deletion disabled, stable trial secret configured and scoped Auth IAM granted.
+  Collection-group indexes submitted; no real account was deleted.
+- [ ] Confirm index readiness, then coordinate the frontend migration with new
+  Firestore rules and ACCOUNT_DELETION_ENABLED. The currently published frontend
+  still grants trials directly; changing rules alone would break existing signups.
+  Owner choice on frontend publication is pending. Verify with a disposable account
+  after activation; backend preparation has already been authorized.
 - [ ] Review refreshed onboarding preferences and assessment entry with the owner;
   visual styling now matches account entry. Existing assessment acceptance checks remain open.
 

@@ -8,7 +8,7 @@ No domain purchase or Firebase Blaze deployment is required.
 
 The reviewed Worker is deployed with verified-email enforcement, `/access`,
 `/professional/status`, per-seat portal cancellation, reserved short invitation codes and the five-minute
-reconciliation trigger. Current version: `5ca4c2f5-7cf7-44d3-9351-2cdfc5a60f97`. Runtime secrets are retained, Stripe stays in test mode,
+reconciliation trigger. Current version: `dac53e3c-bb91-4c8f-bb83-436277722a55`. Runtime secrets are retained, Stripe stays in test mode,
 preview URLs remain disabled and existing observability is enabled. Health,
 localhost CORS, unauthenticated access and unsigned-webhook rejection were verified;
 signed payment lifecycle and scheduled reconciliation still need live validation.
@@ -22,7 +22,7 @@ Set these ordinary runtime variables on the Worker (also recorded in `vendor/clo
 - `STRIPE_MONTHLY_PRICE_ID=price_1UItenAWZtSdGYThrex9dsNh`
 - `STRIPE_MODE=test`
 - `ACCOUNT_DELETION_ENABLED=false` until the activation sequence is complete.
-- `ALLOWED_ORIGINS=http://localhost:5173,https://bysplays.github.io` (comma-separated extra exact origins).
+- `ALLOWED_ORIGINS=http://localhost:5173,https://neuroia.es` (comma-separated extra exact origins).
 
 Set these **Secret** bindings directly in Cloudflare:
 
@@ -159,7 +159,7 @@ Run `node --test vendor/cloudflare/index.test.mjs vendor/cloudflare/seats.test.m
 and the combined sequential emulator command in the professional guide.
 
 
-## Account deletion and trial identity (implementation awaiting deployment)
+## Account deletion and trial identity (staged, activation pending)
 
 `accountLifecycle.mjs` owns POST `/trial`, `/account/deletion-status` and
 `/account/delete`. Client rules prohibit direct trial grants. `/trial` atomically
@@ -198,7 +198,21 @@ asynchronous and depends on backlog/data volume, not an instant-delete guarantee
 Observe failed scheduled invocations and jobs whose `lastRunAt` stops advancing.
 The existing five-minute Stripe reconciliation runs separately.
 
-Activation sequence (do not publish only the frontend):
+Deployment state: Worker modules and both cron triggers are published, with
+`ACCOUNT_DELETION_ENABLED=false`. The stable secret is configured in Cloudflare
+and a mode-0600 local backup is kept outside the repository under
+`~/.config/neuroia/secrets/trial-identity-secret`. The billing service account has
+`projects/ceoaberto-neuroia/roles/neuroiaAccountLifecycle` with only Auth get/delete
+permissions. Collection-group indexes have been submitted; readiness still needs
+confirmation. Production Firestore rules are unchanged.
+
+The published frontend (`index-B8AG4Q-I.js`) still grants trials directly through
+Firestore. Do not switch rules or enable deletion independently of the frontend
+migration: old trial activation would fail. Publishing the current frontend remains
+subject to the owner's separate choice; backend authorization has already been given.
+No real account was deleted. Health and unauthenticated rejection checks passed.
+
+Activation sequence (finish coordinated with frontend publication):
 
 1. Back up/configure `TRIAL_IDENTITY_SECRET` and grant the dedicated service account
    `firebaseauth.users.get` and `firebaseauth.users.delete` through a scoped custom

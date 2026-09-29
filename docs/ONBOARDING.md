@@ -53,7 +53,7 @@ changes to that ledger. Deleting and recreating the account with the same email
 cannot restart the trial. Access expires seven days after the server timestamp,
 requires no card and does not turn into a paid subscription. Legacy Firestore
 Timestamp and numeric values remain readable. See the account lifecycle and
-activation requirements in [the Worker guide](../vendor/cloudflare/README.md#account-deletion-and-trial-identity-implementation-awaiting-deployment).
+activation requirements in [the Worker guide](../vendor/cloudflare/README.md#account-deletion-and-trial-identity-staged-activation-pending).
 
 Stripe Checkout, webhook and portal now use the standalone Cloudflare Worker in
 `vendor/cloudflare/`, without deploying Firebase Cloud Functions or enabling Blaze. See
