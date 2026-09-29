@@ -122,7 +122,9 @@ subject to the confirmed deadline and available client materials.
   captured HTTP 400 `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED` when updating
   `notification.sendEmail.callbackUri`. Keep the existing email action URL; ask
   Firebase Support to diagnose the project restriction before retrying migration.
-  HTTPS readiness does not resolve this backend rejection. Gate: app navigation/returns use the intended app domain; review
+  HTTPS readiness does not resolve this backend rejection. A terminal retry with
+  Firebase CLI OAuth credentials and the official admin API reproduced the same
+  400; read-back confirmed the original callback URL remains unchanged. Gate: app navigation/returns use the intended app domain; review
   branded auth-domain feasibility if needed, without breaking secure verification,
   recovery or sign-in. Coordinate with the existing domain-migration backlog.
 

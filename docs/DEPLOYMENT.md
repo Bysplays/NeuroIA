@@ -117,6 +117,10 @@ migration or a reverse proxy; the subdomain avoids that infrastructure change.
    `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED` (owner-provided response). Keep the default
    email action URL until Firebase Support resolves or explains the rejection;
    do not infer a DNS fault or a need for a paid-plan upgrade from this code.
+   Retested from the terminal using the existing Firebase CLI OAuth session and
+   the official `identitytoolkit.googleapis.com/admin/v2` endpoint: GET succeeded
+   and confirmed the authorized domain; the scoped callbackUri PATCH returned
+   the same HTTP 400. A subsequent GET confirmed the original URL was retained.
 5. Sender branding is a separate configuration in Authentication > Templates >
    Customize domain. Use the exact TXT/CNAME records Firebase supplies, preserve
    unrelated mail records and merge SPF if required rather than adding a second
