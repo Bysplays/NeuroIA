@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowRight, Check, ChevronDown, Ticket, Layers } from 'lucide-react';
+import { ArrowRight, Check, Ticket, Layers } from 'lucide-react';
+import { ModalFrame } from './ModalFrame';
 import type { AccountAccess } from '../services/accessService';
 
 export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onTrial, onInvite, onCheckout, onSignOut, onPortal, checkoutReturn, onCancelCheckout }: {
@@ -10,6 +11,7 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
   checkoutReturn: string | null; onCancelCheckout: () => void;
 }) {
   const [code, setCode] = useState('');
+  const [inviteOpen, setInviteOpen] = useState(false);
   const codeError = invitationIssue?.code === code ? invitationIssue.message : '';
   const expired = access?.kind != null;
   return <div className="access-choice-page">
@@ -43,18 +45,23 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
           </div>
         </section>
       </div>
-      <details className="onboarding-invite">
-        <summary><Ticket size={20} aria-hidden="true"/><span>Tengo un código de invitación</span><ChevronDown size={18} aria-hidden="true"/></summary>
+      <button className="onboarding-invite" aria-haspopup="dialog" disabled={busy} onClick={() => setInviteOpen(true)}><Ticket size={20} aria-hidden="true"/><span>Tengo un código de invitación</span><ArrowRight size={20} aria-hidden="true"/></button>
+      {inviteOpen && <ModalFrame labelledBy="invitation-title" onClose={() => setInviteOpen(false)}>
+        <section className="invitation-dialog">
+        <div className="entry-error-heading"><Ticket size={24} aria-hidden="true"/><h2 id="invitation-title">Tu invitación</h2></div>
         <p>Tu profesional cubre el acceso y puede consultar tu actividad.</p>
         <form className="onboarding-invite-form" onSubmit={event => { event.preventDefault(); if (!busy && access && code.trim()) onInvite(code); }}>
           <label htmlFor="invitation-code">Código de invitación</label>
           <div className="onboarding-code-row">
             <input id="invitation-code" value={code} onChange={event => setCode(event.target.value)} maxLength={64} autoCapitalize="characters" autoComplete="off" spellCheck={false} aria-invalid={Boolean(codeError)} aria-describedby={codeError ? 'invitation-error' : undefined} placeholder="Escribe tu código" required disabled={busy} />
-            <button className="touch-btn" disabled={busy || !access || !code.trim()} type="submit">Usar mi código</button>
+            <button className="touch-btn touch-btn-primary" disabled={busy || !access || !code.trim()} type="submit">Usar mi código</button>
           </div>
           {codeError && <p id="invitation-error" role="alert" aria-atomic="true">{codeError}</p>}
         </form>
-      </details>
+        {busy && <p role="status">Comprobando tu código…</p>}
+        <button className="email-text-button invitation-close" onClick={() => setInviteOpen(false)}>Cerrar</button>
+        </section>
+      </ModalFrame>}
       <footer className="onboarding-footer">
         {busy && <span role="status">Un momento…</span>}
         {(checkoutReturn || access?.pendingCheckout) && <button className="paper-nav-button" disabled={busy} onClick={onCancelCheckout}>Cancelar pago pendiente</button>}

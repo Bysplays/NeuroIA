@@ -181,7 +181,8 @@ Suscribirme primary and the seven-day trial visibly available below it when
 eligible. Explain unavailable checkout rather than leaving an unexplained disabled
 button. Do not invent a price: the current adapter exposes availability, not pricing;
 tell users they will see price and terms before confirmation. Place professional
-invitations in a keyboard-operable disclosure below the plan, with a persistent
+invitations behind a full-width button with a right arrow below the plan. It opens
+a compact ModalFrame with Cerrar, Escape/backdrop dismissal and focus return, with a persistent
 input label, inline validation and the activity-sharing explanation. Preserve
 pending-payment cancellation, subscription management and sign-out.
 Reference: [Brilliant membership benefits](https://mobbin.com/screens/36a35dc6-cede-421e-8cf1-a4d831fc8a94),

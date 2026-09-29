@@ -233,12 +233,14 @@ test('verification polling enters automatically and stops after leaving', async 
 
 test('subscription offers trial and accessible invitation without bypassing availability', async ({page}) => {
   await page.goto(fixture+'?subscription');
-  await page.locator('summary').focus();
+  await page.getByRole('button',{name:'Tengo un código de invitación'}).focus();
   await page.keyboard.press('Enter');
   await page.getByLabel('Código de invitación',{exact:true}).fill('INVALIDO');
   await page.getByRole('button',{name:'Usar mi código'}).click();
   await expect(page.getByRole('alert')).toContainText('Este código no es válido');
   await expect(page.getByLabel('Código de invitación',{exact:true})).toHaveValue('INVALIDO');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button',{name:'Tengo un código de invitación'})).toBeFocused();
   await page.getByRole('button',{name:'Probar gratis 7 días'}).click();
   await expect(page.getByRole('button',{name:'Comenzar',exact:true})).toBeVisible();
   await page.goto(fixture+'?subscription&expired&unavailable');

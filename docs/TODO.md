@@ -12,7 +12,7 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [x] Legal/privacy page presentation approved; outstanding legal content remains tracked below.
 - [x] Login, registration, recovery and error notification presentation approved by owner.
 - [ ] Review the redesigned subscription entry: monthly-plan card, visible eligible
-  trial and invitation disclosure. Local phone/tablet/landscape review and isolated
+  trial and invitation modal. Local phone/tablet/landscape review and isolated
   availability, validation and pending-payment checks pass; owner approval and real
   checkout acceptance remain pending.
 
