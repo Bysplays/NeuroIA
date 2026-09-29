@@ -24,9 +24,11 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [x] Remove the two owner-approved trial access records, retaining both pseudonymous
   trial-use markers atomically. Read-back confirmed both removals and markers;
   profiles, results, invitations and Auth accounts were preserved.
-- [ ] Coordinate the frontend migration with new
-  Firestore rules and ACCOUNT_DELETION_ENABLED. The currently published frontend
-  still grants trials directly; changing rules alone would break existing signups.
+- [x] Publish the account-deletion Firestore rules to `ceoaberto-neuroia` at the
+  owner's explicit request. The active rules match the repository file.
+- [ ] Complete the frontend migration and enable ACCOUNT_DELETION_ENABLED.
+  The old published frontend still attempts direct trial grants, now denied by
+  the deployed rules; publish the Worker-backed trial flow to restore new web trials.
   GitHub authorization and the required explicit merge approval remain pending. Verify with a disposable account
   after activation; backend preparation has already been authorized.
 - [ ] Review refreshed onboarding preferences and assessment entry with the owner;

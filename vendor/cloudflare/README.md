@@ -203,11 +203,13 @@ Deployment state: Worker modules and both cron triggers are published, with
 and a mode-0600 local backup is kept outside the repository under
 `~/.config/neuroia/secrets/trial-identity-secret`. The billing service account has
 `projects/ceoaberto-neuroia/roles/neuroiaAccountLifecycle` with only Auth get/delete
-permissions. All four collection-group indexes are confirmed READY. Production Firestore rules are unchanged.
+permissions. All four collection-group indexes are confirmed READY. The account-deletion
+Firestore rules are published to production and match the repository file.
 
 The published frontend (`index-B8AG4Q-I.js`) still grants trials directly through
-Firestore. Do not switch rules or enable deletion independently of the frontend
-migration: old trial activation would fail. Publishing the current frontend remains
+Firestore. These direct grants are now denied by the rules published at the owner's
+explicit request. Publish the current Worker-backed frontend to restore new trial
+activation on the public web; localhost already uses that flow. Frontend publication remains
 subject to the owner's separate choice; backend authorization has already been given.
 No real account was deleted. Health and unauthenticated rejection checks passed.
 The two trial access records explicitly approved for cleanup were removed in one
