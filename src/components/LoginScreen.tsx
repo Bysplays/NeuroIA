@@ -88,7 +88,7 @@ export function LoginScreen({
               <Brand />
             </button>
             {mode !== null && (
-              <button className="text-link" disabled={busy} onClick={() => changeMode(null)}>
+              <button className="text-link" disabled={busy} onClick={() => changeMode(mode === "reset" ? "signin" : null)}>
                 <ArrowLeft size={18} /> Volver
               </button>
             )}
@@ -142,14 +142,14 @@ export function LoginScreen({
               aria-labelledby="entry-title"
             >
               <div className="account-entry-form">
-                <div
+                {mode !== "reset" && <div
                   className="entry-mode-switch"
                   role="group"
                   aria-label="Tipo de acceso"
                 >
                   <button aria-pressed={mode === "signin"} disabled={busy} onClick={() => changeMode("signin")}>Iniciar sesión</button>
                   <button aria-pressed={mode === "register"} disabled={busy} onClick={() => changeMode("register")}>Crear cuenta</button>
-                </div>
+                </div>}
                 <h1 ref={title} tabIndex={-1} id="entry-title">
                   {mode === "register"
                     ? "Crea tu cuenta"
@@ -267,16 +267,6 @@ export function LoginScreen({
                       onClick={() => changeMode("reset")}
                     >
                       He olvidado mi contraseña
-                    </button>
-                  )}
-                  {mode === "reset" && (
-                    <button
-                      className="email-text-button"
-                      type="button"
-                      disabled={busy}
-                      onClick={() => changeMode("signin")}
-                    >
-                      Volver a iniciar sesión
                     </button>
                   )}
                   {(error || formError) && (
