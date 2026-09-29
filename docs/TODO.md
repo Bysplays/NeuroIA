@@ -116,8 +116,9 @@ subject to the confirmed deadline and available client materials.
   `ceoaberto-neuroia.firebaseapp.com`, documented in DEPLOYMENT.md. Feasibility confirmed: use `auth.neuroia.es` on Firebase Hosting for
   OAuth and email actions while retaining the app on GitHub Pages. Setup sequence
   is in DEPLOYMENT.md. Owner confirmed DNS, authorized domain and Google
-  OAuth callback; certificate and email-template configuration remain pending.
-  The current authDomain remains unchanged until those prerequisites work. Gate: app navigation/returns use the intended app domain; review
+  OAuth callback. HTTPS and both auth endpoints now pass read-only checks; local
+  authDomain override is enabled. Email-template changes and end-to-end Google/email
+  verification remain pending; production authDomain is unchanged. Gate: app navigation/returns use the intended app domain; review
   branded auth-domain feasibility if needed, without breaking secure verification,
   recovery or sign-in. Coordinate with the existing domain-migration backlog.
 
