@@ -187,7 +187,8 @@ and invitation redemption. “Mi acceso” is available before assessment and wi
 Mi cuenta, using the existing subscription service. Never imply payment has
 completed based only on a browser return URL.
 The subscription entry uses a brand header and an 880 px content region: three
-short benefits beside one monthly-plan card, stacked on narrow screens. Keep
+short benefits beside one monthly-plan card. On narrow screens, center the heading
+and combine benefits and plan in a single compact white surface, capped at 440 px. Keep
 Suscribirme primary and the seven-day trial visibly available below it when
 eligible. Explain unavailable checkout rather than leaving an unexplained disabled
 button. Do not invent a price: the current adapter exposes availability, not pricing;
@@ -195,10 +196,11 @@ price and terms remain in Stripe checkout; do not add a helper paragraph below S
 invitations behind a full-width button with a right arrow below the plan. It opens
 a compact ModalFrame with Cerrar, Escape/backdrop dismissal and focus return, with a persistent
 input label, inline validation and the activity-sharing explanation. Preserve
-pending-payment cancellation, subscription management and sign-out. Pending actions
+subscription management and sign-out; do not show a manual pending-payment cancellation action. Pending actions
 show Un momento… inside the activated button; do not add a separate footer or
-invitation loading message. Using an invitation automatically cancels any pending
-checkout through the existing server endpoint before redeeming the code. If payment
+invitation loading message. Starting subscription, trial or invitation redemption automatically cancels any pending
+checkout through the existing server endpoint before continuing. Always consult the
+server, including when the current tab has no pending-checkout flag. If payment
 is already complete or cancellation fails, stop and show the error inside the modal;
 never silently discard redemption or payment errors.
 Reference: [Brilliant membership benefits](https://mobbin.com/screens/36a35dc6-cede-421e-8cf1-a4d831fc8a94),

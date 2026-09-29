@@ -11,7 +11,9 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [x] About page approved.
 - [x] Legal/privacy page presentation approved; outstanding legal content remains tracked below.
 - [x] Login, registration, recovery and error notification presentation approved by owner.
-- [x] Subscription entry approved by owner: monthly plan, trial and invitation modal.
+- [ ] Reconfirm subscription presentation on mobile after compact layout revision;
+  desktop plan, trial and invitation modal were approved. New access choices cancel
+  pending checkout automatically; completed payments remain protected.
   Presentation approval does not certify live payments or change release requirements.
 - [ ] Review authenticated home and catalog with the owner; onboarding review is
   deferred at the owner's request, without marking its unresolved checks complete.

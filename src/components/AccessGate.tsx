@@ -68,6 +68,12 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     const url = new URL(location.href); url.searchParams.delete('checkout');
     window.history.replaceState(null, '', url); setCheckoutReturn(null);
   };
+  const prepareAccessChoice = async () => {
+    // Check the server even if this tab has not observed another tab's checkout.
+    await accessService.cancelCheckout();
+    clearReturn();
+    setInvitationIssue(null);
+  };
   const redirect = async (kind: 'checkout' | 'portal') => {
     const url = new URL(await accessService[kind]());
     if (!alive.current) return;
@@ -83,14 +89,11 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
   return <main className="entry-page access-entry">
     <header className="entry-header"><Brand/></header>
     {<OnboardingModal access={access} loadFailed={Boolean(error)} errorMessage={error} invitationIssue={invitationIssue} busy={busy}
-      onSignOut={onSignOut} onTrial={() => { void run(async () => { await accessService.trial(); await refresh(); }); }}
+      onSignOut={onSignOut} onTrial={() => { void run(async () => { await prepareAccessChoice(); await accessService.trial(); await refresh(); }); }}
       onInvite={code => { void run(async () => {
         setInvitationIssue(null);
         try {
-          if (access.pendingCheckout) {
-            await accessService.cancelCheckout();
-            clearReturn();
-          }
+          await prepareAccessChoice();
           await accessService.invite(code);
         }
         catch (cause) {
@@ -101,8 +104,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
         }
         await refresh();
       }); }}
-      onCheckout={() => { void run(() => redirect('checkout')); }} onPortal={() => { void run(() => redirect('portal')); }}
-      checkoutReturn={checkoutReturn}
-      onCancelCheckout={() => { void run(async () => { await accessService.cancelCheckout(); setInvitationIssue(null); clearReturn(); await refresh(); }); }} />}
+      onCheckout={() => { void run(async () => { await prepareAccessChoice(); await redirect('checkout'); }); }} onPortal={() => { void run(() => redirect('portal')); }}
+      checkoutReturn={checkoutReturn} />}
   </main>;
 }

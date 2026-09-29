@@ -248,7 +248,7 @@ test('subscription offers trial and accessible invitation without bypassing avai
   await expect(page.getByRole('button',{name:'Probar gratis 7 días'})).toHaveCount(0);
   await page.goto(fixture+'?subscription&checkout=success');
   await expect(page.getByRole('status')).toContainText('comprobando tu pago');
-  await expect(page.getByRole('button',{name:'Cancelar pago pendiente'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Cancelar pago pendiente'})).toHaveCount(0);
 });
 
 
@@ -275,3 +275,26 @@ test('invitation automatically cancels pending checkout before redemption', asyn
   await expect(page.getByRole('dialog').getByRole('alert')).toContainText('Estamos confirmando tu pago');
   expect(await page.evaluate(()=>!!window.invited)).toBe(false);
 });
+
+for (const choice of ['trial', 'checkout']) {
+  test(`${choice} invalidates pending payment before starting and stops on cancellation failure`, async ({page}) => {
+    await page.route('**/src/services/accessService.ts*', async route => {
+      const response = await route.fetch();
+      let body = await response.text();
+      // Deliberately stale UI snapshot: the server must still be consulted.
+      body = body.replace(/async load\(\)\s*\{/, 'async load() { return {active:!!window.startedTrial,serverNow:Date.now(),validForMs:60000,checkoutAvailable:true,pendingCheckout:false};');
+      body = body.replace(/async cancelCheckout\(\)\s*\{/, 'async cancelCheckout() { if (location.search.includes("paid")) throw Object.assign(new Error("Estamos confirmando tu pago."), {code:"billing/request-failed"}); window.paymentCancelled = true; return;');
+      body = body.replace(/async trial\(\)\s*\{/, 'async trial() { if (!window.paymentCancelled) throw new Error("pending checkout"); window.startedTrial = true; return;');
+      body = body.replace(/async checkout\(\)\s*\{/, 'async checkout() { if (!window.paymentCancelled) throw new Error("pending checkout"); window.startedCheckout = true; throw Object.assign(new Error("Checkout preparado"), {code:"billing/request-failed"});');
+      await route.fulfill({response,body});
+    });
+    const label = choice === 'trial' ? 'Probar gratis 7 días' : 'Suscribirme';
+    await page.goto(fixture+'?access-gate');
+    await page.getByRole('button',{name:label,exact:true}).click();
+    await expect.poll(()=>page.evaluate(kind=>kind === 'trial' ? !!window.startedTrial : !!window.startedCheckout,choice)).toBe(true);
+    await page.goto(fixture+'?access-gate&paid');
+    await page.getByRole('button',{name:label,exact:true}).click();
+    await expect(page.getByRole('alert')).toContainText('Estamos confirmando tu pago');
+    expect(await page.evaluate(()=>!!window.startedTrial || !!window.startedCheckout)).toBe(false);
+  });
+}

@@ -3,13 +3,13 @@ import { ArrowRight, Check, Ticket, Layers } from 'lucide-react';
 import { ModalFrame } from './ModalFrame';
 import type { AccountAccess } from '../services/accessService';
 
-export function OnboardingModal({ access, busy, loadFailed, errorMessage, invitationIssue, onTrial, onInvite, onCheckout, onSignOut, onPortal, checkoutReturn, onCancelCheckout }: {
+export function OnboardingModal({ access, busy, loadFailed, errorMessage, invitationIssue, onTrial, onInvite, onCheckout, onSignOut, onPortal, checkoutReturn }: {
   access: AccountAccess | null; busy: boolean; loadFailed: boolean;
   errorMessage?: string;
   invitationIssue: { code: string; message: string } | null;
   onTrial: () => void; onInvite: (code: string) => void; onCheckout: () => void;
   onSignOut: () => void; onPortal: () => void;
-  checkoutReturn: string | null; onCancelCheckout: () => void;
+  checkoutReturn: string | null;
 }) {
   const [code, setCode] = useState('');
   const [pendingAction, setPendingAction] = useState('');
@@ -68,7 +68,6 @@ export function OnboardingModal({ access, busy, loadFailed, errorMessage, invita
         </section>
       </ModalFrame>}
       <footer className="onboarding-footer">
-        {(checkoutReturn || access?.pendingCheckout) && <button className="paper-nav-button" disabled={busy} onClick={() => invoke('cancel', onCancelCheckout)}>{label('cancel', 'Cancelar pago pendiente')}</button>}
         <button className="paper-nav-button" disabled={busy} onClick={onSignOut}>Cerrar sesión</button>
       </footer>
     </section>

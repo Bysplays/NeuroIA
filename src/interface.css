@@ -826,11 +826,24 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
 .onboarding-footer { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
 .onboarding-footer > span { font-size: .8rem; }
 .access-membership { display: flex; justify-content: flex-end; padding: 8px 24px; }
-@media (max-width: 680px) {
-  .onboarding-options { grid-template-columns: 1fr; gap: 24px; }
+@media (max-width: 760px) {
+  .access-choice-page { max-width: 440px; padding: 20px 0 16px; }
+  .onboarding-heading { text-align: center; margin-bottom: 24px; }
+  .onboarding-heading h1 { font-size: 1.4rem; }
+  .onboarding-heading p { font-size: .8rem; margin: 10px 0 0; }
+  .onboarding-options { grid-template-columns: 1fr; gap: 0; padding: 24px; background: var(--color-surface); border-radius: 16px; }
+  .onboarding-paid { padding: 20px 0 0; margin-top: 20px; border: 0; border-top: 1px solid var(--color-border); border-radius: 0; background: transparent; }
+  .onboarding-plan-label { display: none; }
+  .onboarding-paid h2 { font-size: 1.1rem; margin: 0 0 6px; }
+  .onboarding-paid p { font-size: .75rem; margin: 0; }
+  .onboarding-actions { margin-top: 20px; gap: 4px; }
+  .onboarding-actions .touch-btn { min-height: 52px; font-size: .85rem; }
+  .onboarding-benefits li { font-size: .75rem; gap: 10px; }
+  .onboarding .onboarding-invite { margin-top: 12px; padding: 12px 4px; font-size: .75rem; border-top: 0; border-bottom: 0; min-height: 52px; }
+  .onboarding-footer { margin-top: 4px; }
   .onboarding-plan-icon { display: none; }
   .onboarding-benefits h2 { display: none; }
-  .onboarding-benefits ul { gap: 10px; }
+  .onboarding-benefits ul { gap: 12px; margin: 0; }
   .onboarding-code-row { flex-direction: column; }
 }
 
