@@ -1,3 +1,5 @@
+import { exerciseStages } from './services/sessionProgress';
+import { gameConfig as progressGameConfig } from './services/difficulty';
 import { InformationPage, type InformationKind } from "./components/InformationPage";
 import { eegService } from './services/eegService';
 import { LevelUpScreen } from './components/LevelUpScreen';
@@ -222,6 +224,14 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
     isLast: dailyPlanSession.currentIndex + 1 >= dailyPlanSession.queue.length,
   } : null;
 
+  const pathProgress = dailyPlanSession?.inProgress ? dailyPlanSession.queue.reduce((scope, domain, index) => {
+    const game = getExercisesForDomain(domain)[0].id;
+    const stages = exerciseStages(game, progressGameConfig(assignedLevel(profile, game)));
+    if (index < dailyPlanSession.currentIndex) scope.before += stages;
+    if (index > dailyPlanSession.currentIndex) scope.after += stages;
+    return scope;
+  }, { before: 0, after: 0 }) : undefined;
+
   const isPlayingGame = !!playingProposal || activeView !== 'dashboard' && activeView !== 'therapist' && activeView !== 'achievements' && activeView !== 'statistics';
 
   const exerciseId = getExercisesForDomain(activeView as CognitiveDomain)[0]?.id ?? activeView as ExerciseId;
@@ -276,7 +286,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
           />
         )}
 
-        {isPlayingGame && !playingProposal && <GameSession onSettings={() => setIsAccessibilityOpen(true)} paused={isAccessibilityOpen} key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
+        {isPlayingGame && !playingProposal && <GameSession progressScope={pathProgress} onSettings={() => setIsAccessibilityOpen(true)} paused={isAccessibilityOpen} key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
           <GameExercise id={exerciseId} profile={profile} onBack={handleBackToDashboard} onSaveResult={handleSaveExerciseResult} planProgress={planProgress} onNextPlanExercise={handleNextPlanExercise} />
         </GameSession>}
       </main>}

@@ -1,3 +1,4 @@
+import { ModalFrame } from './ModalFrame';
 import { Brand } from './Brand';
 import { EegButton } from './EegButton';
 import { EegLive } from './EegLive';
@@ -10,13 +11,13 @@ import { gameConfig, type GameMode } from '../services/difficulty';
 import { SessionContext } from '../services/gameSession';
 import { HeaderIllustration } from './HeaderIllustration';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Minus, Plus, CircleHelp, Clock, Settings2, Volume2 } from 'lucide-react';
+import { Minus, Plus, CircleHelp, Clock, Settings2, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { createGameClock } from '../services/gameClock';
 import { getExerciseById, getExercisesForDomain } from '../services/exerciseCatalog';
 import type { CognitiveDomain, ExerciseId } from '../types';
 import { soundService } from '../services/soundService';
 
-export function GameSession({ id, step, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true, autoStart = false, onSettings, onSkip }: { onSettings?: () => void; onSkip?: () => void; autoStart?: boolean; id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
+export function GameSession({ id, step, progressScope, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true, autoStart = false, onSettings, onSkip }: { progressScope?: { before: number; after: number }; onSettings?: () => void; onSkip?: () => void; autoStart?: boolean; id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
   const panel = useViewportPanel<HTMLDivElement>();
   const [assistanceTarget, setAssistanceTarget] = useState<HTMLDivElement | null>(null);
   const [eegOpen, setEegOpen] = useState(false);
@@ -51,9 +52,9 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
   const instruction = instructions[exercise?.id ?? id] ?? 'Lee las opciones y responde a tu ritmo.';
   useEffect(() => {
     if (paused) return;
-    if (help) { heading.current?.focus(); soundService.stopSpeaking(); }
+    if (help) { if (!started) heading.current?.focus(); soundService.stopSpeaking(); }
     else helpButton.current?.focus();
-  }, [help, paused]);
+  }, [help, paused, started]);
   useEffect(() => {
     if (paused || help || completed || !started || eegOpen || background) return;
     let previous = performance.now();
@@ -85,9 +86,9 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
     }, 1000);
     return () => clock.clearInterval(timer);
   }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started]);
-  return <SessionContext.Provider value={{ config, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setLevel(initialLevel); setStarted(false); finish(false); setHelp(true); setSeconds(0); } }}>
-    <div className={`game-session${started && !help && !completed ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
-    {help && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
+  return <SessionContext.Provider value={{ config, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setLevel(initialLevel); setStarted(false); finish(false); setHelp(true); setSeconds(0); } }}>
+    <div className={`game-session${started && !completed ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
+    {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>
       <div className="placement-card">
         <HeaderIllustration scene={exercise?.id ?? "home"} className="placement-art" />
@@ -97,7 +98,7 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
           <button type="button" aria-label="Bajar nivel" disabled={level <= 1} onClick={() => setLevel(value => Math.max(1, value - 1))}><Minus size={16}/></button>
           <span aria-live="polite">Nivel {level}</span>
           <button type="button" aria-label="Subir nivel" disabled={level >= 10} onClick={() => setLevel(value => Math.min(10, value + 1))}><Plus size={16}/></button>
-        </div> : <span className="soft-label">{mode === 'placement' ? 'A tu ritmo' : `Nivel ${level}`}</span>}
+        </div> : mode !== 'placement' ? <span className="soft-label">Nivel {level}</span> : null}
         <button className="paper-nav-button" onClick={() => soundService.speak(instruction)}><Volume2 size={20} />Escuchar</button>
         </div>
         <div className="placement-copy">
@@ -108,9 +109,9 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
         <div className="placement-actions"><button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setStarted(true); setHelp(false); }}>{started ? 'Continuar jugando' : 'Empezar a jugar'}</button></div>
         </div>
       </div>
-      {(!lockedLevel || step) && <footer className="instruction-navigation">{!lockedLevel && <button className="placement-text-action" onClick={onBack}>← Volver</button>}{step && <span className="instruction-step soft-label">{step}</span>}</footer>}
+      {(!lockedLevel || step) && <footer className="instruction-navigation">{!lockedLevel && <button className="entry-toolbar-action" onClick={onBack}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}{step && <span className="instruction-step soft-label">{step}</span>}</footer>}
     </section>}
-    {started && <div className="game-session-play" hidden={help}>
+    {started && <div className="game-session-play">
       {!completed && <header className="viewport-session-header">
         <span className="game-session-time" aria-label="Tiempo de juego"><Clock size={22}/>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span>
         <div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/><FullscreenButton/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}</div>
@@ -119,18 +120,27 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
       {!completed && <EegLive recording={eeg} ppg={ppg} eegMean={recorder.mean()} ppgMean={ppgRecorder.mean()} recordable={mode === 'normal'}/>}
       {children}
       {!completed && <footer className="viewport-session-footer">
-        <button className="placement-text-action" onClick={onBack}>← Volver</button>
+        <button className="entry-toolbar-action" onClick={onBack}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>
         <div className="viewport-assistance-row">
           <div ref={setAssistanceTarget}/>
           {id !== 'categorization' && <button className="paper-nav-button" onClick={() => soundService.speak(instruction)}><Volume2 size={20}/>Escuchar</button>}
           <button ref={helpButton} className="game-help-button" onClick={() => setHelp(true)} aria-label="Mostrar instrucciones"><CircleHelp size={24}/></button>
         </div>
         <div className="viewport-navigation-row">
-          <span className="soft-label">{mode === 'placement' ? 'A tu ritmo' : `Nivel ${level}`}</span>
-          {onSkip && <button className="placement-text-action" onClick={onSkip}>Omitir →</button>}
+          {mode !== 'placement' && <span className="soft-label">Nivel {level}</span>}
+          {onSkip && <button className="entry-toolbar-action" onClick={onSkip}>Omitir<ArrowRight size={18} aria-hidden="true"/></button>}
         </div>
       </footer>}
     </div>}
+    {help && started && <ModalFrame labelledBy="game-help-title" onClose={() => { soundService.stopSpeaking(); setHelp(false); }}>
+      <section className="entry-error-notification game-help-dialog">
+        <div className="entry-error-heading"><CircleHelp size={24} aria-hidden="true"/><h2 id="game-help-title">Cómo jugar</h2></div>
+        <h3>{exercise?.title}</h3>
+        <div className="entry-error-message"><p>{instruction}</p></div>
+        <button className="entry-toolbar-action" onClick={() => soundService.speak(instruction)}><Volume2 size={18} aria-hidden="true"/>Escuchar</button>
+        <button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setHelp(false); }}>Continuar jugando</button>
+      </section>
+    </ModalFrame>}
     </div>
   </SessionContext.Provider>;
 }

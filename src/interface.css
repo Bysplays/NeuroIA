@@ -1791,3 +1791,6 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .condition-privacy input { flex: none; width: 20px; height: 20px; margin-top: 3px; accent-color: var(--color-primary); }
 
 .save-continue { display: block; margin: 16px auto 0; min-height: 44px; font-size: .8rem; text-decoration: underline; text-underline-offset: 4px; }
+
+.game-help-dialog h3 { margin: 0 0 12px; font-size: .85rem; font-weight: 600; }
+.game-help-dialog > .touch-btn { margin-top: 20px; }

@@ -2,7 +2,6 @@ import { shuffle } from '../services/gameObjectPool';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState } from 'react';
-import { Check } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -224,10 +223,11 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   return (
     <ExerciseWrapper
+      progress={{ done: foundCount / totalTargets, total: 1 }}
       exerciseId="visual-scanning"
       title={
         <span>
-          Busca {article} <strong>{currentTarget.name}</strong> ({foundCount}/{totalTargets})
+          Busca {article} <strong>{currentTarget.name}</strong>
         </span>
       }
       domain="attention"
@@ -252,11 +252,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
               aria-label={item.found ? 'Elemento ya encontrado' : 'Posible objetivo'}
             >
               <span className="cell-emoji"><GameObject symbol={item.symbol} /></span>
-              {item.found && (
-                <div className="cell-check-overlay">
-                  <Check size={36} className="check-svg" />
-                </div>
-              )}
+
             </button>
           ))}
         </div>

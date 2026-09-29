@@ -637,3 +637,9 @@ means an active linked professional can read it; disclose that before saving. Do
 not reuse legacy strokeDate/affectedSide fields or accept free-text diagnoses.
 ProgressSaveNotice retains pending data and retries after dismissal; its continue
 action never bypasses initial cloud loading or server-confirmed access.
+
+`src/services/sessionProgress.ts` owns stage weights and bounded progress aggregation.
+`GameSession.progressScope` carries completed and remaining stages for placement,
+daily plans and assigned sessions; each game supplies its current progress through
+`ExerciseWrapper`. Help uses ModalFrame and pauses the existing game clock without
+unmounting the board.

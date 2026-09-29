@@ -340,7 +340,7 @@ body[data-contrast="standard"] .game-session .category-bin-card { background: #f
 .game-session-viewport .game-task-title { position: static; transform: none; width: 100%; margin: 8px 0 16px; font-size: 1.2rem; line-height: 1.4; text-align: center; }
 .game-session-viewport .game-session-play > .exercise-container { padding: 0; }
 .viewport-session-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 0; }
-.viewport-session-footer > .placement-text-action { justify-self: start; }
+.viewport-session-footer > .entry-toolbar-action { justify-self: start; }
 .viewport-assistance-row { display: flex; align-items: center; justify-content: center; gap: 16px; min-height: 48px; }
 .viewport-navigation-row { display: flex; align-items: center; justify-content: flex-end; gap: 16px; min-height: 48px; }
 .viewport-navigation-row > .soft-label { white-space: nowrap; }
@@ -391,7 +391,7 @@ body[data-contrast="standard"] .game-session .category-bin-card { background: #f
 @media (max-width: 600px) {
   .viewport-session-footer { grid-template-columns: 1fr 1fr; gap: 0 12px; }
   .viewport-session-footer .viewport-assistance-row { grid-column: 1 / -1; grid-row: 1; flex-wrap: wrap; }
-  .viewport-session-footer > .placement-text-action, .viewport-session-footer .viewport-navigation-row { grid-row: 2; }
+  .viewport-session-footer > .entry-toolbar-action, .viewport-session-footer .viewport-navigation-row { grid-row: 2; }
 }
 
 .memory-status-slot { display: grid; }
@@ -462,3 +462,10 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 .game-session .placement-actions .touch-btn, .game-session .memory-actions .touch-btn { border-radius: 12px; min-height: 52px; font-size: .85rem; }
 
 .game-session .viewport-session-tools .muse-entry { width: auto; padding-inline: 14px; }
+
+/* One continuous progress track between the task and the play area. */
+.game-stage-progress { display: block; width: 100%; height: 6px; flex: 0 0 6px; margin: 0 0 12px; border: 0; border-radius: 3px; overflow: hidden; appearance: none; background: var(--color-border); color: var(--color-primary); }
+.game-stage-progress::-webkit-progress-bar { background: var(--color-border); }
+.game-stage-progress::-webkit-progress-value { background: var(--color-primary); }
+.game-stage-progress::-moz-progress-bar { background: var(--color-primary); }
+.viewport-session-footer > .entry-toolbar-action, .viewport-navigation-row > .entry-toolbar-action { min-width: 104px; padding: 10px 14px; justify-content: center; }

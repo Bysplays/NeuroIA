@@ -137,8 +137,9 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
   return (
     <ExerciseWrapper
+      progress={{ done: currentIdx, total: sessionQuestions.length }}
       exerciseId="language-naming"
-      title={`¿Qué objeto es este? (${currentIdx + 1}/${sessionQuestions.length})`}
+      title="¿Qué objeto es este?"
       domain="language"
       instructionText="Mira la imagen y elige su nombre."
       hideBadges={true}

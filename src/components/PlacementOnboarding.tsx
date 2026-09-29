@@ -1,3 +1,5 @@
+import { exerciseStages } from '../services/sessionProgress';
+import { gameConfig } from '../services/difficulty';
 import { advanceAssessment } from '../services/placementAssessment';
 import { SlidersHorizontal } from 'lucide-react';
 import { Brand } from './Brand';
@@ -82,9 +84,21 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
   if (savingPreferences && !preferences && !complete) return <main className="placement-screen"><p role="status">Preparando tus juegos…</p></main>;
   if (editing && !complete) return <PlacementPreferences initial={preferences} onSave={savePreferences}
     onSettings={onSettings} onBack={preferences ? () => setEditing(false) : onCancel} />;
+  const progressScope = selected.reduce((scope, game) => {
+    const first = exerciseStages(game, gameConfig(1, 'placement'));
+    const second = exerciseStages(game, gameConfig(4, 'placement'));
+    if (trials[game]) scope.before += first + second;
+    else {
+      const currentLevel = profile.placement?.stages?.[game]?.level ?? 1;
+      if (currentLevel > 1) scope.before += first;
+      if (game !== id) scope.after += exerciseStages(game, gameConfig(currentLevel, 'placement'));
+      if (currentLevel === 1) scope.after += second;
+    }
+    return scope;
+  }, { before: 0, after: 0 });
   if (phase === 'trial') return <div className="placement-play">
     {paused && <section className="placement-card"><HeaderIllustration scene="rest" className="placement-art" /><div><h1>Hacemos una pausa</h1><p>Descansa lo que necesites. Seguiremos por donde lo dejaste.</p><button autoFocus className="touch-btn touch-btn-primary" onClick={() => setPaused(false)}>Retomar</button></div></section>}
-    <div hidden={paused}><GameSession paused={paused} key={`${id}-${level}-${phase}`} id={id} onSkip={() => save()} onSettings={() => { setPaused(true); onSettings(); }} autoStart initialLevel={level} mode="placement" onBack={() => setPhase('welcome')}>
+    <div hidden={paused}><GameSession progressScope={progressScope} paused={paused} key={`${id}-${level}-${phase}`} id={id} onSkip={() => save()} onSettings={() => { setPaused(true); onSettings(); }} autoStart initialLevel={level} mode="placement" onBack={() => setPhase('welcome')}>
       <GameExercise id={id} profile={profile} onBack={() => setPhase('welcome')} onSaveResult={save} />
     </GameSession></div>
   </div>;
@@ -97,7 +111,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
       <div className="placement-content">
         <div className="placement-progress"><div className="placement-progress-heading">
           <p className="soft-label">{count} de {selected.length} juegos preparados</p>
-          <button className="paper-nav-button" onClick={() => soundService.speak(message)}><Volume2 size={20} />Escuchar</button>
+          <button className="entry-toolbar-action" onClick={() => soundService.speak(message)}><Volume2 size={20} />Escuchar</button>
         </div><progress max={selected.length} value={count} aria-label="Juegos preparados" /></div>
         <div className="placement-copy"><h1 ref={heading} tabIndex={-1} id="placement-title">{complete ? 'A tu ritmo, desde aquí' : 'Este es tu comienzo'}</h1><p aria-live="polite">{message}</p></div>
         {preferences && <p className="placement-plan-note">{preferences.interests.map(area => INTEREST_AREAS.find(item => item.id === area)!.title).join(' · ')}{preferences.movement === 'taps' ? ' · Sin seguir objetivos en movimiento' : ''}</p>}

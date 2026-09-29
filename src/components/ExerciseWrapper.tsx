@@ -1,3 +1,4 @@
+import { sessionProgress } from '../services/sessionProgress';
 import { useGameSession } from '../services/gameSession';
 import { HeaderIllustration } from './HeaderIllustration';
 import React, { useEffect } from 'react';
@@ -15,6 +16,7 @@ interface PlanProgress {
 interface ExerciseWrapperProps {
   exerciseId: ExerciseId;
   title: React.ReactNode;
+  progress: { done: number; total: number };
   domain: CognitiveDomain;
   instructionText: string;
   onBack: () => void;
@@ -30,6 +32,7 @@ interface ExerciseWrapperProps {
 
 export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   title,
+  progress,
   exerciseId,
   domain,
   onBack,
@@ -42,6 +45,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 }) => {
   const session = useGameSession();
   const { finish } = session;
+  const bar = sessionProgress(progress.done, progress.total, session.progressScope);
   useEffect(() => { finish(isCompleted); }, [isCompleted, finish]);
   useEffect(() => {
     if (isCompleted) {
@@ -63,7 +67,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 
   return (
     <div className={`exercise-container${isCompleted && result ? ' exercise-container-completed' : ''}`} data-domain={domain}>
-      {!isCompleted && <h1 className="game-task-title">{title}</h1>}
+      {!isCompleted && <><h1 className="game-task-title">{title}</h1><progress className="game-stage-progress" value={bar.value} max={bar.max} aria-label={session.progressScope ? "Progreso de la sesión" : "Progreso del juego"}/></>}
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}
       <div className="exercise-viewport">
         {isCompleted && result ? (

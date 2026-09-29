@@ -263,7 +263,7 @@ Each game starts with a full instruction page: supporting illustration, title,
 short instruction, optional listen control, ordinary-play level control and one
 primary **Empezar a jugar** action. Keep the back action separate. Landscape uses
 two columns; portrait stacks a compact illustration above the instruction. Help
-reuses that page, preserves answers and pauses the existing game clock.
+opens a compact Cómo jugar modal, preserves answers and pauses the existing game clock.
 
 Active play has utilities/time above the task, a clear stimulus and response area,
 and reachable assistance/back/next controls. Use the shared GameSession and
@@ -441,3 +441,18 @@ retain a small pending notice and background retries. Never label unsynced work 
 
 Do not interrupt the workspace with timed break reminders or guided rest dialogs.
 Opening settings still pauses active gameplay.
+
+Game footer Volver and Omitir and onboarding Escuchar use the shared outlined
+entry action. Omit the A tu ritmo footer label during placement. In-game help opens
+a compact Cómo jugar native modal with the current instruction and Continuar jugando;
+pause the game clock without unmounting the board, and restore focus on dismissal.
+The initial instruction screen remains a full page before starting ordinary play.
+
+Active exercises use a full-width progress track below the task title and above the
+play area, without numeric counters in the title. Individual games show their own
+stages; daily and professional paths sum all configured stages. Placement reserves
+its two possible assessment stages per selected game; finishing early or skipping
+resolves that game's remaining allocation, so changing games never resets the bar.
+Continuous scanning/tracking arenas contribute one stage with fractional progress.
+Footer Back and Skip actions share the same compact outlined dimensions. Scanning
+keeps its found-state treatment without checkmark overlays obscuring the objects.

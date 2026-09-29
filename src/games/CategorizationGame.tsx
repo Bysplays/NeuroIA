@@ -144,8 +144,9 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
   return (
     <ExerciseWrapper
+      progress={{ done: currentIdx, total: sessionItems.length }}
       exerciseId="categorization"
-      title={`Clasificación por Categorías (${currentIdx + 1}/${sessionItems.length})`}
+      title="Clasificación por categorías"
       domain="executive"
       instructionText="Cada cosa en su lugar. Elige el grupo al que pertenece."
       hideBadges={true}

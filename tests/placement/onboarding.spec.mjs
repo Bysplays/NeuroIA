@@ -35,9 +35,9 @@ test('selected assessment survives reload and finishes without testing unrelated
   await expect.poll(async () => (await saved(page)).placement?.preferences?.interests).toEqual(['memory']);
   await page.reload(); await expect(page.getByText('0 de 2 juegos preparados')).toBeVisible();
   await page.getByRole('button', { name: 'Empezar', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /Secuencia de Memoria/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Secuencia de memoria/ })).toBeVisible();
   await page.getByRole('button', { name: /Omitir/ }).click();
-  await expect(page.getByRole('heading', { name: /Parejas de Memoria/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Parejas de memoria/ })).toBeVisible();
   await page.getByRole('button', { name: /Omitir/ }).click();
   await expect(page.getByRole('heading', { name: 'A tu ritmo, desde aquí' })).toBeVisible();
   await expect(page.getByText('Sin probar', { exact: true })).toHaveCount(6);
@@ -86,8 +86,13 @@ test('a passed target stage survives reload and continues at its saved difficult
   await expect.poll(async () => (await saved(page)).placement?.stages?.['motor-target']?.level).toBe(4);
   await page.reload();
   await page.getByRole('button', { name: 'Empezar', exact: true }).click();
-  await expect(page.getByText('A tu ritmo', { exact: true })).toBeVisible();
+  await expect(page.getByText('A tu ritmo', { exact: true })).toHaveCount(0);
   await expect(page.getByText('Nivel 4', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('progressbar', { name: 'Progreso de la sesión' })).toHaveAttribute('value', '5');
+  await expect(page.getByRole('progressbar', { name: 'Progreso de la sesión' })).toHaveAttribute('max', '13');
+  const back = await page.getByRole('button', {name: 'Volver', exact: true}).boundingBox();
+  const skip = await page.getByRole('button', {name: 'Omitir', exact: true}).boundingBox();
+  expect(Math.abs(back.width - skip.width)).toBeLessThan(1);
   await page.getByRole('button', { name: /Omitir/ }).click();
   await expect(page.getByRole('heading', { name: 'A tu ritmo, desde aquí' })).toBeVisible();
   expect((await saved(page)).placement.trials['motor-target'].assessedLevel).toBe(1);

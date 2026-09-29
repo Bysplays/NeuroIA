@@ -1,3 +1,5 @@
+import { exerciseStages } from '../services/sessionProgress';
+import { gameConfig } from '../services/difficulty';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getFirestore } from 'firebase/firestore';
 import { ArrowLeft, Pause, Play } from 'lucide-react';
@@ -98,7 +100,7 @@ export function AssignedSessionPlayer({ selected, profile, sync, onBack, externa
       {paused && <div className="professional-empty" role="status"><h1>Un momento para ti</h1><p>Continuaremos donde lo dejaste.</p></div>}
       {savedLocally && !nextReady && !error && <p className="professional-notice" role="status">Guardando el ejercicio y confirmando el avance…</p>}
       {nextReady && !savedLocally && <div className="professional-notice" role="status"><p>Este ejercicio ya se ha completado en otro dispositivo.</p><button className="stats-quiet-button" onClick={() => { indexRef.current = session.completedCount; setIndex(session.completedCount); }}>Continuar</button></div>}
-      <div hidden={paused || !!error || (nextReady && !savedLocally)}><GameSession key={index} id={step.exerciseId} initialLevel={step.level} lockedLevel nextReady={nextReady} paused={paused || !!error || externalPause || (nextReady && !savedLocally)} step={`Ejercicio ${index + 1} de ${session.steps.length} · Sesión propuesta`} onBack={onBack}>
+      <div hidden={paused || !!error || (nextReady && !savedLocally)}><GameSession progressScope={{ before: session.steps.slice(0, index).reduce((sum, item) => sum + exerciseStages(item.exerciseId, gameConfig(item.level)), 0), after: session.steps.slice(index + 1).reduce((sum, item) => sum + exerciseStages(item.exerciseId, gameConfig(item.level)), 0) }} key={index} id={step.exerciseId} initialLevel={step.level} lockedLevel nextReady={nextReady} paused={paused || !!error || externalPause || (nextReady && !savedLocally)} step={`Ejercicio ${index + 1} de ${session.steps.length} · Sesión propuesta`} onBack={onBack}>
         <GameExercise id={step.exerciseId} profile={profile} onBack={onBack} onSaveResult={save} planProgress={{ current: index + 1, total: session.steps.length, isLast: index + 1 === session.steps.length }} onNextPlanExercise={() => {
           if (!nextReady) return;
           setSavedLocally(false); indexRef.current = session.completedCount; setIndex(session.completedCount); window.scrollTo(0, 0);

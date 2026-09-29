@@ -346,3 +346,19 @@ test('sound toggle enables narration and effects together and mute stops speech'
   expect(await page.evaluate(()=>window.voiceCalls)).toBe(1);
   expect(await page.evaluate(()=>window.voiceStops)).toBeGreaterThan(0);
 });
+
+test('game progress replaces title counters and help restores the same board', async ({page}) => {
+  await page.goto(fixture+'?game=visual-scanning&placement');
+  const bar=page.getByRole('progressbar', {name:'Progreso del juego'});
+  await expect(bar).toHaveAttribute('value','0');
+  await expect(page.locator('.game-task-title')).not.toContainText(/\d+\/\d+/);
+  const board=await page.locator('.scanning-grid').innerHTML();
+  await page.getByRole('button',{name:'Mostrar instrucciones'}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Cómo jugar'})).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Mostrar instrucciones'})).toBeFocused();
+  expect(await page.locator('.scanning-grid').innerHTML()).toBe(board);
+  await expect(page.locator('.cell-check-overlay')).toHaveCount(0);
+});
