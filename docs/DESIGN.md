@@ -123,7 +123,7 @@ scrolling and focus behavior. Game boards adapt to available height while
 keeping touch targets, stimuli and feedback visible.
 
 Use rounded, labelled tabs with equal widths and heights within each bar, an explicit active state and arrow-key navigation. Allow labels to wrap on narrow screens.
-Place primary player tabs inside the shared header, between the brand and utilities; on narrow screens use a second header row. Activity tabs (Resumen y filtros, Gráficas, Historial and Logros when available) sit below their content at the bottom of the activity view. Other secondary section tabs remain above their content. Center short panels vertically in the remaining space below and allow long content to grow without overlapping navigation.
+Place primary player tabs inside the shared header, between the brand and utilities; on narrow screens use a second header row. Embedded player activity tabs (Resumen y filtros, Gráficas, Historial and Logros when available) sit below their content at the bottom of the activity view; standalone professional activity tabs sit above the content. Other secondary section tabs remain above their content. Center short panels vertically in the remaining space below and allow long content to grow without overlapping navigation.
 
 The first row of each player tab starts at the same vertical position, approximately 20% down the viewport (with at least 16px clearance below the header): the Hoy greeting, game filters, proposed-session heading and Estadísticas heading. Use a shared 52px minimum row height and let wrapped text grow. In Juegos, omit the result-count caption and leave 40px between the area filters and game cards. Keep the Hoy greeting directly above its cards. In the daily card, position the main claim at 40% of the available vertical space between the session label and start action, leaving more room below than above. Embedded statistics content begins 18px below its heading, matching Hoy; keep activity tabs at the bottom without vertically centering the content away from its heading. Choose from 15 short, cheerful, greeting-card-style Spanish subtitles randomly on dashboard mount and keep it stable during updates and tab changes. Keep the wording upbeat and literal; avoid double meanings, references to failure or inadequacy, pressure and claims of cognitive improvement. Keep the greeting on the left and its welcome subtitle on the right, inset 16–32px from the card edges; omit the date.
 
@@ -342,8 +342,13 @@ of the daily-plan styles; use the `proposal-` action/heading classes.
 
 People show their supplied name and an action to open the existing activity charts
 and table in read-only mode. Use “Volver al panel” and identify whose activity is
-being shown. Seats show pending/active/inactive state, paid-through date, renewal
-when confirmed, and a selectable/copyable code only when paid and unoccupied.
+being shown. Seat headings pair a numbered badge using the shared section-icon surface and
+rounded shape with the participant name or “Sin asignar” in regular weight.
+Omit the hash sign and separator. Keep the badge in its own left column, vertically
+centered beside the name and subscription details. Align the real
+pending/active/inactive subscription state, paid-through date and confirmed renewal
+together beneath the name in the right column. Allow natural
+wrapping on narrow screens. Show a selectable/copyable code only when paid and unoccupied.
 New codes use the short `NIA-XXXX-XX` format for easy copying or typing.
 After assignment show the participant, not the code. Pending purchases can be
 resumed or canceled; subscription management uses the Stripe portal. Each renewing
@@ -804,9 +809,17 @@ Toca la diana is the exception: complete its full level-specific target sequence
 (5, 8, 11 and 14 targets at levels 1, 4, 7 and 10) before switching games.
 Normal game lengths are unchanged.
 
-Professional activity and session pages use a compact back icon beside a left-aligned
-section title, with the participant name underneath in muted text. Avoid placing a
-large participant heading opposite an oversized back action. The session composer
+Professional session lists, individual-session analytics and standalone activity
+share the overview’s icon-led title, heading size, content width and top alignment.
+A separate control row contains the labelled back action, participant identity and
+any create/refresh action; session status sits below the participant name. Long
+titles and names wrap without pushing controls outside the page. On narrow screens,
+the primary creation action wraps onto a full-width row. Standalone professional
+activity places its section tabs above the cards, like the professional overview;
+the player's embedded activity keeps its bottom tabs. Short panels stay below their
+controls without vertical centering. Keep chart cards side by side on landscape
+tablets and stack them on phones. Session list and breakdown cards use the same
+section icon and heading treatment as Personas and Asientos. The session composer
 uses the shared native dialog with a tinted icon/header, compact close control,
 compact paired metadata fields, a game count and a flat list separated by fine rules.
 Each row has a number, game and level selectors, then inline up/down/delete icons.
@@ -832,7 +845,7 @@ step; disable the pencil after starting, completion or cancellation.
 
 Professional overview and session pages start below their navigation with the
 normal section gap; do not vertically center their main content or tab panels.
-Session lists keep equal outer top/bottom insets by omitting extra bottom padding
+Session and seat lists keep equal outer top/bottom insets by omitting extra bottom padding
 on the last row. Short lists leave remaining viewport space below the content.
 
 The professional overview uses labelled icon tabs, a small briefcase heading,

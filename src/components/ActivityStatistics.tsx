@@ -1,9 +1,10 @@
+import { ProfessionalPageHeader } from './ProfessionalPageHeader';
 import { LevelStatistics } from './LevelStatistics';
 import type { ReactNode } from 'react';
 import { TabletTabs } from './TabletTabs';
 import { useViewportPanel, useCompactViewport } from '../services/viewport';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, RotateCcw } from 'lucide-react';
+import { ChartNoAxesCombined, RotateCcw } from 'lucide-react';
 import type { CognitiveDomain, ExerciseResult, UserProfile } from '../types';
 import { ACTIVITY_EXERCISES, activityExerciseTitle as title, activityExerciseStyle } from '../services/activityExercises';
 import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion, historicalMean } from '../services/activityStats';
@@ -89,10 +90,10 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
     return () => window.clearTimeout(timer);
   }, [tab, more, busy, error, loadMore]);
   const resetPage = () => setPage(0);
-  return <div ref={panel} className={`activity-statistics tablet-screen${embedded ? ' activity-embedded' : ''}`}>
+  return <div ref={panel} className={`tablet-screen ${embedded ? 'activity-statistics activity-embedded' : 'professional-panel activity-professional'}`}>
     {embedded && <header className="workspace-section-heading"><h1>Estadísticas</h1></header>}
-    {!embedded && <header className="stats-heading"><button className="header-icon-btn" aria-label={backLabel} title={backLabel} onClick={onBack}><ArrowLeft size={20}/></button><div><h1>{heading}</h1>{subtitle && <p>{subtitle}</p>}</div></header>}
-    <TabletTabs position="bottom" label="Actividad" value={tab} onChange={setTab} tabs={[
+    {!embedded && <ProfessionalPageHeader title={heading} icon={<ChartNoAxesCombined size={24}/>} name={subtitle} backLabel={backLabel} onBack={onBack}/> }
+    <TabletTabs position={embedded ? "bottom" : "top"} label="Actividad" value={tab} onChange={setTab} tabs={[
       { id: 'overview', label: 'Resumen y filtros', content: <>
     <div className="stats-overview"><CategoryRadar results={results}/>
     <section className="stats-card stats-filter-panel" aria-labelledby="stats-filter-title">

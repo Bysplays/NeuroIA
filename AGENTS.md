@@ -55,6 +55,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/AccountEntry.tsx` | Selects independent player/professional workspaces for the same authenticated account |
 | `src/components/LoginScreen.tsx`, `EmailVerification.tsx`, `AccountPassword.tsx` and `src/services/emailAuth.ts` | Google/email entry, verification, recovery and adding a password to the existing UID |
 | `src/components/ProfessionalDashboard.tsx` and `src/services/firestoreProfessional.ts` | Free professional panel, sponsored seats and read-only linked activity; see `docs/PROFESSIONALS.md` |
+| `src/components/ProfessionalPageHeader.tsx` | Shared icon-led title and separate back/participant/action row for professional sessions and standalone statistics |
 | `src/components/ProfessionalSessions.tsx`, `AssignedSessions.tsx`, `src/services/assignedSessions.ts` and `firestoreSessions.ts` | Immutable professional game proposals, per-step result reconciliation and participant play; see `docs/PROFESSIONALS.md` |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Personal account entry before progress and games |
 | `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
