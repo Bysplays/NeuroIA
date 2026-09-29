@@ -438,3 +438,15 @@ test('workspace link closes auth and reveals the corresponding home', async ({pa
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('heading',{name:'Juega a tu ritmo.'})).toBeVisible();
 });
+
+
+test('today session checks only completed games from today', async ({page}) => {
+  await page.goto(fixture+'?completed-home');
+  await expect(page.getByRole('heading',{name:'Tu sesión de hoy',exact:true})).toBeVisible();
+  await expect(page.locator('.editorial-today').getByText('Completado hoy',{exact:true})).toHaveCount(3);
+  await expect(page.getByRole('button',{name:'Realizar sesión completa'})).toHaveCount(0);
+  for (const option of ['yesterday','practice']) {
+    await page.goto(fixture+'?completed-home&'+option);
+    await expect(page.locator('.editorial-today').getByText('Completado hoy',{exact:true})).toHaveCount(0);
+  }
+});

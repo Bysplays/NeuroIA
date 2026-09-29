@@ -44,7 +44,7 @@ export function Fixture() {
   const [game, setGame] = useState<ExerciseId | undefined>(
     (query.get("game") as ExerciseId) || undefined,
   );
-  const [results, setResults] = useState<ExerciseResult[]>([]);
+  const [results, setResults] = useState<ExerciseResult[]>(() => query.has('completed-home') ? (['attention','language','memory','executive','motor'] as const).flatMap(domain => getExercisesForDomain(domain).map(game => ({ id: `fixture-${game.id}`, exerciseId: game.id, domain, date: new Date(Date.now() - (query.has('yesterday') ? 86400000 : 0)).toISOString(), durationSeconds: 30, accuracy: 100, score: 0, correctAnswers: 1, totalQuestions: 1, feedbackMessage: '', practice: query.has('practice') }))) : []);
   const [information, setInformation] = useState<InformationKind | null>(null);
   const [settings, setSettings] = useState(false);
   const [navigation, setNavigation] = useState<HTMLDivElement | null>(null);

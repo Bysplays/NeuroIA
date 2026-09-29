@@ -1582,7 +1582,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .editorial-greeting h1 span { color: var(--color-primary); }
 .editorial-streak { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 18px; background: var(--color-surface); color: var(--color-primary); font-size: .76rem; white-space: nowrap; }
 .editorial-home-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr); gap: 24px; }
-.editorial-hero { display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; background: var(--panel-blue); padding: clamp(24px, 3vw, 40px); border-radius: 24px; overflow: hidden; min-height: 260px; }
+.editorial-hero { display: grid; grid-template-columns: 1.2fr 1fr; column-gap: 20px; align-items: center; background: var(--panel-blue); padding: clamp(24px, 3vw, 40px); border-radius: 24px; overflow: hidden; min-height: 260px; }
 .editorial-hero h2 { font-size: clamp(1.8rem, 2.8vw, 2.5rem); line-height: 1.13; margin: 16px 0 24px; }
 .editorial-hero .practice-motif { max-width: 250px; }
 .editorial-hero .touch-btn { margin-top: 0; font-size: .9rem; gap: 18px; padding: 14px 20px; min-height: 54px; }
@@ -1833,3 +1833,9 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 
 
 .auth-workspace-switch { padding: 0; margin-top: 4px; }
+
+/* Home utilities reuse the compact outlined controls from game footers. */
+body .main-header .header-right .header-icon-btn,
+body .main-header .header-right .header-signout { min-height: 44px; height: 44px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); box-shadow: none; }
+.main-header .header-right .header-icon-btn:not(.muse-entry) { width: 44px; padding: 0; }
+.main-header .header-right .muse-entry, .main-header .header-right .header-signout { padding: 10px 14px; }

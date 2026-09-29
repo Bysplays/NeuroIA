@@ -514,3 +514,9 @@ and reveals the corresponding home, updating login intent.
 
 Both player and professional entry illustrations share the small blue four-point
 star accent at the lower left of their card composition.
+
+Authenticated home utilities use compact transparent outlined buttons with 8px
+corners. The featured game keeps a 20px gap between its content/Play action and
+artwork. Tu sesión de hoy has no whole-session action; each exercise replaces its
+arrow with a check when a non-practice result exists for that exercise on the
+current local calendar day. No completion is inferred from aggregate counters.

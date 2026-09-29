@@ -1,6 +1,8 @@
+import { localDay } from '../services/activityStats';
 import { useState, type ReactNode } from "react";
 import {
   Activity,
+  Check,
   ArrowRight,
   ArrowUpRight,
   Brain,
@@ -58,7 +60,6 @@ export function Dashboard({
   proposedSessions,
   onSelectDomain,
   onSelectExercise,
-  onStartDailyPlan,
   onOpenSettings,
   onSignOut,
   signingOut,
@@ -73,6 +74,8 @@ export function Dashboard({
       return exercises[Math.floor(Math.random() * exercises.length)].id;
     }),
   );
+  const todayKey = localDay(new Date().toISOString());
+  const completedToday = new Set(history.filter(result => !result.practice && localDay(result.date) === todayKey).map(result => result.exerciseId));
   const featured = getExerciseById(queue[0])!;
   const choose = (id: ExerciseId) => {
     soundService.playTap();
@@ -115,7 +118,7 @@ export function Dashboard({
           <PracticeMotif />
         </section>
         <aside className="editorial-today">
-          <h2>Tu sesión</h2>
+          <h2>Tu sesión de hoy</h2>
           {queue.map((id, index) => {
             const game = getExerciseById(id)!;
             return (
@@ -124,19 +127,11 @@ export function Dashboard({
                 <span>
                   <strong>{game.title}</strong>
                 </span>
-                <ArrowUpRight size={19} />
+                {completedToday.has(id) ? <><Check size={19} aria-hidden="true"/><span className="sr-only">Completado hoy</span></> : <ArrowUpRight size={19} aria-hidden="true"/>}
               </button>
             );
           })}
-          <button
-            className="editorial-daily-start"
-            onClick={() => onStartDailyPlan(queue)}
-          >
-            {profile.dailyPlanCompletedToday
-              ? "Otra sesión"
-              : "Realizar sesión completa"}
-            <ArrowRight size={18} />
-          </button>
+
         </aside>
       </div>
       <section className="editorial-explore">
