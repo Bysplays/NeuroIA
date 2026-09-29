@@ -13,19 +13,147 @@ installation and fullscreen on the tested devices. Sandbox is sufficient for the
 current stage; this is not confirmation of live-money payments. Specific OS/browser
 versions were not supplied, so do not infer a universal compatibility matrix.
 
-The remaining work, in the owner's order, is:
+The client first-review items below are the immediate planning focus. The client
+estimates roughly one week before an IGAPE report needs final screenshots; the
+message supplies no exact deadline, so confirm the date before scheduling a release.
+This update records requested work, not authorization to implement, merge or deploy it.
 
-1. Narration: finish the 91 clips, audition them and resolve commercial licensing.
-2. Notes, reports and local AI: implement the pending workflows.
-3. Finishing work: the two recorded interface issues, bundle optimization and
-   account/data deletion management.
+The earlier priorities remain open: finish/audition the 91 narration clips and
+resolve licensing; implement notes/reports/local AI; resolve the existing interface
+issues, bundle optimization and account/data deletion management. The client review
+adds to this inventory without reopening the owner-confirmed checks above.
 
-The detailed inventory below retains future extensions and specific acceptance
-conditions; it does not reopen the owner-confirmed checks above.
+## Client first review — next delivery
+
+Source: client feedback supplied by the owner on 2026-09-29. Items remain open
+unless explicitly checked below. Reported behavior is not a verified reproduction.
+Work continues on the original design; the Ahead experiment is a protected local
+archive, not the basis for these changes. The order below is a proposed sequence,
+subject to the confirmed deadline and available client materials.
+
+### Delivery dependencies and recovery
+
+- [ ] **CR-01 — IGAPE attribution and logos.** Obtain the exact text, photo/reference
+  and original logo files the client says were sent previously; they are not
+  attached to this request. Confirm required placement and presentation, then add
+  them visibly to the initial public page/landing. Gate: client approves the exact
+  wording, logo proportions, legibility and placement on the target devices.
+- [ ] **CR-02 — Recovery and review environment.** Inventory the deployed version,
+  source commit, existing remote backups and data/configuration recovery procedures;
+  establish an isolated review URL and document how to restore the last approved
+  release before publishing changes. Answer the client's backup question with
+  verified facts. Current evidence: the Ahead source is committed on
+  `codex/neuroia-ahead-redesign`, with local tag
+  `archive/neuroia-ahead-redesign-2026-09-29`, AGENTS guidance and a local Git hook.
+  This does **not** establish a hosted backup website, remote archive or database
+  backup, and it is not a backup of the currently deployed original design.
+- [ ] **CR-03 — IGAPE delivery evidence.** Confirm the actual report deadline,
+  required screenshot list, devices/orientations and who approves the final build.
+  After the agreed fixes and branding are approved, capture the final deployed
+  version and record its commit/URL. Use consented or clearly identified sample
+  data; do not manufacture participant results for the report.
+
+### Initial assessment: correctness and pacing
+
+- [ ] **CR-04 — Interests before assessment.** Ask what the person wants to work
+  on (for example memory or coordination) before any trials, and offer optional
+  mobility/accessibility preferences. Define how selections choose thematic trials,
+  how preferences can be changed/skipped, and how unassessed games are represented.
+  Gate: assessment follows selected areas, does not infer a tested level or a
+  clinical weakness for untested areas, and resumes without losing choices/results.
+  Decide the minimum needed preference data and persistence before implementation.
+- [ ] **CR-05 — Pressure-free assessment wording.** Remove announcements of numeric
+  trial levels and use neutral invitations to play with gradually changing
+  difficulty. The client cites levels 2/5/7; the current documented ladder is
+  1/4/7/10, so inspect actual screens rather than adopting the reported numbers.
+  Gate: introductions, transitions and narration avoid numeric assessment pressure;
+  internal versioned level evidence remains intact.
+- [ ] **CR-06 — Misleading results action during trials.** Reproduce the reported
+  “Ver Resultados” action that advances directly to the next game. This copy exists
+  in naming, word completion and categorization; check all assessment games.
+  Use an action matching the actual next step during assessment. Gate: no trial
+  promises a results screen it will not show; ordinary play retains real results.
+- [ ] **CR-07 — Simon/sequence failure must advance.** Reproduce the forced replay
+  and “No te preocupes” prompt in initial assessment. A failed assessed attempt
+  should record its evidence and proceed without requiring another try. Gate:
+  failure saves once, advances once after confirmation, and survives delayed saves
+  or resume; ordinary practice keeps its separately intended retry behavior.
+- [ ] **CR-08 — Pairs should reveal on touch.** Replace the long compulsory opening
+  preview reported in assessment with cards revealed by tapping before matching.
+  Current MemoryPairsGame starts face-up with a timed preview and an early-start
+  control; verify the client path. Confirm whether this applies to ordinary play
+  too. Gate: immediate understandable interaction, clear matching/mismatch feedback,
+  keyboard/touch access, and compatible timing/difficulty evidence.
+- [ ] **CR-09 — Shorter, balanced assessment.** Review the total trial burden and
+  why Simon repeats several times while the target game is tried only once. Agree
+  per-area stopping rules, maximum attempts and an acceptable overall duration;
+  coordinate with CR-04 and CR-07. Gate: no unnecessary forced repeats, sufficient
+  per-game evidence, and correctly distinguished assessed, skipped and untested
+  games. Do not assume that equal trial counts produce equivalent measurements.
+
+### Public entry, registration and service access
+
+- [ ] **CR-10 — Explain the product before registration.** Add a public landing or
+  restructure the entry screen so a visitor understands the games, purpose and
+  next action before creating an account. Request/approve the explanatory copy
+  offered by the client; include CR-01 branding. Gate: readable public explanation,
+  clear paths to playing, registration and sign-in, and supplied non-medical copy.
+- [ ] **CR-11 — Visible registration action.** Expose “Crear cuenta” directly on the
+  access screen instead of requiring discovery inside “Continuar con correo”.
+  Reuse existing email/Google authentication and workspace selection. Gate: an
+  older first-time user can distinguish registration from sign-in; verification,
+  recovery and existing-account paths still work.
+- [ ] **CR-12 — Purchase before the initial trial.** Provide a visible subscription
+  action on the initial entry/home surface, accessible before assessment. Clarify
+  its placement on the public landing versus signed-in home. Reuse the existing
+  authenticated checkout/access flow; do not introduce anonymous entitlements or
+  imply paid access before server confirmation. Gate: purchase, cancellation and
+  return work without forcing assessment first, respecting billing availability.
+- [ ] **CR-13 — Visible sign-out on home.** Add an explicit “Cerrar sesión” action
+  on the initial signed-in screen, rather than requiring Settings. Gate: discoverable
+  with large text, keyboard and touch; uses existing logout and preserves queued
+  progress for the same account's next login.
+- [ ] **CR-14 — Explain the Muse connection action.** Replace icon-only Bluetooth
+  discovery with a visible label such as “Conectar Muse”, retaining the existing
+  connection/status service. Gate: disconnected, connecting and connected states
+  are understandable, and unsupported browsers have the existing usable fallback.
+- [ ] **CR-15 — Firebase URLs in visible navigation.** Obtain the exact links and
+  reproduce where the address bar changes. Separate app links/returns from Google
+  OAuth helpers and email verification/reset handlers. Existing deployment guidance
+  documents Firebase-hosted auth actions; a Firebase hostname alone is not proof of
+  a broken link. Gate: app navigation/returns use the intended app domain; review
+  branded auth-domain feasibility if needed, without breaking secure verification,
+  recovery or sign-in. Coordinate with the existing domain-migration backlog.
+
+### Game copy and reinforcement
+
+- [ ] **CR-16 — Word-completion naming.** Replace the reported “Completar palabras
+  faltantes” with “Completar palabras” wherever it appears in active entry, catalog,
+  instructions or narration. Locate the exact current variant first. Preserve game
+  IDs, answer keys and saved history; update the active speech inventory if copy changes.
+- [ ] **CR-17 — Visible positive reinforcement.** Add a short positive on-screen
+  popup as requested, so success feedback does not depend on voice alone. Agree
+  the triggers and frequency; reuse shared feedback/dialog infrastructure. Gate:
+  readable with sound off and large text, respectful adult Spanish, accessible
+  focus/dismissal where applicable, no lost input, and no forced retry or added
+  assessment burden contrary to CR-07/CR-09.
+
+### Verification before client approval
+
+Reproduce CR-06–CR-09 in assessment separately from ordinary practice. Changes to
+placement evidence or persistence require the existing difficulty/progress tests
+and demo Firestore rules/adapter suite, including delayed saves and resume. Verify
+entry/payment/auth changes in their supported test environments, and visually
+review the agreed phone/tablet/orientation layouts with large text, touch and
+keyboard. Refresh affected DESIGN, CONTENT, SDD and provider guidance when the
+corresponding decisions are implemented. Do not mark client items complete solely
+from compilation or local source inspection. Merge and deployment still require
+explicit authorization.
 
 ## Product priorities
 
-The order below follows the owner's priorities. Dependencies can be implemented
+The table below retains the earlier product priorities; the client review above
+is the immediate delivery planning focus. Dependencies can be implemented
 first; Muse 2 uses the selected MuseJS Web Bluetooth adapter. No AI model, official SDK,
 voice provider or new illustration set has been selected by this planning work.
 
@@ -40,7 +168,7 @@ voice provider or new illustration set has been selected by this planning work.
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Approved towel/table style integrated across 80 objects, standalone stimuli and motor tokens | Physical-tablet recognition feedback |
 | 9 / LEVELS | Difficulty 1–10 | Versioned 1–10 configuration for all games, saved level and timed same-game promotion | User calibration and physical-device checks |
-| 10 / PLACEMENT | Guided initial level assessment | Eight shuffled games with 1/4/7/10 placement ladders, separate from access onboarding | Physical-device checks |
+| 10 / PLACEMENT | Guided initial level assessment | Eight shuffled games with 1/4/7/10 placement ladders, separate from access onboarding; client requests thematic entry and pacing changes (CR-04–CR-09) | Client review acceptance and physical-device checks |
 | 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
 
 ### Current implementation sequence
