@@ -162,7 +162,7 @@ export function LoginScreen({
                     ? "Te enviaremos un enlace para recuperar tu contraseña."
                     : mode === "register" ? "Guarda tu progreso y vuelve cuando quieras." : professional ? "Accede a tu espacio profesional." : "Entra para continuar a tu ritmo."}
                 </p>
-                {mode !== "reset" && (
+                {mode === "signin" && (
                   <>
                     <button
                       className="google-login-button"
@@ -178,6 +178,11 @@ export function LoginScreen({
                       <span>o con tu correo</span>
                     </div>
                   </>
+                )}
+                {mode === "register" && (
+                  <p className="entry-provider-note">
+                    Las cuentas de terceros, como Google, no necesitan registro. Puedes acceder desde «Iniciar sesión».
+                  </p>
                 )}
                 <form className="email-form" onSubmit={submit} aria-busy={busy}>
                   <div className="entry-field">

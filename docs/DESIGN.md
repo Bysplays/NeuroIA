@@ -107,7 +107,9 @@ card grids. Do not show a subscription pitch or the full funding image inline; l
 explanations remain accessible through Sobre NeuroIA. Registration and sign-in are
 inline pages with labelled fields, Google access, recovery and a clear way back.
 The access page uses one 440 px maximum column, a single Iniciar sesión / Crear cuenta
-selector, then a compact heading, Google action, email divider and grouped fields.
+selector, then a compact heading and grouped fields. Sign-in includes a Google action and
+email divider; registration is email-only with a short note explaining that
+third-party accounts can use Iniciar sesión without separate registration.
 Use 8 px label/input gaps, 20 px between fields and 54 px minimum input/action
 heights. The header holds only the brand and Volver. Do not add a decorative side
 panel or duplicate access buttons. Reference: [Brilliant sign-in on Mobbin](https://mobbin.com/screens/a7afa68a-7e23-4fe5-8c0d-081a1eecc314),
