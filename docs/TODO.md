@@ -16,6 +16,10 @@ of a production deployment. Keep project guidance in English and UI copy in Span
   availability, validation and pending-payment checks pass; owner approval and real
   checkout acceptance remain pending.
 
+- [ ] Rename the Stripe sandbox product attached to `price_1UItenAWZtSdGYThrex9dsNh`
+  to **NeuroAI**, as requested by the owner. Keep the price and billing interval.
+  Requires authenticated Stripe Dashboard/API access; no remote change performed.
+
 ## Project access handoff
 
 - [ ] Give `david@ceoaberto.com` access to the NeuroIA GitHub repository. Confirm

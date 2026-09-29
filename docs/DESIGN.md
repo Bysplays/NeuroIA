@@ -188,7 +188,9 @@ price and terms remain in Stripe checkout; do not add a helper paragraph below S
 invitations behind a full-width button with a right arrow below the plan. It opens
 a compact ModalFrame with Cerrar, Escape/backdrop dismissal and focus return, with a persistent
 input label, inline validation and the activity-sharing explanation. Preserve
-pending-payment cancellation, subscription management and sign-out.
+pending-payment cancellation, subscription management and sign-out. Pending actions
+show Un momento… inside the activated button; do not add a separate footer or
+invitation loading message.
 Reference: [Brilliant membership benefits](https://mobbin.com/screens/36a35dc6-cede-421e-8cf1-a4d831fc8a94),
 adapted to NeuroIA's real monthly plan and independent trial rather than copying
 Brilliant's annual pricing or automatic trial billing.

@@ -11,6 +11,9 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
   checkoutReturn: string | null; onCancelCheckout: () => void;
 }) {
   const [code, setCode] = useState('');
+  const [pendingAction, setPendingAction] = useState('');
+  const invoke = (action: string, callback: () => void) => { setPendingAction(action); callback(); };
+  const label = (action: string, text: string) => busy && pendingAction === action ? <span role="status">Un momento…</span> : text;
   const [inviteOpen, setInviteOpen] = useState(false);
   const codeError = invitationIssue?.code === code ? invitationIssue.message : '';
   const expired = access?.kind != null;
@@ -38,10 +41,10 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
           <h2 id="membership-title">NeuroIA mensual</h2>
           <p>Todos los ejercicios, mes a mes.</p>
           <div className="onboarding-actions">
-            <button className="touch-btn touch-btn-primary" disabled={busy || !access?.checkoutAvailable} onClick={onCheckout}>Suscribirme<ArrowRight size={20} aria-hidden="true"/></button>
+            <button className="touch-btn touch-btn-primary" disabled={busy || !access?.checkoutAvailable} onClick={() => invoke('checkout', onCheckout)}>{label('checkout', 'Suscribirme')}<ArrowRight size={20} aria-hidden="true"/></button>
             {!access?.checkoutAvailable && <small>La suscripción no está disponible en este momento.</small>}
-            {!expired && <button className="onboarding-trial-link" disabled={busy || !access} onClick={onTrial}>Probar gratis 7 días</button>}
-            {access?.canManageSubscription && <button className="paper-nav-button" disabled={busy} onClick={onPortal}>Gestionar suscripción</button>}
+            {!expired && <button className="onboarding-trial-link" disabled={busy || !access} onClick={() => invoke('trial', onTrial)}>{label('trial', 'Probar gratis 7 días')}</button>}
+            {access?.canManageSubscription && <button className="paper-nav-button" disabled={busy} onClick={() => invoke('portal', onPortal)}>{label('portal', 'Gestionar suscripción')}</button>}
           </div>
         </section>
       </div>
@@ -50,21 +53,19 @@ export function OnboardingModal({ access, busy, loadFailed, invitationIssue, onT
         <section className="invitation-dialog">
         <div className="entry-error-heading"><Ticket size={24} aria-hidden="true"/><h2 id="invitation-title">Tu invitación</h2></div>
         <p>Tu profesional cubre el acceso y puede consultar tu actividad.</p>
-        <form className="onboarding-invite-form" onSubmit={event => { event.preventDefault(); if (!busy && access && code.trim()) onInvite(code); }}>
+        <form className="onboarding-invite-form" onSubmit={event => { event.preventDefault(); if (!busy && access && code.trim()) invoke('invite', () => onInvite(code)); }}>
           <label htmlFor="invitation-code">Código de invitación</label>
           <div className="onboarding-code-row">
             <input id="invitation-code" value={code} onChange={event => setCode(event.target.value)} maxLength={64} autoCapitalize="characters" autoComplete="off" spellCheck={false} aria-invalid={Boolean(codeError)} aria-describedby={codeError ? 'invitation-error' : undefined} placeholder="Escribe tu código" required disabled={busy} />
-            <button className="touch-btn touch-btn-primary" disabled={busy || !access || !code.trim()} type="submit">Usar mi código</button>
+            <button className="touch-btn touch-btn-primary" disabled={busy || !access || !code.trim()} type="submit">{label('invite', 'Usar mi código')}</button>
           </div>
           {codeError && <p id="invitation-error" role="alert" aria-atomic="true">{codeError}</p>}
         </form>
-        {busy && <p role="status">Comprobando tu código…</p>}
         <button className="email-text-button invitation-close" onClick={() => setInviteOpen(false)}>Cerrar</button>
         </section>
       </ModalFrame>}
       <footer className="onboarding-footer">
-        {busy && <span role="status">Un momento…</span>}
-        {(checkoutReturn || access?.pendingCheckout) && <button className="paper-nav-button" disabled={busy} onClick={onCancelCheckout}>Cancelar pago pendiente</button>}
+        {(checkoutReturn || access?.pendingCheckout) && <button className="paper-nav-button" disabled={busy} onClick={() => invoke('cancel', onCancelCheckout)}>{label('cancel', 'Cancelar pago pendiente')}</button>}
         <button className="paper-nav-button" disabled={busy} onClick={onSignOut}>Cerrar sesión</button>
       </footer>
     </section>
