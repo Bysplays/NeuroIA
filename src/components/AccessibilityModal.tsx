@@ -80,11 +80,6 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                 </button>
               ))}
             </div>
-            <button className="preferences-companions" role="switch" aria-checked={settings.showCompanions !== false}
-              onClick={() => update({ showCompanions: settings.showCompanions === false })}>
-              <span>Amigos del bienestar</span>
-              <span className="preferences-switch-track" aria-hidden="true"><span /></span>
-            </button>
           </section>
 
           </div> }, { id: 'account', label: 'Mi cuenta', content: <>

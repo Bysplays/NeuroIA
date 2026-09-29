@@ -412,3 +412,6 @@ one. Do not change answer keys to accommodate an accidental image-generation
 error. Check blend modes on each surface and accessibility theme; use the home
 asset's established treatment instead of leaving a tinted rectangular patch
 around the companions.
+
+Settings tabs have 20 px clearance below the dialog header. The retired Amigos
+del bienestar control is not shown; retain stored companion preferences for compatibility.

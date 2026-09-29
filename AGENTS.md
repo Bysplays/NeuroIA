@@ -337,7 +337,7 @@ receipts atomically. Results are idempotent by their existing exercise-result ID
 settings patch individual fields, with the last committed same-field change winning
 in the backend. `settings.pageStyle` is optional for older profiles: absent means `default`, and
 `cozy` explicitly selects the original paper style. Optional `showCompanions`
-defaults to true for older profiles and controls the decorative companion family throughout the interface via
+defaults to true for older profiles; its retired settings control is no longer rendered. The stored value still controls remaining legacy decorative companions via
 `applyAppearance` and `data-companions`; exercise stimuli remain visible. It uses the same settings
 cache, queue and cloud patch as other preferences; `contrast` remains independent.
 Locally edited fields stay pinned in the current `ProgressSync`

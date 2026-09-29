@@ -1000,11 +1000,6 @@ body:not([data-style="cozy"]) .consistency-heading h2 { color: inherit; }
 
 /* Home companions are independent of the selected palette. */
 .daily-session-card.daily-session-without-art { grid-template-columns: 1fr; grid-template-areas: "copy" "message" "actions"; grid-template-rows: auto 1fr auto; }
-.preferences-companions { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; margin-top: 16px; padding: 8px 0; border: 0; background: transparent; color: var(--color-text-main); font-size: .78rem; text-align: left; cursor: pointer; }
-.preferences-switch-track { display: flex; align-items: center; flex-shrink: 0; width: 48px; height: 28px; padding: 3px; border: 1px solid var(--color-text-muted); border-radius: 99px; background: var(--color-surface-hover); }
-.preferences-switch-track > span { width: 20px; height: 20px; border-radius: 50%; background: var(--color-text-muted); }
-.preferences-companions[aria-checked="true"] .preferences-switch-track { background: var(--color-action-bg); border-color: var(--color-action-bg); }
-.preferences-companions[aria-checked="true"] .preferences-switch-track > span { transform: translateX(20px); background: var(--color-action-text); }
 
 /* Hide the decorative illustration family everywhere, preserving game stimuli. */
 body[data-companions="hidden"] .header-illustration,
@@ -1266,7 +1261,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .preferences .preferences-header { padding-block: 18px; }
 .preferences .preferences-letter { font-size: 1.4rem; }
 .preferences .preferences-segment button { padding: 10px; }
-.preferences .tablet-tabs { align-self: stretch; }
+.preferences .tablet-tabs { align-self: stretch; margin-top: 20px; }
 .preferences .tablet-tabs > button { flex: 1; }
 .professional-panel.tablet-screen { justify-content: flex-start; }
 .professional-panel > .tablet-tab-view > .tablet-tab-panel { justify-content: flex-start; }
