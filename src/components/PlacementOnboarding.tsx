@@ -1,4 +1,5 @@
 import { advanceAssessment } from '../services/placementAssessment';
+import { Brand } from './Brand';
 import { PlanButton } from './PlanButton';
 import { useEffect, useRef, useState } from 'react';
 import { Volume2 } from 'lucide-react';
@@ -90,10 +91,9 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
   if (phase === 'feedback') return <main className="placement-screen"><p role="status">Preparando el siguiente juego…</p></main>;
   const message = complete ? (onCancel ? 'Guardaremos los niveles de estas áreas. Los demás niveles y tus partidas se mantendrán.' : 'Ya puedes empezar con las áreas que has elegido. Los juegos que no has probado siguen disponibles; puedes explorarlos cuando quieras.')
     : 'Iremos área por área, con juegos breves a tu ritmo. Puedes omitir cualquiera que no te resulte cómodo.';
-  return <main className="placement-screen">
-    <header className="placement-toolbar"><span>Tu punto de partida</span>{onCancel && <button className="placement-text-action" onClick={onCancel}>Cancelar prueba</button>}<button className="paper-nav-button" onClick={onSettings}>Ajustes</button><PlanButton/></header>
+  return <main className="placement-screen placement-welcome">
+    <header className="placement-toolbar"><Brand/>{onCancel && <button className="placement-text-action" onClick={onCancel}>Cancelar prueba</button>}<button className="paper-nav-button" onClick={onSettings}>Ajustes</button><PlanButton/></header>
     <section className="placement-card" aria-labelledby="placement-title">
-      <HeaderIllustration scene={complete ? 'home' : (available[0] ?? 'home')} className="placement-art" />
       <div className="placement-content">
         <div className="placement-progress"><div className="placement-progress-heading">
           <p className="soft-label">{count} de {selected.length} juegos preparados</p>

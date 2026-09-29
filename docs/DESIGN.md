@@ -219,6 +219,12 @@ This implementation does not certify grant-publicity compliance.
 
 ## Interest onboarding and initial play
 
+Use the shared Brand header and a centered 560 px content column for preferences
+and assessment welcome/completion. Omit decorative companion panels. Match entry
+typography, restrained 12 px corners, fine choice borders and full-width 52 px primary
+actions. Selected choices use a pale blue surface and an explicit check; preserve
+keyboard focus and readable descriptions on mobile and with enlarged text.
+
 Ask one question at a time: desired areas, then optional interaction preference.
 Present labelled choices, selected state and an explicit skip. Avoid collecting a
 diagnosis. Only selected areas enter initial assessment; tap preference excludes
