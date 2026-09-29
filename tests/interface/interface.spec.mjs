@@ -229,3 +229,22 @@ test('verification polling enters automatically and stops after leaving', async 
   await page.clock.runFor(30000);
   expect(await page.evaluate(()=>window.verificationChecks)).toBe(2);
 });
+
+
+test('subscription offers trial and accessible invitation without bypassing availability', async ({page}) => {
+  await page.goto(fixture+'?subscription');
+  await page.locator('summary').focus();
+  await page.keyboard.press('Enter');
+  await page.getByLabel('Código de invitación',{exact:true}).fill('INVALIDO');
+  await page.getByRole('button',{name:'Usar mi código'}).click();
+  await expect(page.getByRole('alert')).toContainText('Este código no es válido');
+  await expect(page.getByLabel('Código de invitación',{exact:true})).toHaveValue('INVALIDO');
+  await page.getByRole('button',{name:'Probar gratis 7 días'}).click();
+  await expect(page.getByRole('button',{name:'Comenzar',exact:true})).toBeVisible();
+  await page.goto(fixture+'?subscription&expired&unavailable');
+  await expect(page.getByRole('button',{name:'Suscribirme',exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Probar gratis 7 días'})).toHaveCount(0);
+  await page.goto(fixture+'?subscription&checkout=success');
+  await expect(page.getByRole('status')).toContainText('comprobando tu pago');
+  await expect(page.getByRole('button',{name:'Cancelar pago pendiente'})).toBeVisible();
+});

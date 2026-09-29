@@ -80,8 +80,8 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     return <ConnectionRecovery message={error} onRetry={() => { setError(''); void refresh(); }} onSignOut={onSignOut}/>;
   }
   if (access.active) return <AccountAccessContext.Provider value={access}>{children}</AccountAccessContext.Provider>;
-  return <main className="access-entry">
-    <Brand/>
+  return <main className="entry-page access-entry">
+    <header className="entry-header"><Brand/></header>
     {<OnboardingModal access={access} loadFailed={Boolean(error)} invitationIssue={invitationIssue} busy={busy}
       onSignOut={onSignOut} onTrial={() => { void run(async () => { await accessService.trial(); await refresh(); }); }}
       onInvite={code => { void run(async () => {

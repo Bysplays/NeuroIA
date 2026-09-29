@@ -175,6 +175,18 @@ after authentication and remain server-confirmed. Access choice is a page, with 
 and invitation redemption. “Mi acceso” is available before assessment and within
 Mi cuenta, using the existing subscription service. Never imply payment has
 completed based only on a browser return URL.
+The subscription entry uses a brand header and an 880 px content region: three
+short benefits beside one monthly-plan card, stacked on narrow screens. Keep
+Suscribirme primary and the seven-day trial visibly available below it when
+eligible. Explain unavailable checkout rather than leaving an unexplained disabled
+button. Do not invent a price: the current adapter exposes availability, not pricing;
+tell users they will see price and terms before confirmation. Place professional
+invitations in a keyboard-operable disclosure below the plan, with a persistent
+input label, inline validation and the activity-sharing explanation. Preserve
+pending-payment cancellation, subscription management and sign-out.
+Reference: [Brilliant membership benefits](https://mobbin.com/screens/36a35dc6-cede-421e-8cf1-a4d831fc8a94),
+adapted to NeuroIA's real monthly plan and independent trial rather than copying
+Brilliant's annual pricing or automatic trial billing.
 
 `ProjectFunding` displays the **entire unchanged owner-supplied IGAPE image** on
 the IGAPE information page. Do not crop or recolor its institutional
