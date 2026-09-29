@@ -46,13 +46,6 @@ interface DashboardProps {
   onSignOut: () => void;
   signingOut: boolean;
 }
-const areaNames: Record<CognitiveDomain, string> = {
-  attention: "Atención",
-  memory: "Memoria",
-  language: "Lenguaje",
-  executive: "Organización",
-  motor: "Coordinación",
-};
 export function Dashboard({
   uid,
   history,
@@ -84,12 +77,10 @@ export function Dashboard({
     <div className="editorial-home">
       <div className="editorial-greeting">
         <div>
-          <p className="editorial-eyebrow">Tu espacio para practicar</p>
           <h1>
             Hola, {profile.name}
             <span>.</span>
           </h1>
-          <p>¿Qué te apetece descubrir hoy?</p>
         </div>
         <div className="editorial-streak">
           <Flame size={21} />
@@ -104,36 +95,21 @@ export function Dashboard({
           <div className="editorial-hero-copy">
             <p className="editorial-eyebrow">
               <i />
-              Tu propuesta de hoy
+              Para hoy
             </p>
-            <h2>
-              Un momento
-              <br />
-              para{" "}
-              {featured.domain === "motor"
-                ? "tu coordinación"
-                : featured.domain === "executive"
-                  ? "poner orden"
-                  : `tu ${areaNames[featured.domain].toLowerCase()}`}
-              .
-            </h2>
-            <p>
-              {featured.title}.<br />
-              Después, elige cómo seguir.
-            </p>
+            <h2>{featured.title}</h2>
             <button
               className="touch-btn touch-btn-primary"
               onClick={() => choose(featured.id)}
             >
-              Vamos a jugar
+              Jugar
               <ArrowRight size={21} />
             </button>
           </div>
           <PracticeMotif />
         </section>
         <aside className="editorial-today">
-          <p className="editorial-eyebrow">Un poco de cada</p>
-          <h2>Hoy puedes probar</h2>
+          <h2>Tu sesión</h2>
           {queue.map((id, index) => {
             const game = getExerciseById(id)!;
             return (
@@ -141,7 +117,6 @@ export function Dashboard({
                 <span className="editorial-step">0{index + 1}</span>
                 <span>
                   <strong>{game.title}</strong>
-                  <small>{areaNames[game.domain]}</small>
                 </span>
                 <ArrowUpRight size={19} />
               </button>
@@ -152,17 +127,17 @@ export function Dashboard({
             onClick={() => onStartDailyPlan(queue)}
           >
             {profile.dailyPlanCompletedToday
-              ? "Hacer otra sesión"
-              : "Jugar la sesión de hoy"}
+              ? "Otra sesión"
+              : "Empezar sesión"}
             <ArrowRight size={18} />
           </button>
         </aside>
       </div>
       <section className="editorial-explore">
         <div className="editorial-section-heading">
-          <h2>A tu manera</h2>
+          <h2>Explorar</h2>
           <button className="text-link" onClick={() => setTab("games")}>
-            Ver los 8 juegos
+            Ver todos
             <ArrowUpRight size={19} />
           </button>
         </div>
@@ -171,22 +146,19 @@ export function Dashboard({
             {
               domain: "attention",
               title: "Atención",
-              copy: "Observar y encontrar",
               icon: Search,
             },
             {
               domain: "memory",
               title: "Memoria",
-              copy: "Recordar y relacionar",
               icon: Brain,
             },
             {
               domain: "motor",
               title: "Coordinación",
-              copy: "Tocar y seguir",
               icon: Hand,
             },
-          ].map(({ domain, title, copy, icon: Icon }) => (
+          ].map(({ domain, title, icon: Icon }) => (
             <button
               key={domain}
               onClick={() => onSelectDomain(domain as CognitiveDomain)}
@@ -196,7 +168,6 @@ export function Dashboard({
               </span>
               <span>
                 <strong>{title}</strong>
-                <small>{copy}</small>
               </span>
               <ArrowUpRight size={20} />
             </button>

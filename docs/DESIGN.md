@@ -74,8 +74,11 @@ content clearance and safe-area spacing so the final action remains reachable.
 The header contains the brand, labelled Muse connection, sound, settings and
 visible sign-out. Mi cuenta also offers sign-out and access management.
 
-Hoy has a greeting and actual streak, one featured activity, a compact three-game
-session list and labelled area shortcuts. The displayed session queue is passed to
+Hoy keeps copy minimal: a greeting and actual streak, “Para hoy” with the featured
+game title and “Jugar”, a “Tu sesión” list containing game names only, and icon-led
+area shortcuts. Do not repeat greetings with an eyebrow or supporting slogan,
+repeat area labels under every game, or add descriptions under area shortcuts.
+Use short concrete labels: “Empezar sesión”, “Explorar”, “Ver todos”. The displayed session queue is passed to
 the start callback; starting it must not silently choose a different sequence.
 Do not add fake map progress, completion counts or placeholders for patient data.
 

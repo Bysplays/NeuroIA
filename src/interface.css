@@ -1550,13 +1550,12 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .editorial-greeting { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .editorial-greeting h1 { font-size: clamp(1.8rem, 3vw, 2.45rem); margin: 0; line-height: 1.15; }
 .editorial-greeting h1 span { color: var(--color-primary); }
-.editorial-greeting p:last-child { margin: 10px 0 0; font-size: .9rem; color: var(--color-text-muted); }
 .editorial-streak { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 18px; background: var(--color-surface); color: var(--color-primary); font-size: .76rem; white-space: nowrap; }
 .editorial-home-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr); gap: 24px; }
-.editorial-hero { display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; background: var(--panel-blue); padding: clamp(24px, 3vw, 40px); border-radius: 24px; overflow: hidden; min-height: 330px; }
-.editorial-hero h2 { font-size: clamp(1.8rem, 2.8vw, 2.5rem); line-height: 1.13; margin: 24px 0 16px; }
-.editorial-hero-copy > p:not(.editorial-eyebrow) { color: var(--color-text-muted); font-size: .85rem; line-height: 1.6; }
-.editorial-hero .touch-btn { margin-top: 22px; font-size: .9rem; gap: 18px; padding: 14px 20px; min-height: 54px; }
+.editorial-hero { display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; background: var(--panel-blue); padding: clamp(24px, 3vw, 40px); border-radius: 24px; overflow: hidden; min-height: 260px; }
+.editorial-hero h2 { font-size: clamp(1.8rem, 2.8vw, 2.5rem); line-height: 1.13; margin: 16px 0 24px; }
+.editorial-hero .practice-motif { max-width: 250px; }
+.editorial-hero .touch-btn { margin-top: 0; font-size: .9rem; gap: 18px; padding: 14px 20px; min-height: 54px; }
 .editorial-today { background: var(--color-surface); border-radius: 24px; padding: 26px; display: flex; flex-direction: column; }
 .editorial-today h2 { font-size: 1.2rem; margin: 0 0 14px; }
 .editorial-today > button { display: flex; align-items: center; gap: 13px; width: 100%; padding: 17px 0; background: none; border: 0; border-bottom: 1px solid var(--color-border); color: var(--color-text-main); text-align: left; cursor: pointer; }
@@ -1638,7 +1637,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 @media (max-width: 960px) {
   .editorial-home-grid { grid-template-columns: 1fr; }
   .editorial-today { padding: 24px; }
-  .editorial-hero { min-height: 310px; }
+  .editorial-hero { min-height: 240px; }
   .editorial-areas { gap: 12px; }
   .editorial-areas > button { padding: 16px; flex-wrap: wrap; }
   .editorial-areas > button > svg { display: none; }
