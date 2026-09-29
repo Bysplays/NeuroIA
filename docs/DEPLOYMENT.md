@@ -133,7 +133,13 @@ migration or a reverse proxy; the subdomain avoids that infrastructure change.
 The owner confirmed DNS setup, the authorized domain and Google OAuth callback
 addition. HTTPS and both reserved endpoints have been checked successfully.
 The local domain override is enabled in ignored `.env.local`; template configuration
-and end-to-end Google/email testing remain pending. Production is unchanged. Stripe and Google still use their own domains
+and end-to-end Google/email testing remain pending. The API key's browser restrictions
+include `https://auth.neuroia.es` and `https://auth.neuroia.es/*`, preserving all
+previous referrers and API targets. Without these entries, the helper returned
+“The requested action is invalid” because getProjectConfig rejected its referrer
+with HTTP 403. An isolated local popup now reaches Google's sign-in screen;
+completing account authentication still requires owner verification.
+Production is unchanged. Stripe and Google still use their own domains
 for their respective hosted payment and account-selection screens.
 
 References: [Google sign-in custom redirect domain](https://firebase.google.com/docs/auth/web/google-signin#customizing-the-redirect-domain-for-google-sign-in),

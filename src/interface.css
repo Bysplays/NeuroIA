@@ -1709,8 +1709,9 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 /* Compact authentication feedback; preserve other dialog shapes. */
 .modal-shell:has(.entry-error-notification) { width: min(440px, calc(100vw - 32px)); border-radius: 6px; background: var(--color-surface); scrollbar-gutter: auto; }
 .entry-error-notification { padding: 28px; }
-.entry-error-notification > svg { color: var(--color-primary); margin-bottom: 18px; }
-.entry-error-notification h2 { font-size: 1.15rem; line-height: 1.35; margin: 0 0 12px; }
+.entry-error-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.entry-error-heading > svg { color: var(--color-primary); flex-shrink: 0; }
+.entry-error-notification h2 { font-size: 1rem; line-height: 1.35; margin: 0; }
 .entry-error-notification p { color: var(--color-text-muted); font-size: .85rem; line-height: 1.6; margin: 0; overflow-wrap: anywhere; text-align: justify; hyphens: auto; }
 .modal-shell .entry-error-notification .touch-btn { width: 100%; border-radius: 4px; }
 

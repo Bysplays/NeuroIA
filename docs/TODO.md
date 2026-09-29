@@ -128,6 +128,8 @@ subject to the confirmed deadline and available client materials.
   `auth.neuroia.es` is connected to Firebase Hosting with valid HTTPS; both auth
   endpoints respond successfully. The owner confirmed DNS, authorized domain and
   Google OAuth callback configuration. The local authDomain override is enabled;
+  the API-key referrer restriction has been corrected for the new helper, and an
+  isolated local popup reaches Google sign-in. Full account sign-in remains to verify;
   production remains unchanged. Keep existing email links working while the
   ticket is unresolved. Setup and rollback are in [DEPLOYMENT.md](DEPLOYMENT.md).
 
