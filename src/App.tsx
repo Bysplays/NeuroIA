@@ -42,6 +42,7 @@ const AccountEntry = lazy(() => import('./components/AccountEntry'));
 export const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [verificationRequired, setVerificationRequired] = useState(false);
+  const [verificationDelivery, setVerificationDelivery] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -82,12 +83,20 @@ export const App: React.FC = () => {
   const handleEmail = async (action: EmailAction, email: string, password: string, professional: boolean) => {
     if (action !== 'reset') setProfessionalEntry(professional);
     setBusy(true); setError('');
+    if (action === 'register') setVerificationDelivery('sending');
     try {
       const result = await submitEmailAuth(auth, action, email, password);
       if (result) StorageService.saveProfessionalEntry(result.user.uid, professional);
+      if (result && 'verificationError' in result) {
+        setVerificationDelivery(result.verificationError ? 'failed' : 'sent');
+      }
+    } catch (error) {
+      if (action === 'register') setVerificationDelivery('idle');
+      throw error;
     } finally { setBusy(false); }
   };
   const handleSignOut = async () => {
+    setVerificationDelivery('idle');
     setBusy(true);
     setError('');
     soundService.stopSpeaking();
@@ -100,7 +109,7 @@ export const App: React.FC = () => {
     ? <AppLoading />
     : user
       ? verificationRequired
-        ? <EmailVerification key={user.uid} user={user} onVerified={() => setVerificationRequired(false)} onSignOut={handleSignOut} signingOut={busy} externalError={error} />
+        ? <EmailVerification key={user.uid} user={user} initialDelivery={verificationDelivery} onVerified={() => setVerificationRequired(false)} onSignOut={handleSignOut} signingOut={busy} externalError={error} />
         : <>
         {error && <p className="account-notice" role="alert">{error}</p>}
         <Suspense fallback={<AppLoading />}><AccountEntry key={user.uid} user={user} professionalEntry={professionalEntry} onSignOut={handleSignOut}><AccessGate key={user.uid} onSignOut={handleSignOut}><CloudProgress key={user.uid} user={user} onSignOut={handleSignOut}>{(sync, data) => <Workspace uid={user.uid} onSignOut={handleSignOut} signingOut={busy} sync={sync} data={data} />}</CloudProgress></AccessGate></AccountEntry></Suspense></>

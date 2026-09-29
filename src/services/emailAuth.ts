@@ -32,7 +32,15 @@ export async function submitEmailAuth(auth: Auth, action: EmailAction, email: st
   }
   if (action === 'register') {
     await checkNewPassword(auth, password);
-    return createUserWithEmailAndPassword(auth, address, password);
+    const credential = await createUserWithEmailAndPassword(auth, address, password);
+    // Send once as part of registration, never on auth restoration or component mount.
+    // Delivery failure must not turn a successfully created account into a signup error.
+    try {
+      await sendVerification(credential.user);
+      return { ...credential, verificationError: null };
+    } catch (verificationError) {
+      return { ...credential, verificationError };
+    }
   }
   return signInWithEmailAndPassword(auth, address, password);
 }

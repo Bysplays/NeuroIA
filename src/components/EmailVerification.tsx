@@ -6,8 +6,9 @@ import { auth } from '../services/firebase';
 import { refreshVerification, sendVerification } from '../services/emailAuth';
 import { authErrorMessage } from '../services/authErrors';
 
-export function EmailVerification({ user, onVerified, onSignOut, signingOut, externalError }: {
+export function EmailVerification({ user, onVerified, onSignOut, signingOut, externalError, initialDelivery = 'idle' }: {
   user: User; onVerified: () => void; onSignOut: () => void; signingOut: boolean; externalError: string;
+  initialDelivery?: 'idle' | 'sending' | 'sent' | 'failed';
 }) {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
@@ -36,13 +37,16 @@ export function EmailVerification({ user, onVerified, onSignOut, signingOut, ext
         <p>Un último paso para abrir tu espacio.</p>
       </header>
       <div className="verification-body">
-        <p>Te enviaremos un enlace de verificación a <strong data-selectable="true">{user.email}</strong>.</p>
+        <p>Abre el enlace de verificación de tu correo <strong data-selectable="true">{user.email}</strong>. Revisa también la carpeta de spam.</p>
         <div className="verification-actions">
-          <button className="touch-btn touch-btn-primary" disabled={busy || signingOut} onClick={() => act(true)}>{sent ? 'Reenviar correo' : 'Enviar correo'}</button>
+          <button className="touch-btn touch-btn-primary" disabled={busy || signingOut || initialDelivery === 'sending'} onClick={() => act(true)}>Reenviar</button>
           <button className="email-text-button" disabled={busy || signingOut} onClick={() => act(false)}>Ya he verificado mi correo</button>
         </div>
         {busy && <p className="entry-note" role="status">Un momento…</p>}
         {notice && <p className="email-feedback" role="status">{notice}</p>}
+        {!notice && !error && initialDelivery === 'sending' && <p className="email-feedback" role="status">Enviando el correo de verificación…</p>}
+        {!notice && !error && initialDelivery === 'sent' && <p className="email-feedback" role="status">Correo de verificación enviado.</p>}
+        {!sent && !notice && !error && initialDelivery === 'failed' && <p className="email-feedback" role="alert">Tu cuenta está creada, pero no hemos podido enviar el correo. Pulsa Reenviar para intentarlo de nuevo.</p>}
         {(error || externalError) && <p className="email-feedback" role="alert">{error || externalError}</p>}
         <footer className="verification-footer">
           <button className="email-text-button" disabled={busy || signingOut} onClick={onSignOut}>Cerrar sesión</button>

@@ -49,7 +49,7 @@ export function Fixture() {
   const [loggedOut, setLoggedOut] = useState(query.has("entry"));
   const back = () => setGame(undefined);
   if (query.has("loading")) return <AppLoading/>;
-  if (query.has("verification") && !loggedOut) return <EmailVerification user={{ email: 'una.direccion.larga.de.prueba@example.com' } as User} onVerified={() => {}} onSignOut={() => setLoggedOut(true)} signingOut={false} externalError={query.has('error') ? 'No hemos podido enviar el correo. Vuelve a intentarlo.' : ''}/>;
+  if (query.has("verification") && !loggedOut) return <EmailVerification initialDelivery={query.has("sending") ? "sending" : query.has("delivery-failed") ? "failed" : "sent"} user={{ email: 'una.direccion.larga.de.prueba@example.com' } as User} onVerified={() => {}} onSignOut={() => setLoggedOut(true)} signingOut={false} externalError={query.has('error') ? 'No hemos podido enviar el correo. Vuelve a intentarlo.' : ''}/>;
   if (query.has("connection-error") && !loggedOut) return <ConnectionRecovery onRetry={() => setLoggedOut(true)} onSignOut={() => setLoggedOut(true)}/>;
   if (loggedOut)
     return (

@@ -151,8 +151,11 @@ scrolling on short viewports. Do not describe missing service configuration as a
 problem with the user's internet connection.
 Email verification uses the same brand header and centered 440 px column as
 sign-in, without a colored card header. Its icon sits beside the title; the email
-address stays copyable and wraps without inserted hyphens. Preserve explicit send,
+address stays copyable and wraps without inserted hyphens. Preserve manual resend,
 verification check and sign-out actions, with readable inline status/error feedback.
+Registration sends verification automatically once; the verification page labels
+the manual action Reenviar. Disable resend during the initial delivery and show
+its success or failure accurately. Reloading/restoring a session never auto-sends.
 Loading reuses the shared Brand instead of a separate wordmark and keeps its
 accessible status and reduced-motion dots. Professional entry failures reuse the
 same recovery page as player access failures.

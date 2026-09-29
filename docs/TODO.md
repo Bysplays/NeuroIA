@@ -503,7 +503,7 @@ release issue is lost during prioritization.
 ## Calma local verification and release limits
 
 - Unit suite: 93 tests passed; demo Firestore/rules/proposals/Worker REST: 31 passed.
-- Demo Auth suite: 2 passed; build and strict lint pass.
+- Demo Auth suite: 3 passed, including automatic verification delivery and retry after failure; build and strict lint pass.
 - Isolated placement browser suite: 9 passed, including delayed evidence and reload.
 - Interface suite: 12 passed (11-suite run plus focused home-navigation regression), covering
   three widths, eight instruction/play screens, funding
