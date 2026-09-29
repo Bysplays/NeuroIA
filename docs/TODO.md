@@ -118,7 +118,11 @@ subject to the confirmed deadline and available client materials.
   is in DEPLOYMENT.md. Owner confirmed DNS, authorized domain and Google
   OAuth callback. HTTPS and both auth endpoints now pass read-only checks; local
   authDomain override is enabled. Email-template changes and end-to-end Google/email
-  verification remain pending; production authDomain is unchanged. Gate: app navigation/returns use the intended app domain; review
+  verification remain pending; production authDomain is unchanged. The owner
+  captured HTTP 400 `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED` when updating
+  `notification.sendEmail.callbackUri`. Keep the existing email action URL; ask
+  Firebase Support to diagnose the project restriction before retrying migration.
+  HTTPS readiness does not resolve this backend rejection. Gate: app navigation/returns use the intended app domain; review
   branded auth-domain feasibility if needed, without breaking secure verification,
   recovery or sign-in. Coordinate with the existing domain-migration backlog.
 

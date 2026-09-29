@@ -113,6 +113,10 @@ migration or a reverse proxy; the subdomain avoids that infrastructure change.
    `https://auth.neuroia.es/__/auth/action` after verifying that endpoint. Verification
    and password reset use this hosted action handler; no custom handler is required.
    Merely changing the JavaScript authDomain does not update email templates.
+   The current project rejects this PATCH with HTTP 400
+   `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED` (owner-provided response). Keep the default
+   email action URL until Firebase Support resolves or explains the rejection;
+   do not infer a DNS fault or a need for a paid-plan upgrade from this code.
 5. Sender branding is a separate configuration in Authentication > Templates >
    Customize domain. Use the exact TXT/CNAME records Firebase supplies, preserve
    unrelated mail records and merge SPF if required rather than adding a second
