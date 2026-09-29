@@ -10,12 +10,10 @@ interface HeaderProps {
   onSignOut: () => void;
   signingOut: boolean;
   profile: UserProfile;
-  sessionMinutes: number;
   activeView: 'dashboard' | 'therapist' | 'statistics' | 'game';
   onNavigate: (view: 'dashboard' | 'therapist') => void;
   navigationRef?: (node: HTMLDivElement | null) => void;
   onOpenAccessibility: () => void;
-  onOpenFatigueAlert: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({

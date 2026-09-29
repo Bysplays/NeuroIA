@@ -434,3 +434,6 @@ funding document page and returning to the previous settings state on close.
 Pending progress writes show a compact notification with Reintentar and the link-style
 Avanzar sin sincronizar. Dismissal keeps the local projection and durable queue;
 retain a small pending notice and background retries. Never label unsynced work saved.
+
+Do not interrupt the workspace with timed break reminders or guided rest dialogs.
+Opening settings still pauses active gameplay.

@@ -97,12 +97,10 @@ export function Fixture() {
         <>
           <Header
             profile={profile}
-            sessionMinutes={0}
             activeView="dashboard"
             onNavigate={() => { back(); setDashboardTab("today"); }}
             navigationRef={setNavigation}
             onOpenAccessibility={() => setSettings(true)}
-            onOpenFatigueAlert={() => {}}
             onSignOut={() => setLoggedOut(true)}
             signingOut={false}
           />

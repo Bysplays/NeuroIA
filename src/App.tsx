@@ -24,11 +24,9 @@ import { AchievementShowcase } from './components/AchievementShowcase';
 import { Dashboard } from './components/Dashboard';
 import { TherapistReport } from './components/TherapistReport';
 import { AccessibilityModal } from './components/AccessibilityModal';
-import { FatigueAlertModal } from './components/FatigueAlertModal';
 import { LoginScreen } from './components/LoginScreen';
 import { EmailVerification } from './components/EmailVerification';
 import { accountDisplayName, needsEmailVerification, submitEmailAuth, type EmailAction } from './services/emailAuth';
-import { RestBreakModal } from './components/RestBreakModal';
 
 import { GameExercise } from './components/GameExercise';
 import { PlacementOnboarding } from './components/PlacementOnboarding';
@@ -136,27 +134,9 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   // Estado del Plan del Día (Secuencia guiada de 3 ejercicios)
   const [dailyPlanSession, setDailyPlanSession] = useState<DailyPlanSession | null>(null);
 
-  // Modales y control de descanso/fatiga
+  // Information and settings dialogs
   const [information, setInformation] = useState<InformationKind | null>(null);
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
-  const [isFatigueOpen, setIsFatigueOpen] = useState(false);
-  const [isRestModalOpen, setIsRestModalOpen] = useState(false);
-  const [sessionMinutes, setSessionMinutes] = useState(0);
-
-  // Contador de minutos de sesión para ofrecer pausas
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSessionMinutes(prev => {
-        const next = prev + 1;
-        if (next === 15 || next === 30) {
-          setIsFatigueOpen(true);
-        }
-        return next;
-      });
-    }, 60000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // Commit visual preferences before paint, together with the selected controls.
   useLayoutEffect(() => {
@@ -256,7 +236,6 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
       {!placement && !isPlayingGame && (
         <Header
           profile={profile}
-          sessionMinutes={sessionMinutes}
           activeView={activeView === 'statistics' ? 'statistics' : activeView === 'therapist' ? 'therapist' : 'dashboard'}
           onNavigate={view => {
             if (view === 'dashboard') setDashboardTab('today');
@@ -269,12 +248,11 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
           onSignOut={onSignOut}
           signingOut={signingOut}
           onOpenAccessibility={() => setIsAccessibilityOpen(true)}
-          onOpenFatigueAlert={() => setIsFatigueOpen(true)}
         />
       )}
 
       {reassessing ? <Reassessment profile={profile} sync={sync} onDone={() => setReassessing(false)} onSettings={() => setIsAccessibilityOpen(true)}/> : placement ? <PlacementOnboarding profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
-        {playingProposal && <AssignedSessionPlayer key={playingProposal.id} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isFatigueOpen || isRestModalOpen} />}
+        {playingProposal && <AssignedSessionPlayer key={playingProposal.id} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isAccessibilityOpen} />}
         {activeView === 'dashboard' && !playingProposal && (
           <Dashboard uid={uid} history={history} navigationTarget={navigationTarget} selectedTab={dashboardTab} onTabChange={setDashboardTab}
             onOpenSettings={() => setIsAccessibilityOpen(true)} onSignOut={onSignOut} signingOut={signingOut}
@@ -299,7 +277,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
           />
         )}
 
-        {isPlayingGame && !playingProposal && <GameSession onSettings={() => setIsAccessibilityOpen(true)} paused={isAccessibilityOpen || isFatigueOpen || isRestModalOpen} key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
+        {isPlayingGame && !playingProposal && <GameSession onSettings={() => setIsAccessibilityOpen(true)} paused={isAccessibilityOpen} key={`${activeView}-${dailyPlanSession?.currentIndex ?? "free"}`} step={planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total}` : undefined} id={exerciseId} initialLevel={assignedLevel(profile, exerciseId)} onBack={handleBackToDashboard}>
           <GameExercise id={exerciseId} profile={profile} onBack={handleBackToDashboard} onSaveResult={handleSaveExerciseResult} planProgress={planProgress} onNextPlanExercise={handleNextPlanExercise} />
         </GameSession>}
       </main>}
@@ -317,24 +295,6 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
         onUpdateSettings={handleUpdateSettings}
       />
 
-      <FatigueAlertModal
-        isOpen={isFatigueOpen && information === null}
-        onClose={() => setIsFatigueOpen(false)}
-        onTakeBreak={() => {
-          setIsFatigueOpen(false);
-          setIsRestModalOpen(true);
-        }}
-      />
-
-      <RestBreakModal
-        isOpen={isRestModalOpen && information === null}
-        onClose={() => setIsRestModalOpen(false)}
-        onFinishBreak={() => {
-          setIsRestModalOpen(false);
-          setSessionMinutes(0); // Reiniciar el contador de fatiga tras descansar
-          handleBackToDashboard();
-        }}
-      />
     </div>
     </div>
     </>
