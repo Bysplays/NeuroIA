@@ -67,7 +67,9 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 
   return (
     <div className={`exercise-container${isCompleted && result ? ' exercise-container-completed' : ''}`} data-domain={domain}>
-      {!isCompleted && <><h1 className="game-task-title">{title}</h1><progress className="game-stage-progress" value={bar.value} max={bar.max} aria-label={session.progressScope ? "Progreso de la sesión" : "Progreso del juego"}/></>}
+      {!isCompleted && <><h1 className="game-task-title">{title}</h1><div className="game-stage-progress" role="progressbar" aria-valuemin={0} aria-valuenow={bar.value} aria-valuemax={bar.max} aria-label={session.progressScope ? "Progreso de la sesión" : "Progreso del juego"}>
+        {Array.from({ length: Math.ceil(bar.max) }, (_, index) => <span key={index} aria-hidden="true"><i style={{ width: `${Math.max(0, Math.min(1, bar.value - index)) * 100}%` }}/></span>)}
+      </div></>}
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}
       <div className="exercise-viewport">
         {isCompleted && result ? (

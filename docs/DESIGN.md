@@ -448,7 +448,7 @@ a compact Cómo jugar native modal with the current instruction and Continuar ju
 pause the game clock without unmounting the board, and restore focus on dismissal.
 The initial instruction screen remains a full page before starting ordinary play.
 
-Active exercises use a full-width progress track below the task title and above the
+Active exercises use a full-width segmented progress track below the task title and above the
 play area, without numeric counters in the title. Individual games show their own
 stages; daily and professional paths sum all configured stages. Placement reserves
 its two possible assessment stages per selected game; finishing early or skipping
@@ -456,3 +456,8 @@ resolves that game's remaining allocation, so changing games never resets the ba
 Continuous scanning/tracking arenas contribute one stage with fractional progress.
 Footer Back and Skip actions share the same compact outlined dimensions. Scanning
 keeps its found-state treatment without checkmark overlays obscuring the objects.
+
+Progress segments use the onboarding indicator’s blue fill, muted track and small
+gaps, within the play area’s lateral padding. The active header keeps the clock
+on the left and utilities aligned right at every width. The placement welcome
+shows the selected count (e.g. “2 juegos preparados”), without a completed fraction.

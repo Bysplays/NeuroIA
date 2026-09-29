@@ -350,7 +350,7 @@ test('sound toggle enables narration and effects together and mute stops speech'
 test('game progress replaces title counters and help restores the same board', async ({page}) => {
   await page.goto(fixture+'?game=visual-scanning&placement');
   const bar=page.getByRole('progressbar', {name:'Progreso del juego'});
-  await expect(bar).toHaveAttribute('value','0');
+  await expect(bar).toHaveAttribute('aria-valuenow','0');
   await expect(page.locator('.game-task-title')).not.toContainText(/\d+\/\d+/);
   const board=await page.locator('.scanning-grid').innerHTML();
   await page.getByRole('button',{name:'Mostrar instrucciones'}).click();

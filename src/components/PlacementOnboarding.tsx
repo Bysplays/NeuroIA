@@ -110,7 +110,7 @@ export function PlacementOnboarding({ profile, sync, onDone, onSettings, onTrial
     <section className="placement-card" aria-labelledby="placement-title">
       <div className="placement-content">
         <div className="placement-progress"><div className="placement-progress-heading">
-          <p className="soft-label">{count} de {selected.length} juegos preparados</p>
+          <p className="soft-label">{selected.length} {selected.length === 1 ? 'juego preparado' : 'juegos preparados'}</p>
           <button className="entry-toolbar-action" onClick={() => soundService.speak(message)}><Volume2 size={20} />Escuchar</button>
         </div><progress max={selected.length} value={count} aria-label="Juegos preparados" /></div>
         <div className="placement-copy"><h1 ref={heading} tabIndex={-1} id="placement-title">{complete ? 'A tu ritmo, desde aquí' : 'Este es tu comienzo'}</h1><p aria-live="polite">{message}</p></div>

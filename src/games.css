@@ -346,8 +346,10 @@ body[data-contrast="standard"] .game-session .category-bin-card { background: #f
 .viewport-navigation-row > .soft-label { white-space: nowrap; }
 @media (max-width: 760px) {
   .game-session-viewport .game-session-play { padding-inline: 16px; }
-  .viewport-session-header { flex-wrap: wrap; justify-content: center; padding: 0; }
-  .viewport-session-header .viewport-session-tools { flex-wrap: wrap; justify-content: center; gap: 8px; flex-shrink: 1; }
+  .viewport-session-header { gap: 8px; padding: 0; align-items: flex-start; }
+  .viewport-session-header .viewport-session-tools { flex-wrap: wrap; justify-content: flex-end; gap: 4px; flex-shrink: 1; margin-left: auto; }
+  .viewport-session-header .game-session-time { min-height: 44px; gap: 4px; font-size: .7rem; flex-shrink: 0; }
+  .game-session .viewport-session-header .muse-entry { padding-inline: 8px; font-size: .65rem; }
 
 }
 
@@ -463,9 +465,8 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 
 .game-session .viewport-session-tools .muse-entry { width: auto; padding-inline: 14px; }
 
-/* One continuous progress track between the task and the play area. */
-.game-stage-progress { display: block; width: 100%; height: 6px; flex: 0 0 6px; margin: 0 0 12px; border: 0; border-radius: 3px; overflow: hidden; appearance: none; background: var(--color-border); color: var(--color-primary); }
-.game-stage-progress::-webkit-progress-bar { background: var(--color-border); }
-.game-stage-progress::-webkit-progress-value { background: var(--color-primary); }
-.game-stage-progress::-moz-progress-bar { background: var(--color-primary); }
+/* Segmented stages share the onboarding indicator's palette and spacing. */
+.game-stage-progress { display: flex; gap: clamp(2px, .5vw, 6px); width: 100%; height: 5px; flex: 0 0 5px; margin: 0 0 12px; }
+.game-stage-progress > span { flex: 1; min-width: 0; height: 100%; border-radius: 4px; overflow: hidden; background: var(--color-border); }
+.game-stage-progress i { display: block; height: 100%; background: var(--color-action-bg); }
 .viewport-session-footer > .entry-toolbar-action, .viewport-navigation-row > .entry-toolbar-action { min-width: 104px; padding: 10px 14px; justify-content: center; }
