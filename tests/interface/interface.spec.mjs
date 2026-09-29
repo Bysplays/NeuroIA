@@ -425,3 +425,16 @@ test('authentication dialog closes to home and restores focus from every mode', 
   await page.getByRole('button',{name:'Aviso legal',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Aviso legal',exact:true})).toBeVisible();
 });
+
+
+test('workspace link closes auth and reveals the corresponding home', async ({page}) => {
+  await page.goto(fixture+'?entry');
+  await page.getByRole('button',{name:'Comenzar',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'¿Eres un profesional?',exact:true}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Un espacio para acompañar.'})).toBeVisible();
+  await page.getByRole('button',{name:'Comenzar',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'Volver al acceso personal',exact:true}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Juega a tu ritmo.'})).toBeVisible();
+});

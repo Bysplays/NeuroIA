@@ -295,9 +295,9 @@ export function LoginScreen({
                 </form>
               </div>
             </section>
-          <div className="auth-workspace-switch">
-            <button className="email-text-button" disabled={busy} onClick={() => { setProfessional(value => !value); setFormError(""); setNotice(""); onClearError(); }}>
-              {professional ? "Acceder como jugador" : "Acceder como profesional"}
+          <div className="product-information-links auth-workspace-switch">
+            <button disabled={busy} onClick={() => { setProfessional(value => !value); changeMode(null); }}>
+              {professional ? "Volver al acceso personal" : "¿Eres un profesional?"}
             </button>
           </div>
         </div>

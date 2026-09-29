@@ -503,8 +503,14 @@ when idle, returning focus to Comenzar. Mode switches remain inside the modal;
 recovery Close also returns home. Error notifications stack above the form and
 return focus without discarding its fields. About/legal links remain on the home only; auth dialogs contain no information links. Short viewports scroll within the dialog.
 
-Professional entry uses a blue UsersRound group icon on a white tile, distinct
-from the player’s paired-card motif, within the same clinical-blue illustration frame.
+Professional entry uses two tilted, overlapping profile cards: a blue individual
+card behind a white group card, with strong avatar symbols and small abstract
+profile lines. It echoes the player’s card composition while distinguishing
+profile management, within the same clinical-blue illustration frame.
 
-Auth dialogs include a centered player/professional switch below the form. Switching
-workspace keeps the modal, form mode and entered fields, and updates login intent.
+Auth dialogs include the same centered player/professional link as the home,
+with only 4px separation below the form. Switching workspace closes the modal
+and reveals the corresponding home, updating login intent.
+
+Both player and professional entry illustrations share the small blue four-point
+star accent at the lower left of their card composition.
