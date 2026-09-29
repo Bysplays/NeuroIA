@@ -1587,13 +1587,13 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .editorial-hero .practice-motif { max-width: 250px; }
 .editorial-hero .touch-btn { margin-top: 0; font-size: .9rem; gap: 18px; padding: 14px 20px; min-height: 54px; }
 .editorial-today { background: var(--color-surface); border-radius: 24px; padding: 26px; display: flex; flex-direction: column; }
+.editorial-today-games { margin-block: auto; border-top: 1px solid var(--color-border); }
 .editorial-today h2 { font-size: 1.2rem; margin: 0 0 14px; }
-.editorial-today > button { display: flex; align-items: center; gap: 13px; width: 100%; padding: 17px 0; background: none; border: 0; border-bottom: 1px solid var(--color-border); color: var(--color-text-main); text-align: left; cursor: pointer; }
-.editorial-today > button > span:nth-child(2) { flex: 1; }
+.editorial-today-games > button { display: flex; align-items: center; gap: 13px; width: 100%; padding: 17px 0; background: none; border: 0; border-bottom: 1px solid var(--color-border); color: var(--color-text-main); text-align: left; cursor: pointer; }
+.editorial-today-games > button > span:nth-child(2) { flex: 1; }
 .editorial-today strong, .editorial-areas strong { font-size: .86rem; font-weight: 650; display: block; }
 .editorial-today small, .editorial-areas small { color: var(--color-text-muted); font-size: .73rem; display: block; margin-top: 5px; }
 .editorial-step { color: var(--color-primary); font-size: .76rem; }
-.editorial-today > .editorial-daily-start { border: 0; color: var(--color-primary); font-size: .82rem; font-weight: 650; justify-content: space-between; margin-top: auto; padding-bottom: 0; min-height: 48px; }
 .editorial-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
 .editorial-section-heading h2 { font-size: 1.2rem; margin: 0; }
 .editorial-areas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }

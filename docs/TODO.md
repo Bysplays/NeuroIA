@@ -16,6 +16,13 @@ of a production deployment. Keep project guidance in English and UI copy in Span
   pending checkout automatically; completed payments remain protected.
   Presentation approval does not certify live payments or change release requirements.
 - [ ] Review authenticated home and catalog with the owner.
+- [ ] Implement account deletion in Mi cuenta: pale enabled action, paid-subscription
+  guard verified by the server, typed confirmation, resumable deletion of Auth,
+  progress, archives and professional/invitation associations. Trial and invited
+  access must not block deletion. Retain only a server-owned pseudonymous trial-use
+  identifier that survives account recreation; a deleted Firebase UID alone is
+  insufficient. Update privacy copy, enforce concurrent-write protection and
+  verify with demo emulators before enabling. No deletion endpoint is shipped yet.
 - [ ] Review refreshed onboarding preferences and assessment entry with the owner;
   visual styling now matches account entry. Existing assessment acceptance checks remain open.
 

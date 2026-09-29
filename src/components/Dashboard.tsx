@@ -92,7 +92,7 @@ export function Dashboard({
           </h1>
         </div>
         <div className="editorial-streak">
-          <Flame size={21} />
+          <Flame size={21} fill={completedToday.size > 0 ? "currentColor" : "none"} />
           <strong>{profile.streakDays}</strong>
           <span>
             {profile.streakDays === 1 ? "día seguido" : "días seguidos"}
@@ -119,6 +119,7 @@ export function Dashboard({
         </section>
         <aside className="editorial-today">
           <h2>Tu sesión de hoy</h2>
+          <div className="editorial-today-games">
           {queue.map((id, index) => {
             const game = getExerciseById(id)!;
             return (
@@ -131,7 +132,7 @@ export function Dashboard({
               </button>
             );
           })}
-
+          </div>
         </aside>
       </div>
       <section className="editorial-explore">

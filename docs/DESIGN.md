@@ -83,16 +83,14 @@ The header contains the brand, labelled Muse connection, sound, settings and
 visible sign-out. Mi cuenta also offers sign-out and access management.
 
 Hoy keeps copy minimal: a greeting and actual streak, “Para hoy” with the featured
-game title and “Jugar”, a “Tu sesión” list containing game names only, and icon-led
+game title and “Jugar”, a “Tu sesión de hoy” list containing game names only, and icon-led
 area shortcuts. Do not repeat greetings with an eyebrow or supporting slogan,
 repeat area labels under every game, or add descriptions under area shortcuts.
-Use short concrete labels: “Realizar sesión completa”, “Explorar”, “Ver todos”. The displayed session queue is passed to
-the start callback; starting it must not silently choose a different sequence.
+Use short concrete labels: “Explorar”, “Ver todos”. The suggested games open individually.
 Do not add fake map progress, completion counts or placeholders for patient data.
 
 The authenticated home's featured Jugar action spans its entire title column with
-centered text and a right arrow, matching the public entry action. The daily-plan
-CTA says Realizar sesión completa (Otra sesión after completion). Catalog headers
+centered text and a right arrow, matching the public entry action. Catalog headers
 have no legacy companion illustration; its eight blue Lucide icons describe each
 interaction (search, naming, letters, sequence, pairs, sorting, target, tracking).
 Keep real illustrated game stimuli unchanged: catalog icons are navigation only.
@@ -520,3 +518,9 @@ corners. The featured game keeps a 20px gap between its content/Play action and
 artwork. Tu sesión de hoy has no whole-session action; each exercise replaces its
 arrow with a check when a non-practice result exists for that exercise on the
 current local calendar day. No completion is inferred from aggregate counters.
+
+The daily game list is vertically centered in the space below its heading when
+the card stretches on wider screens. Fine separators frame both ends and divide
+the rows; compact layouts keep natural content height. The streak flame is filled
+with primary color only when a non-practice game was completed today; otherwise
+it remains an outline.
