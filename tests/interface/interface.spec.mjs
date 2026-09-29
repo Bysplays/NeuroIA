@@ -371,9 +371,10 @@ test('Muse offers connection only when Web Bluetooth is supported', async ({page
     const {createMuseAdapter} = await import('/src/services/museAdapter.ts');
     eegService.install(createMuseAdapter());
   });
-  await page.getByRole('button', {name:'Muse · No soportado',exact:true}).click();
+  await page.getByRole('button', {name:'Conectar Muse',exact:true}).click();
   await expect(page.getByRole('button',{name:'Conectar diadema',exact:true})).toHaveCount(0);
-  await expect(page.getByRole('status')).toHaveText('No soportado');
+  await expect(page.getByRole('button',{name:'Navegador no soportado',exact:true})).toBeDisabled();
+  await expect(page.locator('.preferences-body h3')).toHaveText(['Tus partidas', 'Conexión Bluetooth']);
   await page.keyboard.press('Escape');
   await page.evaluate(async () => {
     Object.defineProperty(navigator, 'bluetooth', {configurable: true, value: {requestDevice: async () => {throw new Error('Test only');}}});

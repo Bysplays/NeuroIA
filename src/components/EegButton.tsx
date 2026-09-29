@@ -14,12 +14,12 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
     : state.status === 'connecting' ? 'Conectando…'
     : state.status === 'error' ? 'No se ha podido conectar. Comprueba la diadema e inténtalo de nuevo.'
     : 'Diadema desconectada';
-  const entryLabel = !available ? 'Muse · No soportado' : state.status === 'connected' ? 'Muse conectado' : state.status === 'connecting' ? 'Conectando Muse' : 'Conectar Muse';
+  const entryLabel = state.status === 'connected' ? 'Muse conectado' : state.status === 'connecting' ? 'Conectando Muse' : 'Conectar Muse';
 
   return <>
     <button className={`header-icon-btn muse-entry${state.status === 'connected' ? ' eeg-connected' : ''}`}
       aria-label={entryLabel}
-      title="Diadema EEG" onClick={() => toggle(true)}><AudioLines size={20}/><span>{available ? entryLabel : 'No soportado'}</span></button>
+      title="Diadema EEG" onClick={() => toggle(true)}><AudioLines size={20}/><span>{entryLabel}</span></button>
     {open && <ModalFrame labelledBy="eeg-title" onClose={() => toggle(false)}>
       <div className="preferences entry-preferences eeg-preferences">
         <header className="preferences-header">
@@ -27,22 +27,22 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
           <button className="preferences-close" aria-label="Cerrar diadema" onClick={() => toggle(false)}><X size={22}/></button>
         </header>
         <div className="preferences-body">
+          <section className="preferences-section" aria-labelledby="eeg-saving-title">
+            <h3 id="eeg-saving-title"><Activity size={20} aria-hidden="true"/>Tus partidas</h3>
+            <p>EEG muestra amplitud eléctrica y PPG la señal óptica. No representan atención ni saturación de oxígeno.</p>
+          </section>
           <section className="preferences-section" aria-labelledby="eeg-connection-title">
             <h3 id="eeg-connection-title"><Bluetooth size={20} aria-hidden="true"/>Conexión Bluetooth</h3>
             {available && <p>Desconecta la diadema de la app Muse y enciéndela. Pulsa «Conectar diadema» y selecciona tu Muse en la ventana del navegador.</p>}
             <div className="eeg-connection-row">
-              <p id="eeg-connection-status" role="status">{status}</p>
+              {available && <p id="eeg-connection-status" role="status">{status}</p>}
               {active
                 ? <button className="entry-toolbar-action" onClick={() => eegService.disconnect()}>{state.status === 'connecting' ? 'Cancelar conexión' : 'Desconectar'}</button>
-                : available ? <button className="subscription-upgrade" aria-describedby="eeg-connection-status" onClick={() => void eegService.connect(true)}>Conectar diadema</button> : null}
+                : <button className="subscription-upgrade" disabled={!available} aria-describedby={available ? "eeg-connection-status" : undefined} onClick={() => void eegService.connect(true)}>{available ? 'Conectar diadema' : 'Navegador no soportado'}</button>}
             </div>
             {state.status === 'connected' && <p className="eeg-battery"><Battery size={18} aria-hidden="true"/>Batería: {state.battery === null ? 'esperando datos…' : `${state.battery} %`}</p>}
           </section>
-          <section className="preferences-section" aria-labelledby="eeg-saving-title">
-            <h3 id="eeg-saving-title"><Activity size={20} aria-hidden="true"/>Tus partidas</h3>
-            <p>EEG muestra amplitud eléctrica y PPG la señal óptica. No representan atención ni saturación de oxígeno.</p>
 
-          </section>
         </div>
       </div>
     </ModalFrame>}
