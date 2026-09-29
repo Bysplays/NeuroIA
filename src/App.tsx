@@ -144,9 +144,8 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   }, [profile.settings.showCompanions, profile.settings.pageStyle, profile.settings.contrast, profile.settings.fontSize, profile.settings.handDominance]);
 
   useEffect(() => {
-    soundService.setSoundEnabled(profile.settings.soundEffects);
     soundService.setSpeechRate(profile.settings.speechRate);
-  }, [profile.settings.soundEffects, profile.settings.speechRate]);
+  }, [profile.settings.speechRate]);
 
   const handleUpdateSettings = (newSettings: Partial<AccessibilitySettings>) => {
     sync.enqueue({ id: crypto.randomUUID(), kind: 'settings', settings: newSettings });

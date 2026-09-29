@@ -280,11 +280,12 @@ pages may scroll. Keep complete motor hit areas inside their measured arenas.
 
 Use in-place answer states rather than success popups or praise narration. Preserve
 spoken instructions, object names and corrective content when needed by the task.
-Game continuation is a stable blue action with 8 px corners, a 52 px minimum
+Game continuation is a stable blue action with 12 px corners, a 52 px minimum
 height and a right arrow; never bounce it. Secondary controls have restrained
 borders. Touch audio uses a quiet sine tone with smooth attack/release; correct
-answers use a brief low-volume two-note cue. Sound and narrator toggles remain
-independent. Completion retains the existing result and daily-plan callbacks.
+answers use a brief low-volume two-note cue. Audio starts muted on each page load. The sound toggle explicitly enables
+effects and narration; muting stops speech and effects. Restored profile audio
+settings must not automatically unmute the page. Completion retains the existing result and daily-plan callbacks.
 
 ## Responsive and accessible behavior
 

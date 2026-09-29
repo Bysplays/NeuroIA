@@ -446,7 +446,19 @@ body .game-object.game-object-illustrated { display: inline-flex; align-items: c
 }
 
 /* Stable, clearly ranked game actions; answer tiles keep their own hit areas. */
-.exercise-container .game-next-action, .exercise-container .result-primary { min-height: 52px; width: min(100%, 440px); padding: 14px 24px; gap: 16px; border: 0; border-radius: 8px; font-size: .9rem; font-weight: 600; line-height: 1.4; box-shadow: none; justify-content: center; animation: none; }
+.exercise-container .game-next-action, .exercise-container .result-primary { min-height: 52px; width: min(100%, 440px); padding: 14px 24px; gap: 16px; border: 0; border-radius: 12px; font-size: .85rem; font-weight: 600; line-height: 1.4; box-shadow: none; justify-content: center; animation: none; }
 .game-next-action svg { width: 20px; height: 20px; flex-shrink: 0; }
 .viewport-session-footer .paper-nav-button, .viewport-session-header .paper-nav-button { border: 1px solid var(--color-border); border-radius: 8px; min-height: 44px; padding: 10px 14px; background: transparent; }
 .exercise-container .actions-bar { padding-top: 16px; }
+
+/* The same controls as onboarding, scoped away from game targets and stimuli. */
+.game-session .viewport-session-tools .header-icon-btn,
+.game-session .game-help-button,
+.game-session .instruction-level-control > button { width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); box-shadow: none; }
+.game-session .paper-nav-button { min-height: 44px; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 8px; background: transparent; color: var(--color-primary); }
+.game-session .paper-nav-button.touch-btn-primary { background: var(--color-primary); color: var(--color-action-text); }
+.game-session .naming-option-btn, .game-session .letter-option-btn, .game-session .category-bin-card { border-radius: 12px; box-shadow: none; }
+.game-session .naming-option-btn { font-size: .85rem; font-weight: 600; }
+.game-session .placement-actions .touch-btn, .game-session .memory-actions .touch-btn { border-radius: 12px; min-height: 52px; font-size: .85rem; }
+
+.game-session .viewport-session-tools .muse-entry { width: auto; padding-inline: 14px; }

@@ -326,3 +326,23 @@ test('save failure can be dismissed while remaining pending or retried', async (
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByText('Guardado pendiente.')).toHaveCount(0);
 });
+
+test('sound toggle enables narration and effects together and mute stops speech', async ({page}) => {
+  await page.goto(fixture+'?game=language-naming&placement');
+  await page.evaluate(async () => {
+    const {soundService} = await import('/src/services/soundService.ts');
+    soundService.speak = Object.getPrototypeOf(soundService).speak.bind(soundService);
+    window.voiceCalls = 0; window.voiceStops = 0;
+    soundService.narration.speak = () => { window.voiceCalls++; return true; };
+    soundService.narration.stop = () => { window.voiceStops++; };
+    soundService.speak('Prueba');
+  });
+  expect(await page.evaluate(()=>window.voiceCalls)).toBe(0);
+  await page.getByRole('button',{name:'Activar sonidos',exact:true}).click();
+  await page.evaluate(async()=>{const {soundService}=await import('/src/services/soundService.ts');soundService.speak('Prueba');});
+  expect(await page.evaluate(()=>window.voiceCalls)).toBe(1);
+  await page.getByRole('button',{name:'Silenciar sonidos',exact:true}).click();
+  await page.evaluate(async()=>{const {soundService}=await import('/src/services/soundService.ts');soundService.speak('Prueba');});
+  expect(await page.evaluate(()=>window.voiceCalls)).toBe(1);
+  expect(await page.evaluate(()=>window.voiceStops)).toBeGreaterThan(0);
+});

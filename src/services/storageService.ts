@@ -12,7 +12,7 @@ export const defaultSettings: AccessibilitySettings = {
   handDominance: 'center',
   speechEnabled: true,
   speechRate: 0.88,
-  soundEffects: true,
+  soundEffects: false,
   leftSideAnchor: false,
   hapticTouchFeedback: true,
 };
