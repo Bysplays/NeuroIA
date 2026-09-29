@@ -235,7 +235,8 @@ icon/title, compact close control and 6 px outer corners, matching entry notific
 Ask one question at a time: desired areas, then optional interaction preference.
 Present areas in a two-column tile grid, with the final tile spanning both columns;
 use one column on very narrow screens. Require at least one area and omit the
-explore-all shortcut. Movement preferences retain labelled rows and an explicit skip. Avoid collecting a
+explore-all shortcut. Movement preferences retain labelled rows, including Prefiero no elegir ahora,
+with a single Preparar mis juegos action and no separate skip button. Avoid collecting a
 diagnosis. Only selected areas enter initial assessment; tap preference excludes
 continuous tracking. Untested games remain accessible with their default level.
 

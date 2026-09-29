@@ -29,7 +29,7 @@ for (const size of [{ width: 390, height: 844 }, { width: 820, height: 1180 }, {
 }
 test('selected assessment survives reload and finishes without testing unrelated areas', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 }); await page.goto(fixture + '?delay');
-  await choose(page); await page.getByRole('button', { name: 'Omitir esta preferencia' }).click();
+  await choose(page); await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   await expect.poll(async () => (await saved(page)).placement?.preferences?.interests).toEqual(['memory']);
   await page.reload(); await expect(page.getByText('0 de 2 juegos preparados')).toBeVisible();
   await page.getByRole('button', { name: 'Empezar', exact: true }).click();
@@ -61,7 +61,7 @@ test('explicit area choices persist when editing reassessment', async ({ page })
   await expect(page.getByRole('button', { name: /No sé qué elegir/ })).toHaveCount(0);
   for (const checkbox of await page.getByRole('checkbox').all()) await checkbox.check();
   await page.getByRole('button', { name: 'Continuar', exact: true }).click();
-  await page.getByRole('button', { name: 'Omitir esta preferencia' }).click();
+  await page.getByRole('button', { name: 'Preparar mis juegos' }).click();
   await expect(page.getByText('0 de 8 juegos preparados')).toBeVisible();
   await page.getByRole('button', { name: 'Cambiar mis elecciones' }).click();
   await expect(page.getByRole('checkbox', { checked: true })).toHaveCount(5);
