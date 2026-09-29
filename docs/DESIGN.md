@@ -475,7 +475,9 @@ copy or instructions to disconnect to change recording.
 The game progress track is inset an additional 16–48px per side inside the play
 area. Muse keeps its Conectar Muse entry and modal, showing the EEG/PPG explanation before
 Conexión Bluetooth. When Web Bluetooth is unavailable, the modal connection button
-is disabled and reads “Navegador no soportado”, without redundant status copy. Connection instructions remain visible regardless
+is disabled and reads “Navegador no soportado”. The disconnected status remains
+“Diadema no conectada” in both supported and unsupported browsers, preserving
+the same layout. Connection instructions remain visible regardless
 of support, starting with selecting Muse and then reminding users to disconnect
 it from other applications; detect API capability rather
 than browser names. Firefox and Safari currently do not implement Web Bluetooth.

@@ -374,6 +374,7 @@ test('Muse offers connection only when Web Bluetooth is supported', async ({page
   await page.getByRole('button', {name:'Conectar Muse',exact:true}).click();
   await expect(page.getByRole('button',{name:'Conectar diadema',exact:true})).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Navegador no soportado',exact:true})).toBeDisabled();
+  await expect(page.getByRole('status')).toHaveText('Diadema no conectada');
   await expect(page.getByText('Pulsa «Conectar diadema» y selecciona tu Muse en la ventana del navegador. Asegúrate de que tu diadema esté desconectada de otras aplicaciones.')).toBeVisible();
   await expect(page.locator('.preferences-body h3')).toHaveText(['Conexión Bluetooth']);
   await page.keyboard.press('Escape');

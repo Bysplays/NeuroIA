@@ -9,11 +9,10 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
   const toggle = (value: boolean) => { setOpen(value); onOpenChange?.(value); };
   const available = state.status !== 'unavailable' && eegService.supported();
   const active = state.status === 'connected' || state.status === 'connecting';
-  const status = !available ? 'No soportado'
-    : state.status === 'connected' ? 'Diadema conectada'
+  const status = state.status === 'connected' ? 'Diadema conectada'
     : state.status === 'connecting' ? 'Conectando…'
     : state.status === 'error' ? 'No se ha podido conectar. Comprueba la diadema e inténtalo de nuevo.'
-    : 'Diadema desconectada';
+    : 'Diadema no conectada';
   const entryLabel = state.status === 'connected' ? 'Muse conectado' : state.status === 'connecting' ? 'Conectando Muse' : 'Conectar Muse';
 
   return <>
@@ -31,10 +30,10 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
             <h3 id="eeg-connection-title"><Bluetooth size={20} aria-hidden="true"/>Conexión Bluetooth</h3>
             <p>Pulsa «Conectar diadema» y selecciona tu Muse en la ventana del navegador. Asegúrate de que tu diadema esté desconectada de otras aplicaciones.</p>
             <div className="eeg-connection-row">
-              {available && <p id="eeg-connection-status" role="status">{status}</p>}
+              <p id="eeg-connection-status" role="status">{status}</p>
               {active
                 ? <button className="entry-toolbar-action" onClick={() => eegService.disconnect()}>{state.status === 'connecting' ? 'Cancelar conexión' : 'Desconectar'}</button>
-                : <button className="subscription-upgrade" disabled={!available} aria-describedby={available ? "eeg-connection-status" : undefined} onClick={() => void eegService.connect(true)}>{available ? 'Conectar diadema' : 'Navegador no soportado'}</button>}
+                : <button className="subscription-upgrade" disabled={!available} aria-describedby="eeg-connection-status" onClick={() => void eegService.connect(true)}>{available ? 'Conectar diadema' : 'Navegador no soportado'}</button>}
             </div>
             {state.status === 'connected' && <p className="eeg-battery"><Battery size={18} aria-hidden="true"/>Batería: {state.battery === null ? 'esperando datos…' : `${state.battery} %`}</p>}
           </section>
