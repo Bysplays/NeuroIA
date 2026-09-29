@@ -77,7 +77,7 @@ export function LoginScreen({
         />
       )}
       <div hidden={information !== null}>
-        <main className={`entry-page${mode === null ? " entry-home" : ""}`}>
+        <main className={`entry-page${mode === null ? " entry-home" : " entry-auth"}`}>
           <header className="entry-header">
             <button
               className="brand-button"
@@ -160,7 +160,7 @@ export function LoginScreen({
                 <p>
                   {mode === "reset"
                     ? "Te enviaremos un enlace para recuperar tu contraseña."
-                    : mode === "register" ? "Guarda tu progreso y vuelve cuando quieras." : professional ? "Accede a tu espacio profesional." : "Entra para continuar a tu ritmo."}
+                    : mode === "register" ? "Las cuentas de terceros no necesitan registro. Accede desde «Iniciar sesión»." : professional ? "Accede a tu espacio profesional." : "Entra para continuar a tu ritmo."}
                 </p>
                 {mode === "signin" && (
                   <>
@@ -178,11 +178,6 @@ export function LoginScreen({
                       <span>o con tu correo</span>
                     </div>
                   </>
-                )}
-                {mode === "register" && (
-                  <p className="entry-provider-note">
-                    Las cuentas de terceros, como Google, no necesitan registro. Puedes acceder desde «Iniciar sesión».
-                  </p>
                 )}
                 <form className="email-form" onSubmit={submit} aria-busy={busy}>
                   <div className="entry-field">

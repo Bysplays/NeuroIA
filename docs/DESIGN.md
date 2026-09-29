@@ -110,8 +110,10 @@ The access page uses one 440 px maximum column, a single Iniciar sesión / Crear
 selector, then a compact heading and grouped fields. Sign-in includes a Google action and
 email divider; registration is email-only with a short note explaining that
 third-party accounts can use Iniciar sesión without separate registration.
-Use 8 px label/input gaps, 20 px between fields and 54 px minimum input/action
-heights. The header holds only the brand and Volver. Do not add a decorative side
+Use 6 px label/input gaps, 14 px between fields, 48 px minimum inputs and
+54 px primary actions. Keep the auth header and footer compact and use a minimum
+viewport-height shell; allow natural scrolling on short screens, with a keyboard
+or enlarged text. Registration uses the third-party note as its only subtitle. The header holds only the brand and Volver. Do not add a decorative side
 panel or duplicate access buttons. Reference: [Brilliant sign-in on Mobbin](https://mobbin.com/screens/a7afa68a-7e23-4fe5-8c0d-081a1eecc314),
 adapted as a full page with NeuroIA's palette and existing authentication.
 Personal/professional intent survives authentication. Existing verification,
