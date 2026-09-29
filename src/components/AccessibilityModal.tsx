@@ -99,7 +99,9 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>
               <LogOut size={18} aria-hidden="true" />{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}
             </button>
-            <ProductInformation onOpen={onInformation} />
+            <ProductInformation onOpen={onInformation}>
+              <button data-information-link="funding" onClick={() => onInformation('funding')}>Financiado por IGAPE</button>
+            </ProductInformation>
           </div>
         </div>
       </div>

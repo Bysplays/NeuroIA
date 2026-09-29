@@ -419,3 +419,6 @@ del bienestar control is not shown; retain stored companion preferences for comp
 New profiles and the initial page use Normal text size by default. Preserve explicit
 saved text-size preferences. The profile-name input and Guardar use 4 px corners,
 matching the other account actions.
+
+Settings includes Financiado por IGAPE beside About and Legal, opening the shared
+funding document page and returning to the previous settings state on close.
