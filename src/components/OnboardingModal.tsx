@@ -40,16 +40,16 @@ export function OnboardingModal({ access, busy, loadFailed, errorMessage, invita
             {access?.canManageSubscription && <button className="paper-nav-button" disabled={busy} onClick={() => invoke('portal', onPortal)}>{label('portal', 'Gestionar suscripción')}</button>}
           </div>
         </section>
-      <button className="onboarding-invite" aria-haspopup="dialog" disabled={busy} onClick={() => setInviteOpen(true)}><Ticket size={20} aria-hidden="true"/><span>Tengo un código de invitación</span><ArrowRight size={20} aria-hidden="true"/></button>
         <div className="onboarding-benefits">
           <span className="onboarding-plan-icon" aria-hidden="true"><Layers size={30}/></span>
           <h2>Tu momento para practicar.</h2>
           <ul>
-            <li><Check size={19} aria-hidden="true"/><span>Ocho juegos para practicar</span></li>
+            <li><Check size={19} aria-hidden="true"/><span>Múltiples juegos para practicar</span></li>
             <li><Check size={19} aria-hidden="true"/><span>Dificultad adaptada a tu ritmo</span></li>
             <li><Check size={19} aria-hidden="true"/><span>Tu actividad y tus logros, a mano</span></li>
           </ul>
         </div>
+      <button className="onboarding-invite" aria-haspopup="dialog" disabled={busy} onClick={() => setInviteOpen(true)}><Ticket size={20} aria-hidden="true"/><span>Tengo un código de invitación</span><ArrowRight size={20} aria-hidden="true"/></button>
       </div>
 
       {inviteOpen && <ModalFrame labelledBy="invitation-title" onClose={() => setInviteOpen(false)}>

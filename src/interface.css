@@ -831,7 +831,7 @@ body:not([data-contrast="standard"]) .menu-header-art { mix-blend-mode: normal; 
   .onboarding-heading { text-align: center; margin-bottom: 24px; }
   .onboarding-heading h1 { font-size: 1.4rem; }
   .onboarding-heading p { font-size: .8rem; margin: 10px 0 0; }
-  .onboarding-options { grid-template-columns: 1fr; grid-template-areas: "paid" "invite" "benefits"; gap: 0; padding: 24px; background: var(--color-surface); border-radius: 16px; }
+  .onboarding-options { grid-template-columns: 1fr; grid-template-areas: "paid" "benefits" "invite"; gap: 0; padding: 24px; background: var(--color-surface); border-radius: 16px; }
   .onboarding-paid { padding: 0; margin-top: 0; border: 0; border-radius: 0; background: transparent; }
   .onboarding-plan-label { display: none; }
   .onboarding-paid h2 { font-size: 1.1rem; margin: 0 0 6px; }
