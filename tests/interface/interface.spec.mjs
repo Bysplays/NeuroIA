@@ -419,8 +419,9 @@ test('authentication dialog closes to home and restores focus from every mode', 
   await page.keyboard.press('Escape');
   await expect(opener).toBeFocused();
   await opener.click();
-  await page.getByRole('dialog').getByRole('button',{name:'Aviso legal',exact:true}).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('dialog').getByRole('button',{name:'Aviso legal',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('dialog').getByRole('button',{name:'Sobre NeuroIA',exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:'Cerrar',exact:true}).click();
-  await expect(page.getByRole('dialog',{name:'Te damos la bienvenida'})).toBeVisible();
+  await page.getByRole('button',{name:'Aviso legal',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Aviso legal',exact:true})).toBeVisible();
 });

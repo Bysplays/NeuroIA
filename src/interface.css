@@ -1818,5 +1818,10 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .auth-modal .account-entry-tabbed { min-height: 0; }
 .auth-modal .account-entry-form h1 { font-size: 1.25rem; outline: none; }
 .auth-modal .account-entry-form > p { font-size: .8rem; }
-.auth-modal .product-information-links { padding: 16px 0 0; gap: 8px 24px; }
 @media (max-width: 600px) { .auth-modal { padding: 20px 20px 12px; } .auth-modal-header .brand { width: 120px; } }
+
+.professional-motif-card { position: absolute; inset: 18%; display: grid; place-items: center; border-radius: 24%; background: var(--color-surface); color: var(--color-primary); box-shadow: 0 12px 24px #173b550d; }
+.professional-motif-card svg { width: 68%; height: 68%; }
+
+.auth-workspace-switch { display: flex; justify-content: center; padding-top: 18px; }
+.auth-workspace-switch .email-text-button { font-size: .75rem; color: var(--color-primary); text-decoration: underline; text-underline-offset: 4px; min-height: 44px; }

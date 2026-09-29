@@ -129,7 +129,7 @@ export function LoginScreen({
                   </div>
                 </div>
                 <div className="public-art">
-                  <PracticeMotif />
+                  <PracticeMotif professional={professional} />
                 </div>
               </section>
           </>
@@ -295,7 +295,11 @@ export function LoginScreen({
                 </form>
               </div>
             </section>
-          <ProductInformation onOpen={setInformation}/>
+          <div className="auth-workspace-switch">
+            <button className="email-text-button" disabled={busy} onClick={() => { setProfessional(value => !value); setFormError(""); setNotice(""); onClearError(); }}>
+              {professional ? "Acceder como jugador" : "Acceder como profesional"}
+            </button>
+          </div>
         </div>
       </ModalFrame>}
       {(error || formError) && (

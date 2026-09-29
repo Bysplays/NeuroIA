@@ -501,5 +501,10 @@ Login, registration and password recovery share a native ModalFrame over the
 unauthenticated home. Close, Escape and backdrop dismiss the entire entry flow
 when idle, returning focus to Comenzar. Mode switches remain inside the modal;
 recovery Close also returns home. Error notifications stack above the form and
-return focus without discarding its fields. Information links open document pages
-and restore the entry modal afterward. Short viewports scroll within the dialog.
+return focus without discarding its fields. About/legal links remain on the home only; auth dialogs contain no information links. Short viewports scroll within the dialog.
+
+Professional entry uses a blue UsersRound group icon on a white tile, distinct
+from the player’s paired-card motif, within the same clinical-blue illustration frame.
+
+Auth dialogs include a centered player/professional switch below the form. Switching
+workspace keeps the modal, form mode and entered fields, and updates login intent.

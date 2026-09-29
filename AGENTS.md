@@ -647,4 +647,4 @@ unmounting the board.
 LoginScreen keeps the unauthenticated home mounted beneath one ModalFrame for
 sign-in, registration and recovery. Closing any mode returns home; mode changes
 reset the dialog scroll. Auth errors use a second ModalFrame above the preserved
-form. Information pages temporarily unmount the auth modal and restore it on close.
+form. About/legal links are available on the home, not inside the auth modal.
