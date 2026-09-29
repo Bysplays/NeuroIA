@@ -25,7 +25,7 @@ CONTENT.md and describe only implemented, verified capabilities.
 Priority order follows the owner: EEG, seats, AI, assigned sessions, email,
 voices, logo, game illustrations, difficulty, placement, game retirement.
 Implementation dependencies can change scheduling without changing those priorities.
-No SDK, language model, inference runtime or replacement voice provider is selected.
+Muse 2 uses the selected MuseJS Web Bluetooth adapter. No official SDK, language model, inference runtime or replacement voice provider is selected.
 The mention of NVIDIA voice repositories is a future research lead, not a verified
 recommendation. Research primary sources and licenses when selecting dependencies.
 
@@ -42,7 +42,7 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | Billing | Worker Checkout, signed webhooks, reconciliation, portal, seat redemption/rotation | Production deployment and sandbox lifecycle not fully verified |
 | Access | Server-owned entitlement records; browser refresh on focus/every 30 seconds | Worker-confirmed time and expiry; 60-second lease, fail-closed refresh; Worker deployed, real-account lifecycle pending |
 | Narration | Shared recorded-player service and browser fallback | 91/370 clips missing; full audition and commercial rights unresolved |
-| EEG / AI | No connected SDK or browser inference | Discovery, implementation and validation required |
+| EEG / AI | MuseJS-based EEG/PPG Web Bluetooth adapter and recording implemented; physical validation pending | Hardware integration and AI implementation/validation required |
 | Brand / objects | Supplied mint mark integrated; existing paper sprite atlases | New object style pending integration |
 
 Historical result IDs, totals, achievements and account data remain compatible.
@@ -87,19 +87,20 @@ flowchart TD
 
 ### EEG — optional headband
 
-Dependency: owner supplies SDK, device identity, protocol and usable license.
-Do not assume a device model or compatibility from old marketing text. Determine
-whether the SDK can operate in the target browser before committing to transport.
+Confirmed target: Muse 2 using the owner-selected MIT Respiire/MuseJS protocol
+over Web Bluetooth. Physical hardware/browser validation remains a release gate.
 
 Adapter states: unsupported, disconnected, requesting permission, connecting,
 connected, reconnecting and error. Expose timestamped samples, signal quality and
 connection events through a bounded subscription interface. Normalize units only
-from SDK documentation. Clean up listeners and buffers on disconnect/sign-out.
+from the selected transport documentation. Clean up listeners and buffers on disconnect/sign-out.
 
 Connection must follow an explicit user action. Missing hardware, rejected
 permissions or lost signal must not block ordinary play. Show quality/connection
-status without inferring mental state. Proposed default: keep samples transient;
-recording/export requires a defined purpose, retention and explicit user choice.
+status without inferring mental state. The owner selected per-exercise chart
+recording: the connection dialog discloses retention with completed results and
+linked-professional visibility, with a live-only option. Save only the documented
+EEG and infrared PPG amplitude summaries in two bounded series, never raw EEG. See [EEG handoff](eeg/README.md).
 No automatic EEG-driven difficulty until its mapping has been separately specified.
 
 Acceptance: test actual hardware, denial, unsupported device/browser, interruption,
@@ -355,7 +356,8 @@ and speech inventories; validate daily-plan progression and saved legacy entries
 ## 5. Proposed data contracts and migrations
 
 Placement, difficulty, result metadata and assignments are implemented locally;
-notes, reports and EEG contracts remain proposed. Production deployment is tracked in TODO.
+optional per-exercise EEG/PPG results are supported by the MuseJS-based adapter.
+Notes and reports remain proposed. Production deployment is tracked in TODO.
 
 | Data | Proposed location / contents | Authority |
 | --- | --- | --- |
@@ -365,7 +367,7 @@ notes, reports and EEG contracts remain proposed. Production deployment is track
 | Assignments | `professionals/{owner}/seats/{seat}/participants/{uid}/sessions/{id}`; owner-editable until started; immutable afterwards | Active linked owner authors; participant step receipts only |
 | Private notes | Separate professional-owned note documents, participant association and timestamps | Authoring owner only under active-link rules |
 | Reports | Reviewed report documents with source references, model version and sharing state | Explicit owner save/share; participant reads shared versions only |
-| EEG | Bounded transient device buffer by default | Local adapter; no cloud writes by default |
+| EEG | Bounded optional indicator series per completed exercise | Existing result/outbox/archive and account access rules; no raw EEG |
 
 Do not put private notes in the participant progress document: linked professionals
 can read that whole document today. Define deletion/retention and expired-link
@@ -384,7 +386,7 @@ optional added fields and disable new writers before rolling back incompatible r
 1. Establish a mergeable baseline; clear lint warnings and reconcile stale check
    documentation. Preserve branch history with an authorized `--no-ff` merge.
 2. Close seat verification/expiry gaps and run real sandbox lifecycle validation.
-   Review EEG SDK/hardware in parallel when supplied.
+   Validate the Muse 2 adapter with physical hardware.
 3. Retire daily actions and define versioned difficulty/data contracts, then
    guided placement. These underpin meaningful assigned-session levels.
 4. Add email entry and manual professional notes/session assignment permissions.
@@ -410,7 +412,7 @@ Production-only validation must remain open until actually performed.
 
 ## 7. Open inputs and decisions
 
-- EEG SDK/device/license, hardware for testing, desired signal use and retention.
+- Muse 2 hardware/firmware for testing, supported browsers, signal validation and retention.
 - Live backend/rules status, Stripe sandbox credentials/configuration, refund policy
   and validation of the proposed access lease.
 - Frontend publication, real email delivery and device verification; magic-link quota decision.

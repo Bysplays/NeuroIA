@@ -106,10 +106,24 @@ service cloud.firestore {
         && request.resource.data.kind in ['result', 'settings', 'placement']
         && request.resource.data.createdAt == request.time;
     }
+    // Bounded JSON series is decoded/validated by the reader; no raw EEG payloads.
+    function validEeg(value) {
+      return value is map && value.keys().hasOnly(['version', 'metric', 'adapter', 'points'])
+        && value.version == 1 && value.adapter is string && value.adapter.size() > 0 && value.adapter.size() <= 80
+        && value.points is string && value.points.size() > 0 && value.points.size() <= 6000
+        && value.metric is map && value.metric.keys().hasOnly(['id', 'label', 'unit', 'min', 'max'])
+        && value.metric.id is string && value.metric.id.size() > 0 && value.metric.id.size() <= 80
+        && value.metric.label is string && value.metric.label.size() > 0 && value.metric.label.size() <= 80
+        && value.metric.unit is string && value.metric.unit.size() <= 20
+        && value.metric.min is number && value.metric.max is number
+        && value.metric.min >= -1000000 && value.metric.max <= 1000000 && value.metric.min < value.metric.max;
+    }
     function validExerciseResult(value) {
       return value.keys().hasOnly(['id', 'exerciseId', 'domain', 'date',
           'durationSeconds', 'accuracy', 'score', 'correctAnswers', 'totalQuestions',
-          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice', 'assignmentId', 'assignmentStep', 'assignmentOwnerId', 'assignmentSeatId'])
+          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice', 'assignmentId', 'assignmentStep', 'assignmentOwnerId', 'assignmentSeatId', 'eeg', 'ppg'])
+        && (!('eeg' in value) || validEeg(value.eeg))
+        && (!('ppg' in value) || validEeg(value.ppg))
         && validAssignmentMetadata(value)
         && (!('level' in value) || (value.level is int && value.level >= 1 && value.level <= 10))
         && (!('configVersion' in value) || value.configVersion == 1)

@@ -1,3 +1,4 @@
+import { EegButton } from './EegButton';
 import { FullscreenButton } from './FullscreenButton';
 import React from 'react';
 import { SoundToggle } from './SoundToggle';
@@ -36,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Professional navigation stays unavailable until verified roles and care links exist. */}
 
+        <EegButton/>
         <SoundToggle/>
 
         {/* Botón de Accesibilidad */}

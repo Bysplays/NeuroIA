@@ -9,7 +9,7 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  globalThis.fetch=(input,init)=>{
   const url=String(input);
   if(url==='https://oauth2.googleapis.com/token')return Promise.resolve(Response.json({access_token:'owner',expires_in:3600}));
-  if(url.startsWith('https://firestore.googleapis.com/v1/projects/demo-neuroia/'))return nativeFetch(url.replace('https://firestore.googleapis.com','http://127.0.0.1:8080'),init);
+  if(url.startsWith('https://firestore.googleapis.com/v1/projects/demo-neuroia/'))return nativeFetch(url.replace('https://firestore.googleapis.com', `http://${process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8080'}`),init);
   throw Error('Unexpected network destination');
  };
  try{

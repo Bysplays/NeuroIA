@@ -372,3 +372,36 @@ test('1/4/7/10 placement saves with existing records, rejects invalid levels and
     await assertFails(setDoc(doc(db,`users/${uid}/progress/main`),{schemaVersion:1,data:invalid,updatedAt:serverTimestamp()}));
   }
 });
+
+test('bounded EEG and PPG recordings persist with its result and receipt, with existing account isolation', async () => {
+  const uid = 'eeg-player'; const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db); await backend.initialize(fresh());
+  const operation = op('eeg-game');
+  operation.result.ppg = { version: 1, adapter: 'test-sdk', metric: { id: 'ppg', label: 'PPG', unit: 'kADC', min: 0, max: 8388.608 }, points: '[[1,1],[2,null],[3,2]]' };
+  operation.result.eeg = { version: 1, adapter: 'test-sdk', metric: { id: 'indicator', label: 'Indicador de prueba', unit: '%', min: 0, max: 100 }, points: '[[1,40],[2,null],[3,45]]' };
+  await assertSucceeds(backend.commit(operation)); await backend.commit(operation);
+  assert.deepEqual((await getDoc(doc(db, `users/${uid}/results/eeg-game`))).data().eeg, operation.result.eeg);
+  assert.deepEqual((await getDoc(doc(db, `users/${uid}/results/eeg-game`))).data().ppg, operation.result.ppg);
+  await assertFails(setDoc(doc(db, `users/${uid}/results/oversized-ppg`), { ...operation.result, id: 'oversized-ppg', ppg: { ...operation.result.ppg, points: '0'.repeat(6001) } }));
+  assert.equal((await backend.load()).profile.totalSessions, 1);
+  assert.deepEqual((await backend.load()).history[0].eeg, operation.result.eeg);
+  assert.deepEqual((await backend.load()).history[0].ppg, operation.result.ppg);
+  await assertFails(updateDoc(doc(db, `users/${uid}/results/eeg-game`), { ppg: operation.result.ppg }));
+  const stranger = env.authenticatedContext('other-eeg-player').firestore();
+  await assertFails(setDoc(doc(stranger, `users/${uid}/results/forged-eeg`), { ...operation.result, id: 'forged-eeg' }));
+  for (const [index, patch] of [
+    { version: 2 }, { adapter: '' }, { points: [] }, { raw: [1, 2, 3] },
+    { metric: { ...operation.result.ppg.metric, min: 2, max: 1 } },
+    { metric: { ...operation.result.ppg.metric, max: 1000001 } },
+  ].entries()) {
+    await assertFails(setDoc(doc(db, `users/${uid}/results/invalid-ppg-${index}`), { ...operation.result, id: `invalid-ppg-${index}`, ppg: { ...operation.result.ppg, ...patch } }));
+  }
+  const ppgOnly = op('ppg-only-game');
+  ppgOnly.result.ppg = operation.result.ppg;
+  await assertSucceeds(backend.commit(ppgOnly));
+  assert.deepEqual((await getDoc(doc(db, `users/${uid}/results/ppg-only-game`))).data().ppg, operation.result.ppg);
+
+  await assertFails(getDoc(doc(env.authenticatedContext('other-eeg-player').firestore(), `users/${uid}/results/eeg-game`)));
+  await assertFails(setDoc(doc(db, `users/${uid}/results/oversized`), { ...operation.result, id: 'oversized', eeg: { ...operation.result.eeg, points: '0'.repeat(6001) } }));
+  await assertFails(setDoc(doc(db, `users/${uid}/results/raw-eeg`), { ...operation.result, id: 'raw-eeg', eeg: { ...operation.result.eeg, raw: [1,2,3] } }));
+});

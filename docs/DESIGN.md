@@ -854,3 +854,37 @@ textual access status, with compact, accessible session-list and analytics icon
 actions on the right. Disable those actions when the seat is inactive. Retain
 clear wording for billing actions; do not replace consequential payment labels
 with unexplained icons.
+
+
+### Optional EEG and individual exercise analytics
+
+Player and game toolbars include a Bluetooth icon beside sound/settings. The
+shared dialog explains availability, connection state and optional saving with
+the completed exercise, including linked professional access. The Muse 2 adapter uses Web Bluetooth; unsupported browsers show compatibility
+guidance. Keep the connection action visible but disabled when unavailable,
+with the reason beside it (insecure page or missing browser Bluetooth support).
+Explain disconnecting from the Muse app and selecting the device in the browser chooser.
+Keep unavailable states honest and never simulate pairing.
+Never block ordinary play for missing hardware. The device dialog pauses play.
+Reuse Settings’ preferences shell, header, close control and flat divided sections.
+Connection status and its action share a wrapping row; optional recording uses the
+same labelled switch as appearance settings, locked while connecting or connected.
+
+When connected, place two compact horizontal monitor-style traces (EEG and PPG)
+below the game toolbar, each with its game mean. Use the existing palette, readable
+units and restrained grid lines; do not imitate emergency alarms or clinical scores.
+Show battery percentage inside the Bluetooth dialog. Detailed per-game analytics
+contain a separate plot and data table for each signal. Preserve game inputs and allow vertical scrolling
+on short screens. Use documented amplitude units (EEG µV, infrared PPG kADC); do not describe a generic
+signal as measured mental effort. Missing, poor and stale signal makes gaps, not
+zeros. Help, portrait, settings and background pause the active-time timeline.
+
+Both player and professional Historial rows have an accessible analytics icon.
+The per-exercise view shows game/date/level, correct answers, accuracy, duration,
+and the saved EEG chart with an expandable data table. Old results explicitly say
+there are no EEG data. Professional proposal rows end with a waveform icon button
+in a dedicated action column, opening the same view for confirmed results. Keep
+it on the right on phones, with metrics wrapping below the game name; disable
+it while the result is unavailable.
+Return restores the previous history filters/page or session view. Recording and
+SDK constraints are documented in [EEG handoff](eeg/README.md).
