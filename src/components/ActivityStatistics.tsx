@@ -1,3 +1,4 @@
+import { ExerciseAnalytics } from './ExerciseAnalytics';
 import { ProfessionalPageHeader } from './ProfessionalPageHeader';
 import { LevelStatistics } from './LevelStatistics';
 import type { ReactNode } from 'react';
@@ -74,6 +75,7 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
   const [exercise, setExercise] = useState(''); const [domain, setDomain] = useState('');
   const [from, setFrom] = useState(''); const [to, setTo] = useState('');
   const [page, setPage] = useState(0);
+  const [selectedResult, setSelectedResult] = useState<ExerciseResult | null>(null);
   const all = useMemo(() => mergeActivity(archive, history), [archive, history]);
   const results = all.filter(r => (!exercise || r.exerciseId === exercise) && (!domain || r.domain === domain) && (!from || localDay(r.date) >= from) && (!to || localDay(r.date) <= to));
   const currentPage = Math.min(page, Math.max(0, Math.ceil(results.length / pageSize) - 1));
@@ -93,7 +95,7 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
   return <div ref={panel} className={`tablet-screen ${embedded ? 'activity-statistics activity-embedded' : 'professional-panel activity-professional'}`}>
     {embedded && <header className="workspace-section-heading"><h1>Estadísticas</h1></header>}
     {!embedded && <ProfessionalPageHeader title={heading} icon={<ChartNoAxesCombined size={24}/>} name={subtitle} backLabel={backLabel} onBack={onBack}/> }
-    <TabletTabs position={embedded ? "bottom" : "top"} label="Actividad" value={tab} onChange={setTab} tabs={[
+    {selectedResult ? <ExerciseAnalytics result={selectedResult} onBack={() => setSelectedResult(null)}/> : <TabletTabs position={embedded ? "bottom" : "top"} label="Actividad" value={tab} onChange={setTab} tabs={[
       { id: 'overview', label: 'Resumen y filtros', content: <>
     <div className="stats-overview"><CategoryRadar results={results}/>
     <section className="stats-card stats-filter-panel" aria-labelledby="stats-filter-title">
@@ -116,7 +118,7 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
       <div className="stats-lines"><LineChart results={results} history={all} complete={!more} metric="accuracy"/><LineChart results={results} history={all} complete={!more} metric="speed"/></div>
     </>
     }, { id: 'history', label: 'Historial', content: <section className="stats-card stats-history" aria-labelledby="stats-history-title"><div className="stats-section-heading"><div><h2 id="stats-history-title">Ejercicios resueltos</h2><p>{more ? 'Historial reciente · Puedes cargar más registros' : 'Todo el historial disponible'}</p></div><span className="stats-count" role="status">{results.length} registros</span></div>
-      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><ActivityTimestamp date={r.date}/></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td></tr>)}</tbody></table></div>
+      <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta', 'Analíticas'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><ActivityTimestamp date={r.date}/></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td><td><button className="header-icon-btn" aria-label={`Ver partida de ${title(r.exerciseId)} del ${formatActivityDate(r.date).day}`} onClick={() => setSelectedResult(r)}><ChartNoAxesCombined size={20}/></button></td></tr>)}</tbody></table></div>
       {!results.length && <p className="stats-empty">No hay ejercicios registrados con estos filtros.</p>}
       <div className="stats-history-footer"><div className="stats-pagination"><button className="stats-quiet-button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><span>Página {currentPage + 1} de {Math.max(1, Math.ceil(results.length / pageSize))}</span><button className="stats-quiet-button" disabled={(currentPage + 1) * pageSize >= results.length} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
       {more && <button className="stats-quiet-button stats-load" disabled={busy} onClick={loadMore}>{busy ? 'Cargando historial…' : error ? 'Reintentar' : 'Cargar más historial'}</button>}</div>
@@ -124,6 +126,6 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
     </section> },
     { id: 'levels', label: 'Nivel', content: <LevelStatistics levels={levels} history={all} complete={!more} busy={busy} error={error} onRetry={loadMore}/> },
     ...(achievements ? [{ id: 'achievements', label: 'Logros', content: achievements }] : [])
-    ]}/>
+    ]}/>}
   </div>;
 }

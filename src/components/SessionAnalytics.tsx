@@ -1,6 +1,7 @@
+import { ExerciseAnalytics } from './ExerciseAnalytics';
 import { ProfessionalPageHeader } from './ProfessionalPageHeader';
 import { useEffect, useState } from 'react';
-import { ChartNoAxesCombined, ListOrdered, RotateCcw } from 'lucide-react';
+import { Activity, ChartNoAxesCombined, ListOrdered, RotateCcw } from 'lucide-react';
 import type { AssignedSession } from '../services/assignedSessions';
 import { sessionStatusLabel } from '../services/assignedSessions';
 import { sessionAnalytics } from '../services/sessionAnalytics';
@@ -14,6 +15,7 @@ export function SessionAnalytics({ session, name, loadResults, onBack }: {
 }) {
   const [response, setResponse] = useState<{ session: AssignedSession; retry: number; results: ExerciseResult[]; error: boolean }>();
   const [retry, setRetry] = useState(0);
+  const [selectedResult, setSelectedResult] = useState<ExerciseResult | null>(null);
   useEffect(() => {
     let active = true;
     loadResults(session).then(results => { if (active) setResponse({ session, retry, results, error: false }); },
@@ -24,6 +26,7 @@ export function SessionAnalytics({ session, name, loadResults, onBack }: {
   const state = !current ? 'loading' : response.error ? 'error' : 'ready';
   const data = sessionAnalytics(session, current ? response.results : []);
   const ready = state === 'ready';
+  if (selectedResult) return <ExerciseAnalytics result={selectedResult} onBack={() => setSelectedResult(null)}/>;
   return <section className="session-dashboard">
     <ProfessionalPageHeader title={session.title} icon={<ChartNoAxesCombined size={24}/>} name={name} detail={sessionStatusLabel[session.status]} backLabel="Volver a sesiones" onBack={onBack} action={<button className="stats-quiet-button" disabled={state === 'loading'} onClick={() => setRetry(value => value + 1)}><RotateCcw size={16}/>Actualizar</button>}/>
     <div className="session-summary">
@@ -43,6 +46,7 @@ export function SessionAnalytics({ session, name, loadResults, onBack }: {
           <div><h3>{getExerciseById(step.exerciseId)?.title}</h3><p>Nivel {step.level} · {index < session.completedCount ? 'Completado' : session.status === 'cancelled' ? 'Sin realizar' : 'Pendiente'}</p>
           {result && <small>{formatActivityDate(result.date).day}{formatActivityDate(result.date).time ? ' · ' + formatActivityDate(result.date).time : ''}</small>}</div>
           <div className="session-result-metrics">{result ? <><strong>{result.totalQuestions ? number(result.correctAnswers / result.totalQuestions * 100) + ' %' : '—'}</strong><span>{result.correctAnswers}/{result.totalQuestions} aciertos · {number(result.durationSeconds)} s</span></> : <span>{index < session.completedCount ? ready ? 'Resultado no disponible' : '—' : 'Sin datos todavía'}</span>}</div>
+          <button className="header-icon-btn session-explore session-eeg-action" disabled={!result} title={result ? 'Ver EEG y analíticas' : 'Disponible al guardar el resultado'} aria-label={`Ver EEG y analíticas del ejercicio ${index + 1}: ${getExerciseById(step.exerciseId)?.title}`} onClick={() => { if (result) setSelectedResult(result); }}><Activity size={20}/></button>
         </li>;
       })}</ol>
     </section>

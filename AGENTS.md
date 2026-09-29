@@ -455,7 +455,8 @@ See docs/PROFESSIONALS.md for paths, rules, limits and publication order.
 
 `npm run test:firestore` includes `tests/sessions.rules.test.mjs` sequentially with
 the existing rules suite. Keep sequential execution because each suite resets the
-same demo project. Pure proposal/adaptation checks are in `npm test`. Use isolated
+same demo project. The Worker REST test honors `FIRESTORE_EMULATOR_HOST`, so an
+isolated emulator port can be used when 8080 is occupied. Pure proposal/adaptation checks are in `npm test`. Use isolated
 browser fixtures for editor/player checks; never create real account activity.
 
 ## Tablet viewport and fullscreen
@@ -530,3 +531,25 @@ the selected session and refresh attempt; no progress writes or new rules are us
 Session edits use firestoreSessions.edit: only assigned sessions can change title,
 note and steps. The transaction checks the original draft to reject stale edits;
 rules enforce owner-only editing and preserve status, ownership and all result fields.
+
+
+## Optional EEG and per-exercise analytics
+
+`eegService.ts` owns the replaceable SDK contract, connection state and account
+cleanup. Bootstrap installs `museAdapter.ts`, adapted from MIT Respiire/MuseJS;
+`museSignal.ts` decodes EEG/infrared PPG and computes one-second AC RMS.
+Source provenance is in `vendor/muse/README.md`; the license ships in public/licenses. `EegButton` reuses ModalFrame; opening it
+inside GameSession pauses the clock. `eegData.ts` validates a bounded, versioned
+signal series. GameSession owns separate live/save buffers for EEG and PPG and samples its
+active clock, pausing in background as well as existing pause conditions.
+`GameExercise` attaches independent optional `eeg` and `ppg` recordings at completion, before ordinary or
+assigned result callbacks enter ProgressSync. Do not save raw EEG or fabricate
+mental-state scores. Repeat/abandon/account change must isolate recordings.
+
+`ExerciseAnalytics` is shared by player/professional history and confirmed
+professional proposal steps. `EegChart` validates decoded points and preserves
+missing-signal gaps. Firestore's optional EEG/PPG metadata/size rules must ship
+before deploying the adapter frontend; existing read permissions and permanent retry receipts
+apply. See [EEG handoff](docs/eeg/README.md) for the adapter contract, retention,
+bounds and hardware acceptance. Tests: `tests/eeg.test.ts`, `tests/muse.test.ts` and the EEG/PPG transaction
+case in the demo Firestore rules suite; no production simulated data or users.

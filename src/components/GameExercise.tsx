@@ -1,3 +1,4 @@
+import { useGameSession } from '../services/gameSession';
 import type { ComponentType } from 'react';
 import type { ExerciseId, ExerciseResult, UserProfile } from '../types';
 import { VisualScanningGame } from '../games/VisualScanningGame';
@@ -22,6 +23,7 @@ const games: Record<ExerciseId, ComponentType<Props>> = {
   'motor-target': MotorCoordinationGame, 'motor-tracking': MotorTrackingGame,
 };
 export function GameExercise({ id, ...props }: Props & { id: ExerciseId }) {
+  const session = useGameSession();
   const Game = games[id];
-  return <Game {...props} />;
+  return <Game {...props} onSaveResult={result => { const eeg = session.eegResult?.(); const ppg = session.ppgResult?.(); props.onSaveResult({ ...result, ...(eeg ? { eeg } : {}), ...(ppg ? { ppg } : {}) }); }} />;
 }

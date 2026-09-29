@@ -88,6 +88,8 @@ export interface MistakeDetail {
 }
 
 export interface ExerciseResult {
+  eeg?: import('../services/eegData').EegRecording;
+  ppg?: import('../services/eegData').EegRecording;
   id: string;
   exerciseId: string;
   domain: CognitiveDomain;

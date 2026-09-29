@@ -1,3 +1,4 @@
+import { eegService } from './services/eegService';
 import { LevelUpScreen } from './components/LevelUpScreen';
 import { Reassessment } from './components/Reassessment';
 import { AssignedSessionInbox, AssignedSessionPlayer } from './components/AssignedSessions';
@@ -49,6 +50,7 @@ export const App: React.FC = () => {
 
   useEffect(() => onAuthStateChanged(auth, nextUser => {
     soundService.stopSpeaking();
+    eegService.disconnect();
     StorageService.setAccount(nextUser ? { uid: nextUser.uid, displayName: accountDisplayName(nextUser) } : null);
     if (nextUser) {
       const cached = StorageService.readCachedProgress();
@@ -58,6 +60,7 @@ export const App: React.FC = () => {
     setVerificationRequired(nextUser ? needsEmailVerification(nextUser) : false);
     setLoading(false);
   }, error => {
+    eegService.disconnect();
     StorageService.setAccount(null);
     setUser(null);
     setLoading(false);

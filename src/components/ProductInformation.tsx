@@ -27,6 +27,7 @@ export function ProductInformation({ children }: { children?: ReactNode }) {
               {section.items && <ul>{section.items.map(item => <li key={item}>{item}</li>)}</ul>}
             </section>)}
             <p>Voz grabada con <a href="https://elevenlabs.io" target="_blank" rel="noreferrer">elevenlabs.io</a>.</p>
+            <p>Conexión Muse 2 adaptada de MuseJS, © 2022 Respiire Health Systems (<a href={`${import.meta.env.BASE_URL}licenses/MuseJS.txt`} target="_blank" rel="noreferrer">licencia MIT</a>).</p>
             <h3>Aviso legal</h3>
           </>}
           <p>{PRODUCT_NOTICE}</p>

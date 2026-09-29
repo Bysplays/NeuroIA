@@ -1,3 +1,7 @@
+import { EegButton } from './EegButton';
+import { EegLive } from './EegLive';
+import { eegService } from '../services/eegService';
+import { createEegRecorder, type EegRecording } from '../services/eegData';
 import { SoundToggle } from './SoundToggle';
 import { FullscreenButton } from './FullscreenButton';
 import { enterFullscreen } from '../services/fullscreen';
@@ -17,6 +21,15 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
   const panel = useViewportPanel<HTMLDivElement>();
   const [assistanceTarget, setAssistanceTarget] = useState<HTMLDivElement | null>(null);
   const portrait = usePortrait();
+  const [eegOpen, setEegOpen] = useState(false);
+  const [recorder] = useState(createEegRecorder);
+  const [savedRecorder] = useState(createEegRecorder);
+  const [ppgRecorder] = useState(createEegRecorder);
+  const [savedPpgRecorder] = useState(createEegRecorder);
+  const [ppg, setPpg] = useState<EegRecording>();
+  const [background, setBackground] = useState(document.hidden);
+  useEffect(() => { const update = () => setBackground(document.hidden); document.addEventListener('visibilitychange', update); return () => document.removeEventListener('visibilitychange', update); }, []);
+  const [eeg, setEeg] = useState<EegRecording>();
   const [level, setLevel] = useState(initialLevel);
   const config = gameConfig(level, mode);
   const [clock] = useState(createGameClock);
@@ -44,7 +57,7 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
     else helpButton.current?.focus();
   }, [help, paused]);
   useEffect(() => {
-    if (paused || portrait || help || completed || !started) return;
+    if (paused || portrait || help || completed || !started || eegOpen || background) return;
     let previous = performance.now();
     let frame: number;
     const tick = (now: number) => {
@@ -55,11 +68,29 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [clock, help, completed, started, portrait, paused]);
-  return <SessionContext.Provider value={{ config, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { clock.reset(); setLevel(initialLevel); setStarted(false); finish(false); setHelp(true); setSeconds(0); } }}>
+  }, [clock, help, completed, started, portrait, paused, eegOpen, background]);
+  useEffect(() => {
+    const timer = clock.setInterval(() => {
+      const state = eegService.getSnapshot();
+      if (state.metric && state.adapter) {
+        const source = { metric: state.metric, adapter: state.adapter, value: state.status === 'connected' && Date.now() - state.receivedAt <= 3000 ? state.value : null };
+        recorder.add(clock.performanceNow() / 1000, source);
+        if (state.recording || savedRecorder.snapshot()) savedRecorder.add(clock.performanceNow() / 1000, { ...source, value: state.recording ? source.value : null });
+        setEeg(recorder.snapshot());
+      }
+      if (state.ppgMetric && state.adapter) {
+        const source = { metric: state.ppgMetric, adapter: state.adapter, value: state.status === 'connected' && Date.now() - state.ppgReceivedAt <= 3000 ? state.ppgValue : null };
+        ppgRecorder.add(clock.performanceNow() / 1000, source);
+        if (state.recording || savedPpgRecorder.snapshot()) savedPpgRecorder.add(clock.performanceNow() / 1000, { ...source, value: state.recording ? source.value : null });
+        setPpg(ppgRecorder.snapshot());
+      }
+    }, 1000);
+    return () => clock.clearInterval(timer);
+  }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started]);
+  return <SessionContext.Provider value={{ config, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setLevel(initialLevel); setStarted(false); finish(false); setHelp(true); setSeconds(0); } }}>
     <div className={`game-session${started && !help && !completed ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
     {help && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
-      <div className="placement-toolbar"><img className="instruction-brand" src={`${import.meta.env.BASE_URL}brand/neuroia-logo.svg`} alt="NeuroIA" /><div className="viewport-session-tools"><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings size={20}/></button>}<FullscreenButton/></div></div>
+      <div className="placement-toolbar"><img className="instruction-brand" src={`${import.meta.env.BASE_URL}brand/neuroia-logo.svg`} alt="NeuroIA" /><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings size={20}/></button>}<FullscreenButton/></div></div>
       <div className="placement-card">
         <HeaderIllustration scene={exercise?.id ?? "home"} className="placement-art" />
         <div className="placement-content">
@@ -84,9 +115,10 @@ export function GameSession({ id, step, onBack, children, initialLevel = 1, mode
     {started && <div className="game-session-play" hidden={help}>
       {!completed && <header className="viewport-session-header">
         <span className="game-session-time" aria-label="Tiempo de juego"><Clock size={22}/>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span>
-        <div className="viewport-session-tools"><SoundToggle/><FullscreenButton/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings size={20}/></button>}</div>
+        <div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/><FullscreenButton/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings size={20}/></button>}</div>
       </header>}
 
+      {!completed && <EegLive recording={eeg} ppg={ppg} eegMean={recorder.mean()} ppgMean={ppgRecorder.mean()} recordable={mode === 'normal'}/>}
       {children}
       {!completed && <footer className="viewport-session-footer">
         <button className="placement-text-action" onClick={onBack}>← Volver</button>

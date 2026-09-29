@@ -7,16 +7,16 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 ## Product priorities
 
 The order below follows the owner's priorities. Dependencies can be implemented
-first; waiting for the EEG SDK must not block independent work. No model, SDK,
+first; Muse 2 uses the selected MuseJS Web Bluetooth adapter. No AI model, official SDK,
 voice provider or new illustration set has been selected by this planning work.
 
 | Order / ID | Deliverable | Current state | Completion gate |
 | --- | --- | --- | --- |
-| 1 / EEG | Bluetooth EEG headband | Awaiting owner-supplied SDK and hardware details | Real-device connection, signal quality, disconnect/reconnect and supported-device matrix |
+| 1 / EEG | Bluetooth EEG headband | Connection UI, adapter contract, live chart and per-exercise recording/detail prepared; MuseJS-based Web Bluetooth adapter implemented; physical hardware validation pending | Real-device connection, signal quality, disconnect/reconnect and supported-device matrix |
 | 2 / SEATS | Monthly professional seats and code validity | Checkout, Worker, redemption and rules implemented; production lifecycle unverified | Unused and redeemed codes follow paid entitlement; expired access blocks games and linked reads |
 | 3 / AI | Browser-local report/note assistance | No runtime integration; professional view is read-only | Spanish evidence-linked drafts, human review, supported-device benchmark and non-AI fallback |
-| 4 / SESSIONS | Professional-assigned game sequences | Versioned proposals, editor, participant entry, fixed levels, durable completion and resume implemented | Publish reviewed rules/frontend and check real paired accounts on physical tablets |
-| 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Release frontend and verify real email delivery; magic links deferred because Spark allows five sign-in emails/day |
+| 4 / SESSIONS | Professional-assigned game sequences | Versioned proposals, editor, participant entry, fixed levels, durable completion and resume implemented | Check real paired accounts on physical tablets |
+| 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Verify real email delivery; magic links deferred because Spark allows five sign-in emails/day |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Approved towel/table style integrated across 80 objects, standalone stimuli and motor tokens | Physical-tablet recognition feedback |
@@ -29,15 +29,24 @@ voice provider or new illustration set has been selected by this planning work.
 The first priority/ease steps are: 0 — mergeable baseline; 1 — retire daily
 actions; 2 — supplied logo; 3 — email/password entry. Steps 0–2 are complete.
 Step 3 is implemented and locally verified; backend/provider activation is complete.
-Seats, difficulty/placement and professional session proposals are also implemented. Frontend publication and real email-delivery checks remain open below. The product-priority table above is separate from this sequence.
+Seats, difficulty/placement and professional session proposals are also implemented. The main-branch Pages workflow publishes these frontend features; real email-delivery and physical-device checks remain open below. The product-priority table above is separate from this sequence.
 
 ### EEG
 
-- [ ] Receive SDK, device model, protocol/transport details, license and sample data.
-- [ ] Implement an optional adapter and explicit connect/disconnect flow; measure
-  quality and handle dropped packets, reconnect, permission denial and unsupported browsers.
-- [ ] Define the EEG use case and data retention before persisting signals or
-  using them for adaptation. Ship ordinary play without requiring the headband.
+- [x] Confirm the target headband: Muse 2 (choosemuse.com).
+- [x] Adapt the owner-selected MIT MuseJS protocol for EEG, infrared PPG and battery
+  over Web Bluetooth, without waiting for the official SDK.
+- [x] Prepare the optional connection dialog, SDK adapter contract, bounded live
+  indicator and opt-out per-exercise saving through the existing result outbox.
+  Player/professional history and confirmed proposal steps open individual analytics.
+- [x] Publish EEG/PPG result rules to `ceoaberto-neuroia` (2026-09-29);
+  verify the active release against the tested source.
+- [ ] Test real Muse 2 quality, dropped packets, reconnect, permissions and supported
+  physical browsers before declaring hardware support verified.
+- [ ] Validate physical amplitudes, electrode contact handling and retention with the owner. Current
+  design saves no raw EEG and retains opted-in charts with completed results;
+  dedicated deletion/retention controls remain absent. No EEG-driven adaptation.
+  See [EEG handoff](eeg/README.md).
 
 ### Seats and expiry
 

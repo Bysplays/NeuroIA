@@ -116,3 +116,13 @@ unsent browser data.
 - [Hostinger DNS management](https://support.hostinger.com/en/articles/1583249-how-to-manage-dns-records-at-hostinger)
 - [Firebase Google authentication](https://firebase.google.com/docs/auth/web/google-signin)
 - [Cloudflare local variables and secrets](https://developers.cloudflare.com/workers/local-development/environment-variables/)
+
+## EEG and PPG result rules
+
+The production `ceoaberto-neuroia` Firestore release includes the optional bounded
+EEG/PPG result fields (verified 2026-09-29 against `vendor/firebase/firestore.rules`).
+The combined demo adapter/rules/Worker suite passed 29 tests before publication.
+The rules deployment is independent of the main-branch Pages workflow that
+publishes the Muse frontend. Physical-device acceptance remains in [TODO](TODO.md). Existing account and linked-professional
+permissions are unchanged. Future rules changes use `firebase deploy --only
+firestore:rules --project ceoaberto-neuroia` after emulator verification.
