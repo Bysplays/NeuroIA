@@ -1,5 +1,6 @@
+import { ProfessionalPageHeader } from './ProfessionalPageHeader';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, RotateCcw } from 'lucide-react';
+import { ChartNoAxesCombined, ListOrdered, RotateCcw } from 'lucide-react';
 import type { AssignedSession } from '../services/assignedSessions';
 import { sessionStatusLabel } from '../services/assignedSessions';
 import { sessionAnalytics } from '../services/sessionAnalytics';
@@ -24,10 +25,7 @@ export function SessionAnalytics({ session, name, loadResults, onBack }: {
   const data = sessionAnalytics(session, current ? response.results : []);
   const ready = state === 'ready';
   return <section className="session-dashboard">
-    <header className="proposal-heading"><div className="stats-heading">
-      <button className="header-icon-btn" aria-label="Volver a sesiones" onClick={onBack}><ArrowLeft size={20}/></button>
-      <div><h1>{session.title}</h1><p>{name} · {sessionStatusLabel[session.status]}</p></div>
-    </div><button className="stats-quiet-button" disabled={state === 'loading'} onClick={() => setRetry(value => value + 1)}><RotateCcw size={16}/>Actualizar</button></header>
+    <ProfessionalPageHeader title={session.title} icon={<ChartNoAxesCombined size={24}/>} name={name} detail={sessionStatusLabel[session.status]} backLabel="Volver a sesiones" onBack={onBack} action={<button className="stats-quiet-button" disabled={state === 'loading'} onClick={() => setRetry(value => value + 1)}><RotateCcw size={16}/>Actualizar</button>}/>
     <div className="session-summary">
       <article className="stats-card"><span>Juegos completados</span><strong>{session.completedCount} <small>/ {session.steps.length}</small></strong><progress aria-label="Juegos completados" value={session.completedCount} max={session.steps.length}/></article>
       <article className="stats-card"><span>Precisión</span><strong>{ready && data.accuracy !== null ? number(data.accuracy) + ' %' : '—'}</strong><small>Aciertos sobre respuestas registradas</small></article>
@@ -37,7 +35,7 @@ export function SessionAnalytics({ session, name, loadResults, onBack }: {
     {state === 'error' && <p role="alert">No se han podido consultar los resultados. Pulsa Actualizar para reintentarlo.</p>}
     {ready && data.missing > 0 && <p role="status">Faltan {data.missing} resultados por consultar. Las métricas muestran solo los disponibles.</p>}
     {ready && session.completedCount === 0 && <p className="session-empty-note">Las analíticas aparecerán al completar los juegos.</p>}
-    <section className="stats-card session-breakdown"><header className="proposal-heading"><h2>Recorrido de la sesión</h2><span className="soft-label">Creada el {new Date(session.createdAt).toLocaleDateString('es-ES')}</span></header>
+    <section className="stats-card session-breakdown"><header className="stats-section-heading"><div className="professional-list-heading"><span className="professional-section-icon" aria-hidden="true"><ListOrdered size={22}/></span><h2>Recorrido de la sesión</h2></div><span className="soft-label">Creada el {new Date(session.createdAt).toLocaleDateString('es-ES')}</span></header>
       {session.note && <p className="session-note">{session.note}</p>}
       <ol>{session.steps.map((step, index) => {
         const result = ready ? data.steps[index] : undefined;

@@ -1,6 +1,7 @@
+import { ProfessionalPageHeader } from './ProfessionalPageHeader';
 import { useEffect, useMemo, useState } from 'react';
 import { getFirestore } from 'firebase/firestore';
-import { ArrowDown, ArrowLeft, ArrowUp, Plus, Trash2, X, ListOrdered, ChevronDown, ChartNoAxesCombined, Pencil } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Trash2, X, ListOrdered, ChevronDown, ChartNoAxesCombined, Pencil } from 'lucide-react';
 import { auth } from '../services/firebase';
 import { firestoreSessions } from '../services/firestoreSessions';
 import { validateSessionDraft, type AssignedSession, type SessionDraft, type SessionLink } from '../services/assignedSessions';
@@ -70,12 +71,13 @@ export function ProfessionalSessions({ link, name, onBack }: { link: SessionLink
   const selectedSession = sessions?.find(session => session.id === selected);
   if (selectedSession) return <main ref={panel} className="professional-panel tablet-screen"><SessionAnalytics key={selectedSession.id} session={selectedSession} name={name} loadResults={adapter.loadResults} onBack={() => setSelected(null)}/></main>;
   return <main ref={panel} className="professional-panel tablet-screen">
-    <header className="proposal-heading"><div className="stats-heading"><button className="header-icon-btn" aria-label="Volver al panel" onClick={onBack}><ArrowLeft size={20}/></button><div><h1>Sesiones</h1><p>{name}</p></div></div><button className="touch-btn touch-btn-primary" disabled={!sessions} onClick={() => setCompose(true)}><Plus size={20}/>Nueva sesión</button></header>
-    {error ? <div className="professional-notice" role="alert"><p>{error}</p><button className="stats-quiet-button" onClick={() => setRetry(value => value + 1)}>Reintentar</button></div> : !sessions ? <p role="status">Cargando sesiones…</p> : !sessions.length ? <section className="stats-card professional-empty"><h2>Aún no hay sesiones propuestas</h2><p>Combina juegos, elige sus niveles y comparte la propuesta con {name}.</p></section> : <>
-      <section className="stats-card professional-session-list" aria-label="Sesiones propuestas">
+    <ProfessionalPageHeader title="Sesiones" icon={<ListOrdered size={24}/>} name={name} backLabel="Volver al panel" onBack={onBack} action={<button className="touch-btn touch-btn-primary" disabled={!sessions} onClick={() => setCompose(true)}><Plus size={20}/>Nueva sesión</button>}/>
+    {error ? <div className="professional-notice" role="alert"><p>{error}</p><button className="stats-quiet-button" onClick={() => setRetry(value => value + 1)}>Reintentar</button></div> : !sessions ? <p role="status">Cargando sesiones…</p> : !sessions.length ? <section className="stats-card professional-empty"><ListOrdered size={36} aria-hidden="true"/><h2>Aún no hay sesiones propuestas</h2><p>Combina juegos, elige sus niveles y comparte la propuesta con {name}.</p></section> : <>
+      <section className="stats-card professional-session-list" aria-labelledby="professional-sessions-title">
+        <div className="professional-list-heading"><span className="professional-section-icon" aria-hidden="true"><ListOrdered size={22}/></span><h2 id="professional-sessions-title">Sesiones propuestas</h2><span className="stats-count">{sessions.length}</span></div>
         <div className="session-list-labels" aria-hidden="true"><span>Fecha</span><span>Nombre</span><span>Acciones</span></div>
         <ul>{sessions.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(session => <li key={session.id}>
-          <time dateTime={new Date(session.createdAt).toISOString()}>{new Date(session.createdAt).toLocaleDateString('es-ES')}</time><h2>{session.title}</h2>
+          <time dateTime={new Date(session.createdAt).toISOString()}>{new Date(session.createdAt).toLocaleDateString('es-ES')}</time><h3>{session.title}</h3>
           <div className="proposal-actions"><button className="header-icon-btn session-explore" aria-label={`Ver analíticas de ${session.title}`} title="Ver analíticas" onClick={() => setSelected(session.id)}><ChartNoAxesCombined size={20}/></button>
           <button className="header-icon-btn" disabled={session.status !== 'assigned'} aria-label={`Editar sesión ${session.title}`} title={session.status === 'assigned' ? 'Editar sesión' : 'Solo se pueden editar sesiones sin empezar'} onClick={() => setEditing(session)}><Pencil size={20}/></button>
           {['assigned', 'in-progress'].includes(session.status) && <button className="header-icon-btn" aria-label={`Cancelar sesión ${session.title}`} title="Cancelar sesión" onClick={() => { setCancel(session); setCancelError(''); }}><Trash2 size={20}/></button>}</div>
