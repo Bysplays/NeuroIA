@@ -189,9 +189,8 @@ and original image; About contains only the product explanation. The legal page 
 non-medical notice, privacy information and a Licencias section with ElevenLabs
 and MuseJS attribution for the Muse 2 integration. Returning restores
 the previous entry/settings view without discarding form or game state. Long copy
-is selectable and scrollable. Justify document paragraphs at widths above 760 px
-with Spanish hyphenation; keep narrow-screen paragraphs left-aligned to avoid
-uneven word spacing. Titles, controls and data tables are not justified. Separate the AEPD rights link
+is selectable and scrollable. Justify document paragraphs at every viewport width, including mobile,
+with Spanish hyphenation to reduce uneven word spacing. Titles, controls and data tables are not justified. Separate the AEPD rights link
 from the preceding section with 24 px of top spacing. Sound and narration remain independent preferences.
 
 Professional workspace, proposals, participant activity, recovery and verification
