@@ -92,7 +92,9 @@ remain within their section; they must not be confused with the primary navigati
 
 The unauthenticated app home introduces NeuroIA before asking for credentials. It has
 one short headline (“Juega a tu ritmo”), the subtitle “Practica memoria, atención y
-coordinación”, and a primary **Comenzar** action that opens sign-in. The centered
+coordinación”, and a primary **Comenzar** action that opens sign-in. Center-align
+the headline and subtitle at all widths; center the subtitle and action column
+on the same horizontal axis within the copy area. The centered
 “Financiado por IGAPE” link sits directly below it and opens a full document page.
 Center this home’s hero vertically in the space between header and footer, allowing
 the page to grow and scroll on short viewports or with enlarged text. The sign-in

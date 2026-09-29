@@ -12,6 +12,15 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 - [x] Legal/privacy page presentation approved; outstanding legal content remains tracked below.
 - [x] Login, registration, recovery and error notification presentation approved by owner.
 
+## Project access handoff
+
+- [ ] Give `david@ceoaberto.com` access to the NeuroIA GitHub repository. Confirm
+  the appropriate repository role and verify access without exposing unrelated
+  repositories; ownership transfer is a separate decision.
+- [ ] Give David access to the NeuroIA Stripe account with the agreed role. Verify
+  access to the relevant sandbox/live environments and billing administration as
+  needed; do not infer that an invitation transfers account ownership or payouts.
+
 ## Current remaining scope
 
 - [x] Prepare three independent clinical-blue, tablet-first concepts using Mobbin
