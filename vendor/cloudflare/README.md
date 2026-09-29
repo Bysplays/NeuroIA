@@ -8,7 +8,7 @@ No domain purchase or Firebase Blaze deployment is required.
 
 The reviewed Worker is deployed with verified-email enforcement, `/access`,
 `/professional/status`, per-seat portal cancellation, reserved short invitation codes and the five-minute
-reconciliation trigger. Current version: `dac53e3c-bb91-4c8f-bb83-436277722a55`. Runtime secrets are retained, Stripe stays in test mode,
+reconciliation trigger. Current version: `9595cefc-f0e0-4f03-8a2d-21065c441504`. Runtime secrets are retained, Stripe stays in test mode,
 preview URLs remain disabled and existing observability is enabled. Health,
 localhost CORS, unauthenticated access and unsigned-webhook rejection were verified;
 signed payment lifecycle and scheduled reconciliation still need live validation.
@@ -164,8 +164,11 @@ and the combined sequential emulator command in the professional guide.
 `accountLifecycle.mjs` owns POST `/trial`, `/account/deletion-status` and
 `/account/delete`. Client rules prohibit direct trial grants. `/trial` atomically
 writes access and `trialUsage/{HMAC-SHA256(normalizedVerifiedEmail)}` with only
-`{used:true}`. This pseudonymous marker survives UID recreation; raw email and the
-old UID are not stored in it. It prevents reuse with the same verified email,
+`{used:true, trialStartedAt}`. This pseudonymous marker survives UID recreation; raw email and the
+old UID are not stored in it. A recreated account with the same verified email can
+resume the remaining trial until exactly seven days after the original start.
+Reactivation never changes that timestamp. Expired trials and legacy markers without
+a known start cannot grant new time. It prevents restarting with the same verified email,
 not a new/different email or all provider aliases. Existing trial timestamps are
 backfilled when deletion is requested; irrecoverable historical trial evidence
 removed by older invitation-departure code cannot be reconstructed.
@@ -214,7 +217,9 @@ subject to the owner's separate choice; backend authorization has already been g
 No real account was deleted. Health and unauthenticated rejection checks passed.
 The two trial access records explicitly approved for cleanup were removed in one
 transaction with their permanent pseudonymous trial-use markers. Read-back confirmed
-both deletions and markers. Profiles, results, invitations and Auth accounts remain intact.
+both deletions and markers. Their original trial start dates were subsequently
+backfilled from the pre-cleanup backup to support remaining-time recovery. No
+access was granted by that backfill. Profiles, results, invitations and Auth accounts remain intact.
 
 Activation sequence (finish coordinated with frontend publication):
 

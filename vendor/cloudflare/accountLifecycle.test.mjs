@@ -41,19 +41,48 @@ function store(initial = {}) {
 const noStripe = async () => { throw Error('unexpected Stripe access'); };
 const request = (uid, db, stripe = noStripe) => requestDeletion(uid, identity(), { confirmation: 'ELIMINAR MI CUENTA' }, env, db, stripe);
 
-test('trial identity is keyed, normalized, stores no email and prevents a second UID claiming the same trial', async () => {
+test('recreated accounts recover the original trial without extending it', async t => {
+  t.mock.timers.enable({apis:['Date'], now: 1800000000000});
   assert.equal(await trialIdentity(' Player@Example.Test ', env.TRIAL_IDENTITY_SECRET), await trialIdentity('player@example.test', env.TRIAL_IDENTITY_SECRET));
   const db = store();
   await startTrial('old', identity().email, env, db);
-  await db.erase(['users/old/access/main']);
-  await assert.rejects(startTrial('new', identity().email, env, db), {status:409});
-  assert.deepEqual([...db.docs.values()], [{used:true}]);
-  await assert.rejects(startTrial('new', identity().email, {}, db), {status:503});
+  const original = db.docs.get('users/old/access/main').trialStartedAt;
+  await request('old', db);
+  for(let i=0;i<40 && db.docs.get('accountDeletions/old')?.phase !== 'done';i++) await processDeletion('old',db,async()=>{},()=> 'NEW');
+  t.mock.timers.tick(2 * 86400000);
+  await startTrial('new', identity().email, env, db);
+  assert.equal(db.docs.get('users/new/access/main').trialStartedAt, original);
+  const hash = await trialIdentity(identity().email, env.TRIAL_IDENTITY_SECRET);
+  assert.deepEqual(db.docs.get(`trialUsage/${hash}`), {used:true,trialStartedAt:original});
+  await request('new',db);
+  assert.equal(db.docs.get(`trialUsage/${hash}`).trialStartedAt,original);
+  t.mock.timers.tick(5 * 86400000);
+  await assert.rejects(startTrial('expired', identity().email, env, db), {status:409});
+  await assert.rejects(startTrial('missingSecret', identity().email, {}, db), {status:503});
 });
-test('trial claims are atomic across simultaneous accounts', async () => {
+test('concurrent trial requests share the same fixed start and duplicate account requests are rejected', async () => {
   const db = store();
-  const results = await Promise.allSettled(['a','b'].map(uid => startTrial(uid, identity().email, env, db)));
-  assert.equal(results.filter(value => value.status === 'fulfilled').length, 1);
+  await Promise.all(['a','b'].map(uid => startTrial(uid, identity().email, env, db)));
+  assert.equal(db.docs.get('users/a/access/main').trialStartedAt, db.docs.get('users/b/access/main').trialStartedAt);
+  await assert.rejects(startTrial('a',identity().email,env,db),{status:409});
+});
+test('legacy markers without a known start cannot grant a fresh trial; pending payments block recovery', async () => {
+  const hash = await trialIdentity(identity().email, env.TRIAL_IDENTITY_SECRET);
+  for(const trialStartedAt of [undefined, 'invalid', Date.now()+86400000, 0]) {
+    const db = store({[`trialUsage/${hash}`]:{used:true,...(trialStartedAt === undefined ? {} : {trialStartedAt})}});
+    await assert.rejects(startTrial('u',identity().email,env,db),{status:409});
+    assert.equal(db.docs.has('users/u/access/main'),false);
+  }
+  const db = store({[`trialUsage/${hash}`]:{used:true,trialStartedAt:Date.now()-1000},'billing/u':{attempt:'pending'}});
+  await assert.rejects(startTrial('u',identity().email,env,db),{status:409});
+});
+test('deletion backfills legacy timestamps and never replaces an earlier ledger date', async () => {
+  const hash = await trialIdentity(identity().email, env.TRIAL_IDENTITY_SECRET);
+  for(const used of [{used:true}, {used:true,trialStartedAt:100}]) {
+    const db = store({[`trialUsage/${hash}`]:used,'users/u/access/main':{kind:'trial',trialStartedAt:200}});
+    await request('u',db);
+    assert.equal(db.docs.get(`trialUsage/${hash}`).trialStartedAt, used.trialStartedAt ?? 200);
+  }
 });
 test('free trials and invitations permit deletion; paid, past due, paused and scheduled cancellation block', async () => {
   for (const kind of ['trial','invitation','revoked']) assert.equal((await deletionEligibility('u', store({'users/u/access/main':{kind}}), noStripe)).allowed, true);

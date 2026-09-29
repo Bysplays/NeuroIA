@@ -16,6 +16,8 @@ of a production deployment. Keep project guidance in English and UI copy in Span
   pending checkout automatically; completed payments remain protected.
   Presentation approval does not certify live payments or change release requirements.
 - [ ] Review authenticated home and catalog with the owner.
+- [x] Preserve the original trial start across account recreation; allow recovery
+  of remaining days with the same verified email without extending expiry.
 - [x] Implement account deletion with typed confirmation, recent identity verification,
   server Stripe checks, resumable cleanup and pseudonymous trial-use retention.
 - [x] Prepare live account-lifecycle infrastructure: Worker modules/cron published

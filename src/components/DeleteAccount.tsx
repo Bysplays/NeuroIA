@@ -60,7 +60,7 @@ export function DeleteAccount() {
         {busy && !state && <p role="status">Comprobando tu cuenta…</p>}
         {state?.allowed && <form className="email-form" onSubmit={remove}>
           <p>Se eliminarán tu perfil, tus partidas y tus vínculos con profesionales. Esta acción no se puede deshacer.</p>
-          <p>Si ya usaste la prueba gratuita, conservaremos un identificador protegido para impedir que se repita. El borrado continuará aunque cierres la aplicación.</p>
+          <p>Si ya usaste la prueba gratuita, conservaremos un identificador protegido y su fecha de inicio. Si vuelves a crear la cuenta con el mismo correo, podrás recuperar el tiempo restante, sin ampliarlo. El borrado continuará aunque cierres la aplicación.</p>
           <label htmlFor="delete-confirmation">Escribe ELIMINAR MI CUENTA</label>
           <input id="delete-confirmation" autoComplete="off" value={confirmation} onChange={event => setConfirmation(event.target.value)} disabled={busy}/>
           {!google && <><label htmlFor="delete-password">Tu contraseña</label><input id="delete-password" type="password" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} disabled={busy}/></>}

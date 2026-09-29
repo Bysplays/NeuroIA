@@ -659,7 +659,9 @@ implements server-only trial identity and resumable deletion jobs, with one-minu
 cleanup and separate five-minute billing reconciliation. See the Worker README
 for secret/IAM/index/rule deployment order and temporary old-token locks.
 `trialUsage` is a keyed verified-email ledger; do not replace it with UID-only
-retention. Personal and professional subscriptions must both be terminal in Stripe.
+retention. Preserve the original `trialStartedAt` in that ledger: recreated accounts
+may resume its remaining seven-day window but never restart or extend it. Unknown
+legacy dates fail closed. Personal and professional subscriptions must both be terminal in Stripe.
 Keep other participants' own activity when removing a professional workspace.
 `StorageService.forgetAccount` clears only the accepted account's device cache and
 outbox after sign-out. No production fixture deletion is permitted in tests.

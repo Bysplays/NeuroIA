@@ -2,6 +2,8 @@
 const error = (status, message) => Object.assign(new Error(message), { status });
 const jobPath = uid => `accountDeletions/${uid}`;
 const terminalSubscription = value => ['canceled', 'incomplete_expired'].includes(value.status);
+const trialDuration = 7 * 86400000;
+const validTrialStart = value => Number.isSafeInteger(value) && value > 0 && value <= Date.now();
 export async function trialIdentity(email, secret) {
   if (!secret || secret.length < 32) throw error(503, 'La gestión de cuentas no está disponible temporalmente.');
   if (typeof email !== 'string' || !email.includes('@')) throw error(403, 'Verifica tu correo antes de continuar.');
@@ -13,10 +15,14 @@ export async function startTrial(uid, email, env, db) {
   const identity = await trialIdentity(email, env.TRIAL_IDENTITY_SECRET);
   await db.runTransaction(async tx => {
     const [access, billing, used] = await tx.getMany([`users/${uid}/access/main`, `billing/${uid}`, `trialUsage/${identity}`]);
-    if (access || used) throw error(409, 'Esta cuenta ya ha utilizado su acceso de prueba.');
+    if (access) throw error(409, 'Esta cuenta ya tiene un acceso registrado.');
     if (billing?.attempt || billing?.checkoutId || billing?.subscriptionId) throw error(409, 'Hay un pago pendiente de confirmar.');
-    tx.set(`trialUsage/${identity}`, { used: true }, false);
-    tx.set(`users/${uid}/access/main`, { kind: 'trial', trialStartedAt: Date.now() }, false);
+    const trialStartedAt = used ? used.trialStartedAt : Date.now();
+    if (!validTrialStart(trialStartedAt) || trialStartedAt + trialDuration <= Date.now()) {
+      throw error(409, 'Esta cuenta ya ha utilizado su acceso de prueba.');
+    }
+    tx.set(`trialUsage/${identity}`, { used: true, trialStartedAt }, false);
+    tx.set(`users/${uid}/access/main`, { kind: 'trial', trialStartedAt }, false);
   });
   return { ok: true };
 }
@@ -71,12 +77,16 @@ export async function requestDeletion(uid, identity, input, env, db, stripe) {
   const eligibility = await deletionEligibility(uid, db, stripe);
   if (!eligibility.allowed) return eligibility;
   await db.runTransaction(async tx => {
-    const [job, billing, proBilling, access] = await tx.getMany([jobPath(uid), `billing/${uid}`, `professionalBilling/${uid}`, `users/${uid}/access/main`]);
+    const [job, billing, proBilling, access, used] = await tx.getMany([jobPath(uid), `billing/${uid}`, `professionalBilling/${uid}`, `users/${uid}/access/main`, `trialUsage/${hash}`]);
     if (job) return;
     if (JSON.stringify([billing, proBilling, access]) !== eligibility.proof) throw error(409, 'El acceso ha cambiado. Vuelve a intentarlo.');
     // Reservations are read in the same transaction as the deletion lock.
     if (billing?.attempt || billing?.checkoutId || proBilling?.pendingSeatId) throw error(409, 'Se ha iniciado un pago. Cancélalo antes de borrar tu cuenta.');
-    if (access?.kind === 'trial' || access?.trialStartedAt != null) tx.set(`trialUsage/${hash}`, { used: true }, false);
+    if (access?.kind === 'trial' || access?.trialStartedAt != null) {
+      // Retain the earliest known start; deletion must never restart the trial clock.
+      const starts = [used?.trialStartedAt, access?.trialStartedAt].filter(validTrialStart);
+      tx.set(`trialUsage/${hash}`, { used: true, ...(starts.length ? { trialStartedAt: Math.min(...starts) } : {}) }, false);
+    }
     tx.set(jobPath(uid), { phase: 'seats', createdAt: Date.now(), lastRunAt: 0, leaseUntil: 0 }, false);
   }, 4, true);
   return { accepted: true };

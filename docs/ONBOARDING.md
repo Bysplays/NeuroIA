@@ -50,7 +50,9 @@ professional workspaces use paid seats and explicit participant redemption inste
 The Worker creates a server-timed access record and a keyed identifier of the
 verified email in one transaction. Firestore rules deny client trial grants and
 changes to that ledger. Deleting and recreating the account with the same email
-cannot restart the trial. Access expires seven days after the server timestamp,
+cannot restart the trial. Recreated accounts with the same verified email can resume
+the remaining time using the ledger’s original `trialStartedAt`; expired or unknown
+legacy dates never grant a new period. Access expires seven days after the server timestamp,
 requires no card and does not turn into a paid subscription. Legacy Firestore
 Timestamp and numeric values remain readable. See the account lifecycle and
 activation requirements in [the Worker guide](../vendor/cloudflare/README.md#account-deletion-and-trial-identity-staged-activation-pending).
