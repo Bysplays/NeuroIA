@@ -601,7 +601,8 @@ test('focus and valid-lease visibility never hide the game or open a pause dialo
   expect(await page.evaluate(()=>window.accessReads)).toBe(reads);
   await expect(recovery).toHaveCount(0);
   await page.evaluate(()=>{window.delayAccess=true;});
-  await page.clock.runFor(61000);
+  // Only the access deadline matters here, not thousands of intermediate game frames.
+  await page.clock.fastForward(61000);
   await expect(recovery).toBeVisible();
   expect(await page.locator('.game-session').evaluate(el=>!!el.closest('[inert]'))).toBe(true);
   const expiredTime=await timer.textContent();
@@ -647,10 +648,10 @@ test('search fills three stages only after completing each board', async ({page}
   await expect(page.locator('.exercise-result')).toBeVisible();
 });
 
-test('every board fits below its fixed title and progress without page scrolling', async ({page}) => {
-  for(const size of [{width:390,height:844},{width:820,height:1180},{width:844,height:390}]) {
+for (const size of [{width:390,height:844},{width:820,height:1180},{width:844,height:390}]) {
+  for (const mode of ['', '&placement']) test(`every board fits without scrolling at ${size.width} (${mode ? 'placement' : 'ordinary'})`, async ({page}) => {
     await page.setViewportSize(size);
-    for(const mode of ['', '&placement']) for(const id of games) {
+    for (const id of games) {
       await page.goto(fixture+'?game='+id+'&level=10'+mode);
       if(!mode) await page.getByRole('button',{name:'Empezar a jugar'}).click();
       await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1)).toBe(true);
@@ -671,8 +672,8 @@ test('every board fits below its fixed title and progress without page scrolling
       }), {message:`${id} ${size.width} ${mode}`}).toBeLessThanOrEqual(2);
       if(!mode) await page.screenshot({path:`/tmp/neuroia-fitted-${id}-${size.width}.png`});
     }
-  }
-});
+  });
+}
 
 test('search marks incorrect objects red and clears feedback on the next board', async ({page}) => {
   // Keep a known distractor before the final target, rather than depending on a random board.
