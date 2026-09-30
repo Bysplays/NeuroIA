@@ -19,23 +19,28 @@ Missing credentials or AI_ENABLED=false disable generation. See [provider setup]
 
 ## Interaction
 
-The summary initially shows deterministic suggestions without an external request.
+Opening Activity → Resumen automatically retrieves the day's recommendations.
+The first successful generation for the caller/participant and local calendar day
+is cached on the server and reused across visits and devices. Filters do not cause
+new recommendations: the daily snapshot covers overall synchronized activity.
+The report continues to use the selected filters. While loading or on failure,
+deterministic suggestions remain available. There is no manual AI refresh button.
 Game-led cards reveal supporting facts under **Por qué este juego**. **Sobre la IA**
-explains aggregate processing and optional suggestions in one short paragraph.
-**Personalizar con IA** explicitly requests generation when the Worker confirms
-availability; **Generado con IA** labels an actual returned AI analysis only.
+explains daily generation and external processing; **Generado con IA** labels actual
+returned AI analysis only. The summary text fills the card's available width.
 
 **Generar informe** requests AI writing and downloads the PDF directly, without an
 editor, review checkbox or confirmation dialog. The button reads **Generando…**
 until download starts; Cancelar aborts pending work. An unavailable provider uses
 the basic activity template without claiming AI authorship. Generation and asset
-errors appear inline and can be retried. Nothing is sent automatically on load.
-The explicit generation action carries the existing processing-version marker;
+errors appear inline and can be retried. Daily recommendations start automatically; report generation remains explicit.
+Both requests carry the existing processing-version marker;
 it is not legal certification or a substitute for the approved privacy basis.
 
 The lazy-loaded jsPDF module embeds the supplied logo and local Manrope fonts.
 No cloud report archive or clinical note storage is introduced. Leaving Resumen,
-changing filters/statistics or changing accounts cancels pending responses.
+changing filters or changing accounts cancels pending responses. Archive-page
+updates preserve the in-flight daily request rather than starting it again.
 Downloaded copies remain under the recipient's control, outside account deletion.
 
 ## Deterministic evidence
@@ -78,7 +83,13 @@ states that it uses synchronized records, which can differ from the local charts
 ## Server boundaries
 
 `POST /ai/status` requires Firebase identity and returns availability (and the
-configured model), never a secret. `POST /ai/analyze` accepts only target UID,
+configured model), never a secret. `POST /ai/recommendations` accepts target UID,
+timezone and the processing-version marker. A server-only document at
+`users/{actorUid}/aiRecommendations/{targetUid}` stores the local day and serialized
+aggregate analysis; updates overwrite the previous snapshot. Cached reads still
+check active access. A 45-second transactional lease prevents duplicate concurrent
+generation; failures release it, and a later visit can retry subject to the quota.
+Recursive account deletion removes this cache. No report PDF is stored. `POST /ai/analyze` accepts only target UID,
 validated filters, mode and the consent-version acknowledgement. It never accepts
 a caller-supplied prompt, model, statistics, notes or result history.
 
@@ -91,9 +102,9 @@ cancels on identity change and rejects responses for a previous identity.
 
 Quota reservations are transactional at `users/{actorUid}/aiUsage/daily`: one
 overwritten document with UTC day, count and last-request time. Default ten attempts
-per day, at least thirty seconds apart, configurable to 1–50 attempts. Failed or
+per day, at least thirty seconds apart within each mode, configurable to 1–50 attempts. The automatic daily update does not block an immediate report request. Failed or
 cancelled provider calls consume the reservation to bound retries. There are no
-automatic retries and no provider calls on page load. Existing deny-by-default
+automatic retries. The first daily recommendation can call the provider on opening Resumen. Existing deny-by-default
 Firestore rules keep this document server-only; recursive account deletion removes
 it. No generated text or other participant's data is persisted in this quota.
 

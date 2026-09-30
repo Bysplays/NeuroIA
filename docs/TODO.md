@@ -279,6 +279,8 @@ Seats, difficulty/placement and professional session proposals are also implemen
 - [x] Deploy the AI Worker with a server-side OpenRouter secret and Dots3-Note
   Preview free enabled. Verify health, both allowed origins and authentication
   enforcement on the production AI routes; signed-in user acceptance remains below.
+- [x] Generate recommendations automatically on the first daily visit to Resumen,
+  reuse an authorized server snapshot across devices and display full-width summary text.
 - [x] Validate real Dots3-Note Preview free recommendations and report smoke cases
   using synthetic data and the v4 prompt. Output mode/ZDR remain hardcoded.
 - [ ] Complete broader Spanish factuality/latency evaluation and provider processing

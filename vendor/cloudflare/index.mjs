@@ -1,5 +1,5 @@
 import { trialOffer, startTrial, deletionEligibility, requestDeletion, processDeletion } from './accountLifecycle.mjs';
-import { aiStatus, generateAnalysis } from './ai.mjs';
+import { aiStatus, generateAnalysis, dailyRecommendations } from './ai.mjs';
 // Cloudflare Worker: Web APIs only, no Firebase Functions or Node runtime.
 const encoder = new TextEncoder();
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
@@ -525,7 +525,7 @@ export function createHandler(deps = {}) {
         await webhook(JSON.parse(body), env, db, stripe);
         return reply({ received: true });
       }
-      if (!['/checkout','/portal','/cancel-checkout','/status','/access','/trial','/account/deletion-status','/account/delete', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat', '/ai/status', '/ai/analyze'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
+      if (!['/checkout','/portal','/cancel-checkout','/status','/access','/trial','/account/deletion-status','/account/delete', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat', '/ai/status', '/ai/analyze', '/ai/recommendations'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
       const token = request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1];
       if (!token) fail(401, 'Inicia sesión para continuar.');
       const uid = await (deps.verifyUser || verifyUser)(token, env.FIREBASE_PROJECT_ID);
@@ -550,11 +550,11 @@ export function createHandler(deps = {}) {
       const deleting = await db.runTransaction(tx => tx.get(`accountDeletions/${uid}`), 4, true);
       if (deleting) fail(409, 'La cuenta se está eliminando.');
       if (path === '/ai/status') return reply(aiStatus(env));
-      if (path === '/ai/analyze') {
+      if (path === '/ai/analyze' || path === '/ai/recommendations') {
         const body = await request.text();
         if (body.length > 2048) fail(413, 'Solicitud demasiado grande.');
         let input; try { input = JSON.parse(body); } catch { fail(400, 'Solicitud no válida.'); }
-        return reply(await generateAnalysis(uid, input, env, db, confirmedAccess, request.signal, deps.aiFetch || fetch));
+        return reply(await (path === '/ai/recommendations' ? dailyRecommendations : generateAnalysis)(uid, input, env, db, confirmedAccess, request.signal, deps.aiFetch || fetch));
       }
       if (path === '/access') {
         const access = await confirmedAccess(uid, db);

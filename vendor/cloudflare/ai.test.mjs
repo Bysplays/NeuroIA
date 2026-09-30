@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHandler, confirmedAccess } from './index.mjs';
-import { aiStatus, generateAnalysis, reserveGeneration } from './ai.mjs';
+import { aiStatus, generateAnalysis, reserveGeneration, dailyRecommendations } from './ai.mjs';
 import { basicNarrative } from '../../src/services/activityInsights.ts';
 
 const env = { APP_URL: 'https://neuroia.es', FIREBASE_PROJECT_ID: 'demo-neuroia', AI_ENABLED: 'true', OPENROUTER_API_KEY: 'test-secret', OPENROUTER_MODEL: 'fixture/model' };
@@ -134,4 +134,49 @@ test('output mode and ZDR stay fixed even when obsolete env overrides are suppli
 });
 test('provider rate limits are distinct from application quotas and omit upstream details', async () => {
   await assert.rejects(run(store(), { fetcher: async () => Response.json({ error: 'PRIVATE_PROVIDER_DETAILS' }, { status: 429 }) }), error => error.status === 429 && /proveedor/.test(error.message) && !/PRIVATE/.test(error.message));
+});
+
+const dailyInput = { targetUid: 'player', timeZone: 'Europe/Madrid', consent: 'activity-summary-v1' };
+test('daily recommendations are reused across visits, refreshed next day and denied after revoked access', async () => {
+  const db = store(); let calls = 0;
+  const fetcher = async (...args) => { calls++; return provider(...args); };
+  const daily = () => dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, fetcher);
+  const first = await daily();
+  assert.deepEqual(await daily(), first);
+  assert.equal(calls, 1); assert.equal(db.reads, 1);
+  assert.equal(db.documents.get('users/player/aiUsage/daily').count, 1);
+  const path = 'users/player/aiRecommendations/player';
+  db.documents.set(path, { ...db.documents.get(path), day: '2000-01-01' });
+  db.documents.delete('users/player/aiUsage/daily');
+  await daily(); assert.equal(calls, 2);
+  db.documents.delete('users/player/access/main');
+  await assert.rejects(daily(), { status: 403 }); assert.equal(calls, 2);
+});
+test('simultaneous daily requests invoke provider once and failed generation can recover', async () => {
+  const db = store(); let release, started;
+  const ready = new Promise(resolve => { started = resolve; });
+  const wait = new Promise(resolve => { release = resolve; });
+  const first = dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, async (...args) => { started(); await wait; return provider(...args); });
+  await ready;
+  await assert.rejects(dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, provider), { status: 409 });
+  release(); await first;
+  const broken = store();
+  await assert.rejects(dailyRecommendations('player', dailyInput, env, broken, confirmedAccess, undefined, async () => new Response('', { status: 503 })), { status: 503 });
+  assert.equal(broken.documents.get('users/player/aiRecommendations/player').leaseUntil, 0);
+  broken.documents.delete('users/player/aiUsage/daily');
+  await dailyRecommendations('player', dailyInput, env, broken, confirmedAccess, undefined, provider);
+});
+test('daily cache is isolated by caller and rejects arbitrary filters', async () => {
+  const db = store();
+  await dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, provider);
+  await assert.rejects(dailyRecommendations('other', dailyInput, env, db, confirmedAccess, undefined, provider), { status: 403 });
+  await assert.rejects(dailyRecommendations('player', {...dailyInput, filters}, env, db, confirmedAccess, undefined, provider), { status: 400 });
+});
+
+test('automatic daily recommendations do not block an immediately requested report', async () => {
+  const db = store();
+  await dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, provider);
+  await run(db);
+  assert.equal(db.documents.get('users/player/aiUsage/daily').count, 2);
+  await assert.rejects(run(db), { status: 429 });
 });

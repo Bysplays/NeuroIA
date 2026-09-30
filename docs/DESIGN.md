@@ -144,13 +144,14 @@ composition on desktop. Put each suggestion's evidence and AI explanation under
 icon and circular chevron. Its expanded white inset groups the AI explanation and
 evidence under a quiet label, with a fine left rule instead of ordinary bullets. Use **Sobre la IA** for a short, high-level paragraph about external aggregate processing and optional suggestions. Native disclosures retain
 keyboard operation and explicit focus. Group generation and report actions in a
-separate footer, with the AI action filled and report action outlined; stack on
+separate footer, with the report action outlined; stack on
 narrow screens. Source, coverage and optional-level scope remain visible.
 References inspected: [Uxcel recommendations](https://mobbin.com/screens/7c84c45e-ae5a-449c-be39-306cead79fa7)
 for game identity and hierarchy, and [Coursera learning dashboard](https://mobbin.com/screens/93beef1d-a7ba-4f6c-9efb-4d13aee3eb76)
 for compact horizontal grouping. Use NeuroIA assets and palette. Never style them as commands or automatic
-level changes. **Personalizar con IA** explicitly requests generation;
-no inference runs merely by visiting the tab. **Generar informe** generates and
+level changes. Recommendations update automatically on the first daily visit to
+Resumen and reuse the daily snapshot thereafter. Remove manual AI generation/refresh
+buttons; show a quiet preparation status and let the summary fill the available width. **Generar informe** generates and
 downloads a PDF directly, without an editor or review dialog. Show **Generando…**
 while pending, allow cancellation and display recoverable errors inline.
 The PDF opens with identity, period, centered activity metrics and both star charts

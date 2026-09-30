@@ -95,7 +95,7 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
       { id: 'overview', label: 'Resumen', content: <>
     <div className="stats-overview"><CategoryRadar results={results}/>
     <LevelStatistics levels={levels}/></div>
-    {active && tab === 'overview' && insights && <ActivityAssistant key={JSON.stringify(insights)} uid={uid} insights={insights} subjectLabel={subtitle}/>}
+    {active && tab === 'overview' && insights && <ActivityAssistant key={JSON.stringify([uid, insights.filters])} uid={uid} insights={insights} subjectLabel={subtitle}/>}
     {!insights && <p role="alert">Revisa el intervalo de fechas en Filtros para preparar recomendaciones.</p>}
     </> }, { id: 'charts', label: 'Gráficas', content:
     <>

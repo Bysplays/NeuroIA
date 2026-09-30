@@ -85,10 +85,10 @@ deletes account data. Reference: [AEPD information duty](https://www.aepd.es/der
 
 ## Optional AI activity copy
 
-Use «¿Qué te recomendamos?», «Personalizar con IA», «Generar informe» and
+Use «¿Qué te recomendamos?», «Tu resumen diario de práctica», «Generar informe» and
 «Generado con IA» (only for actual generated output). The report downloads directly;
 use «Generando…» during processing. Explain AI in one high-level paragraph. Disclose selected dates and partial/synchronized history; do not call
 seconds per question reaction time or call less-practiced games neglected abilities.
-The legal page describes the explicit request, minimized external processing,
-ephemeral drafts, downloaded reports and server quota. This operational copy does
+The legal page describes automatic daily recommendations, explicit report requests,
+minimized external processing, the stored daily snapshot, downloaded reports and server quota. This operational copy does
 not complete the provider/privacy approvals tracked in TODO.

@@ -74,7 +74,7 @@ latency. Do not label a model approved from a schema-only or mocked test.
 Set a spending limit on the OpenRouter key/account. The per-account application
 quota is not a global billing cap and does not prevent aggregate cost across many
 new accounts. Provider response tokens are bounded to 1,400 (suggestions) or 2,200
-(reports). No automatic refresh, retry, model fallback or background generation is
+(reports). The first daily visit to Resumen generates and caches recommendations. No automatic retry or model fallback is
 implemented. Failures/cancellation count against the quota; cancellation may not
 prevent provider billing for already-started work.
 
