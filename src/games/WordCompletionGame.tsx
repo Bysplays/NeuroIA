@@ -89,7 +89,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
-      soundService.speak(`¡Correcto! ${currentItem.word}`);
+      soundService.speak(currentItem.word);
       setCorrectCount(prev => prev + 1);
     } else {
       soundService.playGentlePrompt();
@@ -174,8 +174,9 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
 
   return (
     <ExerciseWrapper
+      completedStages={currentIdx + (selectedLetter !== null ? 1 : 0)}
       exerciseId="word-completion"
-      title={`Completar Palabras (${currentIdx + 1}/${sessionItems.length})`}
+      title="Completar palabras"
       domain="language"
       instructionText="Mira la imagen y toca la letra que falta."
       hideBadges={true}
@@ -282,12 +283,12 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
             aria-hidden={selectedLetter === null}
           >
             <button
-              className={`touch-btn touch-btn-primary touch-btn-large ${selectedLetter !== null ? 'gentle-bounce' : ''}`}
+              className="touch-btn touch-btn-primary game-next-action"
               onClick={handleNext}
               disabled={selectedLetter === null}
               tabIndex={selectedLetter === null ? -1 : 0}
             >
-              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Palabra' : 'Ver Resultados'}</span>
+              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Palabra' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
               <ArrowRight size={24} />
             </button>
           </div>

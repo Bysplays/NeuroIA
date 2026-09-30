@@ -313,13 +313,15 @@ remain unchanged.
 ### PLACEMENT — initial guided level assessment (implemented)
 
 Player entry after access and cloud loading requires version-1 completed placement
-and valid per-game levels. Professional entry has no placement gate. The shared game
-renderer randomly chooses an unfinished game after each assessment turn, excluding
-the previous game whenever alternatives remain. Turns use one round except motor-target,
+and valid levels for the chosen games. Professional entry has no placement gate.
+Two initial steps collect selected practice areas and an optional movement
+preference. Taps-only excludes motor-tracking from assessment, not from play.
+The shared game renderer finishes one selected area before the next, rotating
+between unfinished games within that area. No unselected game receives invented evidence. Turns use one round except motor-target,
 which retains the full normal target count for the tested level (5/8/11/14).
 Each game retains its own next
-level and best result in memory. Each unfinished
-game tries levels 1 → 4 → 7 → 10; a stage passes only with nonzero question count and
+level and best result in the durable placement record. Each unfinished
+game tries at most levels 1 → 4; saved legacy 7/10 stages remain readable and can finish. A stage passes only with nonzero question count and
 all answers correct (not rounded displayed accuracy). On failure/omission, retain
 the last passed level, or level 1 if none passed. Advancing stages remounts the
 GameSession by game and tested level, resetting answers, layout configuration and
@@ -330,14 +332,14 @@ A finished game queues one durable placement operation with optional
 keep its evidence; otherwise save the failed/omitted level-1 result. This explicit
 level bypasses the legacy accuracy-to-level mapping, including tracking. The old
 mapping remains for existing trials without assessedLevel, and version 1 accounts
-are never forced to repeat placement. The final game's save completes placement.
+are never forced to repeat placement. The final selected game's save completes placement. Legacy records without
+preferences still require all eight games and remain compatible.
 Trials do not create ordinary result archives, streaks, achievements or plan work.
 
-Help/settings pause a stage. Return keeps all per-game stage positions in memory; reload restarts unfinished
-ladders from level 1; completed games are kept, and the remaining order may be reshuffled
-on reload. No instructions or individual result confirmations interrupt progression.
-The summary lists final levels and labels only games skipped before any success as
-unmeasured. Mi cuenta retakes use the same ladder, saving all new base levels only
+Help/settings pause a stage. Preferences and passed intermediate stages are
+durable; reload restarts only the current unfinished attempt at its saved next
+level. Completed-game trials remain authoritative. No instructions or individual result confirmations interrupt progression.
+The summary distinguishes measured levels, omitted trials and untested games. Mi cuenta retakes use the same ladder, saving all new base levels only
 when accepted and preserving the original onboarding record and saved activity.
 
 
@@ -363,7 +365,7 @@ Notes and reports remain proposed. Production deployment is tracked in TODO.
 
 | Data | Proposed location / contents | Authority |
 | --- | --- | --- |
-| Placement | Optional progress.profile.placement: version, completed, per-game trial evidence; cursor derived from first missing game | Participant via validated durable operations |
+| Placement | Optional progress.profile.placement: version, completed, preferences, stages, per-game trial evidence and accepted retakePreferences; cursor derived from unfinished selected games | Participant via validated durable operations |
 | Difficulty | Versioned per-exercise level/evidence map in progress; legacy fields retained | Progress transaction/reducer |
 | Results | Optional numeric level, configuration version, assignment/owner/seat/step IDs | Participant; existing result ID/receipt semantics |
 | Assignments | `professionals/{owner}/seats/{seat}/participants/{uid}/sessions/{id}`; owner-editable until started; immutable afterwards | Active linked owner authors; participant step receipts only |
@@ -434,12 +436,23 @@ changes. The celebration is an accessible dialog, with reduced-motion support.
 `levelTimeline`; it never fabricates historical base-level changes from result
 accuracy. Full archive loading is shared with the ordinary activity charts.
 
-An explicit retake uses `Reassessment` and the existing `PlacementOnboarding`.
-Its incomplete trials stay in component memory; cancellation/reload does not alter
-saved levels. Guardar niveles enqueues a placement operation containing all eight
-validated trials. The reducer recalculates only `gameLevels`, resetting their
-promotion evidence; original placement, history, counters, achievements and
-settings are preserved. Existing Firestore placement receipts make retries
-idempotent. Preserving the original placement also avoids validating all trials
-and levels in one write, which exceeds the rules evaluator expression budget.
-No new rule fields or permissions are required.
+An explicit retake uses `Reassessment` and the existing `PlacementOnboarding`,
+with the last accepted interests/movement preferences preselected. Its trials stay
+in component memory; cancellation/reload does not alter saved levels. Guardar
+niveles queues the selected games' validated trials and preferences. The reducer
+recalculates only selected `gameLevels`, resetting their promotion evidence and
+preserving all other levels, original onboarding trials, history, totals and
+settings. `placement.retakePreferences` seeds the next retake; initial
+`placement.preferences` still identifies the original completion gate. Permanent
+placement receipts make retries idempotent. Preserving the original trials avoids
+validating eight changed trials and levels in one write beyond the rules expression
+budget. New preference/stage fields require rules publication before the frontend.
+See [interest onboarding](PLACEMENT.md) for schemas and acceptance checks.
+
+
+Retake acceptance queues two ordered durable operations: the atomic selected-level
+replacement, then the accepted retake preferences. The first keeps the entire
+initial placement record unchanged to stay within Firestore's expression budget;
+the second keeps game levels unchanged. Each operation has its own permanent
+receipt and retry. If the second save is pending, the new levels can already be
+saved while the preference change remains in the recovery queue.

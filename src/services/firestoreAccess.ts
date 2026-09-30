@@ -66,15 +66,8 @@ export function firestoreAccess(uid: string, db: Firestore) {
       await runTransaction(db, async tx => {
         const current = await tx.get(accessRef);
         if (current.data()?.kind !== 'invitation') throw failure('invitation/not-active', 'Tu cuenta ya no tiene una invitación activa.');
-        tx.set(accessRef, { kind: 'revoked', leftAt: serverTimestamp() });
+        tx.set(accessRef, { kind: 'revoked', leftAt: serverTimestamp(), ...(current.data()?.trialStartedAt != null ? { trialStartedAt: current.data()!.trialStartedAt } : {}) });
         tx.delete(patientRef);
-      });
-    },
-    async trial() {
-      await runTransaction(db, async tx => {
-        const current = await tx.get(accessRef);
-        if (current.exists()) throw failure('invitation/trial-used', 'Esta cuenta ya ha utilizado su prueba o tiene acceso.');
-        tx.set(accessRef, { kind: 'trial', trialStartedAt: serverTimestamp() });
       });
     },
   };

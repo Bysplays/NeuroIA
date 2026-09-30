@@ -26,7 +26,7 @@ test('password accounts must verify email before progress, trials, invitations o
     await assertFails(setDoc(doc(db, `professionals/${uid}`), { ownerUid: uid, name: 'Persona', active: true, createdAt: serverTimestamp() }));
   }
   const db = env.authenticatedContext(uid, { firebase: { sign_in_provider: 'password' }, email_verified: true }).firestore();
-  await assertSucceeds(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
+  await assertFails(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
   await assertSucceeds(firestoreProgress(uid, db).initialize(fresh()));
 });
 
@@ -136,10 +136,10 @@ test('Spark: deny forged code, entitlement without reverse link, ownership theft
 test('Spark: trial uses server time, cannot restart and can become a permanent invitation', async () => {
   const uid = 'spark-trial'; const db = env.authenticatedContext(uid).firestore();
   const adapter = firestoreAccess(uid, db);
-  await adapter.trial();
+  await env.withSecurityRulesDisabled(async context => setDoc(doc(context.firestore(), `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: Date.now() }));
   const trial = await adapter.load();
   assert.equal(trial.expiresAt - trial.trialStartedAt, 7*86400000);
-  await assert.rejects(adapter.trial());
+  await assertFails(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
   await assertFails(updateDoc(doc(db, `users/${uid}/access/main`), {trialStartedAt:serverTimestamp()}));
   await adapter.invite('CEOABERTO');
   const permanent = await adapter.load();
@@ -177,7 +177,7 @@ test('Spark: leaving removes both access and care link atomically, preserves pro
   assert.equal((await adapter.load()).active, false);
   assert.equal((await getDoc(patient)).exists(), false);
   assert.ok(await progress.load());
-  await assert.rejects(adapter.trial());
+  await assertFails(setDoc(doc(db, `users/${uid}/access/main`), { kind: 'trial', trialStartedAt: serverTimestamp() }));
   await assert.rejects(adapter.leaveInvitation());
   await adapter.invite('CEOABERTO');
   assert.equal((await adapter.load()).active, true);
@@ -404,4 +404,95 @@ test('bounded EEG and PPG recordings persist with its result and receipt, with e
   await assertFails(getDoc(doc(env.authenticatedContext('other-eeg-player').firestore(), `users/${uid}/results/eeg-game`)));
   await assertFails(setDoc(doc(db, `users/${uid}/results/oversized`), { ...operation.result, id: 'oversized', eeg: { ...operation.result.eeg, points: '0'.repeat(6001) } }));
   await assertFails(setDoc(doc(db, `users/${uid}/results/raw-eeg`), { ...operation.result, id: 'raw-eeg', eeg: { ...operation.result.eeg, raw: [1,2,3] } }));
+});
+
+test('thematic interests, intermediate stages and partial completion round-trip across devices', async () => {
+  const uid = 'thematic-placement';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  const otherDevice = firestoreProgress(uid, env.authenticatedContext(uid).firestore());
+  await backend.initialize(fresh());
+  const preferences = { interests: ['memory'], movement: 'taps' };
+  await assert.doesNotReject(() => backend.commit({ id: 'interests', kind: 'placement', preferences }), 'save preferences');
+  const trial = { accuracy: 100, questions: 2, hints: 0, skipped: false, assessedLevel: 1 };
+  const stage = { id: 'stage-4', kind: 'placement', exerciseId: 'memory-path', stage: { level: 4, best: trial } };
+  await assert.doesNotReject(() => Promise.all([backend.commit(stage), otherDevice.commit(stage)]), 'save stage');
+  let data = await otherDevice.load();
+  assert.deepEqual(data.profile.placement.preferences, preferences);
+  assert.equal(data.profile.placement.stages['memory-path'].level, 4);
+  await assert.doesNotReject(() => backend.commit({ id: 'path', kind: 'placement', exerciseId: 'memory-path', trial }), 'finish path');
+  await assert.doesNotReject(() => otherDevice.commit({ id: 'pairs', kind: 'placement', exerciseId: 'memory-pairs', trial: { ...trial, skipped: true, questions: 0, accuracy: 0 } }), 'finish pairs');
+  data = await backend.load();
+  assert.equal(data.profile.placement.completed, true);
+  assert.equal(data.profile.gameLevels['motor-target'], undefined);
+  assert.equal(data.profile.totalSessions, 0);
+  assert.deepEqual(data.history, []);
+  await assert.doesNotReject(() => backend.commit({ id: 'thematic-retake', kind: 'placement', preferences: { interests: ['motor'], movement: 'taps' }, trials: { 'motor-target': trial } }), 'save retake');
+  await backend.commit({ id: 'retake-preferences', kind: 'placement', retakePreferences: { interests: ['motor'], movement: 'taps' } });
+  assert.equal((await backend.load()).profile.placement.retakePreferences.interests[0], 'motor');
+  for (const preferences of [{ interests: [], movement: 'taps' }, { interests: ['memory', 'memory'], movement: 'taps' }, { interests: ['memory'], movement: 'other' }, { interests: ['memory'], movement: 'taps', diagnosis: 'not-allowed' }]) {
+    const invalid = structuredClone(data); invalid.profile.placement.preferences = preferences;
+    await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), { schemaVersion: 1, data: invalid, updatedAt: serverTimestamp() }));
+  }
+  const invalid = structuredClone(data); delete invalid.profile.placement.trials['memory-pairs'];
+  await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), { schemaVersion: 1, data: invalid, updatedAt: serverTimestamp() }));
+  const badStage = structuredClone(data); badStage.profile.placement.stages = { 'memory-path': { level: 7, best: trial } };
+  await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), { schemaVersion: 1, data: badStage, updatedAt: serverTimestamp() }));
+  await assertFails(getDoc(doc(env.authenticatedContext('unrelated-thematic').firestore(), `users/${uid}/progress/main`)));
+});
+
+test('all-area preferences and retake stay within the rules budget and preserve initial trials', async () => {
+  const uid = 'all-area-placement';
+  const backend = firestoreProgress(uid, env.authenticatedContext(uid).firestore());
+  await backend.initialize(fresh());
+  const preferences = { interests: ['attention', 'memory', 'language', 'executive', 'motor'], movement: 'unspecified' };
+  await assert.doesNotReject(() => backend.commit({ id: 'all-preferences', kind: 'placement', preferences }), 'all preferences');
+  const ids = ['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
+  const trial = { accuracy: 100, questions: 2, hints: 0, skipped: false, assessedLevel: 1 };
+  for (const id of ids) {
+    await assert.doesNotReject(() => backend.commit({ id: 'stage:' + id, kind: 'placement', exerciseId: id, stage: { level: 4, best: trial } }), 'stage ' + id);
+    await assert.doesNotReject(() => backend.commit({ id: 'trial:' + id, kind: 'placement', exerciseId: id, trial }), 'trial ' + id);
+  }
+  await assert.doesNotReject(() => backend.commit({ id: 'all-retake', kind: 'placement', preferences, trials: Object.fromEntries(ids.map(id => [id, { ...trial, assessedLevel: 7 }])) }), 'eight-game retake');
+  await backend.commit({ id: 'all-retake-preferences', kind: 'placement', retakePreferences: preferences });
+  const saved = await backend.load();
+  for (const id of ids) {
+    assert.equal(saved.profile.gameLevels[id].level, 7);
+    assert.equal(saved.profile.placement.trials[id].assessedLevel, 1);
+  }
+});
+
+
+test('optional condition context round-trips with bounded values and consent', async () => {
+  const uid = 'condition-context';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  await backend.initialize(fresh());
+  const condition = {kind:'stroke',side:'left',mobility:'support',consentVersion:1};
+  const preferences = {interests:['memory'],movement:'unspecified',condition};
+  await backend.commit({id:'context',kind:'placement',preferences});
+  const data = await backend.load();
+  assert.deepEqual(data.profile.placement.preferences.condition,condition);
+  for (const invalid of [{...condition,consentVersion:0},{...condition,side:'invalid'},{...condition,diagnosis:'private'},{...condition,kind:'none'}]) {
+    const next = structuredClone(data); next.profile.placement.preferences.condition = invalid;
+    await assertFails(setDoc(doc(db, `users/${uid}/progress/main`), {schemaVersion:1,data:next,updatedAt:serverTimestamp()}));
+  }
+  await backend.commit({id:'remove-context',kind:'placement',preferences:{interests:['memory'],movement:'unspecified'}});
+  assert.equal((await backend.load()).profile.placement.preferences.condition,undefined);
+  const personal = {kind:'other',side:'unspecified',mobility:'unspecified'};
+  await backend.commit({id:'personal-context',kind:'placement',preferences:{interests:['memory'],movement:'unspecified',condition:personal}});
+  assert.deepEqual((await backend.load()).profile.placement.preferences.condition,personal);
+});
+
+
+test('deletion locks deny old-token writes and trial ledgers are server-only', async () => {
+  const uid='deleting-user'; const db=env.authenticatedContext(uid).firestore();
+  await assertSucceeds(firestoreProgress(uid,db).initialize(fresh()));
+  await env.withSecurityRulesDisabled(async context=>setDoc(doc(context.firestore(),`accountDeletions/${uid}`),{phase:'seats'}));
+  await assertFails(getDoc(doc(db,`users/${uid}/progress/main`)));
+  await assertFails(setDoc(doc(db,`professionals/${uid}`),{ownerUid:uid,name:'Private',active:true,createdAt:serverTimestamp()}));
+  await assertFails(setDoc(doc(db,`users/${uid}/access/main`),{kind:'trial',trialStartedAt:serverTimestamp()}));
+  await assertFails(deleteDoc(doc(db,`accountDeletions/${uid}`)));
+  await assertFails(setDoc(doc(db,'trialUsage/forged'),{used:false}));
+  await assertFails(getDoc(doc(db,'trialUsage/forged')));
 });

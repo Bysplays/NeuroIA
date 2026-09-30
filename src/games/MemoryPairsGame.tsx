@@ -48,7 +48,7 @@ function createDeck(pairs: number, level: number): CardItem[] {
       pairKey: obj.pairKey,
       emoji: obj.emoji,
       label: obj.label,
-      isFlipped: true, // Mantener volteadas durante el preview
+      isFlipped: false, // Reveal on touch; an optional hint can show the deck.
       isMatched: false,
     });
     deck.push({
@@ -56,7 +56,7 @@ function createDeck(pairs: number, level: number): CardItem[] {
       pairKey: obj.pairKey,
       emoji: obj.emoji,
       label: obj.label,
-      isFlipped: true, // Mantener volteadas durante el preview
+      isFlipped: false, // Reveal on touch; an optional hint can show the deck.
       isMatched: false,
     });
   });
@@ -81,8 +81,8 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
-  // Fase de memorización inicial (4 segundos)
-  const [isPreviewPhase, setIsPreviewPhase] = useState(true);
+  // No compulsory opening preview. A requested hint uses the pausable clock.
+  const [isPreviewPhase, setIsPreviewPhase] = useState(false);
   const [previewCountdown, setPreviewCountdown] = useState(config.previewSeconds);
   const countdownTimerRef = useRef<number | null>(null);
 
@@ -100,6 +100,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   const [previewVersion, setPreviewVersion] = useState(0);
   const mismatchTimerRef = useRef<number | undefined>(undefined);
   useEffect(() => {
+    if (!isPreviewPhase) return;
     soundService.speak('Memoriza dónde está cada pareja');
     let remaining = config.previewSeconds;
     const timer = clock.setInterval(() => {
@@ -110,11 +111,13 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     countdownTimerRef.current = timer;
     return () => {
       clock.clearInterval(timer);
-      clock.clearTimeout(mismatchTimerRef.current);
     };
-  }, [clock, endPreview, previewVersion, config.previewSeconds]);
+  }, [clock, endPreview, previewVersion, config.previewSeconds, isPreviewPhase]);
+
+  useEffect(() => () => clock.clearTimeout(mismatchTimerRef.current), [clock]);
 
   const initGame = () => {
+    clock.clearTimeout(mismatchTimerRef.current);
     setStartTime(clock.now());
     setHintsUsed(0);
     const shuffled = createDeck(config.pairs, config.level);
@@ -125,7 +128,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     setMistakesList([]);
     setIsCompleted(false);
     setResult(null);
-    setIsPreviewPhase(true);
+    setIsPreviewPhase(false);
     setPreviewCountdown(config.previewSeconds);
     setPreviewVersion(version => version + 1);
   };
@@ -152,7 +155,6 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       if (cardA.pairKey === cardB.pairKey) {
         // ¡Coincidencia!
         soundService.playSuccess();
-        soundService.speak(`¡Pareja de ${cardA.label}!`);
         const matchedCards = newCards.map((card, i) =>
           i === firstIdx || i === secondIdx ? { ...card, isMatched: true } : card);
         setCards(matchedCards);
@@ -224,7 +226,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   return (
     <ExerciseWrapper
       exerciseId="memory-pairs"
-      title={`Parejas de Memoria (${matchedCount}/${config.pairs} Parejas)`}
+      title="Parejas de memoria"
       domain="memory"
       instructionText={
         isPreviewPhase

@@ -4,7 +4,69 @@ This is the canonical TODO. The [SDD](SDD.md) defines the target behavior,
 architecture, dependencies and acceptance criteria. Existing code is not proof
 of a production deployment. Keep project guidance in English and UI copy in Spanish.
 
+## Owner interface review
+
+- [x] Unauthenticated home approved.
+- [x] IGAPE funding page approved.
+- [x] About page approved.
+- [x] Legal/privacy page presentation approved; outstanding legal content remains tracked below.
+- [x] Login, registration, recovery and error notification presentation approved by owner.
+- [x] Subscription presentation approved on mobile and desktop, including plan,
+  benefit checklist and invitation modal. New access choices cancel
+  pending checkout automatically; completed payments remain protected.
+  Presentation approval does not certify live payments or change release requirements.
+- [ ] Review authenticated home and catalog with the owner.
+- [x] Preserve the original trial start across account recreation; allow recovery
+  of remaining days with the same verified email without extending expiry.
+- [x] Implement account deletion with typed confirmation, recent identity verification,
+  server Stripe checks, resumable cleanup and pseudonymous trial-use retention.
+- [x] Prepare live account-lifecycle infrastructure: Worker modules/cron published
+  with deletion enabled, stable trial secret configured and scoped Auth IAM granted.
+  All four collection-group indexes confirmed READY; no real account was deleted.
+- [x] Remove the two owner-approved trial access records, retaining both pseudonymous
+  trial-use markers atomically. Read-back confirmed both removals and markers;
+  profiles, results, invitations and Auth accounts were preserved.
+- [x] Publish the account-deletion Firestore rules to `ceoaberto-neuroia` at the
+  owner's explicit request. The active rules match the repository file.
+- [x] Enable ACCOUNT_DELETION_ENABLED on the deployed Worker; retain both cleanup
+  and billing cron triggers. Resume offers say “Seguir prueba gratuita”.
+- [ ] Complete the frontend migration.
+  The old published frontend still attempts direct trial grants, now denied by
+  the deployed rules; publish the Worker-backed trial flow to restore new web trials.
+  GitHub authorization and the required explicit merge approval remain pending. Verify with a disposable account
+  to verify the full live deletion lifecycle; backend activation is complete.
+- [ ] Review refreshed onboarding preferences and assessment entry with the owner;
+  visual styling now matches account entry. Existing assessment acceptance checks remain open.
+
+- [ ] Rename the Stripe sandbox product attached to `price_1UItenAWZtSdGYThrex9dsNh`
+  to **NeuroAI**, as requested by the owner. Keep the price and billing interval.
+  Requires authenticated Stripe Dashboard/API access; no remote change performed.
+
+- [x] Pending checkout no longer makes CEOABERTO fail silently: Usar mi código
+  cancels the pending checkout before redemption; completed-payment/cancellation
+  errors stop redemption and remain visible. Isolated browser regression covers both paths.
+
+## Project access handoff
+
+- [ ] Give `david@ceoaberto.com` access to the NeuroIA GitHub repository. Confirm
+  the appropriate repository role and verify access without exposing unrelated
+  repositories; ownership transfer is a separate decision.
+- [ ] Give David access to the NeuroIA Stripe account with the agreed role. Verify
+  access to the relevant sandbox/live environments and billing administration as
+  needed; do not infer that an invitation transfers account ownership or payouts.
+
 ## Current remaining scope
+
+- [x] Prepare three independent clinical-blue, tablet-first concepts using Mobbin
+  references from Kit, Ahead and Brilliant. The review board is at
+  `/design/concepts/`; see [DESIGN-CONCEPTS.md](DESIGN-CONCEPTS.md).
+- [x] Owner selected A — Calma editorial, with the clinical-blue palette.
+- [x] Apply A to the application shell, public entry, home, onboarding, catalog,
+  instruction pages, game controls, activity and account surfaces. Shared tokens
+  also style professional screens. Remove orientation gating and automatic fullscreen.
+- [ ] Complete client/device acceptance across signed-in professional, billing and
+  recovery flows. Local component screenshots do not replace a full production
+  account review; see DESIGN-CONCEPTS.md for the original acceptance matrix.
 
 The owner confirms real Muse 2 connection, EEG/PPG, battery, reconnection and saved
 charts; the payment/seat lifecycle (purchase, renewal, failed payment, cancellation
@@ -13,19 +75,135 @@ installation and fullscreen on the tested devices. Sandbox is sufficient for the
 current stage; this is not confirmation of live-money payments. Specific OS/browser
 versions were not supplied, so do not infer a universal compatibility matrix.
 
-The remaining work, in the owner's order, is:
+The client first-review items below are the immediate planning focus. The client
+estimates roughly one week before an IGAPE report needs final screenshots; the
+message supplies no exact deadline, so confirm the date before scheduling a release.
+This update records requested work, not authorization to implement, merge or deploy it.
 
-1. Narration: finish the 91 clips, audition them and resolve commercial licensing.
-2. Notes, reports and local AI: implement the pending workflows.
-3. Finishing work: the two recorded interface issues, bundle optimization and
-   account/data deletion management.
+The earlier priorities remain open: finish/audition the 91 narration clips and
+resolve licensing; implement notes/reports/local AI; resolve the existing interface
+issues, bundle optimization and account/data deletion management. The client review
+adds to this inventory without reopening the owner-confirmed checks above.
 
-The detailed inventory below retains future extensions and specific acceptance
-conditions; it does not reopen the owner-confirmed checks above.
+## Client first review — next delivery
+
+Source: client feedback supplied by the owner on 2026-09-29. Items remain open
+unless explicitly checked below. Reported behavior is not a verified reproduction.
+Work continues on the original design; the Ahead experiment is a protected local
+archive, not the basis for these changes. The order below is a proposed sequence,
+subject to the confirmed deadline and available client materials.
+
+### Delivery dependencies and recovery
+
+- [x] **CR-01 — IGAPE attribution and logos (local).** Complete owner-supplied
+  notice appears on the IGAPE information page, unmodified, with a selectable HTML transcript. Image loading, mobile layout and About focus
+  return checked. Client approval of publicity compliance/placement remains a
+  release check; this is not a legal certification.
+- [ ] **CR-02 — Recovery and review environment.** Inventory the deployed version,
+  source commit, existing remote backups and data/configuration recovery procedures;
+  establish an isolated review URL and document how to restore the last approved
+  release before publishing changes. Answer the client's backup question with
+  verified facts. Current evidence: the Ahead source is committed on
+  `codex/neuroia-ahead-redesign`, with local tag
+  `archive/neuroia-ahead-redesign-2026-09-29`, AGENTS guidance and a local Git hook.
+  Local main is `801dd54`; origin points to `git@github.com:Bysplays/NeuroIA.git`.
+  The checked-out change is isolated on `codex/neuroia-blue-concepts`. Neither
+  the deployed commit nor a separate hosted restore URL has been verified.
+  This does **not** establish a hosted backup website, remote archive or database
+  backup, and it is not a backup of the currently deployed original design.
+- [ ] **CR-03 — IGAPE delivery evidence.** Confirm the actual report deadline,
+  required screenshot list, devices/orientations and who approves the final build.
+  After the agreed fixes and branding are approved, capture the final deployed
+  version and record its commit/URL. Use consented or clearly identified sample
+  data; do not manufacture participant results for the report.
+
+### Initial assessment: correctness and pacing
+
+- [x] **CR-04 — Interests before assessment (implemented locally).** Three accessible
+  steps select practice areas, an optional taps-only preference and optional condition context; thematic trials
+  follow those choices. Preferences, passed stages and completed trials resume
+  through the existing durable progress queue. Unselected games stay untested;
+  choices can be edited before completion and through a selective retake afterward.
+  Invitation access requires explicit sharing consent; personal access has no sharing checkbox. No free-text health information is collected. See [implementation,
+  Mobbin references and checks](PLACEMENT.md).
+- [x] **CR-04 rules —** Published and verified onboarding preferences/stages and
+  bounded optional condition context rules in `ceoaberto-neuroia` after demo tests.
+  Preserved the existing production level-evidence validation.
+- [ ] **CR-04 release —** Owner review, target-device checks and frontend publication.
+- [ ] Approve health-context purpose, consent wording, retention/deletion and professional
+  disclosure before public release; the implemented consent checkbox is not legal certification.
+- [x] **CR-05 — Pressure-free assessment wording (local).** Trial controls say “A tu ritmo”; numeric levels are retained only in ordinary play and the final evidence summary. No numeric trial announcement is narrated.
+
+- [x] **CR-06 — Misleading results action during trials (local).** Naming, words and categorization use “Continuar” during assessment. Ordinary completion keeps its results action; placement advances after durable evidence.
+
+- [x] **CR-07 — Simon failure advances (local).** A wrong trial input saves one failed attempt and ends that ladder. No forced replay or apologetic retry prompt; ordinary practice retains replay. Browser regression verifies single completion.
+
+- [x] **CR-08 — Pairs reveal on touch (local).** All play starts face down with immediate click/keyboard reveal. Optional timed preview remains a counted hint and can be ended early. Mismatch timers clean up on hint, restart and unmount.
+
+- [x] **CR-09 — Shorter assessment (local).** New ladders stop after at most two stages (1/4), with conservative prior evidence on failure. Legacy higher stages remain compatible. Further calibration and client timing acceptance remain open; this is not a validated cognitive measurement.
+
+### Public entry, registration and service access
+
+- [x] **CR-10 — Public explanation (local).** The unauthenticated app home presents a short non-medical introduction and Comenzar. Full product information and IGAPE funding are accessible on separate pages before authentication.
+
+- [x] **CR-11 — Visible registration (local).** Comenzar opens sign-in from the unauthenticated home; Crear cuenta is visible on the access page. Inline forms preserve personal/professional intent, Google entry, confirmation and recovery.
+
+- [x] **CR-12 — Purchase before assessment (local).** The unauthenticated home has no purchase pitch; existing signed-in access choices and Mi acceso expose the authenticated subscription flow before placement and from Mi cuenta. Server availability and Stripe confirmation remain required; repeat real Sandbox lifecycle acceptance before release.
+
+- [x] **CR-13 — Home sign-out (local).** Visible Cerrar sesión in Header and Mi cuenta reuses the existing logout; queued progress persistence is unchanged.
+
+- [x] **CR-14 — Muse label (local).** Visible Conectar Muse / Conectando Muse / Muse conectado uses the same service and unsupported-browser explanation. Check physical hardware before release.
+
+- [ ] **CR-15 — HIGH PRIORITY: branded authentication email URLs / support follow-up.**
+  The owner has submitted a Firebase Support ticket about HTTP 400
+  `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED` when updating
+  `notification.sendEmail.callbackUri`. Await the response; ticket ID/link has not
+  been supplied. The error reproduces both in Firebase Console and through the
+  official admin API using Firebase CLI OAuth credentials. Read-back confirms
+  that the original email action URL remains unchanged.
+
+  `auth.neuroia.es` is connected to Firebase Hosting with valid HTTPS; both auth
+  endpoints respond successfully. The owner confirmed DNS, authorized domain and
+  Google OAuth callback configuration. The local authDomain override is enabled;
+  the API-key referrer restriction has been corrected for the new helper, and an
+  isolated local popup reaches Google sign-in. Full account sign-in remains to verify;
+  the missing local `VITE_BILLING_API_URL` has also been restored and browser CORS
+  connectivity checked. Verify entry through AccessGate and cloud progress with
+  the owner's existing account; no real account was used for automated checks.
+  production remains unchanged. Keep existing email links working while the
+  ticket is unresolved. Setup and rollback are in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+  After Support responds, verify the permitted callback update and read it back.
+  Check newly issued verification and password-reset emails use
+  `https://auth.neuroia.es/__/auth/action`, complete both flows, exercise expired
+  and reused links, and verify return navigation and Google sign-in on the tested
+  browsers. Confirm existing accounts and progress remain intact. Close this item
+  only after the actual email flows pass, not merely on ticket resolution or an
+  HTTP 200 from the helper endpoint. Production activation remains a separate
+  deployment step.
+
+### Game copy and reinforcement
+
+- [x] **CR-16 — Word-completion naming (local).** Active catalog and instruction title use Completar palabras; legacy IDs and saved history are unchanged. New spoken wording uses the existing recording fallback.
+
+- [x] **CR-17 — Answer feedback revised by owner.** Removed transient praise bubbles and spoken congratulations. Keep in-place answer feedback and ordinary results; continuation actions are stable and click/success effects quieter.
+
+### Verification before client approval
+
+Reproduce CR-06–CR-09 in assessment separately from ordinary practice. Changes to
+placement evidence or persistence require the existing difficulty/progress tests
+and demo Firestore rules/adapter suite, including delayed saves and resume. Verify
+entry/payment/auth changes in their supported test environments, and visually
+review the agreed phone/tablet/orientation layouts with large text, touch and
+keyboard. Refresh affected DESIGN, CONTENT, SDD and provider guidance when the
+corresponding decisions are implemented. Do not mark client items complete solely
+from compilation or local source inspection. Merge and deployment still require
+explicit authorization.
 
 ## Product priorities
 
-The order below follows the owner's priorities. Dependencies can be implemented
+The table below retains the earlier product priorities; the client review above
+is the immediate delivery planning focus. Dependencies can be implemented
 first; Muse 2 uses the selected MuseJS Web Bluetooth adapter. No AI model, official SDK,
 voice provider or new illustration set has been selected by this planning work.
 
@@ -40,7 +218,7 @@ voice provider or new illustration set has been selected by this planning work.
 | 7 / BRAND | Supplied new logo | Implemented from the [original PNG](assets/brand/supplied-mark.png) | App, wordmark, favicon and installation variants use the supplied mark |
 | 8 / ART | More realistic illustrated/pictogram game objects | Approved towel/table style integrated across 80 objects, standalone stimuli and motor tokens | Physical-tablet recognition feedback |
 | 9 / LEVELS | Difficulty 1–10 | Versioned 1–10 configuration for all games, saved level and timed same-game promotion | User calibration and physical-device checks |
-| 10 / PLACEMENT | Guided initial level assessment | Eight shuffled games with 1/4/7/10 placement ladders, separate from access onboarding | Physical-device checks |
+| 10 / PLACEMENT | Guided initial level assessment | Selected games grouped by interest with bounded 1/4 placement with legacy 7/10 compatibility, separate from access onboarding; thematic entry implemented locally (CR-04); pacing changes implemented locally (CR-05–CR-09) | Client review acceptance and physical-device checks |
 | 11 / RETIRE | Remove daily action sequencing | Implemented | Eight playable games; Organization uses categorization; historical names, filters and colors retained |
 
 ### Current implementation sequence
@@ -289,12 +467,15 @@ release issue is lost during prioritization.
 
 ## Unresolved interface issues
 
-- [ ] Make the header home action close the catalog when already in the
-  dashboard view. The catalog currently keeps its internal selection state;
-  its own “Volver al inicio” action works.
+- [x] Header home action returns to Hoy from the catalog and other dashboard tabs.
+  Workspace owns tab selection; returning home does not remount the dashboard or
+  regenerate the suggested daily queue.
 - [ ] Reproduce the reported blank background in object naming. It was not
-  reproduced through the catalog; inspect the domain entry and modal/scroll
-  state. Do not mark fixed without a reproduction and verification.
+  reproduced through the current catalog at 390, 820, 1280 or 844×390, including
+  answering, advancing and help/resume; sampled image assets loaded successfully.
+  Current home area shortcuts do not expose Language, so the historical domain
+  entry cannot be exercised there. Keep open for a reproducible owner path/device;
+  do not mark fixed from these negative checks.
 
 ## Accounts and professional access
 
@@ -312,7 +493,7 @@ release issue is lost during prioritization.
   read-only analytics and participant departure with code rotation.
 - [ ] Verify professional credentials before adding any clinical permissions.
 - [ ] Add private clinical notes and patient-facing instructions with distinct
-  permissions, account deletion, and explicit merge of retained local backups
+  permissions and explicit merge of retained local backups
   into an already-existing cloud account. Initial empty-account import is available.
 
 ## Onboarding and subscriptions
@@ -355,3 +536,29 @@ release issue is lost during prioritization.
   extend that confirmation to unspecified OS/browser combinations.
 - [ ] Check longest account/session text and very large text on target devices;
   preserve accessible scrolling for content that cannot fit.
+
+## Calma local verification and release limits
+
+- Unit suite: 93 tests passed; demo Firestore/rules/proposals/Worker REST: 31 passed.
+- Demo Auth suite: 3 passed, including automatic verification delivery and retry after failure; build and strict lint pass.
+- Isolated placement browser suite: 9 passed, including delayed evidence and reload.
+- Interface suite: 12 passed (11-suite run plus focused home-navigation regression), covering
+  three widths, eight instruction/play screens, funding
+  image/transcript, About focus return, keyboard pairs, failed Simon, trial
+  continuation, visible reinforcement, target bounds and enlarged text.
+- Production build succeeds with the existing large-bundle advisory (main chunk
+  remains above 500 kB); bundle splitting remains a performance follow-up.
+- No deployment, real-account writes, database backup, live-payment verification
+  or physical-device Bluetooth/installation verification is implied by these checks.
+- New instruction copy can fall back to browser speech; the existing pending
+  recordings and licensing items remain open.
+
+## Privacy notice release requirements
+
+- [x] Owner confirmed CEO Aberto S.L., NIF B36232361, Vigo address and
+  david@ceoaberto.com as privacy contact; included in the legal page.
+- [ ] Complete rights-request handling, lawful bases (including EEG/PPG), retention
+  periods/criteria, provider agreements and international transfer safeguards.
+  Current legal page describes verified app behavior, not a complete approved policy.
+
+- [x] Keep long category labels inside their buttons with wrapping and hyphenation; verified the level-10 narrow/short viewport fixture with large text.

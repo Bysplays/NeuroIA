@@ -6,20 +6,15 @@ import { getInitialProfile } from '../src/services/storageService.ts';
 import { shuffle } from '../src/services/gameObjectPool.ts';
 import type { ExerciseResult } from '../src/types/index.ts';
 const result = (correctAnswers=3, totalQuestions=3): ExerciseResult => ({ id:'trial', exerciseId:'word-completion', domain:'language', date:'2026-09-28', accuracy:Math.round(correctAnswers / totalQuestions * 100), correctAnswers,totalQuestions, durationSeconds:20, score:0, feedbackMessage:'' });
-test('placement advances 1, 4, 7, 10 and retains the last passed stage', () => {
-  assert.deepEqual(ASSESSMENT_LEVELS,[1,4,7,10]);
-  let best;
-  for (const [i, level] of ASSESSMENT_LEVELS.entries()) {
-    const failure = advanceAssessment(level, best, result(0));
-    assert.equal(failure.finished?.assessedLevel, i ? ASSESSMENT_LEVELS[i-1] : 1);
-    const outcome = advanceAssessment(level,best,result());
-    assert.equal(outcome.next, ASSESSMENT_LEVELS[i+1]);
-    best=outcome.best;
-    if(level===10) assert.equal(outcome.finished?.assessedLevel,10);
-  }
+test('new assessment stops after two stages and retains conservative evidence on failure', () => {
+  assert.deepEqual(ASSESSMENT_LEVELS,[1,4,7,10]); // Saved legacy stages remain valid.
+  const first = advanceAssessment(1, undefined, result());
+  assert.equal(first.next,4);
+  assert.equal(advanceAssessment(4,first.best,result()).finished?.assessedLevel,4);
+  assert.equal(advanceAssessment(4,first.best,result(0)).finished?.assessedLevel,1);
+  assert.equal(advanceAssessment(4,first.best).finished?.assessedLevel,1);
+  for (const level of [7,10] as const) assert.equal(advanceAssessment(level,undefined,result()).finished?.assessedLevel,level);
   assert.equal(advanceAssessment(1).finished?.skipped,true);
-  const previous = advanceAssessment(4,undefined,result()).best;
-  assert.equal(advanceAssessment(7,previous).finished?.assessedLevel,4);
   assert.ok(advanceAssessment(1,undefined,result(199,200)).finished);
   assert.ok(advanceAssessment(1,undefined,result(0,0)).finished);
 });

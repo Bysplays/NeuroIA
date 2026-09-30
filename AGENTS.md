@@ -58,7 +58,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/ProfessionalPageHeader.tsx` | Shared icon-led title and separate back/participant/action row for professional sessions and standalone statistics |
 | `src/components/ProfessionalSessions.tsx`, `AssignedSessions.tsx`, `src/services/assignedSessions.ts` and `firestoreSessions.ts` | Immutable professional game proposals, per-step result reconciliation and participant play; see `docs/PROFESSIONALS.md` |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Personal account entry before progress and games |
-| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
+| `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, Worker trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
 | `vendor/cloudflare/` | Cloudflare Stripe backend, signed webhooks, daily reconciliation and Firestore REST transactions; see `vendor/cloudflare/README.md` |
 | `vendor/firebase/functions/` | Previous Firebase billing backend and administrator-only professional ownership script |
 | `src/App.tsx` | View state, profile refresh, game dispatch, daily-plan progression |
@@ -66,13 +66,17 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/services/productCopy.ts` and `src/components/ProductInformation.tsx` | Supplied public presentation and notice, accessible from login and dashboard |
 | `src/components/Dashboard.tsx` | Home, entry points to areas and all exercises |
 | `src/components/ExerciseCatalog.tsx` | Eight-game catalog and area filters |
+| `src/services/dailySession.ts` | 56 named three-game combinations, deterministically selected by account and local date for home and daily play |
 | `src/services/exerciseCatalog.ts` | Eight active exercise definitions and short summaries |
 | `src/services/activityExercises.ts` | Historical names and stable chart styles, including retired daily sequencing |
+| `src/components/ExerciseIllustration.tsx` | Eight decorative SVG compositions for game introductions; not playable stimuli |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
+| `src/components/PlacementPreferences.tsx` and `src/services/placementPreferences.ts` | Two-step interests/functional movement choices and thematic assessment selection; see `docs/PLACEMENT.md` |
 | `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
 | `src/services/gameSession.ts` | Shared session context and `useGameSession` hook, separate from component exports |
 | `src/services/memorySequence.ts` | Memory-round sequence generation, called only on round start |
+| `src/components/FittedGameArea.tsx` | Measures and scales the playground within the available viewport, keeping the title, progress and navigation outside it |
 | `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and repeat |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
@@ -82,7 +86,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/services/appearance.ts` | Applies restored and live appearance settings before paint |
 | `src/services/firestoreProgress.ts` | Firestore transactions, retry receipts and live updates |
 | `src/services/progressSnapshot.ts` | Orders server snapshots by timestamp to reject delayed older data |
-| `src/components/CloudProgress.tsx` | Cloud loading, import choice and save-status boundary |
+| `src/components/CloudProgress.tsx`, `ProgressSaveNotice.tsx` | Cloud loading, import choice and dismissible pending-save notification |
 | `src/services/soundService.ts` and `speechVoice.ts` | Shared audio, narrator controls, and Spain-voice selection |
 | `src/services/achievements.ts` | Cumulative achievement conditions |
 | `src/components/AchievementShowcase.tsx` | Standalone badge collection and details |
@@ -118,6 +122,7 @@ npm run dev
 npm run build
 npm run lint
 npm test
+npm run test:placement # isolated interest-onboarding browser checks
 npm run test:firestore
 npm ci --prefix vendor/firebase/functions # when backend dependencies are needed
 npm run test:onboarding
@@ -194,7 +199,7 @@ Existing unscoped data is preserved and never imported automatically.
 Settings expose text size, the Cozy style (`contrast: standard`) and a subscription
 section (`SubscriptionSettings`) using the existing access service and Stripe portal.
 Legacy speech, hand-position and contrast values remain compatible; their controls
-are hidden. Audio attribution is in “Sobre NeuroIA”.
+are hidden. Audio and MuseJS attribution are in “Aviso legal”, under “Licencias”.
 Narrator preference remains device-wide and managed by the sound service. Preserve compatibility with existing profiles and history. `leftSideAnchor` is
 a legacy persisted setting, defaults to false, and is neither rendered nor
 configurable; keep the field for compatibility without restoring its visual guide. Use
@@ -243,7 +248,8 @@ as a pronunciation check. The free-plan recordings require attribution and
 are not licensed for commercial release. `src/services/narrationPlayer.ts` owns
 playback, cancellation and single completion; `speechRecordings.json` is the
 compact text-to-file lookup regenerated by the indexer. Preserve missing-text
-fallback and independent narrator/effect toggles. Asset URLs use the Vite base.
+fallback. SoundToggle now controls the master mute for both narration and effects;
+each page load starts muted until explicit activation. Asset URLs use the Vite base.
 Run `node --experimental-strip-types --test tests/narrationPlayer.test.ts` for
 playback behavior, alongside voice-selection and game-clock tests.
 
@@ -279,7 +285,7 @@ registration and recovery with recoverable Spanish errors. Its local
 personal/professional switch passes the selected intent through either sign-in
 callback and persists it before email verification so reload retains the workspace.
 `EmailVerification` precedes both workspaces for unverified password accounts;
-it sends only on explicit action and reloads the user plus ID token before entry.
+registration sends one verification email immediately after account creation; restored sessions never auto-send. Delivery failure preserves the account and offers Reenviar. Verification polls every 10 seconds while visible and online, also on focus/reconnect, with cleanup and account-identity guards. Unverified background checks stay silent; verified checks refresh the ID token before automatic entry. Manual checking remains available.
 Firestore rules and the Worker require `email_verified` for password-provider tokens;
 publish those changes before enabling Email/Password in the real project.
 Google access retains its existing behavior. Settings reuse `AccountPassword`
@@ -300,13 +306,13 @@ appearance; the shared modal hides personal subscription controls.
 `ProductInformation` provides the switch through its optional children slot.
 The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
 localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the
-auth session through the bottom of Settings (not the home header). Entry and
+auth session from the visible home header, Mi cuenta or Settings. Entry and
 recovery screens retain their logout exits. After Firebase restores the UID, cached appearance is applied from
 that account before cloud loading; cached identity never grants access. `StorageService.setAccount` is set by the auth observer; cache
 and pending writes are scoped to the UID. Auth changes unmount the old boundary,
 unsubscribe listeners, and prevent late callbacks from touching the next account.
 
-`AccessGate` is lazy loaded after authentication and validates server-owned access through the authenticated Worker `/access` endpoint before mounting `CloudProgress`. Its server-time confirmation lasts at most 60 seconds, capped by expiry, with 30-second refresh; failure, offline or unconfirmed resume closes play. The Worker API URL is required independently of the purchase feature flag. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
+`AccessGate` is lazy loaded after authentication and validates server-owned access through the authenticated Worker `/access` endpoint before mounting `CloudProgress`. Its server-time confirmation lasts at most 60 seconds, capped by expiry, with 30-second refresh; failure, offline or unconfirmed resume blocks play and pauses its clock through `AccessSuspendedContext`. After initial approval, temporary revalidation keeps the workspace mounted behind an inert, hidden boundary and a blocking dialog. `AccessRecoveryContext` lets an active GameSession own one persistent pause/recovery modal through rechecks; it disables continuation until server confirmation and exposes retry/logout on failure. Other views retain AccessGate’s recovery modal. Confirmed denied access unmounts it; cached access never grants play. The Worker API URL is required independently of the purchase feature flag. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
 before mounting games; an inaccessible/offline initial load shows retry/logout,
 never an empty replacement profile. First cloud initialization offers an explicit
 import of account-local activity or the older unscoped profile when present.
@@ -323,7 +329,7 @@ receipts atomically. Results are idempotent by their existing exercise-result ID
 settings patch individual fields, with the last committed same-field change winning
 in the backend. `settings.pageStyle` is optional for older profiles: absent means `default`, and
 `cozy` explicitly selects the original paper style. Optional `showCompanions`
-defaults to true for older profiles and controls the decorative companion family throughout the interface via
+defaults to true for older profiles; its retired settings control is no longer rendered. The stored value still controls remaining legacy decorative companions via
 `applyAppearance` and `data-companions`; exercise stimuli remain visible. It uses the same settings
 cache, queue and cloud patch as other preferences; `contrast` remains independent.
 Locally edited fields stay pinned in the current `ProgressSync`
@@ -359,10 +365,10 @@ Totals remain self-reported, not medically verified. Publish the reviewed rules
 and Worker before this frontend; frontend builds deploy neither. See
 `docs/AUTHENTICATION.md` and `docs/TODO.md` for remaining release checks.
 
-`LandscapeGate` uses the portrait viewport media query and `ModalFrame`. Its
-context in `src/services/orientation.ts` pauses `GameSession` and the workspace
-fatigue timer without discarding answers. Locking is attempted only from an
-explicit fullscreen button, with a manual-rotation fallback.
+Portrait and landscape render the same workspace with responsive composition.
+There is no orientation gate or orientation-based clock pause. Fullscreen is
+explicit and never locks orientation; help, settings and background visibility
+still pause the game clock without discarding answers.
 
 `npm test` runs focused unit coverage; `npm run test:firestore` uses project
 `demo-neuroia` only and checks isolation, real transactions, idempotency, import
@@ -378,7 +384,7 @@ delivery, project password policy and physical-device OAuth remain release check
 
 ## Installable web metadata
 
-`public/manifest.webmanifest` defines standalone display, landscape preference,
+`public/manifest.webmanifest` defines standalone display, any-orientation preference,
 relative start URL/scope/ID and PNG icons for Android/tablets. `index.html` links
 the manifest and the 180px Apple touch icon; Vite rewrites their URLs for Pages.
 Keep manifest URLs relative so both `/NeuroIA/` and custom-domain roots work.
@@ -395,7 +401,7 @@ profile creation/import and is never updated by the settings input.
 
 ## Account activity statistics
 
-`ActivityStatistics` is embedded in the player dashboard’s Estadísticas tab, with an additional Logros tab rendering `AchievementShowcase`. Primary `TabletTabs` navigation uses a portal into Header’s navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
+`ActivityStatistics` is embedded in the player dashboard’s Actividad tab, with an additional Logros tab rendering `AchievementShowcase`. Primary `TabletTabs` navigation uses a portal into Header’s fixed bottom navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
 the shared `data-style` attribute and palette tokens; no separate theme state.
 `activityStats.ts` deduplicates results and computes local-day per-exercise means.
 It maps historical result IDs `visual-scan`, `daily-seq` and `motor-coord` to
@@ -420,6 +426,13 @@ No new writes, authorization rules or progress storage are introduced.
 `GameExercise` dispatches the same eight implementations for ordinary and placement play.
 `PlacementOnboarding` gates only player Workspace after access/cloud load. It runs
 unscored assessment stages, using durable `placement` operations in ProgressSync for each finished game ladder.
+`PlacementPreferences` precedes trials. It saves interests and an optional functional
+movement preference under `placement.preferences`, using the existing `placement`
+operation and receipt kind. `placement.stages` preserves passed ladder stages.
+Only chosen games are required for completion; untested games get no fabricated
+trial or level. Legacy placement without preferences still requires all eight.
+Selective retakes keep original trials and nonselected levels; accepted choices
+are stored in `placement.retakePreferences`. See docs/PLACEMENT.md for rules rollout.
 `profile.placement` records bounded per-game evidence; optional `profile.gameLevels`
 contains provisional levels/evidence until the final trial marks placement complete.
 The reducer, adapter and Firestore rules use the existing atomic progress/receipt
@@ -466,13 +479,13 @@ navigation. `useViewportPanel` measures the height below surrounding toolbars an
 updates on resize; its min-height allows accessibility overflow. `useCompactViewport`
 reduces page sizes in short windows. Keep viewport rules in interface.css and
 game geometry in games.css; never hide overflow to simulate a fit.
-`FullscreenButton` and `services/fullscreen.ts` share explicit entry/exit and the
-once-per-page first-game Start attempt. Browser rejection must not block play.
-Orientation-lock rejection retains fullscreen and allows manual rotation.
+`FullscreenButton` and `services/fullscreen.ts` share explicit entry/exit. No game
+start requests fullscreen or orientation lock. Browser rejection must not block play.
 Run `npm test` for the fullscreen retry/exit contract; verify actual fullscreen
 entry, exit, tabs, pagination and dialog focus in an isolated browser context.
 
-Placement starts GameSession with `autoStart` for the current 1/4/7/10 stage in a shuffled game order.
+Placement starts GameSession with `autoStart` for its current stage in the selected thematic order.
+New ladders stop after at most levels 1 and 4; saved legacy 7/10 stages remain valid.
 Only the welcome and final level summary require progression buttons. Advance
 after the current trial appears in the parent progress snapshot; do not infer
 missing evidence or start the next game before that update. Manual help and pause
@@ -483,8 +496,8 @@ slot through a React portal. The slot sits beside manual help on the bottom
 navigation row (wrapping directly above it on narrow phones), keeping the current-object narration callback owned by the game.
 
 GameSession shares the viewport header and assistance/navigation footer between
-all placement and ordinary games, including daily sessions. Instruction cards reuse
-the shared `placement-*` layout classes without separate instruction-card styles; starting instructions and difficulty selection remain available outside placement. Narration uses the session instruction;
+all placement and ordinary games, including daily sessions. Instruction pages reuse
+the shared `placement-*` classes with responsive game-specific composition; starting instructions and difficulty selection remain available outside placement. Narration uses the session instruction;
 classification supplies current-object narration through the assistance portal.
 
 Object naming and word completion use shared instruction narration without hint or answer-reveal controls. New results preserve the hintsUsed field with a value of zero.
@@ -510,7 +523,7 @@ do not write all trials and levels together (Firestore expression budget).
 Nivel activity tab receives `gameLevels` from the current/authorized participant
 profile; `levelStatistics.ts` builds dated played-level series from archived results.
 
-`placementAssessment.ts` owns the 1/4/7/10 assessment ladder. New final trials carry
+`placementAssessment.ts` owns the two-stage (1/4) assessment and legacy 7/10 compatibility. New final trials carry
 optional `assessedLevel` (1, 4, 7 or 10; legacy 5 remains valid); trials without it keep the legacy mapping.
 PlacementOnboarding randomly interleaves unfinished games after each assessment turn
 (single round except motor-target, which uses its full level-specific target count), keeping
@@ -553,3 +566,102 @@ before deploying the adapter frontend; existing read permissions and permanent r
 apply. See [EEG handoff](docs/eeg/README.md) for the adapter contract, retention,
 bounds and hardware acceptance. Tests: `tests/eeg.test.ts`, `tests/muse.test.ts` and the EEG/PPG transaction
 case in the demo Firestore rules suite; no production simulated data or users.
+
+
+## Interest-onboarding verification
+
+`npm run test:placement` runs Playwright on port 5197 against
+`tests/placement/index.html`. The fixture mounts real onboarding/game components
+with a ProgressSync test backend and fixture-only sessionStorage; it is not imported
+by the production entry. Browser requests are restricted to local assets and fonts.
+It covers selected areas, optional movement, changing choices, keyboard input,
+large text, contrast, delayed parent updates, reload, actual target-stage completion,
+skip and retake cancellation. Server persistence and permissions use the real demo
+Firestore adapter/rules tests separately; never seed a real account for screenshots.
+
+## Independent design concepts
+
+`design/concepts/index.html` is a development-only review board with three proposed
+clinical-blue directions, real tablet-sized iframes and sample-only navigation.
+It is not imported by the production entry and never connects to auth, payments
+or progress services. Its only application component import is the read-only
+`GameObject` illustration renderer. See `docs/DESIGN-CONCEPTS.md` for references,
+scope, limits and the selection gate requested by the owner. Do not treat the
+prototype or its sample results as implemented production behavior.
+
+## Calma editorial and client-review entry
+
+`Brand` owns the shared transparent wordmark; `PracticeMotif` is CSS decoration,
+not a game stimulus. Default appearance uses clinical-blue Calma tokens and Manrope;
+`pageStyle: cozy` remains compatible as Papel. See docs/DESIGN.md.
+`ProjectFunding` presents the unmodified owner-supplied IGAPE notice, an HTML transcript on the IGAPE information page and About. Provenance lives in
+`docs/assets/images/institutional/README.md`.
+`LoginScreen` starts on the unauthenticated app home and switches to inline email forms.
+`OnboardingModal` retains its existing API but now renders the access-choice page.
+`PlanButton` opens existing subscription management before placement and from
+Mi cuenta. Billing availability and entitlement checks remain server-owned.
+Dashboard passes its displayed exercise queue to the existing daily-plan callback.
+`GameSession.feedback` owns brief non-blocking correct-answer status using its
+pausable timer. Assessment failure in Simon finishes once; ordinary replay remains.
+Pairs start face down; voluntary preview remains a counted hint.
+
+`tests/interface/` is an isolated real-component browser fixture, never imported
+by the production entry; it stores results only in React state and blocks external
+network in the suite. Run `npm run test:interface` for entry/funding, eight-game
+layout, keyboard pairs, trial failure and fullscreen-regression checks. Screenshots
+are written to `/tmp`, not committed. `npm run test:placement` checks preference
+persistence and delayed evidence with its isolated backend.
+
+`InformationPage` renders IGAPE, About and the legal notice as ordinary pages with
+a shared Brand header and a Cerrar action on all three pages. `ProductInformation` is a controlled link list.
+LoginScreen, player Workspace and ProfessionalDashboard own the selected
+information view in existing React state. The previous screen remains mounted but
+hidden; Settings temporarily closes its native dialog and retains its selected tab.
+GameSession remains paused while Settings owns that navigation. No router, history
+rewrite or new persistence is introduced.
+
+PlacementPreferences now has three steps; ConditionPreferences owns optional
+bounded health-context choices and invitation-only sharing consent. `PlacementPreferences.condition`
+is optional, validated identically by the reducer and Firestore rules, and never
+influences `placementExercises` or difficulty. The existing progress authorization
+means an active linked professional can read it; disclose that before saving. Do
+not reuse legacy strokeDate/affectedSide fields or accept free-text diagnoses.
+ProgressSaveNotice retains pending data and retries after dismissal; its continue
+action never bypasses initial cloud loading or server-confirmed access.
+
+`src/services/sessionProgress.ts` owns stage weights and bounded progress aggregation.
+`GameSession.progressScope` carries completed and remaining stages for placement,
+daily plans and assigned sessions; `ExerciseWrapper` derives progress from whole-level completion. Individual
+objects, answers, pairs and contact time must not fill stage segments. Help uses ModalFrame and pauses the existing game clock without
+unmounting the board.
+
+LoginScreen keeps the unauthenticated home mounted beneath one ModalFrame for
+sign-in, registration and recovery. Closing any mode returns home; mode changes
+reset the dialog scroll. Auth errors use a second ModalFrame above the preserved
+form. About/legal links are available on the home, not inside the auth modal.
+
+
+## Account deletion
+
+`DeleteAccount` in Mi cuenta uses the shared ModalFrame and Worker eligibility API.
+Confirmation requires `ELIMINAR MI CUENTA` and Firebase reauthentication; no client
+batch deletion or local entitlement check can authorize it. `accountLifecycle.mjs`
+implements server-only trial identity and resumable deletion jobs, with one-minute
+cleanup and separate five-minute billing reconciliation. See the Worker README
+for secret/IAM/index/rule deployment order and temporary old-token locks.
+`trialUsage` is a keyed verified-email ledger; do not replace it with UID-only
+retention. Preserve the original `trialStartedAt` in that ledger: recreated accounts
+may resume its remaining seven-day window but never restart or extend it. Unknown
+legacy dates fail closed. Personal and professional subscriptions must both be terminal in Stripe.
+Keep other participants' own activity when removing a professional workspace.
+`StorageService.forgetAccount` clears only the accepted account's device cache and
+outbox after sign-out. No production fixture deletion is permitted in tests.
+Include `vendor/cloudflare/accountLifecycle.test.mjs` with Worker unit checks; the
+combined demo Firestore suite exercises the REST cleanup and deletion write locks.
+
+Game progress uses `exerciseStages` and `ExerciseWrapper.completedStages`: count
+whole search boards, naming/completion/classification questions and full memory
+sequences. Pair matching, target practice and tracking remain single-stage games.
+Search aggregates all configured rounds into one result. `FittedGameArea` scales
+boards only; tracking contact radius must use rendered scale, not raw CSS pixels.
+Classification excludes multi-context objects without removing them from naming.

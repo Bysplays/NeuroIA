@@ -265,3 +265,16 @@ test('short-code guessing is bounded even when every attempt fails', async () =>
   db.docs.get('seatRedemptions/person').until = Date.now() - 1;
   await assert.rejects(redeemSeat('person', { code: 'NIA-ABCD-EF' }, db), { status: 400 });
 });
+
+test('deletion jobs do not stall Stripe reconciliation or recreate participant access', async () => {
+  const db=invitationStore();
+  db.docs.set(`accountDeletions/${uid}`,{phase:'tree'});
+  await syncSeatSubscription(uid,id,'sub_seat',env,db,async()=>{throw Error('must not request Stripe for deleting owner');});
+  db.docs.delete(`accountDeletions/${uid}`);
+  await redeemSeat('departing',{code,name:'Private'},db);
+  db.docs.set('accountDeletions/departing',{phase:'tree'});
+  db.docs.delete('users/departing/access/main');
+  await syncSeatSubscription(uid,id,'sub_seat',env,db,async()=>sub());
+  assert.equal(db.docs.has('users/departing/access/main'),false);
+  assert.equal(db.docs.get(path).subscriptionId,'sub_seat');
+});

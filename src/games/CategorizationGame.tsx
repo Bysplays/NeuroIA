@@ -87,7 +87,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
-      soundService.speak(`¡Correcto! ${currentItem.name} pertenece a ${currentItem.categoryName}.`);
+      soundService.speak(`${currentItem.name} pertenece a ${currentItem.categoryName}.`);
       setCorrectCount(prev => prev + 1);
     } else {
       soundService.playGentlePrompt();
@@ -144,8 +144,9 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
   return (
     <ExerciseWrapper
+      completedStages={currentIdx + (selectedCategory !== null ? 1 : 0)}
       exerciseId="categorization"
-      title={`Clasificación por Categorías (${currentIdx + 1}/${sessionItems.length})`}
+      title="Clasificación por categorías"
       domain="executive"
       instructionText="Cada cosa en su lugar. Elige el grupo al que pertenece."
       hideBadges={true}
@@ -212,12 +213,12 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
             aria-hidden={selectedCategory === null}
           >
             <button
-              className={`touch-btn touch-btn-primary touch-btn-large ${selectedCategory !== null ? 'gentle-bounce' : ''}`}
+              className="touch-btn touch-btn-primary game-next-action"
               onClick={handleNext}
               disabled={selectedCategory === null}
               tabIndex={selectedCategory === null ? -1 : 0}
             >
-              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Objeto' : 'Ver Resultados'}</span>
+              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Objeto' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
               <ArrowRight size={24} />
             </button>
           </div>

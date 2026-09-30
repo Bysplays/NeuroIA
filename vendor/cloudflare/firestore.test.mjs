@@ -1,3 +1,4 @@
+import { startTrial, requestDeletion, processDeletion } from './accountLifecycle.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {database, confirmedAccess, redeemSeat, leaveSeat, syncSeatSubscription} from './index.mjs';
@@ -45,5 +46,33 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  const afterLeave = await db.runTransaction(tx => tx.getMany([seatPath, `users/${seat.occupantUid}/access/main`, `professionals/${professional}/patients/${seat.occupantUid}`]));
  assert.equal(afterLeave[0].occupantUid, null); assert.equal(afterLeave[1].kind, 'revoked'); assert.equal(afterLeave[2], null);
  await assert.rejects(redeemSeat(people[1], { code }, db));
+
+ const lifecycleEnv={TRIAL_IDENTITY_SECRET:'demo-lifecycle-secret-32-characters-minimum'};
+ const deletedUid='delete-rest-'+Date.now();
+ const email=deletedUid+'@example.test';
+ await startTrial(deletedUid,email,lifecycleEnv,db);
+ const originalTrial=await db.runTransaction(tx=>tx.get(`users/${deletedUid}/access/main`));
+ await db.runTransaction(async tx=>{
+   tx.set(`users/${deletedUid}/results/a`,{value:'private'},false);
+   tx.set(`users/${deletedUid}/operations/a`,{value:'receipt'},false);
+   tx.set(`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`,{patientId:deletedUid},false);
+ });
+ assert.ok(await db.nextDeletion() === undefined);
+ await requestDeletion(deletedUid,{email,authTime:Date.now()/1000},{confirmation:'ELIMINAR MI CUENTA'},lifecycleEnv,db,async()=>{throw Error('unexpected Stripe');});
+ assert.equal(await db.nextDeletion(),deletedUid);
+ await assert.rejects(db.runTransaction(async tx=>{await tx.get(`users/${deletedUid}/results/a`);tx.set(`users/${deletedUid}/results/new`,{bad:true});}),{status:409});
+ const deleted=[];
+ for(let i=0;i<60;i++) {
+   await processDeletion(deletedUid,db,async(action,id)=>deleted.push([action,id]),()=> 'NIA-ABCD-23');
+   const job=await db.runTransaction(tx=>tx.get(`accountDeletions/${deletedUid}`),4,true);
+   if(job.phase==='done') break;
+ }
+ assert.deepEqual(deleted,[['delete',deletedUid]]);
+ const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
+ assert.deepEqual(remaining,[null,null,null,null]);
+ await startTrial('recreated-'+deletedUid,email,lifecycleEnv,db);
+ const resumedTrial=await db.runTransaction(tx=>tx.get(`users/recreated-${deletedUid}/access/main`));
+ assert.equal(resumedTrial.kind,'trial');
+ assert.equal(resumedTrial.trialStartedAt,originalTrial.trialStartedAt);
  }finally{globalThis.fetch=nativeFetch;}
 });

@@ -5,12 +5,13 @@
   "account_id": "1424cf0f2033b16c9b71ae93de742bf3",
   "preview_urls": false,
   "observability": { "enabled": true, "logs": { "enabled": true } },
-  "triggers": { "crons": ["*/5 * * * *"] },
+  "triggers": { "crons": ["*/5 * * * *", "* * * * *"] },
   "vars": {
     "APP_URL": "https://neuroia.es/",
     "FIREBASE_PROJECT_ID": "ceoaberto-neuroia",
     "STRIPE_MONTHLY_PRICE_ID": "price_1UItenAWZtSdGYThrex9dsNh",
     "STRIPE_MODE": "test",
-    "ALLOWED_ORIGINS": "http://localhost:5173,https://bysplays.github.io"
+    "ACCOUNT_DELETION_ENABLED": "true",
+    "ALLOWED_ORIGINS": "http://localhost:5173,https://neuroia.es"
   }
 }

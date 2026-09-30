@@ -1,14 +1,17 @@
+import { DeleteAccount } from './DeleteAccount';
+import type { InformationKind } from "./InformationPage";
 import { TabletTabs } from './TabletTabs';
 import { ProductInformation } from './ProductInformation';
 import { SubscriptionSettings } from './SubscriptionSettings';
 import { AccountPassword } from './AccountPassword';
 import { ModalFrame } from './ModalFrame';
 import React, { useState } from 'react';
-import { X, Check, Type, Contrast, LogOut } from 'lucide-react';
+import { X, Check, Type, Contrast, LogOut, SlidersHorizontal } from 'lucide-react';
 import type { AccessibilitySettings } from '../types';
 import { soundService } from '../services/soundService';
 
 interface AccessibilityModalProps {
+  onInformation: (kind: InformationKind) => void;
   isOpen: boolean;
   onReassess?: () => void;
   showSubscription?: boolean;
@@ -22,7 +25,7 @@ interface AccessibilityModalProps {
 }
 
 export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
-  isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut, showSubscription = true, onReassess,
+  onInformation, isOpen, settings, name, onUpdateName, onClose, onUpdateSettings, onSignOut, signingOut, showSubscription = true, onReassess,
 }) => {
   const [tab, setTab] = useState('appearance');
   if (!isOpen) return null;
@@ -34,13 +37,13 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
 
   return (
     <ModalFrame onClose={onClose} labelledBy="accessibility-title">
-      <div className="preferences">
+      <div className="preferences entry-preferences">
         <header className="preferences-header">
           <div>
-            <h2 id="accessibility-title">Ajustes</h2>
+            <h2 id="accessibility-title"><SlidersHorizontal size={22} aria-hidden="true"/>Ajustes</h2>
             <p>Un espacio cómodo para ti.</p>
           </div>
-          <button className="preferences-close" onClick={onClose} aria-label="Cerrar ajustes"><X size={22} /></button>
+          <button className="preferences-close" onClick={onClose} aria-label="Cerrar ajustes"><X size={18} /></button>
         </header>
 
         <div className="preferences-body">
@@ -72,20 +75,15 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
                     </span>
                     <span className="cozy-preview-cards"><i /><i /><i /><i /><i /></span>
                   </span>
-                  <span className="preferences-theme-label">{style === 'default' ? 'Default' : 'Cozy'}
+                  <span className="preferences-theme-label">{style === 'default' ? 'Calma' : 'Papel'}
                     <Check size={16} aria-hidden="true" />
                   </span>
                 </button>
               ))}
             </div>
-            <button className="preferences-companions" role="switch" aria-checked={settings.showCompanions !== false}
-              onClick={() => update({ showCompanions: settings.showCompanions === false })}>
-              <span>Amigos del bienestar</span>
-              <span className="preferences-switch-track" aria-hidden="true"><span /></span>
-            </button>
           </section>
 
-          </div> }, { id: 'account', label: 'Mi cuenta', content: <>
+          </div> }, { id: 'account', label: 'Mi cuenta', content: <div className="preferences-account-panel">
           <ProfileName name={name} onSave={onUpdateName} />
           {showSubscription && <SubscriptionSettings />}
           <AccountPassword />
@@ -96,13 +94,16 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
               <button className="subscription-upgrade preferences-action-button" onClick={onReassess}>Rehacer prueba</button>
             </div>
           </section>}
-          </> }
+          <DeleteAccount />
+          </div> }
           ]}/>
           <div className="preferences-account">
             <button className="preferences-signout" disabled={signingOut} onClick={onSignOut}>
               <LogOut size={18} aria-hidden="true" />{signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}
             </button>
-            <ProductInformation />
+            <ProductInformation onOpen={onInformation}>
+              <button data-information-link="funding" onClick={() => onInformation('funding')}>Financiado por IGAPE</button>
+            </ProductInformation>
           </div>
         </div>
       </div>

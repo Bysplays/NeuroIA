@@ -7,7 +7,7 @@ export function validAssessmentLevel(value: unknown): value is AssessmentLevel |
   return value === 1 || value === 4 || value === 5 || value === 7 || value === 10;
 }
 
-/** A failed/omitted stage ends this game at the last level actually passed. */
+/** New assessments use at most two stages (1 then 4). Old saved stages still finish safely. */
 export function advanceAssessment(level: AssessmentLevel, best?: PlacementTrial, result?: ExerciseResult): {
   next?: AssessmentLevel; best?: PlacementTrial; finished?: PlacementTrial;
 } {
@@ -16,6 +16,7 @@ export function advanceAssessment(level: AssessmentLevel, best?: PlacementTrial,
     ? { accuracy: result.accuracy, questions: result.totalQuestions, hints: result.hintsUsed ?? 0, skipped:false, assessedLevel:level }
     : { accuracy:0, questions:0, hints:0, skipped:true, assessedLevel:1 };
   if (passed) {
+    if (level >= 4) return { finished: trial };
     const next = ASSESSMENT_LEVELS[ASSESSMENT_LEVELS.indexOf(level) + 1];
     return next ? { next, best: trial } : { finished: trial };
   }

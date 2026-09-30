@@ -1,58 +1,290 @@
-import { ActivityStatistics } from './ActivityStatistics';
-import { AchievementShowcase } from './AchievementShowcase';
-import { HeaderIllustration } from './HeaderIllustration';
-import { ExerciseCatalog } from './ExerciseCatalog';
-import { getAchievements } from '../services/achievements';
-import React, { useState } from 'react';
-import { Sun, Clock3, Medal, ArrowRight } from 'lucide-react';
-import type { UserProfile, CognitiveDomain, ExerciseId, ExerciseResult } from '../types';
-import { soundService } from '../services/soundService';
-import { TabletTabs } from './TabletTabs';
-import { useViewportPanel } from '../services/viewport';
-
-const WELCOME_MESSAGES = [
-  'Hoy puede ser un día genial.',
-  '¡Vamos a llenar el día de sonrisas!',
-  'Las ganas de jugar no tienen edad.',
-  'La alegría también se practica.',
-  'Un buen día empieza con una sonrisa.',
-  'Hoy toca sumar momentos bonitos.',
-  '¡Que no falten juegos ni sonrisas!',
-  'La curiosidad hace la vida más divertida.',
-  'Las pequeñas alegrías hacen grandes días.',
-  'Ponle una pizca de diversión al día.',
-  '¡Hoy tienes una cita con la diversión!',
-  'Cada día trae algo bonito por descubrir.',
-  'Tu sonrisa es un gran punto de partida.',
-  'Lo mejor de jugar es disfrutarlo.',
-  '¡A por un día lleno de buenos momentos!',
-];
+import { localDay } from '../services/activityStats';
+import { useState, type ReactNode } from "react";
+import {
+  Activity,
+  Check,
+  ArrowRight,
+  ArrowUpRight,
+  Brain,
+  Flame,
+  Grid2X2,
+  Home,
+  Search,
+  Settings2,
+  Trophy,
+  UserRound,
+  Hand,
+  Mail,
+} from "lucide-react";
+import { ActivityStatistics } from "./ActivityStatistics";
+import { AchievementShowcase } from "./AchievementShowcase";
+import { ExerciseCatalog } from "./ExerciseCatalog";
+import { TabletTabs } from "./TabletTabs";
+import { PracticeMotif } from "./PracticeMotif";
+import { PlanButton } from "./PlanButton";
+import {
+  getExerciseById,
+} from "../services/exerciseCatalog";
+import { dailySession } from "../services/dailySession";
+import { soundService } from "../services/soundService";
+import type {
+  UserProfile,
+  CognitiveDomain,
+  ExerciseId,
+  ExerciseResult,
+} from "../types";
 
 interface DashboardProps {
   uid: string;
   history: ExerciseResult[];
   navigationTarget?: HTMLElement | null;
-  proposedSessions?: React.ReactNode;
+  selectedTab?: string;
+  onTabChange?: (tab: string) => void;
+  proposedSessions?: ReactNode;
   profile: UserProfile;
   onSelectDomain: (domain: CognitiveDomain) => void;
   onSelectExercise?: (exerciseId: ExerciseId) => void;
-  onStartDailyPlan: () => void;
+  onStartDailyPlan: (queue?: ExerciseId[]) => void;
+  onOpenSettings: () => void;
+  onSignOut: () => void;
+  signingOut: boolean;
 }
-export function Dashboard({ uid, history, navigationTarget, profile, proposedSessions, onSelectDomain, onSelectExercise, onStartDailyPlan }: DashboardProps) {
-  const [tab, setTab] = useState('today');
-  const [welcomeMessage] = useState(() => WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)]);
-  const [progressTab, setProgressTab] = useState('overview');
-  const onOpenAchievements = () => { setProgressTab('achievements'); setTab('progress'); };
-  const panel = useViewportPanel<HTMLDivElement>();
-  const earned = getAchievements(profile).filter(achievement => achievement.unlocked).length;
-
-  return <div ref={panel} className="dashboard-container tablet-dashboard">
-
-    <TabletTabs navigationTarget={navigationTarget} label="Tu espacio" value={tab} onChange={setTab} tabs={[
-      { id:'today', label:'Hoy', content:<div className="home-today"><div className="home-greeting"><h1>Hola, {profile.name}. <Sun size={26} aria-hidden="true"/></h1><p>{welcomeMessage}</p></div><div className="home-feature-grid"><section className={`daily-session-card${profile.settings.showCompanions === false ? ' daily-session-without-art' : ''}`}><div className="daily-session-copy"><span className="soft-label"><span className="status-dot"/>Tu sesión de hoy</span></div><div className="daily-session-message-slot"><h2 className="daily-session-message">Juega. Practica<br/>Progresa a tu ritmo</h2></div>{profile.settings.showCompanions !== false && <HeaderIllustration scene="home" className="wellness-characters"/>}<div className="session-actions"><button className="session-start" onClick={() => { soundService.playTap(); onStartDailyPlan(); }}>{profile.dailyPlanCompletedToday ? 'Haz otra sesión adicional' : 'Completa tu sesión de hoy'}<ArrowRight size={21}/></button></div></section><section className="consistency-card" aria-labelledby="consistency-title"><div className="consistency-heading"><h2 id="consistency-title">Cada día suma</h2></div><div className="streak-number">{profile.streakDays}<span>{profile.streakDays === 1 ? 'día seguido' : 'días seguidos'}</span></div><div className="consistency-footer"><p>{profile.streakDays ? 'Sigue encontrando ese ratito para ti.' : 'Tu próximo pequeño logro empieza hoy.'}</p><div className="consistency-stats"><div><Clock3 size={20}/><strong>{profile.totalMinutes}</strong><span>minutos</span></div><button onClick={onOpenAchievements}><Medal size={20}/><strong>{earned}</strong><span>Logros ↗</span></button></div></div></section></div></div> },
-      { id:'games', label:'Juegos', content:<ExerciseCatalog embedded profile={profile} onBack={() => setTab('today')} onSelectExercise={exercise => { if (onSelectExercise) onSelectExercise(exercise.id); else onSelectDomain(exercise.domain); }}/> },
-      ...(proposedSessions ? [{ id:'proposals', label:'Para ti', content:proposedSessions }] : []),
-      { id:'progress', label:'Estadísticas', content:<ActivityStatistics levels={profile.gameLevels} selectedTab={progressTab} onTabChange={setProgressTab} uid={uid} history={history} embedded onBack={() => setTab('today')} achievements={<AchievementShowcase profile={profile} embedded onBack={() => setTab('today')}/>}/> },
-    ]}/>
-  </div>;
+export function Dashboard({
+  uid,
+  history,
+  navigationTarget,
+  selectedTab,
+  onTabChange,
+  profile,
+  proposedSessions,
+  onSelectDomain,
+  onSelectExercise,
+  onStartDailyPlan,
+  onOpenSettings,
+  onSignOut,
+  signingOut,
+}: DashboardProps) {
+  const [localTab, setLocalTab] = useState("today");
+  const tab = selectedTab ?? localTab;
+  const setTab = onTabChange ?? setLocalTab;
+  const [progressTab, setProgressTab] = useState("overview");
+  const session = dailySession(uid);
+  const queue = session.games;
+  const todayKey = localDay(new Date().toISOString());
+  const completedToday = new Set(history.filter(result => !result.practice && localDay(result.date) === todayKey).map(result => result.exerciseId));
+  const choose = (id: ExerciseId) => {
+    soundService.playTap();
+    if (onSelectExercise) onSelectExercise(id);
+    else onSelectDomain(getExerciseById(id)!.domain);
+  };
+  const today = (
+    <div className="editorial-home">
+      <div className="editorial-greeting">
+        <div>
+          <h1>
+            Hola, {profile.name}
+            <span>.</span>
+          </h1>
+        </div>
+        <div className="editorial-streak">
+          <Flame size={21} fill={completedToday.size > 0 ? "currentColor" : "none"} />
+          <strong>{profile.streakDays}</strong>
+          <span>
+            {profile.streakDays === 1 ? "día seguido" : "días seguidos"}
+          </span>
+        </div>
+      </div>
+      <div className="editorial-home-grid">
+        <section className="editorial-hero">
+          <div className="editorial-hero-copy">
+            <p className="editorial-eyebrow">
+              <i />
+              Para hoy
+            </p>
+            <h2>{session.title}</h2>
+            <button
+              className="touch-btn touch-btn-primary"
+              onClick={() => onStartDailyPlan([...queue])}
+            >
+              Jugar
+              <ArrowRight size={21} />
+            </button>
+          </div>
+          <PracticeMotif />
+        </section>
+        <aside className="editorial-today">
+          <h2>Tu sesión de hoy</h2>
+          <div className="editorial-today-games">
+          {queue.map((id, index) => {
+            const game = getExerciseById(id)!;
+            return (
+              <button key={id} onClick={() => choose(id)}>
+                <span className="editorial-step">0{index + 1}</span>
+                <span>
+                  <strong>{game.title}</strong>
+                </span>
+                {completedToday.has(id) ? <><Check size={19} aria-hidden="true"/><span className="sr-only">Completado hoy</span></> : <ArrowUpRight size={19} aria-hidden="true"/>}
+              </button>
+            );
+          })}
+          </div>
+        </aside>
+      </div>
+      <section className="editorial-explore">
+        <div className="editorial-section-heading">
+          <h2>Explorar</h2>
+          <button className="text-link" onClick={() => setTab("games")}>
+            Ver todos
+            <ArrowUpRight size={19} />
+          </button>
+        </div>
+        <div className="editorial-areas">
+          {[
+            {
+              domain: "attention",
+              title: "Atención",
+              icon: Search,
+            },
+            {
+              domain: "memory",
+              title: "Memoria",
+              icon: Brain,
+            },
+            {
+              domain: "motor",
+              title: "Coordinación",
+              icon: Hand,
+            },
+          ].map(({ domain, title, icon: Icon }) => (
+            <button
+              key={domain}
+              onClick={() => onSelectDomain(domain as CognitiveDomain)}
+            >
+              <span className="editorial-glyph">
+                <Icon size={25} />
+              </span>
+              <span>
+                <strong>{title}</strong>
+              </span>
+              <ArrowUpRight size={20} />
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+  return (
+    <div className="dashboard-container editorial-dashboard">
+      <TabletTabs
+        navigationTarget={navigationTarget}
+        label="Tu espacio"
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          {
+            id: "today",
+            label: "Hoy",
+            icon: <Home size={22} />,
+            content: today,
+          },
+          {
+            id: "games",
+            label: "Juegos",
+            icon: <Grid2X2 size={22} />,
+            content: (
+              <ExerciseCatalog
+                embedded
+                profile={profile}
+                onBack={() => setTab("today")}
+                onSelectExercise={(exercise) => choose(exercise.id)}
+              />
+            ),
+          },
+          ...(proposedSessions
+            ? [
+                {
+                  id: "proposals",
+                  label: "Para ti",
+                  icon: <Mail size={22} />,
+                  content: proposedSessions,
+                },
+              ]
+            : []),
+          {
+            id: "progress",
+            label: "Actividad",
+            icon: <Activity size={22} />,
+            content: (
+              <ActivityStatistics
+                levels={profile.gameLevels}
+                selectedTab={progressTab}
+                onTabChange={setProgressTab}
+                uid={uid}
+                history={history}
+                embedded
+                onBack={() => setTab("today")}
+                achievements={
+                  <AchievementShowcase
+                    profile={profile}
+                    embedded
+                    onBack={() => setTab("today")}
+                  />
+                }
+              />
+            ),
+          },
+          {
+            id: "account",
+            label: "Mi cuenta",
+            icon: <UserRound size={22} />,
+            content: (
+              <section className="account-overview">
+                <p className="editorial-eyebrow">Como te resulte más cómodo</p>
+                <h1>Tu espacio, a tu manera.</h1>
+                <div className="account-overview-grid">
+                  <div className="account-identity">
+                    <span className="account-initial" aria-hidden="true">
+                      {Array.from(profile.name)[0]}
+                    </span>
+                    <h2>{profile.name}</h2>
+                    <button
+                      className="text-link"
+                      disabled={signingOut}
+                      onClick={onSignOut}
+                    >
+                      {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
+                    </button>
+                  </div>
+                  <div className="account-choices">
+                    <button onClick={onOpenSettings}>
+                      <Settings2 size={24} />
+                      <span>
+                        <strong>Ajustes</strong>
+                        <small>Texto, apariencia y datos de tu cuenta</small>
+                      </span>
+                      <ArrowUpRight size={20} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setProgressTab("achievements");
+                        setTab("progress");
+                      }}
+                    >
+                      <Trophy size={24} />
+                      <span>
+                        <strong>Tus logros</strong>
+                        <small>Pequeños pasos que conservan su lugar</small>
+                      </span>
+                      <ArrowUpRight size={20} />
+                    </button>
+                    <PlanButton detailed />
+                  </div>
+                </div>
+              </section>
+            ),
+          },
+        ]}
+      />
+    </div>
+  );
 }

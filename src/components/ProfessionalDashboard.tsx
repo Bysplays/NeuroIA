@@ -1,3 +1,5 @@
+import { InformationPage, type InformationKind } from "./InformationPage";
+import { Brand } from './Brand';
 import { TabletTabs, TabletPager } from './TabletTabs';
 import { useCompactViewport, useViewportPanel } from '../services/viewport';
 import { FullscreenButton } from './FullscreenButton';
@@ -37,6 +39,7 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
   const compact = useCompactViewport();
   const pageSize = compact ? 2 : 3;
   const seatPageSize = compact ? 1 : 2;
+  const [information, setInformation] = useState<InformationKind | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   useLayoutEffect(() => { applyAppearance(profile.settings); }, [profile.settings]);
   const adapter = useMemo(() => firestoreProfessional(uid, getFirestore(auth.app)), [uid]);
@@ -120,10 +123,10 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
     try { await navigator.clipboard.writeText(seat.invitationCode); if (alive.current) setCopied(seat.id); }
     catch { throw new Error('No hemos podido copiar el código. Puedes seleccionarlo y copiarlo manualmente.'); }
   });
-  return <div className="professional-workspace">
+  return <>{information && <InformationPage kind={information} onBack={() => setInformation(null)}/>}<div hidden={information !== null}><div className="professional-workspace">
     <header className="main-header">
-      <button className="header-left" onClick={returnToPanel} aria-label="NeuroIA, volver al panel profesional"><img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="32" height="40"/><span className="header-title">Neuro<span className="brand-light">IA</span></span></button>
-      <div className="professional-account-actions"><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button><FullscreenButton/></div>
+      <button className="header-left" onClick={returnToPanel} aria-label="NeuroIA, volver al panel profesional"><Brand/></button>
+      <div className="professional-account-actions"><button className="touch-btn touch-btn-primary" disabled={!billingEnabled || !seats || busy} onClick={() => void run(() => redirect('/professional/checkout', { seatId: pending?.id || crypto.randomUUID() }))}><Plus size={20}/>{busy ? 'Un momento…' : pending ? 'Continuar compra' : 'Comprar un asiento'}</button><button className="header-icon-btn header-icon-accessibility" aria-label="Ajustes de accesibilidad" title="Ajustar tamaño del texto y estilo de la página" onClick={() => setSettingsOpen(true)}><Settings size={20} /></button><FullscreenButton/><button className="header-signout" onClick={onSignOut}>Cerrar sesión</button></div>
     </header>
     {currentSeat ? personView === 'sessions' ? <ProfessionalSessions key={currentSeat.id + currentSeat.occupantUid} link={{ professionalId: uid, seatId: currentSeat.id, patientId: currentSeat.occupantUid! }} name={currentSeat.patientName || 'la persona invitada'} onBack={returnToPanel}/> : <PersonActivity key={currentSeat.occupantUid} uid={uid} seat={currentSeat} onBack={returnToPanel} /> : <main ref={panel} className="professional-panel tablet-screen">
       <div className="professional-heading professional-home-heading"><span className="professional-section-icon"><BriefcaseBusiness size={24}/></span><h1>Espacio profesional</h1>
@@ -152,6 +155,6 @@ export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSetting
         </> } ]}/>
       </>}
     </main>}
-    <AccessibilityModal isOpen={settingsOpen} showSubscription={false} settings={profile.settings} name={profile.name} onUpdateName={onUpdateName} onUpdateSettings={onUpdateSettings} onSignOut={onSignOut} signingOut={false} onClose={() => setSettingsOpen(false)} />
-  </div>;
+    <AccessibilityModal onInformation={setInformation} isOpen={settingsOpen && information === null} showSubscription={false} settings={profile.settings} name={profile.name} onUpdateName={onUpdateName} onUpdateSettings={onUpdateSettings} onSignOut={onSignOut} signingOut={false} onClose={() => setSettingsOpen(false)} />
+  </div></div></>;
 }

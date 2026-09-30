@@ -1,14 +1,14 @@
 # NeuroIA billing on Cloudflare Workers
 
-`vendor/cloudflare/index.mjs` is a standalone module Worker: copy its entire content into Cloudflare's
-**Edit code** editor and deploy, or use `npx wrangler deploy --config vendor/cloudflare/wrangler.jsonc`
+`vendor/cloudflare/index.mjs` is a module Worker that imports `accountLifecycle.mjs`.
+Deploy both through `npx wrangler deploy --config vendor/cloudflare/wrangler.jsonc`
 from an authenticated local CLI. It uses Fetch and Web Crypto, not Firebase Functions.
 The configured endpoint is `https://neuroia-billing.kikefontanlorenzo.workers.dev`.
 No domain purchase or Firebase Blaze deployment is required.
 
 The reviewed Worker is deployed with verified-email enforcement, `/access`,
 `/professional/status`, per-seat portal cancellation, reserved short invitation codes and the five-minute
-reconciliation trigger. Current version: `5ca4c2f5-7cf7-44d3-9351-2cdfc5a60f97`. Runtime secrets are retained, Stripe stays in test mode,
+reconciliation trigger. Current version: `8b7afab5-f6dd-46af-b4c0-f8d90caf1981`. Runtime secrets are retained, Stripe stays in test mode,
 preview URLs remain disabled and existing observability is enabled. Health,
 localhost CORS, unauthenticated access and unsigned-webhook rejection were verified;
 signed payment lifecycle and scheduled reconciliation still need live validation.
@@ -21,7 +21,8 @@ Set these ordinary runtime variables on the Worker (also recorded in `vendor/clo
 - `FIREBASE_PROJECT_ID=ceoaberto-neuroia`
 - `STRIPE_MONTHLY_PRICE_ID=price_1UItenAWZtSdGYThrex9dsNh`
 - `STRIPE_MODE=test`
-- `ALLOWED_ORIGINS=http://localhost:5173,https://bysplays.github.io` (comma-separated extra exact origins).
+- `ACCOUNT_DELETION_ENABLED=true` (rules, indexes, Auth IAM and cleanup cron are deployed).
+- `ALLOWED_ORIGINS=http://localhost:5173,https://neuroia.es` (comma-separated extra exact origins).
 
 Set these **Secret** bindings directly in Cloudflare:
 
@@ -29,6 +30,9 @@ Set these **Secret** bindings directly in Cloudflare:
 - `FIREBASE_SERVICE_ACCOUNT`: complete JSON for the dedicated Google service account
   with `roles/datastore.user`. Its `project_id` must match the configured project.
 - `STRIPE_WEBHOOK_SECRET`: signing secret for the specific endpoint below.
+- `TRIAL_IDENTITY_SECRET`: stable cryptographically random secret of at least 32 characters.
+  Generate directly into the secret binding; never print or commit it. Keep it backed
+  up securely: changing it without a ledger migration allows repeat trials.
 
 The service account IAM role grants database-wide data access. The Worker constrains
 its writes to validated account access/billing records, professional seats and
@@ -153,3 +157,92 @@ subscription metadata routes seat events independently from personal access.
 Configure portal cancellation, without quantity or price changes for seats.
 Run `node --test vendor/cloudflare/index.test.mjs vendor/cloudflare/seats.test.mjs`
 and the combined sequential emulator command in the professional guide.
+
+
+## Account deletion and trial identity
+
+`accountLifecycle.mjs` owns POST `/trial`, `/account/deletion-status` and
+`/account/delete`. Client rules prohibit direct trial grants. `/trial` atomically
+writes access and `trialUsage/{HMAC-SHA256(normalizedVerifiedEmail)}` with only
+`{used:true, trialStartedAt}`. This pseudonymous marker survives UID recreation; raw email and the
+old UID are not stored in it. A recreated account with the same verified email can
+resume the remaining trial until exactly seven days after the original start.
+Reactivation never changes that timestamp. For accounts without access, `/access`
+returns `trialOffer` (`new`, `resume`, or `expired`) using the server ledger and
+live verified Auth email. The frontend labels recovery “Seguir prueba gratuita”
+and hides the trial action when the original period has expired. Expired trials and legacy markers without
+a known start cannot grant new time. It prevents restarting with the same verified email,
+not a new/different email or all provider aliases. Existing trial timestamps are
+backfilled when deletion is requested; irrecoverable historical trial evidence
+removed by older invitation-departure code cannot be reconstructed.
+
+Deletion requires the exact phrase `ELIMINAR MI CUENTA`, verified live Auth identity
+and authentication in the preceding five minutes. Check Stripe subscriptions for
+both personal and professional customers and seats. Only `canceled` and
+`incomplete_expired` are terminal; a cancellation scheduled for period end still
+blocks until that period ends. Trial/invitation entitlements do not block deletion.
+Pending checkout must be cancelled first. Stripe failures fail closed. This does
+not cancel charges or erase Stripe's customer/invoice records.
+
+Acceptance creates `accountDeletions/{uid}` in the same transaction that rechecks
+payment reservations. Rules and Worker transactions block further account writes.
+A separate every-minute cron leases the least-recently-processed job and advances
+one bounded batch. It removes active seats/rotates codes, reciprocal patient links,
+old assigned sessions (including previous professionals), owned professional trees,
+invitation codes, access, user progress/results/receipts, billing references and
+redemption throttles. Owned-workspace departure revokes participants' access but
+preserves those participants' own game results. Recursive traversal includes
+missing parent documents and paginates collections/documents. Auth is deleted
+last. Partial failures retain the job and retry without claiming completion.
+
+A temporary UID lock remains for 65 minutes after Auth deletion to reject
+previously-issued ID tokens; the cron then deletes it. It is not a permanent
+account tombstone. Only the trial-use marker is retained permanently. The current
+browser's account cache/outbox is cleared after accepted deletion and sign-out;
+remote browsers' offline copies cannot be erased by this request. Processing is
+asynchronous and depends on backlog/data volume, not an instant-delete guarantee.
+Observe failed scheduled invocations and jobs whose `lastRunAt` stops advancing.
+The existing five-minute Stripe reconciliation runs separately.
+
+Deployment state: Worker modules and both cron triggers are published, with
+`ACCOUNT_DELETION_ENABLED=true`. The stable secret is configured in Cloudflare
+and a mode-0600 local backup is kept outside the repository under
+`~/.config/neuroia/secrets/trial-identity-secret`. The billing service account has
+`projects/ceoaberto-neuroia/roles/neuroiaAccountLifecycle` with only Auth get/delete
+permissions. All four collection-group indexes are confirmed READY. The account-deletion
+Firestore rules are published to production and match the repository file.
+
+The published frontend (`index-B8AG4Q-I.js`) still grants trials directly through
+Firestore. These direct grants are now denied by the rules published at the owner's
+explicit request. Publish the current Worker-backed frontend to restore new trial
+activation on the public web; localhost already uses that flow. Frontend publication remains
+subject to the owner's separate choice; backend authorization has already been given.
+No real account was deleted. Health and unauthenticated rejection checks passed.
+The two trial access records explicitly approved for cleanup were removed in one
+transaction with their permanent pseudonymous trial-use markers. Read-back confirmed
+both deletions and markers. Their original trial start dates were subsequently
+backfilled from the pre-cleanup backup to support remaining-time recovery. No
+access was granted by that backfill. Profiles, results, invitations and Auth accounts remain intact.
+
+Provisioning sequence for future environments (current backend activation is complete):
+
+1. Back up/configure `TRIAL_IDENTITY_SECRET` and grant the dedicated service account
+   `firebaseauth.users.get` and `firebaseauth.users.delete` through a scoped custom
+   project role, in addition to its existing datastore permissions. The reviewed role
+   definition is [account-lifecycle-role.yaml](../firebase/account-lifecycle-role.yaml).
+   No broader owner role.
+2. Deploy `vendor/firebase/firestore.indexes.json`; wait for collection-group indexes.
+3. Deploy Worker modules with both cron triggers, keeping `ACCOUNT_DELETION_ENABLED=false`, and verify the new routes without
+   deleting a real account. Deploy the rules that prohibit direct trial creation and
+   enforce deletion locks **before exposing deletion to users**. Keep old clients
+   closed during this transition: they still attempt direct trial creation.
+4. Set `ACCOUNT_DELETION_ENABLED=true` only after rules and indexes are confirmed.
+   Deploy frontend. Verify reauthentication and deletion with a deliberately created
+   disposable account, then verify cron completion and a rejected repeat trial.
+
+Tests: `node --test vendor/cloudflare/accountLifecycle.test.mjs` plus the combined
+Firestore REST/rules suite in CONTRIBUTING.md. The Auth emulator does not validate
+production IAM. Real permission/cron and Stripe portal checks remain release work.
+Provider contracts: [Auth deletion](https://docs.cloud.google.com/identity-platform/docs/reference/rest/v1/projects.accounts/delete),
+[Auth lookup](https://docs.cloud.google.com/identity-platform/docs/reference/rest/v1/projects.accounts/lookup),
+[recursive Firestore deletion](https://firebase.google.com/docs/firestore/solutions/delete-collections).

@@ -79,12 +79,11 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
     if (correct) {
       soundService.playSuccess();
-      soundService.speak('Correcto');
       setCorrectCount(prev => prev + 1);
       setScore(prev => prev + 100);
     } else {
       soundService.playGentlePrompt();
-      soundService.speak(`Buen intento. El objeto correcto es ${currentQ.word}.`);
+      soundService.speak(`El objeto correcto es ${currentQ.word}.`);
       setMistakesList(prev => [
         ...prev,
         {
@@ -138,8 +137,9 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
   return (
     <ExerciseWrapper
+      completedStages={currentIdx + (selectedOption !== null ? 1 : 0)}
       exerciseId="language-naming"
-      title={`¿Qué objeto es este? (${currentIdx + 1}/${sessionQuestions.length})`}
+      title="¿Qué objeto es este?"
       domain="language"
       instructionText="Mira la imagen y elige su nombre."
       hideBadges={true}
@@ -196,12 +196,12 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
             aria-hidden={selectedOption === null}
           >
             <button
-              className={`touch-btn touch-btn-primary touch-btn-large ${selectedOption !== null ? 'gentle-bounce' : ''}`}
+              className="touch-btn touch-btn-primary game-next-action"
               onClick={handleNext}
               disabled={selectedOption === null}
               tabIndex={selectedOption === null ? -1 : 0}
             >
-              <span>{currentIdx + 1 < sessionQuestions.length ? 'Siguiente Palabra' : 'Ver Resultados'}</span>
+              <span>{currentIdx + 1 < sessionQuestions.length ? 'Siguiente Palabra' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
               <ArrowRight size={24} />
             </button>
           </div>

@@ -7,12 +7,12 @@ const HISTORY_KEY = 'neuroia_history_v1';
 export const defaultSettings: AccessibilitySettings = {
   pageStyle: 'default',
   showCompanions: true,
-  fontSize: 'large',
+  fontSize: 'normal',
   contrast: 'standard',
   handDominance: 'center',
   speechEnabled: true,
   speechRate: 0.88,
-  soundEffects: true,
+  soundEffects: false,
   leftSideAnchor: false,
   hapticTouchFeedback: true,
 };
@@ -52,6 +52,17 @@ export class StorageService {
   public static setAccount(account: { uid: string; displayName: string | null } | null): void {
     this.account = account;
     this.knownOutbox = new Set();
+  }
+
+  /** Remove only this account's local cache/outbox after deletion has been accepted. */
+  public static forgetAccount(uid: string): void {
+    const suffix = ':' + encodeURIComponent(uid);
+    const prefixes = ['neuroia_profile_v1', 'neuroia_history_v1', 'neuroia_local_backup_v1', 'neuroia_entry_v1'];
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (prefixes.some(prefix => key === prefix + suffix) || key.startsWith('neuroia_outbox_v1' + suffix + ':')) localStorage.removeItem(key);
+      }
+    } catch { /* Cloud deletion does not depend on writable browser storage. */ }
   }
 
   // Navigation preference only; Firebase and Firestore still enforce access.

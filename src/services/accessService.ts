@@ -11,6 +11,7 @@ export interface AccountAccess {
   canManageSubscription?: boolean;
   kind?: 'trial' | 'subscription' | 'invitation' | 'revoked';
   trialStartedAt?: number;
+  trialOffer?: 'new' | 'resume' | 'expired';
   expiresAt?: number | null;
   autoRenew?: boolean;
   professionalName?: string;
@@ -47,7 +48,7 @@ export const accessService = {
       validForMs: lifetime,
       checkoutAvailable: billingEnabled, canManageSubscription: billingEnabled && access.canManageSubscription };
   },
-  async trial() { await accountAccess().trial(); },
+  async trial() { await billingRequest('/trial'); },
   async invite(code: string) {
     if (/^NIA-(?:[A-Z2-9]{4}-[A-Z2-9]{2}|[A-F0-9]{32})$/.test(code.trim().toUpperCase())) {
       try { await billingRequest('/redeem-seat', { code, name: auth.currentUser?.displayName || 'Persona invitada' }); }
@@ -65,7 +66,9 @@ export const accessService = {
   async portal() { return (await billingRequest('/portal')).url; },
 };
 export function accessError(error: unknown): string {
+  if (error instanceof Error && error.message === 'billing-unavailable') return 'El servicio de acceso no está disponible. Inténtalo más tarde.';
   const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+  if (code === 'permission-denied') return 'No hemos podido activar el acceso con esta cuenta. Inténtalo de nuevo. Si continúa, contacta con tu profesional.';
   if (code.startsWith('billing/') && error instanceof Error) return error.message;
   if (code.startsWith('invitation/') && error instanceof Error) return error.message;
   if (['functions/not-found', 'functions/invalid-argument'].includes(code)) return 'El código no es válido';

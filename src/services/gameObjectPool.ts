@@ -128,7 +128,9 @@ export const CATEGORY_NAMES: Record<string, string> = {
   tools: 'Herramientas', body: 'Partes del cuerpo', nature: 'Naturaleza',
 };
 // Keep classification unambiguous: avoid overlapping broad household/personal groups.
-export const CLASSIFICATION_POOL = GAME_OBJECT_POOL.filter(item => !['household', 'personal', 'places', 'leisure', 'nature', 'body'].includes(item.category));
+// Keep these identities for naming, but avoid context-dependent category answers.
+const AMBIGUOUS_CLASSIFICATION = new Set(['Vaso', 'Taza', 'Toalla', 'Jabón', 'Esponja', 'Tijeras']);
+export const CLASSIFICATION_POOL = GAME_OBJECT_POOL.filter(item => !AMBIGUOUS_CLASSIFICATION.has(item.name) && !['household', 'personal', 'places', 'leisure', 'nature', 'body'].includes(item.category));
 export function categoryChoices(item: GameObjectItem, config: GameConfig) {
   const categories = [...new Set(CLASSIFICATION_POOL.map(other => other.category))];
   const related: Record<string, string[]> = { food: ['kitchen', 'hygiene'], kitchen: ['tools', 'hygiene'], hygiene: ['kitchen', 'clothes'], furniture: ['kitchen', 'tools'], tools: ['kitchen', 'furniture'], clothes: ['hygiene', 'animals'], animals: ['food', 'vehicles'], vehicles: ['tools', 'furniture'] };

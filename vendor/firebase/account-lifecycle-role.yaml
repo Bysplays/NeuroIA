@@ -1,0 +1,6 @@
+title: NeuroIA account lifecycle
+description: Look up verified accounts and complete owner-requested account deletion.
+stage: GA
+includedPermissions:
+  - firebaseauth.users.get
+  - firebaseauth.users.delete

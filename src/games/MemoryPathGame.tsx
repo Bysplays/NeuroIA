@@ -59,6 +59,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
+  const completedRef = useRef(false);
   const timeoutRefs = useRef<number[]>([]);
 
   const clearTimeouts = useCallback(() => {
@@ -112,7 +113,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   };
 
   const handleTileClick = (tileId: number) => {
-    if (isPlayingDemo || isCompleted || sequence.length === 0) return;
+    if (isPlayingDemo || isCompleted || completedRef.current || sequence.length === 0) return;
 
     soundService.playTap();
     setActiveTile(tileId);
@@ -124,9 +125,19 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     const currentStep = nextInput.length - 1;
 
     if (tileId !== sequence[currentStep]) {
+      if (config.mode === 'placement') {
+        clearTimeouts();
+        finishGame(score, true, [...mistakesList, {
+          id: 'mem-' + clock.now(), item: `Secuencia de ${sequence.length} fichas`,
+          userAction: `Tocaste ${ALL_TILES[tileId]?.label} en el paso ${currentStep + 1}`,
+          correctSolution: `La ficha era ${ALL_TILES[sequence[currentStep]]?.label}`,
+          explanation: 'La prueba continúa con la información de este intento.',
+        }]);
+        return;
+      }
       soundService.playGentlePrompt();
       setStatusMessage('Casi lo tienes. Puedes pulsar "Ver de nuevo" para recordar la secuencia.');
-      soundService.speak('No te preocupes. Pulsa ver de nuevo para recordar.');
+      soundService.speak('Pulsa ver de nuevo para recordar la secuencia.');
       setPlayerInput([]);
       setErrorsCount(prev => prev + 1);
 
@@ -171,7 +182,9 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     playSequenceDemo(sequence);
   };
 
-  const finishGame = (finalScore: number) => {
+  const finishGame = (finalScore: number, failed = false, mistakes = mistakesList) => {
+    if (completedRef.current) return;
+    completedRef.current = true;
     const elapsedSeconds = Math.max(20, Math.round((clock.now() - startTime) / 1000));
     const accuracy = Math.max(0, Math.round((maxRounds / (maxRounds + errorsCount)) * 100));
 
@@ -185,13 +198,13 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       domain: 'memory',
       date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
-      accuracy,
+      accuracy: failed ? 0 : accuracy,
       score: finalScore,
-      correctAnswers: maxRounds,
-      totalQuestions: maxRounds + errorsCount,
+      correctAnswers: failed ? 0 : maxRounds,
+      totalQuestions: failed ? 1 : maxRounds + errorsCount,
       feedbackMessage:
         'Has completado el juego de luces y secuencias. Puedes volver a jugar a tu ritmo.',
-      mistakesList,
+      mistakesList: mistakes,
     };
 
     setResult(gameResult);
@@ -200,6 +213,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   };
 
   const handleRestart = () => {
+    completedRef.current = false;
     setHintsUsed(0);
     setRound(1);
     setScore(0);
@@ -215,8 +229,9 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
   return (
     <ExerciseWrapper
+      completedStages={round - 1}
       exerciseId="memory-path"
-      title={`Secuencia de Memoria (Ronda ${round}/${maxRounds})`}
+      title="Secuencia de memoria"
       domain="memory"
       instructionText="Mira qué fichas se iluminan. Después, repite el orden."
       hideBadges={true}

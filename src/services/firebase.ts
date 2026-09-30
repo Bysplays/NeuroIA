@@ -4,7 +4,7 @@ import { browserPopupRedirectResolver, indexedDBLocalPersistence, browserLocalPe
 // Public web configuration. Authorization must be enforced by server-side rules.
 const app = initializeApp({
   apiKey: 'AIzaSyAbEc1z8GzzNTl1vOziMJypSHagIrukilQ',
-  authDomain: 'ceoaberto-neuroia.firebaseapp.com',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN?.trim() || 'ceoaberto-neuroia.firebaseapp.com',
   projectId: 'ceoaberto-neuroia',
   storageBucket: 'ceoaberto-neuroia.firebasestorage.app',
   messagingSenderId: '1049872074432',

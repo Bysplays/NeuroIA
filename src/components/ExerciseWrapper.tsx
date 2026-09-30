@@ -1,8 +1,9 @@
+import { exerciseStages, sessionProgress } from '../services/sessionProgress';
+import { FittedGameArea } from './FittedGameArea';
 import { useGameSession } from '../services/gameSession';
-import { HeaderIllustration } from './HeaderIllustration';
+import { getExerciseById } from '../services/exerciseCatalog';
 import React, { useEffect } from 'react';
-import { RotateCcw, ArrowRight } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { RotateCcw, ArrowRight, Check } from 'lucide-react';
 import type { CognitiveDomain, ExerciseId, ExerciseResult } from '../types';
 import { soundService } from '../services/soundService';
 
@@ -24,6 +25,8 @@ interface ExerciseWrapperProps {
   planProgress?: PlanProgress | null;
   onNextPlanExercise?: () => void;
   children: React.ReactNode;
+  completedStages?: number;
+  nextAction?: React.ReactNode;
   hideBadges?: boolean;
   hideInstructionBanner?: boolean;
 }
@@ -39,42 +42,35 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
   planProgress,
   onNextPlanExercise,
   children,
+  completedStages = 0,
+  nextAction,
 }) => {
   const session = useGameSession();
   const { finish } = session;
+  const stages = exerciseStages(exerciseId, session.config);
+  const bar = sessionProgress(isCompleted ? stages : completedStages, stages, session.progressScope);
   useEffect(() => { finish(isCompleted); }, [isCompleted, finish]);
   useEffect(() => {
     if (isCompleted) {
       window.scrollTo(0, 0);
       soundService.playCompletionFanfare();
-      try {
-        confetti({
-          disableForReducedMotion: true,
-          particleCount: 60,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ['#b9dce3', '#c6dfb9', '#cfc6e8', '#edd9bb', '#e9c5df'],
-        });
-      } catch {
-        // Silencioso
-      }
     }
   }, [isCompleted]);
 
   return (
     <div className={`exercise-container${isCompleted && result ? ' exercise-container-completed' : ''}`} data-domain={domain}>
-      {!isCompleted && <h1 className="game-task-title">{title}</h1>}
+      {!isCompleted && <h1 className="game-task-title">{title}</h1>}<div className="game-stage-progress" role="progressbar" aria-valuemin={0} aria-valuenow={bar.value} aria-valuemax={bar.max} aria-label={session.progressScope ? "Progreso de la sesión" : "Progreso del juego"}>
+        {Array.from({ length: Math.ceil(bar.max) }, (_, index) => <span key={index} aria-hidden="true"><i style={{ width: `${Math.max(0, Math.min(1, bar.value - index)) * 100}%` }}/></span>)}
+      </div>
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}
-      <div className="exercise-viewport">
+      <FittedGameArea>
         {isCompleted && result ? (
           <section className="exercise-result" aria-labelledby="result-title">
             <div className="result-heading">
-              <div>
-                <p className="result-eyebrow">{planProgress ? `Ejercicio ${planProgress.current} de ${planProgress.total} completado` : 'Ejercicio completado'}</p>
-                <h1 id="result-title">Un paso más. Bien hecho.</h1>
-                <p className="result-message">Gracias por dedicarte este rato.{result.level ? ` Has jugado en el nivel ${result.level}.` : ''}</p>
-              </div>
-              <HeaderIllustration scene={exerciseId} className="game-completion-art" />
+              <span className="result-complete-mark" aria-hidden="true"><Check size={30}/></span>
+              <p className="result-eyebrow">{planProgress ? `Actividad ${planProgress.current} de ${planProgress.total}` : 'Tu práctica de hoy'}</p>
+              <h1 id="result-title">{planProgress?.isLast ? 'Sesión completada' : 'Actividad completada'}</h1>
+              <p className="result-message">{getExerciseById(exerciseId)?.title}{result.level ? ` · Nivel ${result.level}` : ''}</p>
             </div>
 
             <dl className="result-summary">
@@ -84,12 +80,6 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
             </dl>
 
             <div className="result-actions">
-              {!session.lockedLevel && <div className="result-secondary-actions">
-                <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
-                  onRestart(); }}>
-                  <RotateCcw size={18} aria-hidden="true" /> Repetir
-                </button>
-              </div>}
               <button
                 className="touch-btn touch-btn-primary result-primary"
                 disabled={session.lockedLevel && !session.nextReady}
@@ -102,13 +92,21 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                 <span>{planProgress && onNextPlanExercise ? (planProgress.isLast ? 'Terminar mi sesión' : 'Siguiente ejercicio') : 'Volver al inicio'}</span>
                 <ArrowRight size={20} aria-hidden="true" />
               </button>
+              {!session.lockedLevel && <div className="result-secondary-actions">
+                <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
+                  onRestart(); }}>
+                  <RotateCcw size={18} aria-hidden="true" /> Repetir
+                </button>
+              </div>}
+
 
             </div>
           </section>
         ) : (
           children
         )}
-      </div>
+      </FittedGameArea>
+      {!isCompleted && nextAction && <div className="game-stage-action">{nextAction}</div>}
 
 
     </div>

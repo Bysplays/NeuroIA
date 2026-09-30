@@ -3,6 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function authenticated() {
       return request.auth != null
+        && !exists(/databases/$(database)/documents/accountDeletions/$(request.auth.uid))
         && (request.auth.token.get('firebase', {}).get('sign_in_provider', '') != 'password'
           || request.auth.token.get('email_verified', false) == true);
     }
@@ -19,20 +20,25 @@ service cloud.firestore {
       let seatId = access.seatId;
       let seat = get(/databases/$(database)/documents/professionals/$(id)/seats/$(seatId)).data;
       let link = get(/databases/$(database)/documents/professionals/$(id)/patients/$(uid)).data;
-      return request.auth != null && professionalOwner(id)
+      return request.auth != null && !exists(/databases/$(database)/documents/accountDeletions/$(uid)) && professionalOwner(id)
         && access.kind == 'invitation' && access.expiresAt > request.time.toMillis()
         && seat.status == 'active' && seat.expiresAt > request.time.toMillis()
         && seat.occupantUid == uid && link.patientId == uid && link.seatId == seatId;
     }
+    function validLevelEvidence(evidence) {
+      return evidence is list && evidence.size() < 3
+        && evidence[0] is int && evidence[0] >= 0 && evidence[0] <= 100
+        && (evidence.size() < 2 || (evidence[1] is int && evidence[1] >= 0 && evidence[1] <= 100));
+    }
     function validGameLevel(value) {
       let level = value.level;
       let evidence = value.evidence;
+      let runs = value.get('qualifyingRuns', 0);
       return value is map && value.keys().hasOnly(['level', 'evidence', 'qualifyingRuns'])
-        && (!('qualifyingRuns' in value) || (value.qualifyingRuns is int && value.qualifyingRuns >= 0 && value.qualifyingRuns <= 1))
+        && runs is int && runs >= 0 && runs <= 1
         && level is int && level >= 1 && level <= 10
-        && evidence is list && evidence.size() < 3
-        && (evidence.size() < 1 || (evidence[0] is int && evidence[0] >= 0 && evidence[0] <= 100))
-        && (evidence.size() < 2 || (evidence[1] is int && evidence[1] >= 0 && evidence[1] <= 100));
+        // Reassessment resets all eight lists; keep that path below the rules expression limit.
+        && (evidence == [] || validLevelEvidence(evidence));
     }
     function validTrial(value) {
       return value is map && value.keys().hasOnly(['accuracy', 'questions', 'hints', 'skipped', 'assessedLevel'])
@@ -53,20 +59,70 @@ service cloud.firestore {
         && (!('motor-target' in value) || value['motor-target'] == previous.get('motor-target', null) || validGameLevel(value['motor-target']))
         && (!('motor-tracking' in value) || value['motor-tracking'] == previous.get('motor-tracking', null) || validGameLevel(value['motor-tracking']));
     }
+    function validConditionContext(value) {
+      return value is map && value.keys().hasAll(['kind', 'side', 'mobility'])
+        && value.keys().hasOnly(['kind', 'side', 'mobility', 'consentVersion'])
+        && (!('consentVersion' in value) || value.consentVersion == 1) && value.kind in ['stroke', 'other', 'none']
+        && value.side in ['unspecified', 'left', 'right', 'both', 'none']
+        && value.mobility in ['unspecified', 'independent', 'support', 'limited']
+        && (value.kind != 'none' || (value.side == 'unspecified' && value.mobility == 'unspecified'));
+    }
+    function validPlacementPreferences(value) {
+      return value is map && value.keys().hasAll(['interests', 'movement'])
+        && value.keys().hasOnly(['interests', 'movement', 'condition'])
+        && (!('condition' in value) || validConditionContext(value.condition))
+        && value.interests is list && value.interests.size() > 0 && value.interests.size() <= 5
+        && value.interests.toSet().size() == value.interests.size()
+        && value.interests.hasOnly(['attention', 'memory', 'language', 'executive', 'motor'])
+        && value.movement in ['unspecified', 'standard', 'taps'];
+    }
+    function coversPlacementGames(keys, placement) {
+      let interests = placement.get('preferences', {}).get('interests', ['attention', 'memory', 'language', 'executive', 'motor']);
+      let taps = placement.get('preferences', {}).get('movement', 'unspecified') == 'taps';
+      return keys.hasAll(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking']) || (('preferences' in placement) && (!interests.hasAny(['attention']) || keys.hasAll(['visual-scanning']))
+        && (!interests.hasAny(['memory']) || keys.hasAll(['memory-path', 'memory-pairs']))
+        && (!interests.hasAny(['language']) || keys.hasAll(['language-naming', 'word-completion']))
+        && (!interests.hasAny(['executive']) || keys.hasAll(['categorization']))
+        && (!interests.hasAny(['motor']) || (keys.hasAll(['motor-target']) && (taps || keys.hasAll(['motor-tracking'])))));
+    }
+    function validPlacementStage(value) {
+      return value is map && value.keys().hasOnly(['level', 'best'])
+        && value.level in [4, 7, 10] && validTrial(value.best)
+        && value.best.accuracy == 100 && value.best.questions > 0 && !value.best.skipped
+        && ((value.level == 4 && value.best.assessedLevel == 1)
+          || (value.level == 7 && value.best.assessedLevel == 4)
+          || (value.level == 10 && value.best.assessedLevel == 7));
+    }
+    function validPlacementStages(value) {
+      let previous = resource == null ? {} : resource.data.data.profile.get('placement', {}).get('stages', {});
+      return value is map && value.keys().hasOnly(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking'])
+        && (!('visual-scanning' in value) || value['visual-scanning'] == previous.get('visual-scanning', null) || validPlacementStage(value['visual-scanning']))
+        && (!('language-naming' in value) || value['language-naming'] == previous.get('language-naming', null) || validPlacementStage(value['language-naming']))
+        && (!('word-completion' in value) || value['word-completion'] == previous.get('word-completion', null) || validPlacementStage(value['word-completion']))
+        && (!('memory-path' in value) || value['memory-path'] == previous.get('memory-path', null) || validPlacementStage(value['memory-path']))
+        && (!('memory-pairs' in value) || value['memory-pairs'] == previous.get('memory-pairs', null) || validPlacementStage(value['memory-pairs']))
+        && (!('categorization' in value) || value['categorization'] == previous.get('categorization', null) || validPlacementStage(value['categorization']))
+        && (!('motor-target' in value) || value['motor-target'] == previous.get('motor-target', null) || validPlacementStage(value['motor-target']))
+        && (!('motor-tracking' in value) || value['motor-tracking'] == previous.get('motor-tracking', null) || validPlacementStage(value['motor-tracking']));
+    }
     function validPlacement(value) {
-      let previous = resource == null ? {} : resource.data.data.profile.get('placement', {}).get('trials', {});
-      return value is map && value.keys().hasOnly(['version', 'completed', 'trials'])
+      let previousPlacement = resource == null ? {} : resource.data.data.profile.get('placement', {});
+      let previous = previousPlacement.get('trials', {});
+      return value is map && value.keys().hasOnly(['version', 'completed', 'trials', 'preferences', 'retakePreferences', 'stages'])
+        && (!('preferences' in value) || value.preferences == previousPlacement.get('preferences', null) || validPlacementPreferences(value.preferences))
+        && (!('retakePreferences' in value) || value.retakePreferences == previousPlacement.get('retakePreferences', null) || validPlacementPreferences(value.retakePreferences))
+        && (!('stages' in value) || value.stages == previousPlacement.get('stages', null) || validPlacementStages(value.stages))
         && value.version == 1 && value.completed is bool && value.trials is map
         && value.trials.keys().hasOnly(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking'])
-        && (!value.completed || value.trials.keys().hasAll(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking']))
-        && (!('visual-scanning' in value.trials) || value.trials['visual-scanning'] == previous.get('visual-scanning', null) || validTrial(value.trials['visual-scanning']))
+        && (!value.completed || coversPlacementGames(value.trials.keys(), value))
+        && (value.trials == previous || ((!('visual-scanning' in value.trials) || value.trials['visual-scanning'] == previous.get('visual-scanning', null) || validTrial(value.trials['visual-scanning']))
         && (!('language-naming' in value.trials) || value.trials['language-naming'] == previous.get('language-naming', null) || validTrial(value.trials['language-naming']))
         && (!('word-completion' in value.trials) || value.trials['word-completion'] == previous.get('word-completion', null) || validTrial(value.trials['word-completion']))
         && (!('memory-path' in value.trials) || value.trials['memory-path'] == previous.get('memory-path', null) || validTrial(value.trials['memory-path']))
         && (!('memory-pairs' in value.trials) || value.trials['memory-pairs'] == previous.get('memory-pairs', null) || validTrial(value.trials['memory-pairs']))
         && (!('categorization' in value.trials) || value.trials['categorization'] == previous.get('categorization', null) || validTrial(value.trials['categorization']))
         && (!('motor-target' in value.trials) || value.trials['motor-target'] == previous.get('motor-target', null) || validTrial(value.trials['motor-target']))
-        && (!('motor-tracking' in value.trials) || value.trials['motor-tracking'] == previous.get('motor-tracking', null) || validTrial(value.trials['motor-tracking']));
+        && (!('motor-tracking' in value.trials) || value.trials['motor-tracking'] == previous.get('motor-tracking', null) || validTrial(value.trials['motor-tracking']))));
     }
     function validProgress() {
       let value = request.resource.data;
@@ -82,7 +138,7 @@ service cloud.firestore {
           'settings', 'therapistNotes', 'prescribedDomains', 'therapistGuidanceNote', 'placement', 'gameLevels'])
         && (!('placement' in profile) || (resource != null && profile.placement == resource.data.data.profile.get('placement', null)) || validPlacement(profile.placement))
         && (!('gameLevels' in profile) || (resource != null && profile.gameLevels == resource.data.data.profile.get('gameLevels', null)) || validLevels(profile.gameLevels))
-        && (!('placement' in profile) || !profile.placement.completed || ('gameLevels' in profile && profile.gameLevels.keys().hasAll(['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking'])))
+        && (!('placement' in profile) || !profile.placement.completed || ('gameLevels' in profile && (profile.gameLevels.size() == 8 || profile.gameLevels.keys().hasAll(profile.placement.trials.keys()))))
         && profile.name is string && profile.name.size() <= 200
         && profile.totalSessions is int && profile.totalSessions >= 0
         && profile.totalMinutes is int && profile.totalMinutes >= 0
@@ -154,7 +210,8 @@ service cloud.firestore {
       let seat = get(/databases/$(database)/documents/professionals/$(owner)/seats/$(seatId)).data;
       let access = get(/databases/$(database)/documents/users/$(uid)/access/main).data;
       let link = get(/databases/$(database)/documents/professionals/$(owner)/patients/$(uid)).data;
-      return authenticated() && (request.auth.uid == owner || request.auth.uid == uid)
+      return authenticated() && !exists(/databases/$(database)/documents/accountDeletions/$(owner))
+        && !exists(/databases/$(database)/documents/accountDeletions/$(uid)) && (request.auth.uid == owner || request.auth.uid == uid)
         && professional.active == true && professional.ownerUid == owner
         && seat.status == 'active' && seat.expiresAt > request.time.toMillis() && seat.occupantUid == uid
         && access.kind == 'invitation' && access.professionalId == owner && access.seatId == seatId
@@ -227,7 +284,8 @@ service cloud.firestore {
     }
     function reservedProfessional() {
       let professional = getAfter(/databases/$(database)/documents/professionals/ceoaberto).data;
-      return professional.name == 'CeoAberto' && professional.active == true;
+      return professional.name == 'CeoAberto' && professional.active == true
+        && (professional.get('ownerUid', null) == null || !exists(/databases/$(database)/documents/accountDeletions/$(professional.ownerUid)));
     }
     function invitation(value) {
       return value.kind == 'invitation' && value.invitationCode == 'CEOABERTO'
@@ -241,10 +299,7 @@ service cloud.firestore {
     match /users/{uid}/access/main {
       allow get: if owns(uid);
       allow create: if owns(uid) && noBilling(uid) && (
-        (request.resource.data.keys().hasOnly(['kind', 'trialStartedAt'])
-          && request.resource.data.kind == 'trial'
-          && request.resource.data.trialStartedAt == request.time)
-        || (request.resource.data.keys().hasOnly(['kind', 'invitationCode', 'professionalId',
+        (request.resource.data.keys().hasOnly(['kind', 'invitationCode', 'professionalId',
             'professionalName', 'expiresAt', 'linkedAt'])
           && invitation(request.resource.data) && reservedProfessional()
           && request.resource.data.linkedAt == request.time
@@ -259,7 +314,8 @@ service cloud.firestore {
         && matchingPatient(uid, request.resource.data.linkedAt);
       allow update: if owns(uid) && noBilling(uid) && resource.data.kind == 'invitation'
         && resource.data.professionalId == 'ceoaberto' && !('seatId' in resource.data)
-        && request.resource.data.keys().hasOnly(['kind', 'leftAt'])
+        && request.resource.data.keys().hasOnly(['kind', 'leftAt', 'trialStartedAt'])
+        && request.resource.data.get('trialStartedAt', null) == resource.data.get('trialStartedAt', null)
         && request.resource.data.kind == 'revoked' && request.resource.data.leftAt == request.time
         && !existsAfter(/databases/$(database)/documents/professionals/ceoaberto/patients/$(uid));
     }

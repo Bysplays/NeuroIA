@@ -1,11 +1,28 @@
+import { useEffect, useState } from 'react';
+import { Brand } from './Brand';
+const loadingMessages = [
+  'Eligiendo emociones positivas',
+  'Recordando que cada día es un regalo',
+  'Poniendo atención en los detalles',
+  'Preparando sonrisas y abrazos sinceros',
+  'Haciendo espacio para un ratito para ti',
+  'Despertando la curiosidad',
+  'Celebrando cada pequeño paso',
+  'Preparando juegos para ir a tu ritmo',
+];
+
 /** One visual boundary for authentication, entitlement and progress loading. */
 export function AppLoading() {
+  const [messageIndex, setMessageIndex] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setMessageIndex(index => (index + 1) % loadingMessages.length);
+    }, 4000);
+    return () => window.clearInterval(timer);
+  }, []);
   return <main className="app-loading" role="status" aria-live="polite" aria-label="Preparando tu espacio">
-    <div className="app-loading-mark" aria-hidden="true">
-      <img src={`${import.meta.env.BASE_URL}brand/neuroia-mark.svg`} alt="" width="64" height="64" />
-    </div>
-    <span className="app-loading-brand" aria-hidden="true">Neuro<strong>IA</strong></span>
-    <p aria-hidden="true">Preparando tu espacio…</p>
+    <div aria-hidden="true"><Brand/></div>
+    <p aria-hidden="true">{loadingMessages[messageIndex]}</p>
     <span className="app-loading-dots" aria-hidden="true"><i /><i /><i /></span>
   </main>;
 }

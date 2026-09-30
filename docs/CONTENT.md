@@ -9,8 +9,9 @@ not a determination of regulatory status or legal compliance.
 
 `src/services/productCopy.ts` holds the public introduction, information sections
 and supplied general notice. `ProductInformation` makes these accessible before
-sign-in and from the settings footer using the shared dialog. The login heading
-and dashboard claim come from the PDF. Browser title and description follow the
+sign-in and from the settings footer using full document pages. The concise unauthenticated-home heading “Juega a tu ritmo” adapts the supplied claim; its
+one-sentence introduction names actual practice areas. The complete product
+explanation remains in About. Browser title and description follow the
 same positioning. Keep descriptions grounded in observable in-game activity.
 
 ## Included sections
@@ -45,7 +46,8 @@ the current introduction uses the cover paragraph without that claim instead.
 ## Professional entry
 
 The login offers “¿Eres un profesional?” and a reversible professional presentation.
-It addresses professionals who want to follow other people's exercise activity.
+Its owner-approved subtitle is “Gestiona los perfiles de varios jugadores”. It addresses
+professionals who want to follow other people's exercise activity.
 Keep “Para profesionales”, the heading and Google/email access actions in its panel;
 omit the explanatory and availability paragraphs. Signing in opens a free
 self-owned workspace. Selecting it alone does not grant access to anyone
@@ -61,3 +63,22 @@ restoring brain functions, or providing rehabilitation. Disease and medical term
 in the supplied non-medical-purpose notice are exclusions, not promotional claims.
 Keep instructions, answer keys, scoring and persistence semantics intact. Internal
 legacy identifiers are not product copy and do not require a data migration.
+
+## Supplied institutional attribution
+
+The owner supplied the complete IGAPE funding notice on 2026-09-29. Render it
+unchanged on the IGAPE information page with an HTML transcript.
+The notice's AI project subtitle is funding attribution, not an additional claim
+that the current product ships all planned AI capabilities. See
+[asset provenance](assets/images/institutional/README.md).
+
+## Operational privacy notice
+
+`PRIVACY_SECTIONS` in `productCopy.ts` describes the implemented account, progress,
+professional sharing, optional Muse recordings, billing providers and local storage.
+It appears on the legal page, alongside the supplied non-medical notice. This is
+not yet a complete approved privacy policy: the owner has confirmed CEO Aberto S.L., NIF B36232361, the Vigo address
+and david@ceoaberto.com as privacy contact. Remaining approval covers legal bases (including optional signal recording),
+retention criteria, rights handling and provider transfer safeguards before release.
+Do not invent these details or imply that closing a session or cancelling billing
+deletes account data. Reference: [AEPD information duty](https://www.aepd.es/derechos-y-deberes/conoce-tus-derechos/derecho-de-informacion).

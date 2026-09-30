@@ -5,7 +5,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
     {
       id: 'visual-scanning',
       domain: 'attention',
-      title: 'Rastreo y Búsqueda Visual',
+      title: 'Busca la figura',
       subtitle: 'Cancelación y Foco',
       description: 'Encuentra el elemento repetido entre las demás figuras de la cuadrícula.',
       iconName: 'Search',
@@ -15,7 +15,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
     {
       id: 'language-naming',
       domain: 'language',
-      title: 'Denominación de Objetos',
+      title: 'Ponle nombre',
       subtitle: 'Fluidez y Vocabulario',
       description: 'Observa la imagen y elige la palabra correcta con pistas fonológicas y de sonido.',
       iconName: 'BookOpen',
@@ -23,7 +23,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
     {
       id: 'word-completion',
       domain: 'language',
-      title: 'Completar Palabras Faltantes',
+      title: 'Completar palabras',
       subtitle: 'Léxico y Ortografía Táctil',
       description: 'Completa la palabra del objeto colocando las letras que faltan mediante teclas táctiles grandes.',
       iconName: 'Type',
@@ -33,7 +33,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
     {
       id: 'memory-path',
       domain: 'memory',
-      title: 'Secuencia de Balizas',
+      title: 'Recuerda la secuencia',
       subtitle: 'Memoria de Trabajo Espacial',
       description: 'Observa el orden en que se iluminan las balizas luminosas y repite la misma secuencia.',
       iconName: 'Sparkles',
@@ -41,7 +41,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
     {
       id: 'memory-pairs',
       domain: 'memory',
-      title: 'Parejas de Memoria',
+      title: 'Encuentra las parejas',
       subtitle: 'Retención y Parejas Cotidianas',
       description: 'Encuentra las parejas de objetos cotidianos volteando cartas boca abajo en una cuadrícula clara.',
       iconName: 'Grid',
@@ -51,7 +51,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
     {
       id: 'categorization',
       domain: 'executive',
-      title: 'Clasificación por Categorías',
+      title: 'Cada cosa en su lugar',
       subtitle: 'Razonamiento y Toma de Decisiones',
       description: 'Clasifica objetos de la vida diaria en sus contenedores temáticos (alimentos, ropa, higiene).',
       iconName: 'Layers',
@@ -61,7 +61,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
     {
       id: 'motor-target',
       domain: 'motor',
-      title: 'Toque de Dianas Estáticas',
+      title: 'Toca la diana',
       subtitle: 'Precisión Táctil y Puntería',
       description: 'Toca dianas grandes en pantalla para practicar la precisión a tu ritmo.',
       iconName: 'Hand',
@@ -69,7 +69,7 @@ export const EXERCISES_BY_DOMAIN: Record<CognitiveDomain, ExerciseDefinition[]> 
     {
       id: 'motor-tracking',
       domain: 'motor',
-      title: 'Persecución de Diana Móvil',
+      title: 'Sigue a tu compañero',
       subtitle: 'Rastreo Motor Continuo',
       description: 'Sigue con el dedo una diana que se mueve lentamente en la pantalla para recargar la meta.',
       iconName: 'Compass',
