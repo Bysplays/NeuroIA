@@ -69,6 +69,8 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/services/dailySession.ts` | 56 named three-game combinations, deterministically selected by account and local date for home and daily play |
 | `src/services/exerciseCatalog.ts` | Eight active exercise definitions and short summaries |
 | `src/services/activityExercises.ts` | Historical names and stable chart styles, including retired daily sequencing |
+| `src/services/activityInsights.ts`, `activityAi.ts`, `activityReportPdf.ts` and `src/components/ActivityAssistant.tsx` | Shared deterministic activity evidence, optional OpenRouter suggestions and direct Spanish PDF report export; see `docs/AI.md` |
+| `vendor/cloudflare/ai.mjs` and `vendor/openrouter/` | Authenticated AI endpoints, server retrieval/quota and versioned Spanish prompts; no browser secret or model-driven level writes |
 | `src/components/ExerciseIllustration.tsx` | Eight decorative SVG compositions for game introductions; not playable stimuli |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/PlacementPreferences.tsx` and `src/services/placementPreferences.ts` | Two-step interests/functional movement choices and thematic assessment selection; see `docs/PLACEMENT.md` |
@@ -663,6 +665,31 @@ outbox after sign-out. No production fixture deletion is permitted in tests.
 Include `vendor/cloudflare/accountLifecycle.test.mjs` with Worker unit checks; the
 combined demo Firestore suite exercises the REST cleanup and deletion write locks.
 
+## Optional activity AI
+
+Read docs/AI.md and vendor/openrouter/README.md before changing inference or reports.
+Use `activityInsights.ts` for the browser and Worker metric projection. AI may explain
+only the bounded candidates and cite calculated facts; it never writes levels,
+results, assignments or clinical notes. `/ai/analyze` retrieves server-owned data
+and verifies owner/active reciprocal-seat authorization before and after generation.
+Do not accept arbitrary client prompts, models or statistics. Never send account
+identity, free text, health context or EEG/PPG to OpenRouter. Use explicit generation actions to request external processing and all secrets in Worker bindings. The production configuration sets `AI_ENABLED=true` with Dots3-Note Preview free;
+missing credentials or a false flag disable generation.
+Reports are direct PDF downloads, not saved cloud documents. The lazy-loaded
+`activityReportPdf.ts` uses jsPDF with local embedded Manrope fonts and the supplied
+brand logo; fonts and logo use BASE_URL. The PDF includes vector area/level radars, centered metric cards and a square table
+with centered numeric columns and no internal identifiers. Export requests cancel
+on cancellation or identity/context change; asset failures are recoverable inline. Drafts and requests
+are cleared on leaving the overview, changing context or account identity.
+The server-only `users/{actorUid}/aiUsage/daily` holds bounded counters and is covered
+by recursive account deletion; existing rules deny client access. The REST adapter
+decodes nested progress values for AI retrieval without changing the billing writes.
+Run `node --experimental-strip-types --test vendor/cloudflare/ai.test.mjs` with the
+existing Worker suites; npm test includes insight coverage and the combined demo
+Firestore suite covers real archive retrieval. Mock provider calls in automated
+tests. Real-model Spanish quality, provider configuration and deployment are
+separate release checks, tracked in docs/TODO.md.
+
 Game progress uses `exerciseStages` and `ExerciseWrapper.completedStages`: count
 whole search boards, naming/completion/classification questions and full memory
 sequences. The optional `individual` stage argument enables tap segments for solo
@@ -683,3 +710,13 @@ access resume automatically without a second action. There are no pause/resume
 controls in ordinary or assigned games. Focus events never trigger recovery. Motor tracking captures pointer
 down on the arena and tests contact each frame, including drags beginning outside
 the target. Target misses persist as transparent red outlines until restart.
+
+OpenRouter local setup accepts root `.env` `OPENROUTER_API` and `OPENROUTER_MODEL`
+through `npm run ai:configure`; secrets are copied only to ignored Worker `.dev.vars`.
+The selected Gemma free configuration uses JSON object output with server validation
+and an owner-authorized disabled ZDR filter. JSON object mode and ZDR false are
+fixed code constants in vendor/openrouter/prompts.mjs, not env options. Never put the key in a Vite variable.
+`npm run ai:verify` makes explicit real inference requests with synthetic records
+only; it is not a CI test. Test local configuration preservation with
+`node --experimental-strip-types --test vendor/openrouter/local-config.test.mjs vendor/openrouter/prompts.test.mjs`. Env setup does not deploy
+or activate the remote Worker. See vendor/openrouter/README.md for bindings.

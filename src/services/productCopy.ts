@@ -91,6 +91,14 @@ export const PRIVACY_SECTIONS = [
     ],
   },
   {
+    title: 'Ayuda opcional con inteligencia artificial',
+    paragraphs: [
+      'Al solicitar recomendaciones o informes de actividad con inteligencia artificial, NeuroIA envía un resumen agregado de actividad a servidores externos de OpenRouter y del proveedor del modelo para generar el contenido en castellano. La generación se inicia al pulsar el botón correspondiente.',
+      'Ese resumen incluye juegos, niveles, frecuencia de práctica, precisión y duración por pregunta. Se transmite sin identificadores ni una tabla de correspondencias que lo vincule directamente con una persona o cuenta. No se envían tu nombre, correo, identificadores de cuenta o de partidas, notas personales, condición de salud ni señales EEG/PPG. El análisis utiliza los datos sincronizados disponibles y explica si el historial es parcial.',
+      'Las sugerencias no cambian niveles ni propuestas profesionales y pueden contener errores. El informe se genera y descarga directamente en PDF. NeuroIA no guarda su contenido en tu cuenta; el archivo descargado permanece bajo tu control. Se conserva un contador diario de solicitudes para limitar el uso del servicio, sin el contenido de los informes.',
+    ],
+  },
+  {
     title: 'Datos en este dispositivo',
     paragraphs: [
       'El navegador conserva la sesión y datos locales necesarios para recuperar tus preferencias y sincronizar cambios pendientes. Cerrar sesión impide continuar usando la cuenta sin identificarse de nuevo, pero no elimina el historial de la nube ni todas las copias locales.',

@@ -1,4 +1,5 @@
 import { trialOffer, startTrial, deletionEligibility, requestDeletion, processDeletion } from './accountLifecycle.mjs';
+import { aiStatus, generateAnalysis } from './ai.mjs';
 // Cloudflare Worker: Web APIs only, no Firebase Functions or Node runtime.
 const encoder = new TextEncoder();
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
@@ -53,7 +54,10 @@ async function googleToken(env) {
   return oauth.token;
 }
 const encodeValue = value => value === null ? { nullValue: null } : typeof value === 'number' ? { doubleValue: value } : typeof value === 'boolean' ? { booleanValue: value } : { stringValue: value };
-const decode = fields => Object.fromEntries(Object.entries(fields ?? {}).map(([k, v]) => [k, 'integerValue' in v ? Number(v.integerValue) : 'doubleValue' in v ? v.doubleValue : v.stringValue ?? v.booleanValue ?? (v.timestampValue ? Date.parse(v.timestampValue) : null)]));
+const decodeValue = v => 'integerValue' in v ? Number(v.integerValue) : 'doubleValue' in v ? v.doubleValue
+  : v.mapValue ? decode(v.mapValue.fields) : v.arrayValue ? (v.arrayValue.values || []).map(decodeValue)
+    : v.stringValue ?? v.booleanValue ?? (v.timestampValue ? Date.parse(v.timestampValue) : null);
+const decode = fields => Object.fromEntries(Object.entries(fields ?? {}).map(([k, v]) => [k, decodeValue(v)]));
 export function database(env) {
   const root = `projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents`;
   async function api(path, method = 'GET', body) {
@@ -63,6 +67,20 @@ export function database(env) {
     return data;
   }
   return {
+    async readActivity(uid) {
+      if (!/^[A-Za-z0-9_-]{1,128}$/.test(uid)) fail(400, 'Cuenta no válida.');
+      const [progress, rows] = await Promise.all([
+        api(`/users/${uid}/progress/main`),
+        api(`/users/${uid}:runQuery`, 'POST', { structuredQuery: { from: [{ collectionId: 'results' }], orderBy: [{ field: { fieldPath: 'date' }, direction: 'DESCENDING' }], limit: 401 } }),
+      ]);
+      const data = decode(progress?.fields).data || {};
+      const archive = (rows || []).filter(row => row.document).map(row => decode(row.document.fields));
+      const recent = Array.isArray(data.history) ? data.history : [];
+      const history = [...new Map([...recent, ...archive.slice(0, 400)].map(r => [r.id, r])).values()];
+      return { history, levels: data.profile?.gameLevels,
+        partial: archive.length > 400 || !Number.isInteger(data.profile?.totalSessions) || data.profile.totalSessions > history.length,
+        tapsOnly: data.profile?.placement?.preferences?.movement === 'taps' };
+    },
     async find(collection, field, value, allDescendants = false, limit = 100) {
       const rows = await api(':runQuery', 'POST', { structuredQuery: { from: [{ collectionId: collection, allDescendants }], where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: encodeValue(value) } }, limit } });
       return (rows || []).filter(row => row.document).map(row => ({ path: row.document.name.slice(root.length + 1), ...decode(row.document.fields) }));
@@ -507,7 +525,7 @@ export function createHandler(deps = {}) {
         await webhook(JSON.parse(body), env, db, stripe);
         return reply({ received: true });
       }
-      if (!['/checkout','/portal','/cancel-checkout','/status','/access','/trial','/account/deletion-status','/account/delete', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
+      if (!['/checkout','/portal','/cancel-checkout','/status','/access','/trial','/account/deletion-status','/account/delete', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat', '/ai/status', '/ai/analyze'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
       const token = request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1];
       if (!token) fail(401, 'Inicia sesión para continuar.');
       const uid = await (deps.verifyUser || verifyUser)(token, env.FIREBASE_PROJECT_ID);
@@ -531,6 +549,13 @@ export function createHandler(deps = {}) {
       }
       const deleting = await db.runTransaction(tx => tx.get(`accountDeletions/${uid}`), 4, true);
       if (deleting) fail(409, 'La cuenta se está eliminando.');
+      if (path === '/ai/status') return reply(aiStatus(env));
+      if (path === '/ai/analyze') {
+        const body = await request.text();
+        if (body.length > 2048) fail(413, 'Solicitud demasiado grande.');
+        let input; try { input = JSON.parse(body); } catch { fail(400, 'Solicitud no válida.'); }
+        return reply(await generateAnalysis(uid, input, env, db, confirmedAccess, request.signal, deps.aiFetch || fetch));
+      }
       if (path === '/access') {
         const access = await confirmedAccess(uid, db);
         if (!access.kind && env.TRIAL_IDENTITY_SECRET) {
@@ -562,6 +587,7 @@ export function createHandler(deps = {}) {
       }
       return reply({ ok: true });
     } catch (error) {
+      if (new URL(request.url).pathname.startsWith('/ai/')) return reply({ error: error.status ? error.message : 'No hemos podido preparar el análisis. Inténtalo de nuevo.' }, error.status || 500);
       return reply({ error: error instanceof HttpError || (error.status >= 400 && error.status < 500) || error.status === 503 ? error.message : (new URL(request.url).pathname.startsWith('/account/') ? 'No hemos podido gestionar tu cuenta. Inténtalo de nuevo.' : 'No hemos podido gestionar el pago. Inténtalo de nuevo.') }, error.status || 500);
     }
   };

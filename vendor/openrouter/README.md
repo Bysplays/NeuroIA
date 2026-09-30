@@ -1,0 +1,128 @@
+# OpenRouter integration
+
+The existing Cloudflare Worker performs remote inference with standard `fetch`;
+there is no browser API key, SDK dependency, vector database or autonomous agent.
+Bounded Firestore retrieval supplies calculated facts for optional writing.
+See [product/architecture](../../docs/AI.md) and [runtime prompts](prompts.mjs).
+
+## Configuration
+
+Set the following bindings on `vendor/cloudflare/wrangler.jsonc` or the equivalent
+Worker environment. The production configuration enables the owner-approved AI release; set AI_ENABLED=false to disable generation.
+
+| Binding | Meaning |
+| --- | --- |
+| `OPENROUTER_API_KEY` / `OPENROUTER_API` | Worker **secret** (canonical name takes precedence); never a `VITE_` variable, source file or committed config |
+| `OPENROUTER_MODEL` | Explicit model ID; selected: `dots-studio/dots-3-note-preview:free`; no automatic model fallback |
+| `AI_ENABLED` | `true` in the production config; absent/false disables generation |
+| `AI_DAILY_LIMIT` | Optional integer 1–50, default 10 attempts per caller per UTC day |
+| `OPENROUTER_PROVIDER` | Optional exact provider slug to pin in `provider.only` |
+| `OPENROUTER_REGION` | Optional `eu` selects `https://eu.openrouter.ai/api/v1/chat/completions`; otherwise uses the standard API |
+
+Regional endpoints can require an eligible OpenRouter plan. Confirm availability
+and model/provider support rather than assuming that an EU endpoint works on every
+account. The implementation never falls back from EU to the standard endpoint.
+
+Example secret setup (interactive, no key in shell history):
+
+```sh
+npx wrangler secret put OPENROUTER_API_KEY --config vendor/cloudflare/wrangler.jsonc
+```
+
+## Root .env workflow
+
+The owner supplies `OPENROUTER_API` and `OPENROUTER_MODEL` in root `.env`.
+Output mode and ZDR are fixed in `prompts.mjs`: `RESPONSE_FORMAT` is
+`{ type: 'json_object' }` and `ZERO_DATA_RETENTION` is `false`. They are not env
+bindings and obsolete env values are ignored. The prompt includes a worked example,
+a per-request fill-in template and the exact allowed evidence IDs. See
+[PROMPT.md](PROMPT.md) for the editing and data-insertion guide.
+
+Run `npm run ai:configure` to copy only the allowlisted AI bindings into ignored
+`vendor/cloudflare/.dev.vars`, with local `AI_ENABLED=true` and mode 0600. The script
+preserves existing billing/service-account bindings verbatim. It never changes
+`.env.local` or prints secrets. Neither env file is committed or exposed as a Vite
+variable. Run again after changing the model/key. Start local Wrangler with
+`npx wrangler dev --config vendor/cloudflare/wrangler.jsonc`; the existing Worker
+still needs its Firebase service-account bindings to serve authenticated activity.
+
+`npm run ai:verify` performs up to two **real inference requests** against the
+configured model using only synthetic in-memory records, then saves drafts to
+`/tmp/neuroia-openrouter-synthetic.json` for inspection. It never reads/writes
+Firebase. It is opt-in, never part of build/CI; a paid model would incur charges.
+
+The frontend reuses `VITE_BILLING_API_URL` and the authenticated `/ai/status` endpoint.
+Root `.env` alone does not reconfigure the deployed Worker. Production activation
+requires adding the Worker secret, setting `AI_ENABLED=true`, and deploying the
+reviewed Worker/frontend under the existing release authorization. The committed production configuration enables generation with Dots3-Note Preview free.
+
+## Model selection and cost
+
+The configured production model is `dots-studio/dots-3-note-preview:free`.
+Real synthetic recommendations and report smoke checks passed with the v4 prompt
+and disabled reasoning. The endpoint remains configurable; these smoke cases do
+not certify general factuality, latency or availability. JSON object mode and ZDR
+remain hardcoded, with no paid or automatic model fallback. Gemma previously
+returned temporary upstream rate limits. Provider 429 errors have a distinct
+Spanish message. Broader Spanish acceptance remains pending.
+
+Use synthetic scenarios: empty/partial history, little-played games, high precision
+with more time, same-level speed trends, different-level history, assigned sessions,
+unknown hints and legacy dates. Compare facts, clarity, actionable wording and
+latency. Do not label a model approved from a schema-only or mocked test.
+
+Set a spending limit on the OpenRouter key/account. The per-account application
+quota is not a global billing cap and does not prevent aggregate cost across many
+new accounts. Provider response tokens are bounded to 1,400 (suggestions) or 2,200
+(reports). No automatic refresh, retry, model fallback or background generation is
+implemented. Failures/cancellation count against the quota; cancellation may not
+prevent provider billing for already-started work.
+
+## Privacy and routing
+
+Only de-identified aggregate game activity is transmitted. This is not a claim
+that the data is legally anonymous. Names, emails, account/result IDs, health
+context, free-text notes, original responses and EEG/PPG are excluded. The caller
+affirmatively acknowledges each request; professionals must have the appropriate
+authority for external processing of a linked participant's summary.
+
+The selected configuration requests:
+
+```json
+{
+  "provider": {
+    "require_parameters": true,
+    "data_collection": "deny",
+    "zdr": false,
+    "allow_fallbacks": false
+  },
+  "response_format": { "type": "json_object" }
+}
+```
+
+Also review account-level prompt logging/privacy settings and the selected
+provider's terms. Do not enable prompt/body logging in Worker observability.
+The owner explicitly disabled the application-level ZDR filter for Gemma. Do not
+claim zero retention for this configuration; `data_collection: deny` is a separate
+routing setting, not proof of zero retention or a particular data location. Controller/provider review remains a release gate.
+
+Official references checked during implementation:
+
+- [Structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs)
+- [Provider routing and privacy parameters](https://openrouter.ai/docs/guides/routing/provider-selection)
+- [Provider logging](https://openrouter.ai/docs/guides/privacy/provider-logging)
+- [Regional routing](https://openrouter.ai/docs/guides/get-started/sovereign-ai)
+
+## Verification
+
+```sh
+node --experimental-strip-types --test tests/activityInsights.test.ts
+node --experimental-strip-types --test vendor/cloudflare/ai.test.mjs vendor/openrouter/local-config.test.mjs vendor/openrouter/prompts.test.mjs
+npm run test:interface -- tests/interface/activity-ai.spec.mjs tests/interface/activity-ai-transport.spec.mjs
+```
+
+The combined Firestore command in CONTRIBUTING also covers the real REST adapter
+for nested profile/history and archived results. Existing Firestore rules deny
+client reads/writes to the server-only quota path; no new client authorization rule
+is needed. Recursive account deletion covers that subcollection. Reports are
+downloaded only, so no additional database archive/retention schema is introduced.

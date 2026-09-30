@@ -132,6 +132,43 @@ Sin probar, not zero. Gráficas contains Precisión, Velocidad and Niveles; leve
 history draws every recorded game together without a game dropdown. Filtros owns
 area, exercise and date controls, affecting area counts, all three charts and history;
 current levels remain the account's latest values, independently of date filtering.
+Resumen also contains **¿Qué te recomendamos?** below the two radars, using the
+same 10px cards. The compact header pairs an icon-led title with the actual
+source (calculated or AI draft). Show a short introduction and localized coverage
+in a secondary row. Up to three game-led suggestion cards show an existing
+WellnessGlyph, an intent label, the catalog name and the optional action. A pale
+blue first card and neutral remaining cards use existing theme tokens; equal-height
+columns adapt to the available width, and a single suggestion uses a horizontal
+composition on desktop. Put each suggestion's evidence and AI explanation under
+**Por qué este juego**, rendered as an outlined disclosure with a small activity
+icon and circular chevron. Its expanded white inset groups the AI explanation and
+evidence under a quiet label, with a fine left rule instead of ordinary bullets. Use **Sobre la IA** for a short, high-level paragraph about external aggregate processing and optional suggestions. Native disclosures retain
+keyboard operation and explicit focus. Group generation and report actions in a
+separate footer, with the AI action filled and report action outlined; stack on
+narrow screens. Source, coverage and optional-level scope remain visible.
+References inspected: [Uxcel recommendations](https://mobbin.com/screens/7c84c45e-ae5a-449c-be39-306cead79fa7)
+for game identity and hierarchy, and [Coursera learning dashboard](https://mobbin.com/screens/93beef1d-a7ba-4f6c-9efb-4d13aee3eb76)
+for compact horizontal grouping. Use NeuroIA assets and palette. Never style them as commands or automatic
+level changes. **Personalizar con IA** explicitly requests generation;
+no inference runs merely by visiting the tab. **Generar informe** generates and
+downloads a PDF directly, without an editor or review dialog. Show **Generando…**
+while pending, allow cancellation and display recoverable errors inline.
+The PDF opens with identity, period, centered activity metrics and both star charts
+on the activity page. Summary and recommendations follow on a new page: a pale
+blue lead panel, numbered recommendation panels, compact numbered section markers
+and fine rules establish hierarchy. Game names are bold in the square-corner table;
+supporting observations use small blue markers and scope stays visually secondary.
+Long text continues across pages without losing its heading or clipping.
+
+Reports use A4 pages, the supplied NeuroIA logo, embedded Manrope, centered blue
+metric panels and vector star charts for practice by area and current game levels.
+Use a square-corner activity table with game names only and centered numeric
+columns. Keep scope, page numbering and selectable Spanish text; omit internal
+IDs, hashes and model/prompt metadata. Label actual AI output **Generado con IA**.
+In the PDF star chart, untried games plot as level 0 and complete the polygon.
+Center the explanatory note beneath both charts. This presentation does not change stored levels.
+Keep controls reachable at large text sizes. Reports do not replace professional proposals.
+See [AI behavior and provider boundaries](AI.md).
 Use white 10px-corner cards and the shared blue palette. Hovering a series shows its
 name in a noninteractive chip at the upper right of the card and fades other lines.
 Omit the separate legend. Series support keyboard focus and a persistent click/tap
@@ -648,3 +685,6 @@ recovery (“Seguir prueba gratuita”), based on the server-confirmed offer. An
 trial is not offered again; recovery preserves its original expiry. In account deletion,
 keep a short retention notice, add space before the confirmation fields and highlight the
 required phrase “ELIMINAR MI CUENTA” in the primary color.
+
+Professional linked-player lists keep only the card’s own bottom inset after the
+last player. Do not add final-row bottom padding on top of the card padding.

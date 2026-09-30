@@ -63,7 +63,7 @@ also contains display name, aggregate counters and accessibility settings; the
 UI uses only name and history. Firestore cannot grant access to individual fields
 within a document. There are no clinical records, editable notes or clinical
 permissions. The existing `ActivityStatistics` view provides the charts, filters,
-table and explicit archive pagination. A missing profile has an honest empty
+table and explicit archive pagination. Resumen also offers optional activity suggestions and direct Spanish PDF report downloads through the existing authorized relationship; see [AI.md](AI.md). No private notes or generated reports are written to participant progress. A missing profile has an honest empty
 history; permission/network errors must never be presented as zero activity.
 
 Rules independently check professional ownership, both link directions, seat

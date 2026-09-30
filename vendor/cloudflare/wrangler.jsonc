@@ -7,6 +7,8 @@
   "observability": { "enabled": true, "logs": { "enabled": true } },
   "triggers": { "crons": ["*/5 * * * *", "* * * * *"] },
   "vars": {
+    "AI_ENABLED": "true",
+    "OPENROUTER_MODEL": "dots-studio/dots-3-note-preview:free",
     "APP_URL": "https://neuroia.es/",
     "FIREBASE_PROJECT_ID": "ceoaberto-neuroia",
     "STRIPE_MONTHLY_PRICE_ID": "price_1UItenAWZtSdGYThrex9dsNh",

@@ -223,6 +223,8 @@ export function Dashboard({
             icon: <Activity size={22} />,
             content: (
               <ActivityStatistics
+                active={tab === 'progress'}
+                tapsOnly={profile.placement?.preferences?.movement === 'taps'}
                 levels={profile.gameLevels}
                 selectedTab={progressTab}
                 onTabChange={setProgressTab}

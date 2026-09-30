@@ -18,6 +18,15 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  await db.saveMaintenance({cursor:'sub_test',nextRunAt:123,startedAt:null});
  assert.deepEqual(await db.maintenance(),{cursor:'sub_test',nextRunAt:123,startedAt:null});
  const uid='worker-rest-'+Date.now();
+ // Real nested Firestore encoding, archive ordering and imported-history coverage.
+ const aiUid='ai-rest-'+Date.now();
+ const value=v=>v===null?{nullValue:null}:Array.isArray(v)?{arrayValue:{values:v.map(value)}}:typeof v==='object'?{mapValue:{fields:Object.fromEntries(Object.entries(v).map(([k,x])=>[k,value(x)]))}}:typeof v==='number'?{integerValue:String(v)}:typeof v==='boolean'?{booleanValue:v}:{stringValue:v};
+ const put=async(path,data)=>{const response=await nativeFetch(`http://${process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8080'}/v1/projects/demo-neuroia/databases/(default)/documents/${path}`,{method:'PATCH',headers:{Authorization:'Bearer owner','Content-Type':'application/json'},body:JSON.stringify(value(data).mapValue)});assert.equal(response.status,200);};
+ await put(`users/${aiUid}/progress/main`,{schemaVersion:1,data:{profile:{totalSessions:5,gameLevels:{'memory-pairs':{level:4,evidence:[]}},placement:{preferences:{movement:'taps'}}},history:[{id:'imported',date:'2026-09-01',exerciseId:'memory-pairs'}]}});
+ await put(`users/${aiUid}/results/archive`,{id:'archived',date:'2026-09-20T12:00:00Z',exerciseId:'memory-pairs'});
+ const source=await db.readActivity(aiUid);
+ assert.deepEqual(source.history.map(r=>r.id),['imported','archived']);assert.equal(source.levels['memory-pairs'].level,4);assert.equal(source.tapsOnly,true);assert.equal(source.partial,true);
+ await db.erase([`users/${aiUid}/progress/main`,`users/${aiUid}/results/archive`]);
  await db.transaction(uid,(access,billing,patch)=>{assert.deepEqual(access,{});assert.deepEqual(billing,{});patch(0,{kind:'trial',trialStartedAt:123});patch(1,{attempt:'original',count:0});});
  await Promise.all(Array.from({length:2},()=>db.transaction(uid,async(_a,b,patch)=>{await new Promise(r=>setTimeout(r,50));patch(1,{count:b.count+1});})));
  await db.transaction(uid,(access,billing,patch)=>{assert.equal(access.trialStartedAt,123);assert.equal(billing.count,2);assert.equal(billing.attempt,'original');patch(0,{kind:'subscription',expiresAt:2000000000000});patch(1,{attempt:null});});

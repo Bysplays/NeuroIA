@@ -16,14 +16,14 @@ import { ActivityStatistics } from './ActivityStatistics';
 import { AppLoading } from './AppLoading';
 
 function PersonActivity({ uid, seat, onBack }: { uid: string; seat: ProfessionalSeat; onBack: () => void }) {
-  const [activity, setActivity] = useState<{ name: string; history: ExerciseResult[]; levels?: UserProfile['gameLevels'] } | null>(null);
+  const [activity, setActivity] = useState<{ name: string; history: ExerciseResult[]; levels?: UserProfile['gameLevels']; tapsOnly?: boolean } | null>(null);
   const [error, setError] = useState(false);
   useEffect(() => firestoreProfessional(uid, getFirestore(auth.app)).subscribeActivity(seat.occupantUid!, setActivity, () => {
     setActivity(null); setError(true);
   }), [uid, seat.occupantUid]);
   if (error) return <section className="cloud-entry"><h1>No hemos podido consultar esta actividad</h1><p role="alert">Comprueba la conexión y que la invitación siga activa.</p><button className="stats-quiet-button" onClick={onBack}>Volver al panel</button></section>;
   if (!activity) return <AppLoading />;
-  return <ActivityStatistics uid={seat.occupantUid!} history={activity.history} levels={activity.levels} heading="Actividad" subtitle={activity.name || seat.patientName || 'Persona invitada'} backLabel="Volver al panel" onBack={onBack} />;
+  return <ActivityStatistics tapsOnly={activity.tapsOnly} uid={seat.occupantUid!} history={activity.history} levels={activity.levels} heading="Actividad" subtitle={activity.name || seat.patientName || 'Persona invitada'} backLabel="Volver al panel" onBack={onBack} />;
 }
 
 export function ProfessionalDashboard({ uid, onSignOut, profile, onUpdateSettings, onUpdateName }: {
