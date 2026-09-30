@@ -169,6 +169,13 @@ IDs, hashes and model/prompt metadata. Label actual AI output **Generado con IA*
 In the PDF star chart, untried games plot as level 0 and complete the polygon.
 Center the explanatory note beneath both charts. This presentation does not change stored levels.
 Keep controls reachable at large text sizes. Reports do not replace professional proposals.
+Activity AI and PDFs use only the eight active catalog games. Retired daily sequencing
+is excluded from aggregates, tables and prompt evidence. The daily cache carries
+the evidence version so older catalog snapshots are regenerated. After download,
+a shared ModalFrame confirmation says «Informe PDF descargado», closes with
+Entendido or Escape and returns focus to Generar informe. The optional-suggestions
+footer uses the available width beside the report action without a character-width cap.
+
 See [AI behavior and provider boundaries](AI.md).
 Use white 10px-corner cards and the shared blue palette. Hovering a series shows its
 name in a noninteractive chip at the upper right of the card and fades other lines.

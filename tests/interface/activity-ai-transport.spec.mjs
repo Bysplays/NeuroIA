@@ -48,5 +48,6 @@ test('professional report downloads directly with its local participant referenc
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Generar informe' }).click();
   await (await download).saveAs('/tmp/neuroia-informe-profesional.pdf');
+  await page.getByRole('dialog').getByRole('button', {name:'Entendido'}).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });

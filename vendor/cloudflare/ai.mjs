@@ -1,4 +1,4 @@
-import { buildActivityInsights, validAiNarrative, validInsightFilters } from '../../src/services/activityInsights.ts';
+import { INSIGHTS_VERSION, buildActivityInsights, validAiNarrative, validInsightFilters } from '../../src/services/activityInsights.ts';
 import { activityMessages, PROMPT_VERSION, RESPONSE_FORMAT, ZERO_DATA_RETENTION } from '../openrouter/prompts.mjs';
 
 const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
@@ -118,7 +118,7 @@ export async function dailyRecommendations(actor, input, env, db, confirmedAcces
   const claim = crypto.randomUUID();
   const cached = await db.runTransaction(async tx => {
     const previous = await tx.get(path);
-    if (previous?.day === day && previous.analysis) return previous.analysis;
+    if (previous?.day === day && previous.dataVersion === INSIGHTS_VERSION && previous.analysis) return previous.analysis;
     if (previous?.leaseUntil > Date.now()) fail(409, 'Las recomendaciones del día se están preparando. Vuelve a entrar en unos instantes.');
     tx.set(path, { day, claim, leaseUntil: Date.now() + 45000 }, false);
     return null;
@@ -132,7 +132,7 @@ export async function dailyRecommendations(actor, input, env, db, confirmedAcces
       filters: { from: '', to: '', domain: '', exercise: '', timeZone: input.timeZone } }, env, db, confirmedAccess, signal, fetcher);
     await db.runTransaction(async tx => {
       const current = await tx.get(path);
-      if (current?.claim === claim) tx.set(path, { day, analysis: JSON.stringify(result), leaseUntil: 0 }, false);
+      if (current?.claim === claim) tx.set(path, { day, dataVersion: INSIGHTS_VERSION, analysis: JSON.stringify(result), leaseUntil: 0 }, false);
     });
     await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
     return result;

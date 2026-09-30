@@ -75,3 +75,11 @@ test('report star chart keeps all current levels independent of selected activit
   assert.equal(result.currentLevels.find(game => game.id === 'memory-pairs')?.level, 7);
   assert.equal(result.currentLevels.find(game => game.id === 'visual-scanning')?.level, null);
 });
+
+test('retired daily sequencing never enters activity AI or PDF evidence, including its legacy alias', () => {
+  const result = buildActivityInsights([row(), row({id:'old-a',exerciseId:'daily-seq',domain:'executive'}), row({id:'old-b',exerciseId:'daily-sequencing',domain:'executive'})], undefined, filters);
+  assert.equal(result.count, 1);
+  assert.equal(result.games.length, 8);
+  assert.ok(!JSON.stringify(result).includes('daily-seq'));
+  assert.ok(!JSON.stringify(result).includes('Secuencias de la Vida Diaria'));
+});
