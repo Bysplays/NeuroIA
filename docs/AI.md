@@ -102,7 +102,7 @@ cancels on identity change and rejects responses for a previous identity.
 
 Quota reservations are transactional at `users/{actorUid}/aiUsage/daily`: one
 overwritten document with UTC day, count and last-request time. Default ten attempts
-per day, at least thirty seconds apart, configurable to 1–50 attempts. Failed or
+per day, at least thirty seconds apart within each mode, configurable to 1–50 attempts. The automatic daily update does not block an immediate report request. Failed or
 cancelled provider calls consume the reservation to bound retries. There are no
 automatic retries. The first daily recommendation can call the provider on opening Resumen. Existing deny-by-default
 Firestore rules keep this document server-only; recursive account deletion removes

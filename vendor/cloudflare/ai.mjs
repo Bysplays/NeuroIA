@@ -17,7 +17,7 @@ export async function authorizeAnalysis(actor, target, db, confirmedAccess) {
     fail(403, 'No tienes acceso activo a esta actividad.');
   }
 }
-export async function reserveGeneration(actor, env, db, now = Date.now()) {
+export async function reserveGeneration(actor, env, db, now = Date.now(), mode = 'report') {
   const configured = Number(env.AI_DAILY_LIMIT || 10);
   const limit = Number.isInteger(configured) && configured >= 1 && configured <= 50 ? configured : 10;
   await db.runTransaction(async tx => {
@@ -25,9 +25,13 @@ export async function reserveGeneration(actor, env, db, now = Date.now()) {
     const previous = await tx.get(path);
     const day = new Date(now).toISOString().slice(0, 10);
     const count = previous?.day === day ? previous.count : 0;
-    if (previous?.lastRequestAt > now - 30000) fail(429, 'Espera medio minuto antes de generar otro análisis.');
+    const cooldownField = mode === 'report' ? 'lastReportAt' : 'lastRecommendationsAt';
+    const lastRequest = previous?.[cooldownField] ?? previous?.lastRequestAt;
+    if (lastRequest > now - 30000) fail(429, 'Espera medio minuto antes de generar otro análisis.');
     if (!Number.isInteger(count) || count < 0 || count >= limit) fail(429, 'Has alcanzado el límite diario de análisis. Puedes seguir usando el resumen y la plantilla sin IA.');
-    tx.set(path, { day, count: count + 1, lastRequestAt: now }, false);
+    tx.set(path, { day, count: count + 1, lastRequestAt: now,
+      lastReportAt: mode === 'report' ? now : previous?.lastReportAt ?? 0,
+      lastRecommendationsAt: mode === 'recommendations' ? now : previous?.lastRecommendationsAt ?? 0 }, false);
   });
 }
 async function boundedJson(response) {
@@ -62,7 +66,7 @@ export async function generateAnalysis(actor, input, env, db, confirmedAccess, s
   signal?.throwIfAborted();
   // Recheck after reading, before any disclosure and before charging the quota.
   await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
-  await reserveGeneration(actor, env, db);
+  await reserveGeneration(actor, env, db, Date.now(), input.mode);
   const abort = AbortSignal.any([...(signal ? [signal] : []), AbortSignal.timeout(25000)]);
   const endpoint = env.OPENROUTER_REGION === 'eu' ? 'https://eu.openrouter.ai/api/v1/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
   let result;

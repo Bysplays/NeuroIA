@@ -172,3 +172,11 @@ test('daily cache is isolated by caller and rejects arbitrary filters', async ()
   await assert.rejects(dailyRecommendations('other', dailyInput, env, db, confirmedAccess, undefined, provider), { status: 403 });
   await assert.rejects(dailyRecommendations('player', {...dailyInput, filters}, env, db, confirmedAccess, undefined, provider), { status: 400 });
 });
+
+test('automatic daily recommendations do not block an immediately requested report', async () => {
+  const db = store();
+  await dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, provider);
+  await run(db);
+  assert.equal(db.documents.get('users/player/aiUsage/daily').count, 2);
+  await assert.rejects(run(db), { status: 429 });
+});
