@@ -28,34 +28,42 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
   useEffect(() => {
     const controller = new AbortController(); const pending = requests.current;
     void activityAi.status(controller.signal).then(status => {
-      if (!controller.signal.aborted) { setAvailable(status.available); setStatusChecked(true); }
+      if (!controller.signal.aborted) {
+        setAvailable(status.available); setStatusChecked(true);
+        if (status.available) {
+          setBusy('recommendations');
+          void activityAi.dailyRecommendations(uid, insights.filters.timeZone, controller.signal).then(result => {
+            if (!controller.signal.aborted) setAnalysis(result);
+          }).catch(failure => {
+            if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : 'No hemos podido preparar las recomendaciones de hoy.');
+          }).finally(() => { if (!controller.signal.aborted) setBusy(null); });
+        }
+      }
     }).catch(() => { if (!controller.signal.aborted) setStatusChecked(true); });
     return () => { controller.abort(); pending.controller?.abort(); pending.version++; };
-  }, []);
+  }, [uid, insights.filters.timeZone]);
   const cancel = () => {
     requests.current.controller?.abort(); requests.current.controller = null; requests.current.version++;
     setBusy(null); setError('');
   };
   const shown = analysis?.insights ?? insights;
   const narrative = analysis?.narrative ?? basicNarrative(insights);
-  const generate = async (mode: 'recommendations' | 'report') => {
-    if (requests.current.controller || !statusChecked) return;
+  const generateReport = async () => {
+    if (requests.current.controller || !statusChecked || busy !== null) return;
     const controller = new AbortController(); requests.current.controller = controller;
     const requestId = ++requests.current.version;
-    setBusy(mode); setError(''); setNotice('');
+    setBusy('report'); setError(''); setNotice('');
     try {
-      // The explicit generation action requests processing; no request runs on load.
-      const result = available ? await activityAi.generate(uid, insights.filters, mode, controller.signal) : undefined;
+      // Reports use the current selected activity; recommendations use their daily snapshot.
+      const result = available ? await activityAi.generate(uid, insights.filters, 'report', controller.signal) : undefined;
       if (controller.signal.aborted || requests.current.version !== requestId) return;
-      if (mode === 'report') {
-        const { createActivityReportPdf, downloadActivityReport } = await import('../services/activityReportPdf');
-        controller.signal.throwIfAborted();
-        const data = result?.insights ?? shown;
-        const text = reportNarrative(result?.narrative ?? narrative, data);
-        const pdf = await createActivityReportPdf({ insights: data, text, reference: subjectLabel, provenance: result?.provenance ?? analysis?.provenance }, controller.signal);
-        if (controller.signal.aborted || requests.current.version !== requestId) return;
-        downloadActivityReport(pdf); setNotice('Informe PDF descargado en este dispositivo.');
-      } else if (result) { setAnalysis(result); setNotice('Recomendaciones actualizadas.'); }
+      const { createActivityReportPdf, downloadActivityReport } = await import('../services/activityReportPdf');
+      controller.signal.throwIfAborted();
+      const data = result?.insights ?? insights;
+      const text = reportNarrative(result?.narrative ?? basicNarrative(insights), data);
+      const pdf = await createActivityReportPdf({ insights: data, text, reference: subjectLabel, provenance: result?.provenance }, controller.signal);
+      if (controller.signal.aborted || requests.current.version !== requestId) return;
+      downloadActivityReport(pdf); setNotice('Informe PDF descargado en este dispositivo.');
     } catch (failure) {
       if (requests.current.version === requestId && !controller.signal.aborted) setError(failure instanceof Error ? failure.message : 'No hemos podido generar el contenido. Vuelve a intentarlo.');
     } finally {
@@ -67,7 +75,7 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
       <div className="activity-assistant-title"><span className="activity-assistant-mark"><Lightbulb size={22} aria-hidden="true"/></span><h2 id={`${id}-title`}>¿Qué te recomendamos?</h2></div>
       {analysis && <span className="activity-assistant-origin"><Sparkles size={14} aria-hidden="true"/>Generado con IA</span>}
     </header>
-    <div className="activity-assistant-intro"><p>Ideas para tu próxima práctica. Tú eliges.</p><Coverage insights={shown}/></div>
+    <div className="activity-assistant-intro"><p>Tu resumen diario de práctica. Tú eliges.</p><Coverage insights={shown}/></div>
     {analysis && <p className="activity-assistant-summary">{narrative.summary}</p>}
     {!shown.count && <p className="activity-assistant-empty">{narrative.summary}</p>}
     <div className="activity-assistant-suggestions">{shown.suggestions.map(suggestion => {
@@ -91,15 +99,14 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
     <div className="activity-assistant-footer">
       <p>Las sugerencias no cambian tus niveles ni las propuestas de tu profesional.</p>
       <div className="activity-assistant-actions">
-        {available && insights.count > 0 && <button className="stats-quiet-button activity-assistant-generate" disabled={busy !== null} onClick={() => { void generate('recommendations'); }}><Sparkles size={18} aria-hidden="true"/>{busy === 'recommendations' ? 'Generando…' : analysis ? 'Actualizar con IA' : 'Personalizar con IA'}</button>}
-        <button className="stats-quiet-button" onClick={() => { void generate('report'); }} disabled={!shown.count || busy !== null || !statusChecked}><FileText size={18} aria-hidden="true"/>{busy === 'report' ? 'Generando…' : 'Generar informe'}</button>
-        {busy && <button className="stats-quiet-button" onClick={cancel}>Cancelar</button>}
+        <button className="stats-quiet-button" onClick={() => { void generateReport(); }} disabled={!insights.count || busy !== null || !statusChecked}><FileText size={18} aria-hidden="true"/>{busy === 'report' ? 'Generando…' : 'Generar informe'}</button>
+        {busy === 'report' && <button className="stats-quiet-button" onClick={cancel}>Cancelar</button>}
       </div>
     </div>
     <details className="activity-assistant-limits"><summary>Sobre la IA<ChevronDown size={16} aria-hidden="true"/></summary>
-      <p>La IA analiza un resumen de tu actividad —juegos, frecuencia, precisión, velocidad y niveles— para proponerte ideas de práctica y generar informes. Para ello, enviamos datos agregados a servidores externos, sin nombres, correos ni identificadores de cuenta. Tú decides qué sugerencias seguir; los niveles y las propuestas profesionales no se modifican.</p>
+      <p>La IA analiza un resumen de tu actividad —juegos, frecuencia, precisión, velocidad y niveles— para proponerte ideas de práctica y generar informes. Las recomendaciones se actualizan la primera vez que abres este resumen cada día y se conservan hasta la siguiente actualización. Para ello, enviamos datos agregados a servidores externos, sin nombres, correos ni identificadores de cuenta. Tú decides qué sugerencias seguir; los niveles y las propuestas profesionales no se modifican.</p>
     </details>
     {error && <p role="alert">{error}</p>}
-    <p className="activity-assistant-status" role="status">{notice}</p>
+    <p className="activity-assistant-status" role="status">{busy === 'recommendations' ? 'Preparando tus recomendaciones del día…' : notice}</p>
   </section>;
 }

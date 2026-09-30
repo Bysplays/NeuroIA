@@ -101,3 +101,42 @@ export async function generateAnalysis(actor, input, env, db, confirmedAccess, s
   return { narrative, insights, provenance: { generatedAt: new Date().toISOString(), model: typeof result.model === 'string' ? result.model : env.OPENROUTER_MODEL,
     promptVersion: PROMPT_VERSION, snapshotHash, mode: input.mode } };
 }
+
+/** One shared daily result per caller/participant; no regeneration on filter changes. */
+export async function dailyRecommendations(actor, input, env, db, confirmedAccess, signal, fetcher = fetch) {
+  if (!input || typeof input !== 'object' || Object.keys(input).length !== 3
+    || input.consent !== 'activity-summary-v1' || typeof input.targetUid !== 'string'
+    || !validInsightFilters({ from: '', to: '', domain: '', exercise: '', timeZone: input.timeZone })) fail(400, 'Solicitud de recomendaciones no válida.');
+  await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
+  if (!aiStatus(env).available) fail(503, 'La ayuda con IA no está disponible ahora.');
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone: input.timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const path = `users/${actor}/aiRecommendations/${input.targetUid}`;
+  const claim = crypto.randomUUID();
+  const cached = await db.runTransaction(async tx => {
+    const previous = await tx.get(path);
+    if (previous?.day === day && previous.analysis) return previous.analysis;
+    if (previous?.leaseUntil > Date.now()) fail(409, 'Las recomendaciones del día se están preparando. Vuelve a entrar en unos instantes.');
+    tx.set(path, { day, claim, leaseUntil: Date.now() + 45000 }, false);
+    return null;
+  });
+  if (cached) {
+    await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
+    return JSON.parse(cached);
+  }
+  try {
+    const result = await generateAnalysis(actor, { targetUid: input.targetUid, mode: 'recommendations', consent: input.consent,
+      filters: { from: '', to: '', domain: '', exercise: '', timeZone: input.timeZone } }, env, db, confirmedAccess, signal, fetcher);
+    await db.runTransaction(async tx => {
+      const current = await tx.get(path);
+      if (current?.claim === claim) tx.set(path, { day, analysis: JSON.stringify(result), leaseUntil: 0 }, false);
+    });
+    await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
+    return result;
+  } catch (error) {
+    await db.runTransaction(async tx => {
+      const current = await tx.get(path);
+      if (current?.claim === claim) tx.set(path, { day, leaseUntil: 0 }, false);
+    }).catch(() => {});
+    throw error;
+  }
+}

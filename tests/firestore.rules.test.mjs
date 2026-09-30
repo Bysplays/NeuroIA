@@ -69,15 +69,16 @@ test('roles, clinical data, result edits/deletes and receipt forgery formats are
   await assertSucceeds(getDoc(doc(db, 'users/patient-a/progress/main')));
 });
 
-test('AI usage quota is server-only even for the account owner', async () => {
-  const path = 'users/quota-owner/aiUsage/daily';
-  await env.withSecurityRulesDisabled(async context => {
-    await setDoc(doc(context.firestore(), path), { day: '2026-09-30', count: 10, lastRequestAt: 1 });
-  });
-  for (const db of [env.unauthenticatedContext().firestore(), env.authenticatedContext('quota-owner').firestore(), env.authenticatedContext('another-user').firestore()]) {
-    await assertFails(getDoc(doc(db, path)));
-    await assertFails(setDoc(doc(db, path), { count: 0 }));
-    await assertFails(deleteDoc(doc(db, path)));
+test('AI usage and daily recommendations are server-only even for the account owner', async () => {
+  for (const path of ['users/quota-owner/aiUsage/daily', 'users/quota-owner/aiRecommendations/player']) {
+    await env.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), path), { day: '2026-09-30', analysis: 'private-cache' });
+    });
+    for (const db of [env.unauthenticatedContext().firestore(), env.authenticatedContext('quota-owner').firestore(), env.authenticatedContext('another-user').firestore()]) {
+      await assertFails(getDoc(doc(db, path)));
+      await assertFails(setDoc(doc(db, path), { count: 0 }));
+      await assertFails(deleteDoc(doc(db, path)));
+    }
   }
 });
 

@@ -249,7 +249,7 @@ Provider contracts: [Auth deletion](https://docs.cloud.google.com/identity-platf
 
 ## Optional activity AI
 
-The same Worker serves authenticated `/ai/status` and `/ai/analyze`. See
+The same Worker serves authenticated `/ai/status`, `/ai/recommendations` and `/ai/analyze`. See
 [OpenRouter setup](../openrouter/README.md) for the separate secret/model/enable
 bindings, minimized data and provider evaluation. The production config enables `AI_ENABLED: true` with Dots3-Note Preview free.
 Set the flag to false to disable it; it does not depend on Stripe's purchase UI flag.

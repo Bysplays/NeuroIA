@@ -6,14 +6,14 @@ async function mockAi(page, behavior = 'success') {
   await page.route('**/src/services/activityAi.ts*', route => route.fulfill({ contentType: 'text/javascript', body: `
     import { buildActivityInsights, basicNarrative } from '/src/services/activityInsights.ts';
     window.aiCalls=[];
-    export const activityAi={async status(){return {available:${behavior !== 'unavailable'}}},async generate(uid,filters,mode,signal){
+    export const activityAi={async status(){return {available:${behavior !== 'unavailable'}}},async dailyRecommendations(uid,timeZone,signal){return this.generate(uid,{from:'',to:'',domain:'',exercise:'',timeZone},'recommendations',signal)},async generate(uid,filters,mode,signal){
       window.aiCalls.push({uid,filters,mode});
       ${behavior === 'error' ? "throw Error('No se ha podido comprobar el borrador de IA.');" : ''}
-      ${behavior === 'slow' ? 'await new Promise(resolve=>window.finishAi=resolve);' : ''}
+      ${behavior === 'slow' ? 'if(mode==="report") await new Promise(resolve=>window.finishAi=resolve);' : ''}
       window.aiWasAborted=signal.aborted;
       const history=Array.from({length:6},(_,i)=>({id:'fixture-'+i,exerciseId:'visual-scanning',domain:'attention',date:'2026-09-'+(20+i),durationSeconds:30,correctAnswers:3,totalQuestions:3,level:3,configVersion:1,hintsUsed:0}));
       const insights=buildActivityInsights(history,{'visual-scanning':{level:3,evidence:[]}},filters,{partial:true});
-      const narrative=basicNarrative(insights);narrative.summary='Puedes dar variedad a tu práctica y elegir un reto que te resulte cómodo.';
+      const narrative=basicNarrative(insights);narrative.summary='Puedes dar variedad a tu práctica y elegir un reto que te resulte cómodo. Alterna los juegos que conoces con otras propuestas para explorar las distintas áreas a tu ritmo. Las recomendaciones tienen en cuenta la actividad disponible y puedes elegir libremente qué practicar hoy.';
       return {insights,narrative,provenance:{generatedAt:'2026-09-30T10:00:00Z',model:'fixture/model',promptVersion:'fixture-v1',snapshotHash:'fixture-hash',mode}};
     }};
     export function downloadActivityReport(text){const url=URL.createObjectURL(new Blob([text],{type:'text/plain'}));const a=document.createElement('a');a.href=url;a.download='informe.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
@@ -26,16 +26,19 @@ for (const width of [390, 820, 1280]) test(`direct AI report and recommendations
   await page.setViewportSize({ width, height: 900 });
   await mockAi(page);
   const card = page.locator('.activity-assistant');
-  await expect.poll(() => page.evaluate(() => window.aiCalls.length)).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.aiCalls.length)).toBe(1);
+  await expect(card.getByRole('button', { name: /Personalizar|Actualizar/ })).toHaveCount(0);
   const reason = card.locator('.activity-assistant-reason').first();
   await reason.locator('summary').focus(); await page.keyboard.press('Enter');
   await expect(reason.locator('ul')).toBeVisible();
   await reason.screenshot({ path: `/tmp/neuroia-recommendation-reason-${width}.png` });
   await page.keyboard.press('Enter');
-  await card.getByRole('button', { name: 'Personalizar con IA' }).click();
   await expect(card).toContainText('Generado con IA');
   await expect(card).toContainText('Puedes dar variedad');
   await card.screenshot({ path: `/tmp/neuroia-ai-recommendations-${width}.png` });
+  const summaryWidth = await card.locator('.activity-assistant-summary').evaluate(el => el.getBoundingClientRect().width);
+  const introWidth = await card.locator('.activity-assistant-intro').evaluate(el => el.getBoundingClientRect().width);
+  expect(Math.abs(summaryWidth - introWidth)).toBeLessThan(2);
   const download = page.waitForEvent('download');
   await card.getByRole('button', { name: 'Generar informe' }).click();
   const file = await download;
@@ -48,7 +51,6 @@ for (const width of [390, 820, 1280]) test(`direct AI report and recommendations
 
 test('service failure stays inline and preserves the existing recommendations', async ({ page }) => {
   await mockAi(page, 'error');
-  await page.getByRole('button', { name: 'Personalizar con IA' }).click();
   await expect(page.getByRole('alert')).toContainText('No se ha podido comprobar');
   await expect(page.locator('.activity-assistant')).not.toContainText('Generado con IA');
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -67,7 +69,7 @@ test('pending report shows progress and cancellation prevents late downloads', a
   await page.getByLabel('Área', { exact: true }).selectOption('attention');
   await page.getByLabel('Desde', { exact: true }).fill('2026-09-20');
   await page.getByRole('tab', { name: 'Resumen', exact: true }).click();
-  await page.getByRole('button', { name: 'Personalizar con IA' }).click();
+  await page.getByRole('button', { name: 'Generar informe' }).click();
   await expect.poll(() => page.evaluate(() => window.aiCalls.at(-1).filters.domain)).toBe('attention');
   expect(await page.evaluate(() => window.aiCalls.at(-1).filters.from)).toBe('2026-09-20');
   await page.getByRole('button', { name: 'Cancelar', exact: true }).click();

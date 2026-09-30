@@ -673,7 +673,8 @@ only the bounded candidates and cite calculated facts; it never writes levels,
 results, assignments or clinical notes. `/ai/analyze` retrieves server-owned data
 and verifies owner/active reciprocal-seat authorization before and after generation.
 Do not accept arbitrary client prompts, models or statistics. Never send account
-identity, free text, health context or EEG/PPG to OpenRouter. Use explicit generation actions to request external processing and all secrets in Worker bindings. The production configuration sets `AI_ENABLED=true` with Dots3-Note Preview free;
+identity, free text, health context or EEG/PPG to OpenRouter. Recommendations generate automatically on the first daily visit to Resumen; reports
+remain explicitly requested. Keep all secrets in Worker bindings. The production configuration sets `AI_ENABLED=true` with Dots3-Note Preview free;
 missing credentials or a false flag disable generation.
 Reports are direct PDF downloads, not saved cloud documents. The lazy-loaded
 `activityReportPdf.ts` uses jsPDF with local embedded Manrope fonts and the supplied
@@ -681,7 +682,10 @@ brand logo; fonts and logo use BASE_URL. The PDF includes vector area/level rada
 with centered numeric columns and no internal identifiers. Export requests cancel
 on cancellation or identity/context change; asset failures are recoverable inline. Drafts and requests
 are cleared on leaving the overview, changing context or account identity.
-The server-only `users/{actorUid}/aiUsage/daily` holds bounded counters and is covered
+The server-only `users/{actorUid}/aiRecommendations/{targetUid}` stores one daily
+aggregate analysis per caller/participant, with a transactional generation lease.
+Cached reads recheck permissions; filters affect reports but not the daily snapshot.
+Recursive account deletion removes it. The server-only `users/{actorUid}/aiUsage/daily` holds bounded counters and is covered
 by recursive account deletion; existing rules deny client access. The REST adapter
 decodes nested progress values for AI retrieval without changing the billing writes.
 Run `node --experimental-strip-types --test vendor/cloudflare/ai.test.mjs` with the
