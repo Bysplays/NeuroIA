@@ -496,3 +496,56 @@ test('deletion locks deny old-token writes and trial ledgers are server-only', a
   await assertFails(setDoc(doc(db,'trialUsage/forged'),{used:false}));
   await assertFails(getDoc(doc(db,'trialUsage/forged')));
 });
+
+test('completed placement profiles save all game results with Muse EEG/PPG and settings', async () => {
+  const uid='muse-completed-placement';const db=env.authenticatedContext(uid).firestore();
+  const backend=firestoreProgress(uid,db);await backend.initialize(fresh());
+  const ids=['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
+  const domains=['attention','language','language','memory','memory','executive','motor','motor'];
+  for(const exerciseId of ids)await backend.commit({id:`placement:${exerciseId}`,kind:'placement',exerciseId,trial:{assessedLevel:4,accuracy:100,questions:1,hints:0,skipped:false}});
+  const points=JSON.stringify(Array.from({length:119},(_,i)=>[i*1.017,12.375]));
+  for(const [i,exerciseId] of ids.entries()) {
+    const operation=op(`muse-${exerciseId}`);
+    Object.assign(operation.result,{exerciseId,domain:domains[i],practice:false,level:4,configVersion:1,hintsUsed:0,
+      eeg:{version:1,adapter:'muse2-webbluetooth-v1',metric:{id:'muse2-ac-rms-v1',label:'Amplitud EEG',unit:'µV',min:0,max:1000},points},
+      ppg:{version:1,adapter:'muse2-webbluetooth-v1',metric:{id:'muse2-ppg-ir-rms-v1',label:'Amplitud PPG infrarroja',unit:'kADC',min:0,max:8388.608},points}});
+    await assertSucceeds(backend.commit(operation));
+  }
+  await assertSucceeds(backend.commit({id:'after-muse-settings',kind:'settings',settings:{fontSize:'xlarge'}}));
+  assert.equal((await backend.load()).profile.totalSessions,8);
+});
+
+test('reassessment can replace all eight legacy level entries in one durable operation', async () => {
+  const uid = 'all-levels-retake';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  const ids = ['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
+  const data = fresh();
+  data.profile.placement = { version:1, completed:true, trials:Object.fromEntries(ids.map(id => [id, { accuracy:100, questions:3, hints:0, skipped:false }])) };
+  data.profile.gameLevels = Object.fromEntries(ids.map(id => [id, { level:4, evidence:[], qualifyingRuns:0 }]));
+  data.history = [op('preserved-activity').result];
+  data.profile.totalSessions = 1;
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), `users/${uid}/progress/main`), { schemaVersion:1, data, updatedAt:serverTimestamp() });
+  });
+  const retake = { id:'placement:retake:all', kind:'placement', trials:Object.fromEntries(ids.map(id => [id, { accuracy:0, questions:0, hints:0, skipped:true }])) };
+  await assertSucceeds(backend.commit(retake));
+  await assertSucceeds(backend.commit(retake));
+  const saved = await backend.load();
+  for (const id of ids) assert.deepEqual(saved.profile.gameLevels[id], { level:1, evidence:[] });
+  assert.deepEqual(saved.history, data.history);
+  assert.deepEqual(saved.profile.placement, data.profile.placement);
+  assert.equal(saved.profile.totalSessions, 1);
+  await assertSucceeds(backend.commit(op('after-all-levels-retake')));
+  assert.equal((await backend.load()).profile.totalSessions, 2);
+  for (const evidence of [[0], [0, 100]]) {
+    await assertSucceeds(updateDoc(doc(db, `users/${uid}/progress/main`), {
+      'data.profile.gameLevels.motor-tracking.evidence': evidence, updatedAt:serverTimestamp(),
+    }));
+  }
+  for (const evidence of [null, {}, [0, 0, 0], [-1], [101], [1.5], ['0'], [0, 101], [0, 1.5]]) {
+    await assertFails(updateDoc(doc(db, `users/${uid}/progress/main`), {
+      'data.profile.gameLevels.motor-tracking.evidence': evidence, updatedAt:serverTimestamp(),
+    }));
+  }
+});
