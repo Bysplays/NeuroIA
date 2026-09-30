@@ -2,13 +2,11 @@ import { EegButton } from './EegButton';
 import { Brand } from './Brand';
 import React from 'react';
 import { SoundToggle } from './SoundToggle';
-import { Settings2, LogOut } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { soundService } from '../services/soundService';
 
 interface HeaderProps {
-  onSignOut: () => void;
-  signingOut: boolean;
   profile: UserProfile;
   activeView: 'dashboard' | 'therapist' | 'statistics' | 'game';
   onNavigate: (view: 'dashboard' | 'therapist') => void;
@@ -17,7 +15,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onNavigate, onSignOut, signingOut,
+  onNavigate,
   navigationRef,
   onOpenAccessibility,
 }) => {
@@ -45,9 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
           aria-label="Ajustes de accesibilidad"
           title="Ajustar tamaño del texto y estilo de la página"
         >
-          <Settings2 size={20} />
+          <Settings size={20} />
         </button>
-        <button className="header-signout" disabled={signingOut} onClick={onSignOut}><LogOut size={18}/>{signingOut ? 'Cerrando…' : 'Cerrar sesión'}</button>
       </div>
     </header>
   );

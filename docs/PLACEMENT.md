@@ -95,10 +95,12 @@ production rules do not accept the new fields. This task does not publish rules,
 merge, deploy, change entitlements or create real participant activity. Verify the
 released flow with the client on their target devices after publication.
 
-CR-05's remaining numeric labels, CR-06's misleading results buttons, CR-07's
-sequence retry, CR-08's pairs reveal and CR-09's trial pacing remain separate backlog
-items. This change does not claim to resolve those game behaviors. Welcome copy
-no longer announces numeric ladder steps, but the internal ladder is unchanged.
+Game controls and pacing (CR-05–CR-09) are implemented as described in
+[DESIGN.md](DESIGN.md) and tracked for device acceptance in [TODO.md](TODO.md).
+Trials use Continuar; sequence errors show both answers before saving the failed
+attempt, and pairs use Comenzar followed by a timed preview. Grouped/placement
+pairs retain one board. Welcome copy omits numeric ladder steps while preserving
+the bounded internal ladder.
 
 Optional `preferences.condition` contains bounded kind/side/mobility enums and
 optional `consentVersion: 1` for invitation sharing; omission is backward-compatible and means no context supplied.

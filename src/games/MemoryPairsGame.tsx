@@ -2,7 +2,7 @@ import { GAME_OBJECT_POOL, shuffle } from '../services/gameObjectPool';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect, useRef, useCallback, type CSSProperties } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Play, RotateCcw } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -48,7 +48,7 @@ function createDeck(pairs: number, level: number): CardItem[] {
       pairKey: obj.pairKey,
       emoji: obj.emoji,
       label: obj.label,
-      isFlipped: false, // Reveal on touch; an optional hint can show the deck.
+      isFlipped: false, // The opening preview reveals this card after Comenzar.
       isMatched: false,
     });
     deck.push({
@@ -56,7 +56,7 @@ function createDeck(pairs: number, level: number): CardItem[] {
       pairKey: obj.pairKey,
       emoji: obj.emoji,
       label: obj.label,
-      isFlipped: false, // Reveal on touch; an optional hint can show the deck.
+      isFlipped: false, // The opening preview reveals this card after Comenzar.
       isMatched: false,
     });
   });
@@ -70,7 +70,11 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, config, progressScope, lockedLevel } = useGameSession();
+  const maxRounds = config.mode === 'normal' && !progressScope && !planProgress && !lockedLevel ? 3 : 1;
+  const [round, setRound] = useState(1);
+  const [started, setStarted] = useState(false);
+  const [roundDone, setRoundDone] = useState(false);
   const [cards, setCards] = useState<CardItem[]>(() => createDeck(config.pairs, config.level));
   const [selectedCards, setSelectedCards] = useState<number[]>([]); // índices de las cartas volteadas
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -81,7 +85,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
 
-  // No compulsory opening preview. A requested hint uses the pausable clock.
+  // Opening preview and early hiding share the pausable session clock.
   const [isPreviewPhase, setIsPreviewPhase] = useState(false);
   const [previewCountdown, setPreviewCountdown] = useState(config.previewSeconds);
   const countdownTimerRef = useRef<number | null>(null);
@@ -118,6 +122,9 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
   const initGame = () => {
     clock.clearTimeout(mismatchTimerRef.current);
+    setStarted(false);
+    setRoundDone(false);
+    setRound(1);
     setStartTime(clock.now());
     setHintsUsed(0);
     const shuffled = createDeck(config.pairs, config.level);
@@ -134,7 +141,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   };
 
   const handleCardClick = (index: number) => {
-    if (isPreviewPhase || isEvaluating || cards[index].isFlipped || cards[index].isMatched) return;
+    if (!started || roundDone || isCompleted || isPreviewPhase || isEvaluating || cards[index].isFlipped || cards[index].isMatched) return;
 
     soundService.playTap();
 
@@ -164,7 +171,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
         // Comprobar si todas las cartas están resueltas
         const allMatched = matchedCards.every(c => c.isMatched);
         if (allMatched) {
-          handleGameFinish(attempts + 1, mistakesList);
+          setRoundDone(true);
         }
       } else {
         // No coinciden
@@ -192,8 +199,8 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
   const handleGameFinish = (finalAttempts: number, mistakes: MistakeDetail[]) => {
     const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
-    // Precisión basada en intentos óptimos (3 intentos perfectos)
-    const accuracy = Math.min(100, Math.max(0, Math.round((config.pairs / Math.max(config.pairs, finalAttempts)) * 100)));
+    // Aggregate completed boards against all attempts, including repetitions.
+    const accuracy = Math.min(100, Math.max(0, Math.round((config.pairs * maxRounds / Math.max(config.pairs * maxRounds, finalAttempts)) * 100)));
 
     const gameResult: ExerciseResult = {
       id: crypto.randomUUID(),
@@ -206,8 +213,8 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
       accuracy,
-      score: 300 + Math.max(0, 200 - (finalAttempts - config.pairs) * 30),
-      correctAnswers: config.pairs,
+      score: 300 + Math.max(0, 200 - (finalAttempts - config.pairs * maxRounds) * 30),
+      correctAnswers: config.pairs * maxRounds,
       totalQuestions: finalAttempts,
       feedbackMessage:
         accuracy >= 80
@@ -221,10 +228,34 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     onSaveResult(gameResult);
   };
 
-  const matchedCount = cards.filter(c => c.isMatched).length / 2;
+  const startPreview = () => {
+    if (isPreviewPhase || roundDone) return;
+    clock.clearTimeout(mismatchTimerRef.current);
+    if (started) setHintsUsed(value => value + 1);
+    setStarted(true);
+    setSelectedCards([]);
+    setIsEvaluating(false);
+    // Repetition restarts the current board, preserving the locations to memorize.
+    setCards(previous => previous.map(card => ({ ...card, isMatched: false, isFlipped: true })));
+    setIsPreviewPhase(true);
+    setPreviewCountdown(config.previewSeconds);
+    setPreviewVersion(value => value + 1);
+  };
+  const continueRound = () => {
+    if (!roundDone) return;
+    if (round === maxRounds) handleGameFinish(attempts, mistakesList);
+    else {
+      setRound(value => value + 1);
+      setCards(createDeck(config.pairs, config.level));
+      setStarted(false);
+      setRoundDone(false);
+      setSelectedCards([]);
+    }
+  };
 
   return (
     <ExerciseWrapper
+      completedStages={round - 1 + (roundDone ? 1 : 0)}
       exerciseId="memory-pairs"
       title="Parejas de memoria"
       domain="memory"
@@ -241,27 +272,17 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       onRestart={initGame}
       planProgress={planProgress}
       onNextPlanExercise={onNextPlanExercise}
+      nextAction={<button
+        className={`touch-btn game-next-action ${roundDone || !started ? 'touch-btn-primary' : 'touch-btn-secondary'}`}
+        onClick={roundDone ? continueRound : isPreviewPhase ? endPreview : startPreview}>
+        {roundDone ? <>Continuar<ArrowRight size={20} aria-hidden="true"/></> : <>
+          {!started ? <Play size={20} aria-hidden="true"/> : !isPreviewPhase ? <RotateCcw size={20} aria-hidden="true"/> : null}
+          <span>{!started ? 'Comenzar' : isPreviewPhase ? `Ocultar · ${previewCountdown} s` : 'Repetir'}</span>
+        </>}
+      </button>}
     >
       <div className="memory-pairs-game-container">
         <div className="pairs-board-card">
-          <div className="pairs-status-bar">
-              <span className="pairs-stat-pill">Parejas encontradas: <strong>{matchedCount} de {config.pairs}</strong></span>
-              <span className="pairs-stat-pill">Intentos: <strong>{attempts}</strong></span>
-              <button className={`paper-nav-button pairs-preview-control${isPreviewPhase ? ' touch-btn-primary' : ''}`}
-                aria-label={isPreviewPhase ? `Se ocultan en ${previewCountdown} segundos. Empezar ahora` : 'Volver a ver las cartas'}
-                onClick={() => {
-                if (isPreviewPhase) { endPreview(); return; }
-                clock.clearTimeout(mismatchTimerRef.current);
-                setSelectedCards([]); setIsEvaluating(false);
-                setHintsUsed(value => value + 1);
-                setCards(previous => previous.map(card => ({ ...card, isFlipped: true })));
-                setIsPreviewPhase(true); setPreviewCountdown(config.previewSeconds);
-                setPreviewVersion(value => value + 1);
-              }}><span className={isPreviewPhase ? 'pairs-preview-label-hidden' : undefined}>Volver a ver las cartas</span>
-                {isPreviewPhase && <span className="pairs-preview-countdown">{previewCountdown} s</span>}
-              </button>
-            </div>
-
           <div className="pairs-grid" style={{
             '--pair-columns': config.pairs,
             '--pair-mobile-columns': config.pairs <= 3 ? config.pairs : config.pairs === 6 ? 3 : 2,
@@ -271,7 +292,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
                 key={card.id}
                 className={`card memory-card-tile ${!isPreviewPhase ? 'card-interactive' : 'tile-preview'} ${card.isFlipped ? 'tile-flipped' : ''} ${card.isMatched ? 'tile-matched' : ''}`}
                 onClick={() => handleCardClick(idx)}
-                disabled={isPreviewPhase || card.isMatched}
+                disabled={!started || roundDone || isPreviewPhase || isEvaluating || card.isMatched}
                 aria-label={card.isFlipped || card.isMatched ? card.label : `Carta ${idx + 1}. Descubrir`}
               >
                 {card.isFlipped || card.isMatched ? (
@@ -289,6 +310,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
               </button>
             ))}
           </div>
+
         </div>
       </div>
     </ExerciseWrapper>

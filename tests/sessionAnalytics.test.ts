@@ -10,12 +10,12 @@ test('session metrics keep repeated games separate, deduplicate and weight answe
   const data=sessionAnalytics(session,[a,a,b]);
   assert.equal(data.available,2);assert.equal(data.accuracy,75);assert.equal(data.seconds,120);assert.equal(data.missing,0);
 });
-test('missing, unconfirmed or other-seat results are not fabricated as zero performance',()=>{
+test('missing or other-seat results are not fabricated as zero performance',()=>{
   const a=assignmentResult(session,0,base);
   for(const patch of [{assignmentSeatId:'other'},{assignmentId:'other'},{assignmentOwnerId:'other'},{practice:true},{level:2}]) {
     const data=sessionAnalytics(session,[{...a,...patch}]);
     assert.equal(data.available,0);assert.equal(data.accuracy,null);assert.equal(data.seconds,null);assert.equal(data.missing,2);
   }
-  assert.equal(sessionAnalytics({...session,completedCount:0,resultIds:[]},[a]).available,0);
+  assert.equal(sessionAnalytics({...session,completedCount:0,resultIds:[]},[a]).available,1);
   assert.equal(sessionAnalytics(session,[a]).missing,1);
 });

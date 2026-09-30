@@ -36,3 +36,21 @@ export function canAdvanceSession(session: AssignedSession, result: ExerciseResu
 export const sessionStatusLabel: Record<AssignedSession['status'], string> = {
   assigned: 'Por empezar', 'in-progress': 'En curso', completed: 'Completada', cancelled: 'Cancelada',
 };
+
+/** A saved step keeps its identity even when the participant plays out of order. */
+export function matchesAssignedStep(session: AssignedSession, index: number, result: ExerciseResult) {
+  const step = session.steps[index];
+  return !!step && result.id === assignedResultId(session.id, index)
+    && result.assignmentId === session.id && result.assignmentStep === index
+    && result.assignmentOwnerId === session.professionalId && result.assignmentSeatId === session.seatId
+    && result.exerciseId === step.exerciseId && result.level === step.level
+    && result.configVersion === session.configVersion && result.practice !== true;
+}
+export function completedSessionSteps(session: AssignedSession, results: ExerciseResult[]) {
+  return new Set(session.steps.flatMap((_, index) => index < session.completedCount || results.some(result => matchesAssignedStep(session, index, result)) ? [index] : []));
+}
+/** Pending games take the three places first; completed games fill any spare places. */
+export function visibleSessionSteps(count: number, completed: ReadonlySet<number>) {
+  const indices = Array.from({ length: count }, (_, index) => index);
+  return [...indices.filter(index => !completed.has(index)), ...indices.filter(index => completed.has(index))].slice(0, 3);
+}

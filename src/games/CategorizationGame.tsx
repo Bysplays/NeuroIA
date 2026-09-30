@@ -157,13 +157,17 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
       onRestart={initGame}
       planProgress={planProgress}
       onNextPlanExercise={onNextPlanExercise}
+      nextAction={<button className="touch-btn touch-btn-primary game-next-action" onClick={handleNext}
+        style={{ visibility: selectedCategory === null ? 'hidden' : 'visible' }} disabled={selectedCategory === null}>
+        Continuar<ArrowRight size={20} aria-hidden="true"/>
+      </button>}
     >
       {assistanceTarget && createPortal(<button
-              className="touch-btn touch-btn-secondary object-voice-btn"
+              className="paper-nav-button"
               onClick={() => soundService.speak(currentItem.name)}
               title="Escuchar nombre del objeto"
             >
-              <Volume2 size={22} />
+              <Volume2 size={20} />
               <span>Escuchar</span>
             </button>, assistanceTarget)}
       <div className="categorization-game-container">
@@ -207,21 +211,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
             })}
           </div>
 
-          {/* Botón de Siguiente persistente en layout */}
-          <div
-            className={`category-next-bar actions-bar ${selectedCategory === null ? 'category-next-bar-hidden' : ''}`}
-            aria-hidden={selectedCategory === null}
-          >
-            <button
-              className="touch-btn touch-btn-primary game-next-action"
-              onClick={handleNext}
-              disabled={selectedCategory === null}
-              tabIndex={selectedCategory === null ? -1 : 0}
-            >
-              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Objeto' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
-              <ArrowRight size={24} />
-            </button>
-          </div>
+
         </div>
       </div>
     </ExerciseWrapper>

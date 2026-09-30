@@ -1,14 +1,14 @@
 import { TabletPager } from './TabletTabs';
 import { useCompactViewport } from '../services/viewport';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Search, MessageCircle, LetterText, Route, Copy, Shapes, Target, MousePointer2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Search, MessageCircle, LetterText, Route, Copy, Shapes, CircleDot, Hand } from 'lucide-react';
 import type { CognitiveDomain, ExerciseDefinition, ExerciseId, UserProfile } from '../types';
 import { ALL_EXERCISES, EXERCISE_SUMMARIES } from '../services/exerciseCatalog';
 import { soundService } from '../services/soundService';
 const gameIcons = {
   'visual-scanning': Search, 'language-naming': MessageCircle,
   'word-completion': LetterText, 'memory-path': Route, 'memory-pairs': Copy,
-  categorization: Shapes, 'motor-target': Target, 'motor-tracking': MousePointer2,
+  categorization: Shapes, 'motor-target': CircleDot, 'motor-tracking': Hand,
 };
 function CatalogIcon({ exercise }: { exercise: ExerciseId }) {
   const Icon = gameIcons[exercise];

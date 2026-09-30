@@ -187,6 +187,10 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
       onRestart={initGame}
       planProgress={planProgress}
       onNextPlanExercise={onNextPlanExercise}
+      nextAction={<button className="touch-btn touch-btn-primary game-next-action" onClick={handleNext}
+        style={{ visibility: selectedLetter === null ? 'hidden' : 'visible' }} disabled={selectedLetter === null}>
+        Continuar<ArrowRight size={20} aria-hidden="true"/>
+      </button>}
     >
       <div
         className="word-completion-game-container"
@@ -277,21 +281,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
             })}
           </div>
 
-          {/* 5. Barra de siguiente persistente */}
-          <div
-            className={`completion-next-bar actions-bar ${selectedLetter === null ? 'completion-next-bar-hidden' : ''}`}
-            aria-hidden={selectedLetter === null}
-          >
-            <button
-              className="touch-btn touch-btn-primary game-next-action"
-              onClick={handleNext}
-              disabled={selectedLetter === null}
-              tabIndex={selectedLetter === null ? -1 : 0}
-            >
-              <span>{currentIdx + 1 < sessionItems.length ? 'Siguiente Palabra' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
-              <ArrowRight size={24} />
-            </button>
-          </div>
+
         </div>
       </div>
     </ExerciseWrapper>

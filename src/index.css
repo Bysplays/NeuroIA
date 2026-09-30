@@ -2818,11 +2818,7 @@ body:has(.dashboard-area-selection-active),
   transition: transform var(--transition-fast), color var(--transition-fast);
 }
 
-.letter-option-btn:hover:not(:disabled) {
-  transform: translateY(-5px) scale(1.03);
-  border-color: var(--color-primary);
-  box-shadow: 0 12px 24px -4px rgba(var(--color-primary-rgb), 0.3);
-}
+
 
 .letter-option-btn:active:not(:disabled) {
   cursor: grabbing;

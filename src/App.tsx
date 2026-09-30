@@ -1,3 +1,4 @@
+import { useAssignedRecommendation } from './services/useAssignedRecommendation';
 import { dailySession } from './services/dailySession';
 import { exerciseStages } from './services/sessionProgress';
 import { gameConfig as progressGameConfig } from './services/difficulty';
@@ -121,9 +122,11 @@ export const App: React.FC = () => {
 const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: boolean; sync: ProgressSync; data: ProgressData }> = ({ uid, onSignOut, signingOut, sync, data }) => {
   const { profile, history } = data;
   const access = useAccountAccess();
+  const [proposalStep, setProposalStep] = useState<number | undefined>();
   const [proposal, setProposal] = useState<AssignedSession | null>(null);
   const [navigationTarget, setNavigationTarget] = useState<HTMLDivElement | null>(null);
   const sessionLink = access?.kind === 'invitation' && access.professionalId && access.seatId ? { professionalId: access.professionalId, seatId: access.seatId, patientId: uid } : null;
+  const recommendation = useAssignedRecommendation(sessionLink, history);
   const playingProposal = proposal && sessionLink && proposal.professionalId === sessionLink.professionalId && proposal.seatId === sessionLink.seatId ? proposal : null;
   const [reassessing, setReassessing] = useState(false);
   const [placementOpen, setPlacementOpen] = useState(() => !hasPlacement(profile));
@@ -249,18 +252,18 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
             window.scrollTo(0, 0);
           }}
           navigationRef={setNavigationTarget}
-          onSignOut={onSignOut}
-          signingOut={signingOut}
           onOpenAccessibility={() => setIsAccessibilityOpen(true)}
         />
       )}
 
       {reassessing ? <Reassessment paused={isAccessibilityOpen} profile={profile} sync={sync} onDone={() => setReassessing(false)} onSettings={() => setIsAccessibilityOpen(true)}/> : placement ? <PlacementOnboarding paused={isAccessibilityOpen} profile={profile} sync={sync} onDone={() => setPlacementOpen(false)} onSettings={() => setIsAccessibilityOpen(true)} /> : <main className={`main-content ${isPlayingGame ? 'main-content-focus' : ''}`}>
-        {playingProposal && <AssignedSessionPlayer key={playingProposal.id} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isAccessibilityOpen} />}
+        {playingProposal && <AssignedSessionPlayer key={`${playingProposal.id}:${proposalStep ?? "session"}`} singleStep={proposalStep} selected={playingProposal} profile={profile} sync={sync} onBack={handleBackToDashboard} externalPause={isAccessibilityOpen} />}
         {activeView === 'dashboard' && !playingProposal && (
           <Dashboard uid={uid} history={history} navigationTarget={navigationTarget} selectedTab={dashboardTab} onTabChange={setDashboardTab}
-            onOpenSettings={() => setIsAccessibilityOpen(true)} onSignOut={onSignOut} signingOut={signingOut}
-            proposedSessions={sessionLink && <AssignedSessionInbox key={sessionLink.professionalId + sessionLink.seatId} link={sessionLink} onStart={value => { setDailyPlanSession(null); setProposal(value); window.scrollTo(0, 0); }} />}
+            recommendation={recommendation}
+            onStartRecommendation={(value, step) => { setDailyPlanSession(null); setProposalStep(step); setProposal(value); window.scrollTo(0, 0); }}
+            onOpenSettings={() => setIsAccessibilityOpen(true)}
+            proposedSessions={sessionLink && <AssignedSessionInbox key={sessionLink.professionalId + sessionLink.seatId} link={sessionLink} onStart={value => { setDailyPlanSession(null); setProposalStep(undefined); setProposal(value); window.scrollTo(0, 0); }} />}
             profile={profile}
             onSelectDomain={handleSelectDomain}
             onSelectExercise={handleSelectExercise}

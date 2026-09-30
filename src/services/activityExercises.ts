@@ -3,15 +3,15 @@ import type { CognitiveDomain } from '../types/index.ts';
 
 // Stable historical series styles must not change when a game leaves the catalog.
 const series: Record<string, { color: string }> = {
-  'visual-scanning': { color: '#007f86' },
-  'language-naming': { color: '#d34887' },
-  'word-completion': { color: '#5946c2' },
-  'memory-path': { color: '#c56508' },
-  'memory-pairs': { color: '#327b35' },
-  'daily-sequencing': { color: '#bf302e' },
-  categorization: { color: '#2876c7' },
-  'motor-target': { color: '#82720d' },
-  'motor-tracking': { color: '#7c466d' },
+  'visual-scanning': { color: '#276a93' },
+  'language-naming': { color: '#548dba' },
+  'word-completion': { color: '#173b55' },
+  'memory-path': { color: '#398b8c' },
+  'memory-pairs': { color: '#657fa0' },
+  'daily-sequencing': { color: '#526675' },
+  categorization: { color: '#2a5671' },
+  'motor-target': { color: '#427571' },
+  'motor-tracking': { color: '#788997' },
 };
 
 export const ACTIVITY_EXERCISES: { id: string; domain: CognitiveDomain; title: string; retired?: boolean }[] = [
@@ -24,5 +24,5 @@ export function activityExerciseTitle(id: string) {
 }
 
 export function activityExerciseStyle(id: string) {
-  return series[id] ?? { color: '#007f86' };
+  return series[id] ?? { color: '#276a93' };
 }

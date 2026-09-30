@@ -150,6 +150,10 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
       onRestart={initQuestions}
       planProgress={planProgress}
       onNextPlanExercise={onNextPlanExercise}
+      nextAction={<button className="touch-btn touch-btn-primary game-next-action" onClick={handleNext}
+        style={{ visibility: selectedOption === null ? 'hidden' : 'visible' }} disabled={selectedOption === null}>
+        Continuar<ArrowRight size={20} aria-hidden="true"/>
+      </button>}
     >
       <div className="language-game-container">
         <div className="naming-card">
@@ -191,20 +195,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
             })}
           </div>
 
-          <div
-            className={`naming-next-bar actions-bar ${selectedOption === null ? 'naming-next-bar-hidden' : ''}`}
-            aria-hidden={selectedOption === null}
-          >
-            <button
-              className="touch-btn touch-btn-primary game-next-action"
-              onClick={handleNext}
-              disabled={selectedOption === null}
-              tabIndex={selectedOption === null ? -1 : 0}
-            >
-              <span>{currentIdx + 1 < sessionQuestions.length ? 'Siguiente Palabra' : config.mode === 'placement' ? 'Continuar' : 'Ver resultados'}</span>
-              <ArrowRight size={24} />
-            </button>
-          </div>
+
         </div>
       </div>
     </ExerciseWrapper>

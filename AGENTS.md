@@ -56,7 +56,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/LoginScreen.tsx`, `EmailVerification.tsx`, `AccountPassword.tsx` and `src/services/emailAuth.ts` | Google/email entry, verification, recovery and adding a password to the existing UID |
 | `src/components/ProfessionalDashboard.tsx` and `src/services/firestoreProfessional.ts` | Free professional panel, sponsored seats and read-only linked activity; see `docs/PROFESSIONALS.md` |
 | `src/components/ProfessionalPageHeader.tsx` | Shared icon-led title and separate back/participant/action row for professional sessions and standalone statistics |
-| `src/components/ProfessionalSessions.tsx`, `AssignedSessions.tsx`, `src/services/assignedSessions.ts` and `firestoreSessions.ts` | Immutable professional game proposals, per-step result reconciliation and participant play; see `docs/PROFESSIONALS.md` |
+| `src/components/ProfessionalSessions.tsx`, `AssignedSessions.tsx`, `src/services/assignedSessions.ts`, `useAssignedRecommendation.ts` and `firestoreSessions.ts` | Professional proposals, Hoy recommendations, independent prescribed-step play and contiguous archived-result reconciliation; see `docs/PROFESSIONALS.md` |
 | `src/components/AccessGate.tsx` and `OnboardingModal.tsx` | Personal account entry before progress and games |
 | `src/services/firestoreAccess.ts` and `accessService.ts` | Spark-compatible entitlement reads, Worker trials and atomic CEOABERTO redemption and invitation departure; see `docs/ONBOARDING.md` |
 | `vendor/cloudflare/` | Cloudflare Stripe backend, signed webhooks, daily reconciliation and Firestore REST transactions; see `vendor/cloudflare/README.md` |
@@ -72,11 +72,11 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/ExerciseIllustration.tsx` | Eight decorative SVG compositions for game introductions; not playable stimuli |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/PlacementPreferences.tsx` and `src/services/placementPreferences.ts` | Two-step interests/functional movement choices and thematic assessment selection; see `docs/PLACEMENT.md` |
-| `src/components/GameSession.tsx` | Pre-game instructions, help, pause and active-time clock provider |
+| `src/components/GameSession.tsx` | Pre-game instructions, help and active-time clock provider |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
 | `src/services/gameSession.ts` | Shared session context and `useGameSession` hook, separate from component exports |
 | `src/services/memorySequence.ts` | Memory-round sequence generation, called only on round start |
-| `src/components/FittedGameArea.tsx` | Measures and scales the playground within the available viewport, keeping the title, progress and navigation outside it |
+| `src/components/FittedGameArea.tsx` | Centers the board and action together; scales the board while keeping action touch size, title, progress and navigation intact |
 | `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and repeat |
 | `src/games/` | Individual game interactions and result creation |
 | `src/components/ModalFrame.tsx` | Native dialog, focus handling, dismissal, scroll lock |
@@ -89,7 +89,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/CloudProgress.tsx`, `ProgressSaveNotice.tsx` | Cloud loading, import choice and dismissible pending-save notification |
 | `src/services/soundService.ts` and `speechVoice.ts` | Shared audio, narrator controls, and Spain-voice selection |
 | `src/services/achievements.ts` | Cumulative achievement conditions |
-| `src/components/AchievementShowcase.tsx` | Standalone badge collection and details |
+| `src/components/AchievementShowcase.tsx` | Badge collection and details; twenty Lucide emblems mapped to stable achievement artwork indices |
 | `src/components/TherapistReport.tsx` | Professional guidance, notes, history, and print view |
 | `src/components/WellnessGlyph.tsx` | Distinct catalog illustrations for each game |
 | `src/components/GameObject.tsx` and `src/services/gameArtwork.json` | Shared game stimuli: `illustratedArtwork.json` maps active objects to transparent atlases with measured crops in `illustratedAtlasBounds.json`; standalone table/towel/soup assets and legacy atlas fallback remain supported |
@@ -306,13 +306,13 @@ appearance; the shared modal hides personal subscription controls.
 `ProductInformation` provides the switch through its optional children slot.
 The user has confirmed Google login. Firebase persists authentication across browser restarts using IndexedDB, with
 localStorage, sessionStorage and in-memory fallbacks. Explicit logout clears the
-auth session from the visible home header, Mi cuenta or Settings. Entry and
+auth session from Settings only in the active workspace. Entry and
 recovery screens retain their logout exits. After Firebase restores the UID, cached appearance is applied from
 that account before cloud loading; cached identity never grants access. `StorageService.setAccount` is set by the auth observer; cache
 and pending writes are scoped to the UID. Auth changes unmount the old boundary,
 unsubscribe listeners, and prevent late callbacks from touching the next account.
 
-`AccessGate` is lazy loaded after authentication and validates server-owned access through the authenticated Worker `/access` endpoint before mounting `CloudProgress`. Its server-time confirmation lasts at most 60 seconds, capped by expiry, with 30-second refresh; failure, offline or unconfirmed resume blocks play and pauses its clock through `AccessSuspendedContext`. After initial approval, temporary revalidation keeps the workspace mounted behind an inert, hidden boundary and a blocking dialog. `AccessRecoveryContext` lets an active GameSession own one persistent pause/recovery modal through rechecks; it disables continuation until server confirmation and exposes retry/logout on failure. Other views retain AccessGate’s recovery modal. Confirmed denied access unmounts it; cached access never grants play. The Worker API URL is required independently of the purchase feature flag. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
+`AccessGate` is lazy loaded after authentication and validates server-owned access through the authenticated Worker `/access` endpoint before mounting `CloudProgress`. Its server-time confirmation lasts at most 60 seconds, capped by expiry, with 30-second refresh; failure, offline or an expired lease blocks play and stops its clock through `AccessSuspendedContext`. Visibility return refreshes in the background while the existing server lease remains valid; focus/blur never invalidate it. Actual recovery keeps the board mounted and visible but inert beneath AccessGate's connection dialog. GameSession has no pause/recovery dialog or recovery ownership context. Confirmed denied access unmounts it; cached access never grants play. The Worker API URL is required independently of the purchase feature flag. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
 before mounting games; an inaccessible/offline initial load shows retry/logout,
 never an empty replacement profile. First cloud initialization offers an explicit
 import of account-local activity or the older unscoped profile when present.
@@ -401,7 +401,7 @@ profile creation/import and is never updated by the settings input.
 
 ## Account activity statistics
 
-`ActivityStatistics` is embedded in the player dashboard’s Actividad tab, with an additional Logros tab rendering `AchievementShowcase`. Primary `TabletTabs` navigation uses a portal into Header’s fixed bottom navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
+`ActivityStatistics` is embedded in the player dashboard’s Actividad tab, with Resumen (area radar and labelled current-level radar), Gráficas (accuracy, speed and recorded levels), Historial, Filtros and Logros rendering `AchievementShowcase`. `ActivityLineChart` shares focusable series, emphasis and a noninteractive active-series chip across all three time charts; `LevelStatistics` owns the current-level summary. Primary `TabletTabs` navigation uses a portal into Header’s fixed bottom navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
 the shared `data-style` attribute and palette tokens; no separate theme state.
 `activityStats.ts` deduplicates results and computes local-day per-exercise means.
 It maps historical result IDs `visual-scan`, `daily-seq` and `motor-coord` to
@@ -486,14 +486,15 @@ entry, exit, tabs, pagination and dialog focus in an isolated browser context.
 
 Placement starts GameSession with `autoStart` for its current stage in the selected thematic order.
 New ladders stop after at most levels 1 and 4; saved legacy 7/10 stages remain valid.
-Only the welcome and final level summary require progression buttons. Advance
-after the current trial appears in the parent progress snapshot; do not infer
-missing evidence or start the next game before that update. Manual help and pause
-retain their existing clock behavior; ordinary games still open instructions.
+Welcome and final summary have their own progression actions; game answer boards
+use the shared Continuar action. Once saved, advance automatically after the current
+trial appears in the parent progress snapshot; do not infer
+missing evidence or start the next game before that update. Help and settings
+retain silent clock suspension; ordinary games still open instructions.
 
 Classification renders its object-listening button into GameSession’s assistance
 slot through a React portal. The slot sits beside manual help on the bottom
-navigation row (wrapping directly above it on narrow phones), keeping the current-object narration callback owned by the game.
+navigation row (wrapping directly above it on narrow phones), keeping the current-object narration callback owned by the game. Its button uses the shared `paper-nav-button` style and 20px Volume2 icon. Empty assistance portal slots are hidden to preserve the same spacing as other games.
 
 GameSession shares the viewport header and assistance/navigation footer between
 all placement and ordinary games, including daily sessions. Instruction pages reuse
@@ -534,8 +535,9 @@ normal results or activity counters are created during assessment.
 keep pending-write notices separate and retain retry/logout behavior.
 
 ProfessionalSessions opens SessionAnalytics by selected session ID using React
-state. The adapter reads at most eight deterministic result documents for confirmed
-steps under the linked participant; existing active-seat rules enforce access.
+state. The adapter reads at most eight deterministic result documents across all
+proposed steps, including independently completed steps beyond the contiguous
+completedCount prefix, under the linked participant; existing active-seat rules enforce access.
 sessionAnalytics.ts checks session/owner/seat/step/game/level/version attribution,
 deduplicates by step and derives answer-weighted accuracy and summed durations.
 Missing results are disclosed, not counted as zero. Async responses are scoped to
@@ -601,9 +603,10 @@ not a game stimulus. Default appearance uses clinical-blue Calma tokens and Manr
 `PlanButton` opens existing subscription management before placement and from
 Mi cuenta. Billing availability and entitlement checks remain server-owned.
 Dashboard passes its displayed exercise queue to the existing daily-plan callback.
-`GameSession.feedback` owns brief non-blocking correct-answer status using its
-pausable timer. Assessment failure in Simon finishes once; ordinary replay remains.
-Pairs start face down; voluntary preview remains a counted hint.
+Memory sequence failure marks wrong/correct tiles and finishes once on Continuar.
+Replay clears partial input without regenerating the sequence and counts a hint.
+Pairs require an opening preview; Repetir resets the same board and counts a hint.
+Solo pairs aggregate three boards; grouped/placement pairs retain one.
 
 `tests/interface/` is an isolated real-component browser fixture, never imported
 by the production entry; it stores results only in React state and blocks external
@@ -631,8 +634,9 @@ action never bypasses initial cloud loading or server-confirmed access.
 
 `src/services/sessionProgress.ts` owns stage weights and bounded progress aggregation.
 `GameSession.progressScope` carries completed and remaining stages for placement,
-daily plans and assigned sessions; `ExerciseWrapper` derives progress from whole-level completion. Individual
-objects, answers, pairs and contact time must not fill stage segments. Help uses ModalFrame and pauses the existing game clock without
+daily plans and assigned sessions; `ExerciseWrapper` uses whole rounds/questions,
+except solo targets which use successful taps. Solo pairs use three boards. Individual
+search objects, matched pairs and contact time do not fill stage segments. Help uses ModalFrame and pauses the existing game clock without
 unmounting the board.
 
 LoginScreen keeps the unauthenticated home mounted beneath one ModalFrame for
@@ -661,7 +665,21 @@ combined demo Firestore suite exercises the REST cleanup and deletion write lock
 
 Game progress uses `exerciseStages` and `ExerciseWrapper.completedStages`: count
 whole search boards, naming/completion/classification questions and full memory
-sequences. Pair matching, target practice and tracking remain single-stage games.
+sequences. The optional `individual` stage argument enables tap segments for solo
+targets and three boards for solo pairs. Grouped pairs/targets and tracking remain
+single-stage games. Completion hides progress. All Continue actions occupy the
+shared unscaled `nextAction` slot directly below the fitted board. FittedGameArea
+measures the board and action as a centered group. Memory playback/repeat and
+Continue replace each other in that same slot; do not reserve a second footer action.
 Search aggregates all configured rounds into one result. `FittedGameArea` scales
 boards only; tracking contact radius must use rendered scale, not raw CSS pixels.
 Classification excludes multi-context objects without removing them from naming.
+
+GameSession restarts completed games in place, preserving its selected level even
+if the saved profile adapts. It resets its clock and recordings; game restart handlers
+reset board state. Ordinary focus changes never require confirmation. Hidden tabs,
+help, settings, Muse and access suspension pause the clock; visibility and confirmed
+access resume automatically without a second action. There are no pause/resume
+controls in ordinary or assigned games. Focus events never trigger recovery. Motor tracking captures pointer
+down on the arena and tests contact each frame, including drags beginning outside
+the target. Target misses persist as transparent red outlines until restart.

@@ -135,3 +135,16 @@ test('owner edits only unstarted sessions, with validation, conflict protection 
   await assert.rejects(owner.edit(updated, draft));
   await assertFails(updateDoc(doc(ownerDb, path, 'editable'), { title: 'After start', updatedAt: serverTimestamp() }));
 });
+
+test('individual proposed games save out of order and reconcile without skipping the missing step', async () => {
+  await owner.publish('independent', draft);
+  await player.start('independent');
+  const session = await player.load('independent');
+  await save(result(session, 1));
+  assert.equal((await player.advance('independent')).completedCount, 0);
+  assert.equal((await owner.loadResults(session)).length, 1);
+  await save(result(session, 0));
+  assert.equal((await player.advance('independent')).completedCount, 1);
+  assert.equal((await player.advance('independent')).status, 'completed');
+  assert.equal((await owner.loadResults(session)).length, 2);
+});
