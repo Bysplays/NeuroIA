@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ChartNoAxesColumnIncreasing, ChevronDown, FileText, Lightbulb, Sparkles } from 'lucide-react';
+import { ChartNoAxesColumnIncreasing, ChevronDown, FileText, CircleCheck, Lightbulb, Sparkles } from 'lucide-react';
+import { ModalFrame } from './ModalFrame';
 import { WellnessGlyph } from './WellnessGlyph';
 import { activityAi } from '../services/activityAi';
 import { basicNarrative, reportNarrative, type ActivityInsights, type AiAnalysis } from '../services/activityInsights';
@@ -18,6 +19,11 @@ function Evidence({ insights, ids }: { insights: ActivityInsights; ids: string[]
 
 export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad' }: { uid: string; insights: ActivityInsights; subjectLabel?: string }) {
   const id = useId();
+  const reportButton = useRef<HTMLButtonElement>(null);
+  const closeDownloadNotice = () => {
+    setNotice('');
+    requestAnimationFrame(() => reportButton.current?.focus());
+  };
   const [available, setAvailable] = useState(false);
   const [statusChecked, setStatusChecked] = useState(false);
   const [analysis, setAnalysis] = useState<AiAnalysis>();
@@ -63,7 +69,7 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
       const text = reportNarrative(result?.narrative ?? basicNarrative(insights), data);
       const pdf = await createActivityReportPdf({ insights: data, text, reference: subjectLabel, provenance: result?.provenance }, controller.signal);
       if (controller.signal.aborted || requests.current.version !== requestId) return;
-      downloadActivityReport(pdf); setNotice('Informe PDF descargado en este dispositivo.');
+      downloadActivityReport(pdf); setNotice('Informe PDF descargado');
     } catch (failure) {
       if (requests.current.version === requestId && !controller.signal.aborted) setError(failure instanceof Error ? failure.message : 'No hemos podido generar el contenido. Vuelve a intentarlo.');
     } finally {
@@ -99,7 +105,7 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
     <div className="activity-assistant-footer">
       <p>Las sugerencias no cambian tus niveles ni las propuestas de tu profesional.</p>
       <div className="activity-assistant-actions">
-        <button className="stats-quiet-button" onClick={() => { void generateReport(); }} disabled={!insights.count || busy !== null || !statusChecked}><FileText size={18} aria-hidden="true"/>{busy === 'report' ? 'Generando…' : 'Generar informe'}</button>
+        <button ref={reportButton} className="stats-quiet-button" onClick={() => { void generateReport(); }} disabled={!insights.count || busy !== null || !statusChecked}><FileText size={18} aria-hidden="true"/>{busy === 'report' ? 'Generando…' : 'Generar informe'}</button>
         {busy === 'report' && <button className="stats-quiet-button" onClick={cancel}>Cancelar</button>}
       </div>
     </div>
@@ -107,6 +113,13 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
       <p>La IA analiza un resumen de tu actividad —juegos, frecuencia, precisión, velocidad y niveles— para proponerte ideas de práctica y generar informes. Las recomendaciones se actualizan la primera vez que abres este resumen cada día y se conservan hasta la siguiente actualización. Para ello, enviamos datos agregados a servidores externos, sin nombres, correos ni identificadores de cuenta. Tú decides qué sugerencias seguir; los niveles y las propuestas profesionales no se modifican.</p>
     </details>
     {error && <p role="alert">{error}</p>}
-    <p className="activity-assistant-status" role="status">{busy === 'recommendations' ? 'Preparando tus recomendaciones del día…' : notice}</p>
+    <p className="activity-assistant-status" role="status">{busy === 'recommendations' ? 'Preparando tus recomendaciones del día…' : ''}</p>
+    {notice && <ModalFrame labelledBy={`${id}-download-title`} onClose={closeDownloadNotice}>
+      <section className="entry-error-notification">
+        <div className="entry-error-heading"><CircleCheck size={24} aria-hidden="true"/><h2 id={`${id}-download-title`}>{notice}</h2></div>
+        <div className="entry-error-message"><p>Lo encontrarás en las descargas de tu navegador.</p></div>
+        <button className="touch-btn touch-btn-primary" onClick={closeDownloadNotice}>Entendido</button>
+      </section>
+    </ModalFrame>}
   </section>;
 }

@@ -44,7 +44,12 @@ for (const width of [390, 820, 1280]) test(`direct AI report and recommendations
   const file = await download;
   expect((await fs.readFile(await file.path())).subarray(0, 5).toString()).toBe('%PDF-');
   await file.saveAs(`/tmp/neuroia-informe-${width}.pdf`);
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const popup = page.getByRole('dialog', {name:'Informe PDF descargado'});
+  await expect(popup).toBeVisible();
+  await popup.screenshot({path:`/tmp/neuroia-download-popup-${width}.png`});
+  await page.keyboard.press('Escape');
+  await expect(popup).toHaveCount(0);
+  await expect(card.getByRole('button', {name:'Generar informe'})).toBeFocused();
   await expect(card.getByRole('button', { name: 'Generar informe' })).toBeEnabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
@@ -85,6 +90,7 @@ test('large text and high contrast allow a direct basic PDF when AI is unavailab
   await page.locator('.activity-assistant').screenshot({ path: '/tmp/neuroia-recommendations-accessible.png' });
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Generar informe' }).click(); await download;
+  await page.getByRole('dialog').getByRole('button', {name:'Entendido'}).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 

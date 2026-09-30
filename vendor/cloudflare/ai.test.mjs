@@ -180,3 +180,14 @@ test('automatic daily recommendations do not block an immediately requested repo
   assert.equal(db.documents.get('users/player/aiUsage/daily').count, 2);
   await assert.rejects(run(db), { status: 429 });
 });
+
+test('daily cache with an older catalog version is replaced before serving it', async () => {
+  const db = store();
+  await dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, provider);
+  const path = 'users/player/aiRecommendations/player';
+  db.documents.set(path, {...db.documents.get(path), dataVersion:'activity-v1', analysis:'old-retired-game'});
+  db.documents.delete('users/player/aiUsage/daily');
+  let calls=0;
+  const result=await dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, async(...args)=>{calls++;return provider(...args)});
+  assert.equal(calls,1);assert.equal(result.insights.version,'activity-v2');
+});

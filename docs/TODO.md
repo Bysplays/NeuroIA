@@ -279,6 +279,9 @@ Seats, difficulty/placement and professional session proposals are also implemen
 - [x] Deploy the AI Worker with a server-side OpenRouter secret and Dots3-Note
   Preview free enabled. Verify health, both allowed origins and authentication
   enforcement on the production AI routes; signed-in user acceptance remains below.
+- [x] Restrict report/AI evidence to the eight active games and invalidate old catalog
+  caches. Production inventory found no retired-game results or profile fields;
+  two obsolete daily AI snapshots were backed up and removed.
 - [x] Generate recommendations automatically on the first daily visit to Resumen,
   reuse an authorized server snapshot across devices and display full-width summary text.
 - [x] Validate real Dots3-Note Preview free recommendations and report smoke cases

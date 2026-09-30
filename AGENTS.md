@@ -69,7 +69,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/services/dailySession.ts` | 56 named three-game combinations, deterministically selected by account and local date for home and daily play |
 | `src/services/exerciseCatalog.ts` | Eight active exercise definitions and short summaries |
 | `src/services/activityExercises.ts` | Historical names and stable chart styles, including retired daily sequencing |
-| `src/services/activityInsights.ts`, `activityAi.ts`, `activityReportPdf.ts` and `src/components/ActivityAssistant.tsx` | Shared deterministic activity evidence, optional OpenRouter suggestions and direct Spanish PDF report export; see `docs/AI.md` |
+| `src/services/activityInsights.ts`, `activityAi.ts`, `activityReportPdf.ts` and `src/components/ActivityAssistant.tsx` | Active-game deterministic activity evidence, optional OpenRouter suggestions and direct Spanish PDF report export; see `docs/AI.md` |
 | `vendor/cloudflare/ai.mjs` and `vendor/openrouter/` | Authenticated AI endpoints, server retrieval/quota and versioned Spanish prompts; no browser secret or model-driven level writes |
 | `src/components/ExerciseIllustration.tsx` | Eight decorative SVG compositions for game introductions; not playable stimuli |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
@@ -684,7 +684,7 @@ on cancellation or identity/context change; asset failures are recoverable inlin
 are cleared on leaving the overview, changing context or account identity.
 The server-only `users/{actorUid}/aiRecommendations/{targetUid}` stores one daily
 aggregate analysis per caller/participant, with a transactional generation lease.
-Cached reads recheck permissions; filters affect reports but not the daily snapshot.
+Cached reads recheck permissions and the evidence version; filters affect reports but not the daily snapshot.
 Recursive account deletion removes it. The server-only `users/{actorUid}/aiUsage/daily` holds bounded counters and is covered
 by recursive account deletion; existing rules deny client access. The REST adapter
 decodes nested progress values for AI retrieval without changing the billing writes.

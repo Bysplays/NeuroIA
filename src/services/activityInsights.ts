@@ -4,7 +4,7 @@ import type { ExerciseId, ExerciseResult, UserProfile } from '../types/index.ts'
 
 // Shared by the browser and Worker. No identity, free text or physiological data
 // may cross this projection into the language-model input.
-export const INSIGHTS_VERSION = 'activity-v1';
+export const INSIGHTS_VERSION = 'activity-v2';
 export interface InsightFilters { from: string; to: string; domain: string; exercise: string; timeZone: string }
 export interface InsightFact { id: string; text: string }
 export interface InsightSuggestion { id: string; exerciseId: ExerciseId; title: string; action: string; evidence: string[] }
@@ -61,7 +61,7 @@ export function buildActivityInsights(history: ExerciseResult[], levels: UserPro
   for (const r of new Map(history.filter(r => r && typeof r.id === 'string').map(r => [r.id, r])).values()) {
     if (r.practice === true) continue;
     const id = aliases[r.exerciseId] ?? r.exerciseId;
-    const game = ACTIVITY_EXERCISES.find(g => g.id === id);
+    const game = ALL_EXERCISES.find(g => g.id === id);
     const day = typeof r.date === 'string' ? insightDay(r.date, filters.timeZone) : null;
     if (!game || !day || day > today || !Number.isInteger(r.totalQuestions) || r.totalQuestions <= 0 || r.totalQuestions > 1000
       || !Number.isInteger(r.correctAnswers) || r.correctAnswers < 0 || r.correctAnswers > r.totalQuestions
@@ -74,7 +74,7 @@ export function buildActivityInsights(history: ExerciseResult[], levels: UserPro
       hints: Number.isInteger(r.hintsUsed) && r.hintsUsed! >= 0 ? r.hintsUsed! : null, assigned: Boolean(r.assignmentId) });
   }
   rows.sort((a, b) => a.day.localeCompare(b.day) || a.date.localeCompare(b.date));
-  const games = ACTIVITY_EXERCISES.filter(g => (!filters.exercise || filters.exercise === g.id) && (!filters.domain || filters.domain === g.domain))
+  const games = ALL_EXERCISES.filter(g => (!filters.exercise || filters.exercise === g.id) && (!filters.domain || filters.domain === g.domain))
     .map(g => {
       const played = rows.filter(r => r.game === g.id);
       return { id: g.id, title: g.title, count: played.length, accuracy: mean(played.map(r => r.accuracy)),

@@ -30,7 +30,7 @@ explains daily generation and external processing; **Generado con IA** labels ac
 returned AI analysis only. The summary text fills the card's available width.
 
 **Generar informe** requests AI writing and downloads the PDF directly, without an
-editor, review checkbox or confirmation dialog. The button reads **Generando…**
+editor, review checkbox or pre-download confirmation dialog. The button reads **Generando…**
 until download starts; Cancelar aborts pending work. An unavailable provider uses
 the basic activity template without claiming AI authorship. Generation and asset
 errors appear inline and can be retried. Daily recommendations start automatically; report generation remains explicit.
@@ -42,6 +42,13 @@ No cloud report archive or clinical note storage is introduced. Leaving Resumen,
 changing filters or changing accounts cancels pending responses. Archive-page
 updates preserve the in-flight daily request rather than starting it again.
 Downloaded copies remain under the recipient's control, outside account deletion.
+
+Activity AI and PDFs use only the eight active catalog games. Retired daily sequencing
+is excluded from aggregates, tables and prompt evidence. The daily cache carries
+the evidence version so older catalog snapshots are regenerated. After download,
+a shared ModalFrame confirmation says «Informe PDF descargado», closes with
+Entendido or Escape and returns focus to Generar informe. The optional-suggestions
+footer uses the available width beside the report action without a character-width cap.
 
 ## Deterministic evidence
 
