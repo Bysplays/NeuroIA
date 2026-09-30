@@ -13,6 +13,8 @@ import type { CognitiveDomain, ExerciseResult, UserProfile } from '../types';
 import { ACTIVITY_EXERCISES, activityExerciseTitle as title } from '../services/activityExercises';
 import { dailyActivity, formatActivityDate, localDay, mergeActivity, secondsPerQuestion, historicalMean } from '../services/activityStats';
 import { loadActivityPage } from '../services/activityHistory';
+import { ActivityAssistant } from './ActivityAssistant';
+import { buildActivityInsights } from '../services/activityInsights';
 
 const domains: [CognitiveDomain, string][] = [['attention', 'Atención'], ['language', 'Lenguaje'], ['memory', 'Memoria'], ['executive', 'Organización'], ['motor', 'Coordinación']];
 const number = (n: number | null) => n === null || !Number.isFinite(n) ? '—' : n.toLocaleString('es-ES', { maximumFractionDigits: 1 });
@@ -50,8 +52,8 @@ function CategoryRadar({ results }: { results: ExerciseResult[] }) {
 export function ActivityStatistics(props: ActivityStatisticsProps) {
   return <AccountActivityStatistics key={props.uid} {...props}/>;
 }
-type ActivityStatisticsProps = { levels?: UserProfile['gameLevels']; selectedTab?: string; onTabChange?: (tab: string) => void; embedded?: boolean; achievements?: ReactNode; uid: string; history: ExerciseResult[]; onBack: () => void; heading?: string; subtitle?: string; backLabel?: string };
-function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu actividad', subtitle, backLabel = 'Volver al inicio', embedded = false, achievements, selectedTab, onTabChange }: ActivityStatisticsProps) {
+type ActivityStatisticsProps = { active?: boolean; tapsOnly?: boolean; levels?: UserProfile['gameLevels']; selectedTab?: string; onTabChange?: (tab: string) => void; embedded?: boolean; achievements?: ReactNode; uid: string; history: ExerciseResult[]; onBack: () => void; heading?: string; subtitle?: string; backLabel?: string };
+function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu actividad', subtitle, backLabel = 'Volver al inicio', embedded = false, achievements, selectedTab, onTabChange, active = true, tapsOnly = false }: ActivityStatisticsProps) {
   const panel = useViewportPanel<HTMLDivElement>();
   const [localTab, setLocalTab] = useState('overview');
   const tab = selectedTab ?? localTab;
@@ -70,6 +72,8 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
   const [selectedResult, setSelectedResult] = useState<ExerciseResult | null>(null);
   const all = useMemo(() => mergeActivity(archive, history), [archive, history]);
   const results = all.filter(r => (!exercise || r.exerciseId === exercise) && (!domain || r.domain === domain) && (!from || localDay(r.date) >= from) && (!to || localDay(r.date) <= to));
+  const insights = useMemo(() => from && to && from > to ? null : buildActivityInsights(all, levels,
+    { from, to, exercise, domain, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }, { partial: more, tapsOnly }), [all, levels, from, to, exercise, domain, more, tapsOnly]);
   const currentPage = Math.min(page, Math.max(0, Math.ceil(results.length / pageSize) - 1));
   const loadMore = useCallback(async () => {
     if (fetching.current) return;
@@ -91,6 +95,8 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
       { id: 'overview', label: 'Resumen', content: <>
     <div className="stats-overview"><CategoryRadar results={results}/>
     <LevelStatistics levels={levels}/></div>
+    {active && tab === 'overview' && insights && <ActivityAssistant key={JSON.stringify(insights)} uid={uid} insights={insights} subjectLabel={subtitle}/>}
+    {!insights && <p role="alert">Revisa el intervalo de fechas en Filtros para preparar recomendaciones.</p>}
     </> }, { id: 'charts', label: 'Gráficas', content:
     <>
       {more && <div className="stats-archive-notice" role="status">{error ? <>No se pudo cargar todo el historial. <button className="stats-quiet-button" onClick={loadMore}>Reintentar</button></> : 'Cargando el historial completo para calcular las medias…'}</div>}

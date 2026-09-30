@@ -13,11 +13,14 @@
     "test:onboarding": "npm run test:firestore",
     "test:auth": "npx --yes firebase-tools@15.30.1 emulators:exec --only auth --project demo-neuroia \"node --experimental-strip-types --test tests/emailAuth.emulator.test.mjs\"",
     "test:placement": "playwright test --config tests/placement/playwright.config.mjs",
-    "test:interface": "playwright test --config tests/interface/playwright.config.mjs"
+    "test:interface": "playwright test --config tests/interface/playwright.config.mjs",
+    "ai:configure": "node vendor/openrouter/configure.mjs",
+    "ai:verify": "node --experimental-strip-types vendor/openrouter/verify.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
     "firebase": "^12.19.0",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.42.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

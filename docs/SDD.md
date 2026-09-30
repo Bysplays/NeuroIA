@@ -11,7 +11,7 @@ tracked in [TODO.md](TODO.md). Existing behavior is documented in [AGENTS.md](..
 ## 1. Purpose and scope
 
 Extend the Spanish-language serious-play app with optional Bluetooth EEG,
-reliable monthly professional seats, local AI-assisted reports/notes,
+reliable monthly professional seats, optional OpenRouter-assisted activity reports and suggestions,
 professional-assigned sessions, email authentication, complete natural narration,
 the supplied brand mark, recognizable illustrated objects, ten difficulty levels
 and guided initial placement. Retire daily action sequencing; retain the memory
@@ -25,7 +25,7 @@ CONTENT.md and describe only implemented, verified capabilities.
 Priority order follows the owner: EEG, seats, AI, assigned sessions, email,
 voices, logo, game illustrations, difficulty, placement, game retirement.
 Implementation dependencies can change scheduling without changing those priorities.
-Muse 2 uses the selected MuseJS Web Bluetooth adapter. No official SDK, language model, inference runtime or replacement voice provider is selected.
+Muse 2 uses the selected MuseJS Web Bluetooth adapter. No official SDK or replacement voice provider is selected. Activity writing uses the OpenRouter API with an explicitly configured server-side model; live model evaluation remains a release check.
 The mention of NVIDIA voice repositories is a future research lead, not a verified
 recommendation. Research primary sources and licenses when selecting dependencies.
 
@@ -42,7 +42,7 @@ recommendation. Research primary sources and licenses when selecting dependencie
 | Billing | Worker Checkout, signed webhooks, reconciliation, portal, seat redemption/rotation | Production deployment and sandbox lifecycle not fully verified |
 | Access | Server-owned entitlement records; browser refresh on focus/every 30 seconds | Worker-confirmed time and expiry; 60-second lease, fail-closed refresh; Worker deployed, real-account lifecycle pending |
 | Narration | Shared recorded-player service and browser fallback | 91/370 clips missing; full audition and commercial rights unresolved |
-| EEG / AI | MuseJS-based EEG/PPG adapter and recording implemented; core real-device flow confirmed by owner | AI implementation/validation remains pending; retain tested-device scope |
+| EEG / AI | MuseJS-based EEG/PPG adapter; core real-device flow confirmed by owner. OpenRouter activity writing implemented locally | AI provider configuration, Spanish evaluation and deployment pending; retain tested-device scope |
 | Brand / objects | Supplied mint mark integrated; existing paper sprite atlases | New object style pending integration |
 
 Historical result IDs, totals, achievements and account data remain compatible.
@@ -64,7 +64,7 @@ Proposed additions:
   ordinary game entry. Professional-only entry remains free and has no placement gate.
 - A professional session/notes adapter with explicit Firestore authorization.
 - An optional EEG transport adapter, isolated from game logic.
-- A lazy browser-inference worker, isolated from rendering and the game clock.
+- An authenticated Worker inference endpoint, isolated from game logic, using bounded server-calculated activity summaries.
 
 ```mermaid
 flowchart TD
@@ -79,7 +79,7 @@ flowchart TD
   Professional --> Assignments[Authorized session assignments]
   Assignments --> Games
   Games --> Sync[Durable results and receipts]
-  Professional --> Drafts[Optional local AI drafts]
+  Professional --> Drafts[Optional AI activity reports]
   EEG[Optional EEG adapter] --> Games
 ```
 
@@ -145,32 +145,28 @@ period-end cancellation, refund/revocation policy, departure/reassignment,
 clock manipulation, offline refresh, open-tab expiry and sleep/resume. Payment
 failure semantics and refund policy must be explicit before live billing.
 
-### AI — local assistance for reports and notes
+### AI — optional activity suggestions and Spanish reports
 
-First deliver manual notes/reports with explicit permissions; the current legacy
-therapist component does not authorize professional writes. Keep private notes
-separate from participant-visible reports and instructions.
+The selected scope replaces the earlier browser-local inference proposal with
+OpenRouter API writing through the existing authenticated Cloudflare Worker.
+The model explains deterministic facts and optional practice/level suggestions;
+it never changes game difficulty, prescriptions, results or progress.
 
-Evaluate small Llama/Gemma-style models without preselecting a version. Compare
-Spanish quality, grounding, download size, memory, device performance, runtime
-support and commercial license using representative target hardware. A runtime
-capability probe decides availability. Load model assets only after an informed
-user action showing size; inference runs outside the UI thread and is cancelable.
-Provide manual editing when unavailable, download fails or the model cannot fit.
-Do not introduce remote inference as a silent fallback.
+Implemented: Activity → Resumen → ¿Qué te recomendamos?, bounded evidence
+and suggestion calculations, explicit external-processing acknowledgement,
+server-side authorized history retrieval, quotas, versioned Spanish prompts,
+structured output validation, cancellation and a directly downloaded PDF report
+export. A manual template remains available when AI is disabled/unavailable.
+No generated report is saved to Firestore; private professional notes remain future
+scope. See [AI design and acceptance](AI.md) and
+[provider configuration](../vendor/openrouter/README.md).
 
-Supply only the selected person's authorized activity and selected notes, with
-explicit date range, partial-history coverage and record references. Treat note
-contents as data, never instructions that override the summarization task. Missing
-activity produces an honest empty state. Drafts must distinguish measured data
-from proposed wording, use neutral Spanish, and contain no invented diagnoses,
-results, efficacy claims or treatment instructions. A professional reviews/edits
-and explicitly saves a draft; generation does not publish or assign a session.
-
-Acceptance: unsupported/low-memory devices, canceled/download-failed generation,
-Spanish factuality review, empty/partial data, malicious instructions in notes,
-sign-out/data-switch cancellation, and no activity/notes transmitted for inference.
-Store model/configuration version and source coverage with an accepted report.
+The production Worker enables Dots3-Note Preview free with server-held credentials.
+Real-model Spanish factuality, performance/cost, provider/privacy review and
+production player/professional acceptance remain open. Automated tests use mocked
+model responses and the demo Firestore project. This feature does not implement
+the grant memory's reinforcement-learning engine, EEG-based mental-state inference,
+or proof of report-productivity/adherence KPIs.
 
 ### SESSIONS — professional-assigned game sequences
 

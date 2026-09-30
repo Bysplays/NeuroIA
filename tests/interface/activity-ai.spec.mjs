@@ -1,0 +1,112 @@
+import { test, expect } from '@playwright/test';
+import fs from 'node:fs/promises';
+
+async function mockAi(page, behavior = 'success') {
+  await page.route('**/*', route => ['127.0.0.1', 'localhost', 'fonts.googleapis.com', 'fonts.gstatic.com'].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
+  await page.route('**/src/services/activityAi.ts*', route => route.fulfill({ contentType: 'text/javascript', body: `
+    import { buildActivityInsights, basicNarrative } from '/src/services/activityInsights.ts';
+    window.aiCalls=[];
+    export const activityAi={async status(){return {available:${behavior !== 'unavailable'}}},async generate(uid,filters,mode,signal){
+      window.aiCalls.push({uid,filters,mode});
+      ${behavior === 'error' ? "throw Error('No se ha podido comprobar el borrador de IA.');" : ''}
+      ${behavior === 'slow' ? 'await new Promise(resolve=>window.finishAi=resolve);' : ''}
+      window.aiWasAborted=signal.aborted;
+      const history=Array.from({length:6},(_,i)=>({id:'fixture-'+i,exerciseId:'visual-scanning',domain:'attention',date:'2026-09-'+(20+i),durationSeconds:30,correctAnswers:3,totalQuestions:3,level:3,configVersion:1,hintsUsed:0}));
+      const insights=buildActivityInsights(history,{'visual-scanning':{level:3,evidence:[]}},filters,{partial:true});
+      const narrative=basicNarrative(insights);narrative.summary='Puedes dar variedad a tu práctica y elegir un reto que te resulte cómodo.';
+      return {insights,narrative,provenance:{generatedAt:'2026-09-30T10:00:00Z',model:'fixture/model',promptVersion:'fixture-v1',snapshotHash:'fixture-hash',mode}};
+    }};
+    export function downloadActivityReport(text){const url=URL.createObjectURL(new Blob([text],{type:'text/plain'}));const a=document.createElement('a');a.href=url;a.download='informe.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+  ` }));
+  await page.goto('/tests/interface/index.html?activity-demo');
+  await page.getByRole('tab', { name: 'Actividad', exact: true }).click();
+}
+
+for (const width of [390, 820, 1280]) test(`direct AI report and recommendations at ${width}`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 });
+  await mockAi(page);
+  const card = page.locator('.activity-assistant');
+  await expect.poll(() => page.evaluate(() => window.aiCalls.length)).toBe(0);
+  const reason = card.locator('.activity-assistant-reason').first();
+  await reason.locator('summary').focus(); await page.keyboard.press('Enter');
+  await expect(reason.locator('ul')).toBeVisible();
+  await reason.screenshot({ path: `/tmp/neuroia-recommendation-reason-${width}.png` });
+  await page.keyboard.press('Enter');
+  await card.getByRole('button', { name: 'Personalizar con IA' }).click();
+  await expect(card).toContainText('Generado con IA');
+  await expect(card).toContainText('Puedes dar variedad');
+  await card.screenshot({ path: `/tmp/neuroia-ai-recommendations-${width}.png` });
+  const download = page.waitForEvent('download');
+  await card.getByRole('button', { name: 'Generar informe' }).click();
+  const file = await download;
+  expect((await fs.readFile(await file.path())).subarray(0, 5).toString()).toBe('%PDF-');
+  await file.saveAs(`/tmp/neuroia-informe-${width}.pdf`);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(card.getByRole('button', { name: 'Generar informe' })).toBeEnabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('service failure stays inline and preserves the existing recommendations', async ({ page }) => {
+  await mockAi(page, 'error');
+  await page.getByRole('button', { name: 'Personalizar con IA' }).click();
+  await expect(page.getByRole('alert')).toContainText('No se ha podido comprobar');
+  await expect(page.locator('.activity-assistant')).not.toContainText('Generado con IA');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Generar informe' })).toBeEnabled();
+});
+
+test('pending report shows progress and cancellation prevents late downloads', async ({ page }) => {
+  await mockAi(page, 'slow');
+  let downloads = 0; page.on('download', () => downloads++);
+  await page.getByRole('button', { name: 'Generar informe' }).click();
+  await expect(page.getByRole('button', { name: 'Generando…' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await page.evaluate(() => window.finishAi());
+  await expect.poll(() => page.evaluate(() => window.aiWasAborted)).toBe(true);
+  await page.getByRole('tab', { name: 'Filtros', exact: true }).click();
+  await page.getByLabel('Área', { exact: true }).selectOption('attention');
+  await page.getByLabel('Desde', { exact: true }).fill('2026-09-20');
+  await page.getByRole('tab', { name: 'Resumen', exact: true }).click();
+  await page.getByRole('button', { name: 'Personalizar con IA' }).click();
+  await expect.poll(() => page.evaluate(() => window.aiCalls.at(-1).filters.domain)).toBe('attention');
+  expect(await page.evaluate(() => window.aiCalls.at(-1).filters.from)).toBe('2026-09-20');
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  expect(downloads).toBe(0);
+});
+
+test('large text and high contrast allow a direct basic PDF when AI is unavailable', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockAi(page, 'unavailable');
+  await page.goto('/tests/interface/index.html?activity-demo&large&contrast');
+  await page.getByRole('tab', { name: 'Actividad', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Personalizar con IA' })).toHaveCount(0);
+  await page.locator('.activity-assistant').screenshot({ path: '/tmp/neuroia-recommendations-accessible.png' });
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Generar informe' }).click(); await download;
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('PDF generation recovers from a missing font', async ({ page }) => {
+  await mockAi(page, 'unavailable');
+  await page.route('**/fonts/manrope/Manrope-Regular.ttf', route => route.fulfill({ status: 503, body: 'Unavailable' }));
+  await page.getByRole('button', { name: 'Generar informe' }).click();
+  await expect(page.getByRole('alert')).toContainText('tipografía');
+  await page.unroute('**/fonts/manrope/Manrope-Regular.ttf');
+  const downloaded = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Generar informe' }).click(); await downloaded;
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+test('vector report supports complete levels and long text across pages', async ({ page }) => {
+  await mockAi(page, 'unavailable');
+  const downloaded = page.waitForEvent('download');
+  await page.evaluate(async () => {
+    const { buildActivityInsights } = await import('/src/services/activityInsights.ts');
+    const { ALL_EXERCISES } = await import('/src/services/exerciseCatalog.ts');
+    const { createActivityReportPdf, downloadActivityReport } = await import('/src/services/activityReportPdf.ts');
+    const insights = buildActivityInsights([], Object.fromEntries(ALL_EXERCISES.map((g,i) => [g.id, {level:i+1,evidence:[]} ])), {from:'',to:'',domain:'',exercise:'',timeZone:'Europe/Madrid'});
+    const text = Array.from({length:65}, (_, i) => `Párrafo ${i+1}. Práctica de atención y memoria: precisión y velocidad. Las sugerencias se eligen libremente.`).join('\n\n');
+    downloadActivityReport(await createActivityReportPdf({insights,text,reference:'Ana María · Ejemplo ficticio'},new AbortController().signal));
+  });
+  await (await downloaded).saveAs('/tmp/neuroia-informe-largo.pdf');
+});

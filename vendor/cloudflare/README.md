@@ -246,3 +246,15 @@ production IAM. Real permission/cron and Stripe portal checks remain release wor
 Provider contracts: [Auth deletion](https://docs.cloud.google.com/identity-platform/docs/reference/rest/v1/projects.accounts/delete),
 [Auth lookup](https://docs.cloud.google.com/identity-platform/docs/reference/rest/v1/projects.accounts/lookup),
 [recursive Firestore deletion](https://firebase.google.com/docs/firestore/solutions/delete-collections).
+
+## Optional activity AI
+
+The same Worker serves authenticated `/ai/status` and `/ai/analyze`. See
+[OpenRouter setup](../openrouter/README.md) for the separate secret/model/enable
+bindings, minimized data and provider evaluation. The production config enables `AI_ENABLED: true` with Dots3-Note Preview free.
+Set the flag to false to disable it; it does not depend on Stripe's purchase UI flag.
+Its quota lives under the caller's `users/{uid}/aiUsage/daily`; recursive deletion
+removes it. Existing rules deny client access without a new rule deployment.
+Include `node --experimental-strip-types --test vendor/cloudflare/ai.test.mjs`
+with the Worker checks. The shared TypeScript evidence module is bundled by
+Wrangler; real nested Firestore retrieval is covered by the combined demo suite.

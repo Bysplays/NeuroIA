@@ -69,6 +69,18 @@ test('roles, clinical data, result edits/deletes and receipt forgery formats are
   await assertSucceeds(getDoc(doc(db, 'users/patient-a/progress/main')));
 });
 
+test('AI usage quota is server-only even for the account owner', async () => {
+  const path = 'users/quota-owner/aiUsage/daily';
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), path), { day: '2026-09-30', count: 10, lastRequestAt: 1 });
+  });
+  for (const db of [env.unauthenticatedContext().firestore(), env.authenticatedContext('quota-owner').firestore(), env.authenticatedContext('another-user').firestore()]) {
+    await assertFails(getDoc(doc(db, path)));
+    await assertFails(setDoc(doc(db, path), { count: 0 }));
+    await assertFails(deleteDoc(doc(db, path)));
+  }
+});
+
 test('initial import is atomic, excludes clinical fields, and cannot replace existing cloud progress', async () => {
   const backend = firestoreProgress('import-patient', env.authenticatedContext('import-patient').firestore());
   const data = fresh(); data.profile.totalSessions = 7; data.profile.strokeDate = '2000-01-01'; data.history = [op('imported').result];

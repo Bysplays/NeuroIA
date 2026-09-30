@@ -81,7 +81,7 @@ message supplies no exact deadline, so confirm the date before scheduling a rele
 This update records requested work, not authorization to implement, merge or deploy it.
 
 The earlier priorities remain open: finish/audition the 91 narration clips and
-resolve licensing; implement notes/reports/local AI; resolve the existing interface
+resolve licensing; complete AI activation/acceptance and private notes; resolve the existing interface
 issues, bundle optimization and account/data deletion management. The client review
 adds to this inventory without reopening the owner-confirmed checks above.
 
@@ -218,7 +218,7 @@ voice provider or new illustration set has been selected by this planning work.
 | --- | --- | --- | --- |
 | 1 / EEG | Bluetooth EEG headband | Connection UI, adapter contract, live chart and per-exercise recording/detail prepared; MuseJS-based Web Bluetooth adapter implemented; real-device connection, signals, battery, reconnection and saved charts confirmed by owner | Retain tested-device scope; do not infer support for untested browsers |
 | 2 / SEATS | Monthly professional seats and code validity | Payment and seat lifecycle confirmed by owner in Sandbox | Sandbox accepted for current stage; live-money validation is separate |
-| 3 / AI | Browser-local report/note assistance | No runtime integration; professional view is read-only | Spanish evidence-linked drafts, human review, supported-device benchmark and non-AI fallback |
+| 3 / AI | OpenRouter activity reports and optional suggestions | Implemented: grounded summaries, authenticated API, Spanish prompts/template, direct PDF download; private notes remain pending | Complete broader Spanish/privacy acceptance and real-account verification; see AI.md |
 | 4 / SESSIONS | Professional-assigned game sequences | Versioned proposals, editor, participant entry, fixed levels, durable completion and resume implemented | Check real paired accounts on physical tablets |
 | 5 / EMAIL | Email authentication | Email/password implemented; provider enabled and verified-email rules/Worker published | Real email delivery confirmed by owner; magic links deferred because Spark allows five sign-in emails/day |
 | 6 / VOICE | Natural Spanish narration | 279/370 evaluation clips available; 91 pending | Audition, rights, current text inventory and playback/fallback verification |
@@ -266,12 +266,29 @@ Seats, difficulty/placement and professional session proposals are also implemen
 
 ### Reports, notes and assigned sessions
 
-- [ ] Define separate storage and permissions for private professional notes,
-  reviewed reports and participant-visible instructions; implement manual use first.
-- [ ] Evaluate small Llama/Gemma-style browser models, runtimes, Spanish quality,
-  device memory, download size and licenses before selecting a model.
-- [ ] Implement local draft generation, cancellation, explicit review and save;
-  never manufacture diagnoses, activity or prescriptions from empty histories.
+- [ ] Define separate storage and permissions for private professional notes and
+  participant-visible instructions; the direct PDF report generation is implemented.
+- [x] Implement optional OpenRouter activity writing through the existing Worker:
+  server-verified data/permissions, quotas, bounded Spanish prompts/schema,
+  cancellation and direct PDF report download with vector area/level star charts. Activity Resumen
+  shows optional suggestions without AI-driven level changes; see [AI.md](AI.md).
+- [x] Wire root `.env` OpenRouter credentials to local Worker bindings; support
+  the selected Dots3-Note Preview free model with hardcoded JSON object output and ZDR
+  disabled. The versioned prompt includes an example, a fill-in template and
+  explicit allowed evidence IDs; keep real-model factuality acceptance separate.
+- [x] Deploy the AI Worker with a server-side OpenRouter secret and Dots3-Note
+  Preview free enabled. Verify health, both allowed origins and authentication
+  enforcement on the production AI routes; signed-in user acceptance remains below.
+- [x] Validate real Dots3-Note Preview free recommendations and report smoke cases
+  using synthetic data and the v4 prompt. Output mode/ZDR remain hardcoded.
+- [ ] Complete broader Spanish factuality/latency evaluation and provider processing
+  arrangements; verify player and linked-professional generation with real accounts.
+  Synthetic smoke checks and mocked tests are not full product acceptance.
+- [ ] If required later, define a cloud archive for reviewed reports and distinct
+  private-note permissions. Current reports are downloaded only; account deletion
+  cannot remove users' downloaded copies.
+- [ ] Reconcile the grant memory with the selected suggestion-only AI scope;
+  reinforcement learning, EEG interpretation and measured pilot KPIs remain unmet.
 - [x] Implement versioned session assignments to an actively linked person,
   ordered game IDs/levels, progress/resume, cancellation and completion receipts.
 - [x] Test cross-account isolation, seat expiry, departure, replaced occupants,

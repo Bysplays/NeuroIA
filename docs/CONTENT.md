@@ -22,7 +22,7 @@ same positioning. Keep descriptions grounded in observable in-game activity.
 - Skills grouped as attention, memory, language, coordination and logic.
 - Adaptation and activity-data paragraphs, narrowed to existing level changes,
   completed activity durations, accuracy, errors and difficulty. Do not promise
-  per-stimulus response-time logging or personalized AI that does not exist.
+  per-stimulus response-time logging or model-driven level changes.
 - The PDF's first legal-notice paragraph, verbatim with the NeuroIA name repaired
   from PDF text extraction. The EEG-specific paragraph is deferred with EEG.
 
@@ -37,7 +37,7 @@ result feedback describes the game and avoids inferred improvement or efficacy.
 The PDF describes professional session access, AI-driven adaptation and summaries,
 and EEG/Muse 2 interaction as existing features. The professional workspace now
 implements read-only activity for explicitly redeemed paid seats; it is not
-clinical session management. AI remains unavailable and must not be advertised as implemented. The owner
+clinical session management. Optional OpenRouter activity writing is implemented with production activation authorized; broader real-model quality evaluation remains pending. Describe it only where available as activity summaries and optional suggestions, never as clinical inference or automatic AI level control; see [AI.md](AI.md). The owner
 confirms the MuseJS-based Muse 2 EEG/PPG connection, battery, reconnection and saved
 charts on the tested setup. Describe these as signal amplitudes, without claims of
 attention, mental effort, heart rate or universal device/browser compatibility. The PDF's short introduction and “Entrena jugando” claim mention AI;
@@ -82,3 +82,13 @@ and david@ceoaberto.com as privacy contact. Remaining approval covers legal base
 retention criteria, rights handling and provider transfer safeguards before release.
 Do not invent these details or imply that closing a session or cancelling billing
 deletes account data. Reference: [AEPD information duty](https://www.aepd.es/derechos-y-deberes/conoce-tus-derechos/derecho-de-informacion).
+
+## Optional AI activity copy
+
+Use «¿Qué te recomendamos?», «Personalizar con IA», «Generar informe» and
+«Generado con IA» (only for actual generated output). The report downloads directly;
+use «Generando…» during processing. Explain AI in one high-level paragraph. Disclose selected dates and partial/synchronized history; do not call
+seconds per question reaction time or call less-practiced games neglected abilities.
+The legal page describes the explicit request, minimized external processing,
+ephemeral drafts, downloaded reports and server quota. This operational copy does
+not complete the provider/privacy approvals tracked in TODO.
