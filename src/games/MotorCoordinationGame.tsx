@@ -1,6 +1,6 @@
 import { useGameSession } from '../services/gameSession';
 import { PaperTarget } from '../components/PaperTarget';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -31,7 +31,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, config, progressScope, lockedLevel } = useGameSession();
   const totalTargets = config.targets;
   const targetSize = config.targetSize; // Diana ampliada para máxima accesibilidad y visibilidad
 
@@ -56,12 +56,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   const [touches, setTouches] = useState<{ x: number; y: number; id: number }[]>([]);
   const [accuracySum, setAccuracySum] = useState(0);
   const [misses, setMisses] = useState(0);
-  const [missPoint, setMissPoint] = useState<{ x: number; y: number } | null>(null);
-  useEffect(() => {
-    if (!missPoint) return;
-    const timer = clock.setTimeout(() => setMissPoint(null), 900);
-    return () => clock.clearTimeout(timer);
-  }, [clock, missPoint]);
+  const [missPoints, setMissPoints] = useState<{ x: number; y: number }[]>([]);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
   const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
@@ -73,7 +68,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     setTouches([]);
     setAccuracySum(0);
     setMisses(0);
-    setMissPoint(null);
+    setMissPoints([]);
     setMistakesList([]);
     setIsCompleted(false);
     setResult(null);
@@ -90,7 +85,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
     soundService.playSuccess();
 
-    const newTouch = { x: currentTarget.x, y: currentTarget.y, id: clock.now() };
+    const newTouch = { x: currentTarget.x, y: currentTarget.y, id: targetIdx };
     setTouches(prev => [...prev, newTouch]);
 
     const newSum = accuracySum + 95;
@@ -130,10 +125,10 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   const handleArenaClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isCompleted) return;
     const bounds = event.currentTarget.getBoundingClientRect();
-    setMissPoint({
+    setMissPoints(points => [...points, {
       x: Math.max(0, Math.min(100, (event.clientX - bounds.left) / bounds.width * 100)),
       y: Math.max(0, Math.min(100, (event.clientY - bounds.top) / bounds.height * 100)),
-    });
+    }]);
     soundService.playGentlePrompt();
     setMisses(prev => prev + 1);
     setMistakesList(prev => [
@@ -150,6 +145,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
   return (
     <ExerciseWrapper
+      completedStages={config.mode === 'normal' && !progressScope && !planProgress && !lockedLevel ? targetIdx : 0}
       exerciseId="motor-target"
       title="Toca la diana"
       domain="motor"
@@ -175,7 +171,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
             />
           ))}
 
-          {missPoint && <span className="motor-miss-circle" style={{ left: `${missPoint.x}%`, top: `${missPoint.y}%` }} aria-hidden="true" />}
+          {missPoints.map((point, index) => <span key={index} className="motor-miss-circle" style={{ left: `${point.x}%`, top: `${point.y}%` }} aria-hidden="true" />)}
 
           {/* Diana activa - siempre por encima y con prioridad de clic */}
           <button

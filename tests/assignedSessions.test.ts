@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assignmentResult, canAdvanceSession, validateSessionDraft, type AssignedSession } from '../src/services/assignedSessions.ts';
+import { assignmentResult, canAdvanceSession, completedSessionSteps, visibleSessionSteps, validateSessionDraft, type AssignedSession } from '../src/services/assignedSessions.ts';
 import { adaptDifficulty } from '../src/services/difficulty.ts';
 import { getInitialProfile } from '../src/services/storageService.ts';
 import type { ExerciseResult } from '../src/types/index.ts';
@@ -24,4 +24,15 @@ test('qualifying assigned results update the personal base without changing pres
   adaptDifficulty(profile, assignmentResult(session, 0, { ...base, durationSeconds:59 }));
   assert.equal(profile.gameLevels['memory-pairs'].level, 4);
   assert.deepEqual(session, before);
+});
+
+test('today keeps three pending step identities, including repeated games and out-of-order results', () => {
+  const proposed = { ...session, steps: Array.from({ length: 6 }, () => session.steps[0]) };
+  let completed = completedSessionSteps(proposed, [assignmentResult(proposed, 1, base)]);
+  assert.deepEqual(visibleSessionSteps(6, completed), [0, 2, 3]);
+  completed = completedSessionSteps(proposed, [0, 1, 2].map(index => assignmentResult(proposed, index, base)));
+  assert.deepEqual(visibleSessionSteps(6, completed), [3, 4, 5]);
+  completed = completedSessionSteps(proposed, [0, 1, 2, 3, 4].map(index => assignmentResult(proposed, index, base)));
+  assert.deepEqual(visibleSessionSteps(6, completed), [5, 0, 1]);
+  assert.equal(completedSessionSteps(proposed, [{ ...assignmentResult(proposed, 0, base), assignmentOwnerId: 'other' }]).size, 0);
 });

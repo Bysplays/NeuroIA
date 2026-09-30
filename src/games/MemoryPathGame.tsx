@@ -2,7 +2,7 @@ import { createMemorySequence } from '../services/memorySequence';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Eye, RotateCcw, Play } from 'lucide-react';
+import { ArrowRight, RotateCcw, Play, Check, X } from 'lucide-react';
 import { ExerciseWrapper } from '../components/ExerciseWrapper';
 import type { ExerciseResult, UserProfile, MistakeDetail } from '../types';
 import { soundService } from '../services/soundService';
@@ -50,11 +50,11 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   const [playerInput, setPlayerInput] = useState<number[]>([]);
   const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const [activeTile, setActiveTile] = useState<number | null>(null);
-  const [statusMessage, setStatusMessage] = useState('');
+  const [roundDone, setRoundDone] = useState(false);
+  const [failure, setFailure] = useState<{ pressed: number; expected: number } | null>(null);
   const [score, setScore] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
   const [hintsUsed, setHintsUsed] = useState(0);
-  const [errorsCount, setErrorsCount] = useState(0);
   const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
@@ -79,13 +79,13 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
     setSequence(newSeq);
     setPlayerInput([]);
+    setRoundDone(false);
+    setFailure(null);
     playSequenceDemo(newSeq);
   };
 
   const playSequenceDemo = (seq: number[]) => {
     setIsPlayingDemo(true);
-    setStatusMessage('Observa atentamente el orden de las fichas...');
-    soundService.speak('Observa y memoriza.');
 
     const delayBetweenSteps = config.sequenceStepMs;
     const highlightDuration = config.sequenceStepMs * 0.6;
@@ -106,18 +106,17 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     const totalTime = (seq.length + 1) * delayBetweenSteps + 200;
     const finishTimeout = clock.setTimeout(() => {
       setIsPlayingDemo(false);
-      setStatusMessage('¡Tu turno! Toca las fichas en el mismo orden que viste.');
       soundService.speak('Tu turno. Toca las fichas en el mismo orden.');
     }, totalTime);
     timeoutRefs.current.push(finishTimeout);
   };
 
   const handleTileClick = (tileId: number) => {
-    if (isPlayingDemo || isCompleted || completedRef.current || sequence.length === 0) return;
+    if (isPlayingDemo || roundDone || isCompleted || completedRef.current || sequence.length === 0) return;
 
     soundService.playTap();
     setActiveTile(tileId);
-    clock.setTimeout(() => setActiveTile(null), 300);
+    timeoutRefs.current.push(clock.setTimeout(() => setActiveTile(null), 300));
 
     const nextInput = [...playerInput, tileId];
     setPlayerInput(nextInput);
@@ -125,22 +124,11 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     const currentStep = nextInput.length - 1;
 
     if (tileId !== sequence[currentStep]) {
-      if (config.mode === 'placement') {
-        clearTimeouts();
-        finishGame(score, true, [...mistakesList, {
-          id: 'mem-' + clock.now(), item: `Secuencia de ${sequence.length} fichas`,
-          userAction: `Tocaste ${ALL_TILES[tileId]?.label} en el paso ${currentStep + 1}`,
-          correctSolution: `La ficha era ${ALL_TILES[sequence[currentStep]]?.label}`,
-          explanation: 'La prueba continúa con la información de este intento.',
-        }]);
-        return;
-      }
+      clearTimeouts();
+      setActiveTile(null);
+      setFailure({ pressed: tileId, expected: sequence[currentStep] });
+      setRoundDone(true);
       soundService.playGentlePrompt();
-      setStatusMessage('Casi lo tienes. Puedes pulsar "Ver de nuevo" para recordar la secuencia.');
-      soundService.speak('Pulsa ver de nuevo para recordar la secuencia.');
-      setPlayerInput([]);
-      setErrorsCount(prev => prev + 1);
-
       const pressed = ALL_TILES.find(t => t.id === tileId);
       const expected = ALL_TILES.find(t => t.id === sequence[currentStep]);
       setMistakesList(prev => [
@@ -161,32 +149,37 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       const newScore = score + Math.round(round * 120);
       setScore(newScore);
 
-      if (round < maxRounds) {
-        setIsPlayingDemo(true);
-        setStatusMessage(`Ronda ${round} completada. Vamos con otra secuencia.`);
-        soundService.speak('Vamos con otra secuencia.');
-        clock.setTimeout(() => {
-          setRound(prev => prev + 1);
-          startCurrentRound();
-        }, 1500);
-      } else {
-        finishGame(newScore);
-      }
+      setRoundDone(true);
     }
   };
 
   const handleRepeatDemo = () => {
+    if (isPlayingDemo || roundDone || sequence.length === 0) return;
+    clearTimeouts();
     setHintsUsed(value => value + 1);
-    if (isPlayingDemo || sequence.length === 0) return;
-    soundService.playGentlePrompt();
+    setPlayerInput([]);
+    setActiveTile(null);
     playSequenceDemo(sequence);
+  };
+
+  const continueRound = () => {
+    if (!roundDone) return;
+    if (failure || round === maxRounds) finishGame(score, !!failure);
+    else {
+      clearTimeouts();
+      setRound(value => value + 1);
+      setSequence([]);
+      setPlayerInput([]);
+      setActiveTile(null);
+      setRoundDone(false);
+    }
   };
 
   const finishGame = (finalScore: number, failed = false, mistakes = mistakesList) => {
     if (completedRef.current) return;
     completedRef.current = true;
     const elapsedSeconds = Math.max(20, Math.round((clock.now() - startTime) / 1000));
-    const accuracy = Math.max(0, Math.round((maxRounds / (maxRounds + errorsCount)) * 100));
+    const correctRounds = failed ? round - 1 : maxRounds;
 
     const gameResult: ExerciseResult = {
       id: crypto.randomUUID(),
@@ -198,10 +191,10 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       domain: 'memory',
       date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
-      accuracy: failed ? 0 : accuracy,
+      accuracy: failed ? 0 : 100,
       score: finalScore,
-      correctAnswers: failed ? 0 : maxRounds,
-      totalQuestions: failed ? 1 : maxRounds + errorsCount,
+      correctAnswers: correctRounds,
+      totalQuestions: failed ? round : maxRounds,
       feedbackMessage:
         'Has completado el juego de luces y secuencias. Puedes volver a jugar a tu ritmo.',
       mistakesList: mistakes,
@@ -213,14 +206,17 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   };
 
   const handleRestart = () => {
+    clearTimeouts();
+    setIsPlayingDemo(false);
+    setActiveTile(null);
+    setRoundDone(false);
+    setFailure(null);
     completedRef.current = false;
     setHintsUsed(0);
     setRound(1);
     setScore(0);
     setSequence([]);
-    setStatusMessage('');
     setPlayerInput([]);
-    setErrorsCount(0);
     setMistakesList([]);
     setIsCompleted(false);
     setResult(null);
@@ -229,7 +225,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
   return (
     <ExerciseWrapper
-      completedStages={round - 1}
+      completedStages={round - 1 + (roundDone ? 1 : 0)}
       exerciseId="memory-path"
       title="Secuencia de memoria"
       domain="memory"
@@ -242,6 +238,12 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
       onRestart={handleRestart}
       planProgress={planProgress}
       onNextPlanExercise={onNextPlanExercise}
+      nextAction={<button
+        className={`touch-btn game-next-action ${roundDone || sequence.length === 0 ? 'touch-btn-primary' : 'touch-btn-secondary'}${isPlayingDemo ? ' sequence-playing' : ''}`}
+        onClick={roundDone ? continueRound : sequence.length === 0 ? startCurrentRound : handleRepeatDemo}
+        disabled={isPlayingDemo}>
+        {roundDone ? <>Continuar<ArrowRight size={20} aria-hidden="true"/></> : isPlayingDemo ? 'Reproduciendo' : sequence.length === 0 ? <><Play size={20} aria-hidden="true"/>Comenzar</> : <><RotateCcw size={20} aria-hidden="true"/>Repetir</>}
+      </button>}
     >
       <div className="memory-game-container">
 
@@ -254,48 +256,24 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
             return (
               <button
                 key={tile.id}
-                className={`memory-tile ${isActive ? 'tile-active' : ''}`}
+                className={`memory-tile ${isActive ? 'tile-active' : ''}${failure?.pressed === tile.id ? ' sequence-incorrect' : ''}${failure?.expected === tile.id ? ' sequence-correct' : ''}`}
                 style={{
-                  borderColor: tile.color,
-                  backgroundColor: isActive ? tile.color : 'var(--color-surface)',
+                  borderColor: failure?.pressed === tile.id ? '#aa6156' : failure?.expected === tile.id ? '#51876a' : undefined,
+                  backgroundColor: failure?.pressed === tile.id ? '#f4d9d3' : failure?.expected === tile.id ? '#dceee2' : isActive ? tile.color : undefined,
                   color: isActive ? '#ffffff' : 'var(--color-text-main)',
                 }}
+                aria-label={`${tile.label}${failure?.pressed === tile.id ? " · Respuesta incorrecta" : failure?.expected === tile.id ? " · Respuesta correcta" : ""}`}
                 onClick={() => handleTileClick(tile.id)}
-                disabled={isPlayingDemo || sequence.length === 0}
+                disabled={isPlayingDemo || roundDone || sequence.length === 0}
               >
                 <span className="tile-emoji"><GameObject symbol={tile.emoji} /></span>
                 <span className="tile-name">{tile.label}</span>
+                {failure?.pressed === tile.id && <X className="sequence-answer-mark" aria-hidden="true"/>}
+                {failure?.expected === tile.id && <Check className="sequence-answer-mark" aria-hidden="true"/>}
                 {isActive && <div className="tile-glow-ring" />}
               </button>
             );
           })}
-        </div>
-        <div className="memory-sequence-controls">
-          <div className="memory-status-slot">
-            <div className="memory-status-badge memory-status-reserve" aria-hidden="true"><Eye size={24}/><span>Casi lo tienes. Puedes pulsar "Ver de nuevo" para recordar la secuencia.</span></div>
-            <div className="memory-status-badge" role="status">{statusMessage && <><Eye size={24}/><span>{statusMessage}</span></>}</div>
-          </div>
-
-          <div className="memory-actions">
-            {sequence.length === 0 ? (
-              <button
-                className="touch-btn touch-btn-primary touch-btn-large"
-                onClick={() => startCurrentRound()}
-              >
-                <Play size={24} />
-                <span>Comenzar secuencia</span>
-              </button>
-            ) : (
-              <button
-                className="touch-btn touch-btn-secondary touch-btn-large"
-                onClick={handleRepeatDemo}
-                disabled={isPlayingDemo}
-              >
-                <RotateCcw size={22} />
-                <span>Ver de nuevo</span>
-              </button>
-            )}
-          </div>
         </div>
 
       </div>

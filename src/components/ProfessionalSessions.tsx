@@ -1,10 +1,10 @@
 import { ProfessionalPageHeader } from './ProfessionalPageHeader';
 import { useEffect, useMemo, useState } from 'react';
 import { getFirestore } from 'firebase/firestore';
-import { ArrowDown, ArrowUp, Plus, Trash2, X, ListOrdered, ChevronDown, ChartNoAxesCombined, Pencil } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Trash2, X, ListOrdered, ChartNoAxesCombined, Pencil } from 'lucide-react';
 import { auth } from '../services/firebase';
 import { firestoreSessions } from '../services/firestoreSessions';
-import { validateSessionDraft, type AssignedSession, type SessionDraft, type SessionLink } from '../services/assignedSessions';
+import { validateSessionDraft, type AssignedSession, type SessionDraft, type SessionLink, sessionStatusLabel } from '../services/assignedSessions';
 import { EXERCISE_IDS } from '../services/difficulty';
 import { getExerciseById } from '../services/exerciseCatalog';
 import type { ExerciseId } from '../types';
@@ -13,8 +13,8 @@ import { useViewportPanel } from '../services/viewport';
 import { SessionAnalytics } from './SessionAnalytics';
 import { ModalFrame } from './ModalFrame';
 
-export function SessionSteps({ session }: { session: SessionDraft & { completedCount?: number } }) {
-  return <ol className="session-steps">{session.steps.map((step, index) => <li key={index}><span>{getExerciseById(step.exerciseId)?.title}</span><span className="soft-label">Nivel {step.level}{index < (session.completedCount ?? 0) ? ' · Completado' : ''}</span></li>)}</ol>;
+export function SessionSteps({ session, completedSteps }: { session: SessionDraft & { completedCount?: number }; completedSteps?: ReadonlySet<number> }) {
+  return <ol className="session-steps">{session.steps.map((step, index) => <li key={index}><span>{getExerciseById(step.exerciseId)?.title}</span><span className="soft-label">Nivel {step.level}{(completedSteps?.has(index) || index < (session.completedCount ?? 0)) ? ' · Completado' : ''}</span></li>)}</ol>;
 }
 function Composer({ initial, onClose, onPublish }: { initial?: AssignedSession; onClose: () => void; onPublish: (id: string, draft: SessionDraft) => Promise<void> }) {
   const [id] = useState(() => initial?.id ?? crypto.randomUUID());
@@ -40,8 +40,8 @@ function Composer({ initial, onClose, onPublish }: { initial?: AssignedSession; 
         <div className="session-games-heading"><h3>Juegos de la sesión</h3><span className="soft-label">{draft.steps.length} / 8</span></div>
         <ol className="session-draft-steps">{draft.steps.map((step, index) => <li key={index}>
           <span className="session-step-number" aria-hidden="true">{index + 1}</span>
-          <label className="session-select"><select aria-label={`Juego ${index + 1}`} value={step.exerciseId} onChange={event => change(index, { exerciseId: event.target.value as ExerciseId })}>{EXERCISE_IDS.map(id => <option key={id} value={id}>{getExerciseById(id)?.title}</option>)}</select><ChevronDown size={16} aria-hidden="true"/></label>
-          <label className="session-select session-level-select"><select value={step.level} aria-label={`Nivel del juego ${index + 1}`} onChange={event => change(index, { level: Number(event.target.value) })}>{Array.from({ length: 10 }, (_, i) => <option key={i} value={i + 1}>Nivel {i + 1}</option>)}</select><ChevronDown size={16} aria-hidden="true"/></label>
+          <label className="session-select"><select aria-label={`Juego ${index + 1}`} value={step.exerciseId} onChange={event => change(index, { exerciseId: event.target.value as ExerciseId })}>{EXERCISE_IDS.map(id => <option key={id} value={id}>{getExerciseById(id)?.title}</option>)}</select></label>
+          <label className="session-select session-level-select"><select value={step.level} aria-label={`Nivel del juego ${index + 1}`} onChange={event => change(index, { level: Number(event.target.value) })}>{Array.from({ length: 10 }, (_, i) => <option key={i} value={i + 1}>Nivel {i + 1}</option>)}</select></label>
           <div className="proposal-actions"><button type="button" className="stats-quiet-button" disabled={index === 0} aria-label={`Subir juego ${index + 1}`} onClick={() => move(index, -1)}><ArrowUp size={18}/></button><button type="button" className="stats-quiet-button" disabled={index === draft.steps.length - 1} aria-label={`Bajar juego ${index + 1}`} onClick={() => move(index, 1)}><ArrowDown size={18}/></button><button type="button" className="stats-quiet-button" disabled={draft.steps.length === 1} aria-label={`Quitar juego ${index + 1}`} onClick={() => setDraft({ ...draft, steps: draft.steps.filter((_, i) => i !== index) })}><Trash2 size={18}/></button></div>
         </li>)}</ol>
         <button type="button" className="stats-quiet-button session-add-game" disabled={draft.steps.length >= 8} onClick={() => setDraft({ ...draft, steps: [...draft.steps, { exerciseId: 'memory-pairs', level: 1 }] })}><Plus size={18}/>Añadir juego</button>
@@ -77,7 +77,7 @@ export function ProfessionalSessions({ link, name, onBack }: { link: SessionLink
         <div className="professional-list-heading"><span className="professional-section-icon" aria-hidden="true"><ListOrdered size={22}/></span><h2 id="professional-sessions-title">Sesiones propuestas</h2><span className="stats-count">{sessions.length}</span></div>
         <div className="session-list-labels" aria-hidden="true"><span>Fecha</span><span>Nombre</span><span>Acciones</span></div>
         <ul>{sessions.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(session => <li key={session.id}>
-          <time dateTime={new Date(session.createdAt).toISOString()}>{new Date(session.createdAt).toLocaleDateString('es-ES')}</time><h3>{session.title}</h3>
+          <time dateTime={new Date(session.createdAt).toISOString()}>{new Date(session.createdAt).toLocaleDateString('es-ES')}</time><div><h3>{session.title}</h3><span className="professional-session-status">{sessionStatusLabel[session.status]} · {session.steps.length} juegos</span></div>
           <div className="proposal-actions"><button className="header-icon-btn session-explore" aria-label={`Ver analíticas de ${session.title}`} title="Ver analíticas" onClick={() => setSelected(session.id)}><ChartNoAxesCombined size={20}/></button>
           <button className="header-icon-btn" disabled={session.status !== 'assigned'} aria-label={`Editar sesión ${session.title}`} title={session.status === 'assigned' ? 'Editar sesión' : 'Solo se pueden editar sesiones sin empezar'} onClick={() => setEditing(session)}><Pencil size={20}/></button>
           {['assigned', 'in-progress'].includes(session.status) && <button className="header-icon-btn" aria-label={`Cancelar sesión ${session.title}`} title="Cancelar sesión" onClick={() => { setCancel(session); setCancelError(''); }}><Trash2 size={20}/></button>}</div>

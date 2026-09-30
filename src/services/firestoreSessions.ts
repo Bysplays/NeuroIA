@@ -98,8 +98,14 @@ export function firestoreSessions(db: Firestore, link: SessionLink) {
         throw error;
       }
     },
+    watchResults(id: string, next: (results: ExerciseResult[]) => void, error: () => void) {
+      return onSnapshot(query(collection(db, 'users', link.patientId, 'results'), where('assignmentId', '==', id)), { includeMetadataChanges: true }, snapshot => {
+        if (snapshot.metadata.fromCache) return;
+        if (!snapshot.metadata.hasPendingWrites) next(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }) as ExerciseResult));
+      }, error);
+    },
     async loadResults(session: AssignedSession): Promise<ExerciseResult[]> {
-      const snapshots = await Promise.all(session.steps.slice(0, session.completedCount).map((_, index) =>
+      const snapshots = await Promise.all(session.steps.map((_, index) =>
         getDocFromServer(doc(db, 'users', link.patientId, 'results', assignedResultId(session.id, index)))));
       return snapshots.filter(snapshot => snapshot.exists()).map(snapshot => ({ ...snapshot.data(), id: snapshot.id }) as ExerciseResult);
     },

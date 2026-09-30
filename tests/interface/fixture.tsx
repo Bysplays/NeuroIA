@@ -1,3 +1,5 @@
+import { ProfessionalDashboard } from '../../src/components/ProfessionalDashboard';
+import { RecommendationFixture } from './recommendation-fixture';
 import { LevelUpScreen } from '../../src/components/LevelUpScreen';
 import type { ProgressData } from '../../src/services/progressData';
 import { InformationPage, type InformationKind } from "../../src/components/InformationPage";
@@ -37,6 +39,7 @@ export function Fixture() {
   const [profile, setProfile] = useState(() => {
     const p = getInitialProfile();
     p.name = "Lucía";
+    if (query.has('activity-demo')) p.gameLevels = { 'visual-scanning': { level: 4, evidence: [] }, 'memory-path': { level: 6, evidence: [] } };
     p.settings.fontSize = query.has("large") ? "xlarge" : "normal";
     p.settings.contrast = query.has("contrast") ? "high-contrast" : "standard";
     p.settings.showCompanions = !query.has("hidden");
@@ -46,7 +49,7 @@ export function Fixture() {
   const [game, setGame] = useState<ExerciseId | undefined>(
     (query.get("game") as ExerciseId) || undefined,
   );
-  const [results, setResults] = useState<ExerciseResult[]>(() => query.has('completed-home') ? (['attention','language','memory','executive','motor'] as const).flatMap(domain => getExercisesForDomain(domain).map(game => ({ id: `fixture-${game.id}`, exerciseId: game.id, domain, date: new Date(Date.now() - (query.has('yesterday') ? 86400000 : 0)).toISOString(), durationSeconds: 30, accuracy: 100, score: 0, correctAnswers: 1, totalQuestions: 1, feedbackMessage: '', practice: query.has('practice') }))) : []);
+  const [results, setResults] = useState<ExerciseResult[]>(() => query.has('activity-demo') ? Array.from({length: 6}, (_, day) => (['visual-scanning', 'memory-path'] as const).map((id, index) => ({ id: `chart-${day}-${id}`, exerciseId: id, domain: index ? 'memory' as const : 'attention' as const, date: `2026-09-${20 + day}T12:00:00Z`, durationSeconds: 60 - day * 4 + index * 30, accuracy: 40 + day * 7 + index * 18, score: 0, correctAnswers: 3, totalQuestions: 5, feedbackMessage: '', level: 2 + day + index * 3 }))).flat() : query.has('completed-home') ? (['attention','language','memory','executive','motor'] as const).flatMap(domain => getExercisesForDomain(domain).map(game => ({ id: `fixture-${game.id}`, exerciseId: game.id, domain, date: new Date(Date.now() - (query.has('yesterday') ? 86400000 : 0)).toISOString(), durationSeconds: 30, accuracy: 100, score: 0, correctAnswers: 1, totalQuestions: 1, feedbackMessage: '', practice: query.has('practice') }))) : []);
   const [information, setInformation] = useState<InformationKind | null>(null);
   const [settings, setSettings] = useState(false);
   const [navigation, setNavigation] = useState<HTMLDivElement | null>(null);
@@ -56,6 +59,8 @@ export function Fixture() {
   const [accessAction, setAccessAction] = useState('');
   const [accessBusy, setAccessBusy] = useState(false);
   const back = () => setGame(undefined);
+  if (query.has('professional')) return <ProfessionalDashboard uid="fixture-owner" profile={profile} onSignOut={()=>setLoggedOut(true)} onUpdateSettings={()=>{}} onUpdateName={()=>{}}/>;
+  if (query.has('recommendations')) return <RecommendationFixture profile={profile}/>;
   if (query.has('level-up')) return <LevelUpFixture/>;
   if (query.has('resume-game')) return <AccessGate onSignOut={()=>setLoggedOut(true)}><GameSession id="visual-scanning" onBack={()=>setLoggedOut(true)}><GameExercise id="visual-scanning" profile={profile} onBack={()=>setLoggedOut(true)} onSaveResult={()=>{}}/></GameSession></AccessGate>;
   if (query.has('access-gate')) return <AccessGate onSignOut={()=>setLoggedOut(true)}><p>Acceso confirmado</p></AccessGate>;
@@ -86,6 +91,8 @@ export function Fixture() {
           onBack={back}
           onSettings={() => setSettings(true)}
           paused={settings}
+          progressScope={query.has("plan") ? { before: 2, after: 3 } : undefined}
+          lockedLevel={query.has("assigned")}
           initialLevel={Number(query.get("level") || 1)}
           mode={query.has("placement") ? "placement" : "normal"}
           autoStart={query.has("placement")}

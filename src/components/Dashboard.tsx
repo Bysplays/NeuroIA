@@ -1,3 +1,5 @@
+import { visibleSessionSteps, type AssignedSession } from '../services/assignedSessions';
+import { DIFFICULTY_VERSION } from '../services/difficulty';
 import { localDay } from '../services/activityStats';
 import { useState, type ReactNode } from "react";
 import {
@@ -41,13 +43,13 @@ interface DashboardProps {
   selectedTab?: string;
   onTabChange?: (tab: string) => void;
   proposedSessions?: ReactNode;
+  recommendation?: { session: AssignedSession; completed: ReadonlySet<number> };
+  onStartRecommendation?: (session: AssignedSession, step?: number) => void;
   profile: UserProfile;
   onSelectDomain: (domain: CognitiveDomain) => void;
   onSelectExercise?: (exerciseId: ExerciseId) => void;
   onStartDailyPlan: (queue?: ExerciseId[]) => void;
   onOpenSettings: () => void;
-  onSignOut: () => void;
-  signingOut: boolean;
 }
 export function Dashboard({
   uid,
@@ -57,21 +59,24 @@ export function Dashboard({
   onTabChange,
   profile,
   proposedSessions,
+  recommendation,
+  onStartRecommendation,
   onSelectDomain,
   onSelectExercise,
   onStartDailyPlan,
   onOpenSettings,
-  onSignOut,
-  signingOut,
 }: DashboardProps) {
   const [localTab, setLocalTab] = useState("today");
   const tab = selectedTab ?? localTab;
   const setTab = onTabChange ?? setLocalTab;
   const [progressTab, setProgressTab] = useState("overview");
   const session = dailySession(uid);
-  const queue = session.games;
+  const queue = recommendation?.session.steps.map(step => step.exerciseId) ?? session.games;
   const todayKey = localDay(new Date().toISOString());
   const completedToday = new Set(history.filter(result => !result.practice && localDay(result.date) === todayKey).map(result => result.exerciseId));
+  const completed = recommendation?.completed ?? new Set(queue.flatMap((id, index) => completedToday.has(id) ? [index] : []));
+  const visible = visibleSessionSteps(queue.length, completed);
+  const allDone = completed.size === queue.length;
   const choose = (id: ExerciseId) => {
     soundService.playTap();
     if (onSelectExercise) onSelectExercise(id);
@@ -99,14 +104,15 @@ export function Dashboard({
           <div className="editorial-hero-copy">
             <p className="editorial-eyebrow">
               <i />
-              Para hoy
+              {recommendation ? `Propuesta de ${recommendation.session.professionalName}` : 'Para hoy'}
             </p>
-            <h2>{session.title}</h2>
+            <h2>{recommendation?.session.title ?? session.title}</h2>
             <button
               className="touch-btn touch-btn-primary"
-              onClick={() => onStartDailyPlan([...queue])}
+              disabled={!!recommendation && (allDone || recommendation.session.configVersion !== DIFFICULTY_VERSION)}
+              onClick={() => recommendation ? onStartRecommendation?.(recommendation.session) : onStartDailyPlan([...queue])}
             >
-              Jugar
+              {recommendation && allDone ? 'Sesión completada' : 'Jugar'}
               <ArrowRight size={21} />
             </button>
           </div>
@@ -115,15 +121,16 @@ export function Dashboard({
         <aside className="editorial-today">
           <h2>Tu sesión de hoy</h2>
           <div className="editorial-today-games">
-          {queue.map((id, index) => {
+          {visible.map(index => {
+            const id = queue[index];
             const game = getExerciseById(id)!;
             return (
-              <button key={id} onClick={() => choose(id)}>
+              <button key={index} disabled={!!recommendation && (completed.has(index) || recommendation.session.configVersion !== DIFFICULTY_VERSION)} onClick={() => recommendation ? onStartRecommendation?.(recommendation.session, index) : choose(id)}>
                 <span className="editorial-step">0{index + 1}</span>
                 <span>
                   <strong>{game.title}</strong>
                 </span>
-                {completedToday.has(id) ? <><Check size={19} aria-hidden="true"/><span className="sr-only">Completado hoy</span></> : <ArrowUpRight size={19} aria-hidden="true"/>}
+                {completed.has(index) ? <><Check size={19} aria-hidden="true"/><span className="sr-only">{recommendation ? 'Completado' : 'Completado hoy'}</span></> : <ArrowUpRight size={19} aria-hidden="true"/>}
               </button>
             );
           })}
@@ -239,22 +246,10 @@ export function Dashboard({
             icon: <UserRound size={22} />,
             content: (
               <section className="account-overview">
-                <p className="editorial-eyebrow">Como te resulte más cómodo</p>
-                <h1>Tu espacio, a tu manera.</h1>
-                <div className="account-overview-grid">
-                  <div className="account-identity">
-                    <span className="account-initial" aria-hidden="true">
-                      {Array.from(profile.name)[0]}
-                    </span>
-                    <h2>{profile.name}</h2>
-                    <button
-                      className="text-link"
-                      disabled={signingOut}
-                      onClick={onSignOut}
-                    >
-                      {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
-                    </button>
-                  </div>
+                <header className="workspace-section-heading">
+                  <span className="workspace-section-icon" aria-hidden="true"><Settings2 size={26}/></span>
+                  <div><h1>Mi cuenta</h1><p>Ajustes y acceso a NeuroIA.</p></div>
+                </header>
                   <div className="account-choices">
                     <button onClick={onOpenSettings}>
                       <Settings2 size={24} />
@@ -263,6 +258,9 @@ export function Dashboard({
                         <small>Texto, apariencia y datos de tu cuenta</small>
                       </span>
                       <ArrowUpRight size={20} />
+                    </button>
+                    <button onClick={() => { setProgressTab("overview"); setTab("progress"); }}>
+                      <Activity size={24}/><span><strong>Tu actividad</strong><small>Historial, gráficas y niveles</small></span><ArrowUpRight size={20}/>
                     </button>
                     <button
                       onClick={() => {
@@ -273,13 +271,12 @@ export function Dashboard({
                       <Trophy size={24} />
                       <span>
                         <strong>Tus logros</strong>
-                        <small>Pequeños pasos que conservan su lugar</small>
+                        <small>Consulta tus logros y su progreso</small>
                       </span>
                       <ArrowUpRight size={20} />
                     </button>
                     <PlanButton detailed />
                   </div>
-                </div>
               </section>
             ),
           },

@@ -27,14 +27,14 @@ test('daily plans with Organization can only select active exercises', () => {
   }
 });
 
-test('retired results keep their historical names, filters, colors and original records', () => {
+test('retired results keep their historical names, filters, shared palette and original records', () => {
   const result: ExerciseResult = { id: 'old', exerciseId: 'daily-seq', domain: 'executive', date: '2026-09-20', durationSeconds: 30, accuracy: 100, score: 450, correctAnswers: 3, totalQuestions: 3, feedbackMessage: '' };
   const [display] = mergeActivity([result]);
   assert.equal(activityExerciseTitle(display.exerciseId), 'Secuencias de la Vida Diaria');
   assert.ok(ACTIVITY_EXERCISES.find(exercise => exercise.id === display.exerciseId)?.retired);
-  assert.deepEqual(activityExerciseStyle(display.exerciseId), { color: '#bf302e' });
-  assert.deepEqual(activityExerciseStyle('categorization'), { color: '#2876c7' });
-  assert.equal(activityExerciseStyle('motor-target').color, '#82720d');
+  assert.deepEqual(activityExerciseStyle(display.exerciseId), { color: '#526675' });
+  assert.deepEqual(activityExerciseStyle('categorization'), { color: '#2a5671' });
+  assert.equal(activityExerciseStyle('motor-target').color, '#427571');
   assert.equal(result.exerciseId, 'daily-seq');
   assert.equal(display.score, 450);
 });

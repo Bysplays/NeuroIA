@@ -20,3 +20,15 @@ test('partial selections never fill a stage and completion is bounded', () => {
   assert.deepEqual(sessionProgress(.9,3),{value:0,max:3});
   assert.deepEqual(sessionProgress(9,3),{value:3,max:3});
 });
+
+ test('only individual targets count taps and individual pairs have three rounds', () => {
+  for (const level of [1, 4, 10]) {
+    const config = gameConfig(level);
+    assert.equal(exerciseStages('motor-target', config, true), config.targets);
+    assert.equal(exerciseStages('memory-pairs', config, true), 3);
+    for (const id of ['motor-target', 'memory-pairs'] as const) {
+      assert.equal(exerciseStages(id, config, false), 1);
+      assert.equal(exerciseStages(id, gameConfig(level, 'placement'), true), 1);
+    }
+  }
+});

@@ -1,8 +1,10 @@
 import type { ExerciseId } from '../types/index.ts';
 import type { GameConfig } from './difficulty.ts';
 
-/** Count complete rounds, not individual matches, taps or seconds of contact. */
-export function exerciseStages(id: ExerciseId, config: GameConfig): number {
+/** Grouped activities count complete rounds; solo targets count successful taps. */
+export function exerciseStages(id: ExerciseId, config: GameConfig, individual = false): number {
+  if (individual && config.mode === 'normal' && id === 'motor-target') return config.targets;
+  if (individual && config.mode === 'normal' && id === 'memory-pairs') return 3;
   if (id === 'memory-path') return config.mode === 'normal' ? 3 : 1;
   if (['visual-scanning', 'language-naming', 'word-completion', 'categorization'].includes(id)) return config.rounds;
   return 1;

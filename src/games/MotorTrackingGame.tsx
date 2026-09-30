@@ -58,12 +58,11 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     pointer.current = null;
   };
 
-  const handlePointerDownTarget = (e: React.PointerEvent) => {
+  const handlePointerDownArena = (e: React.PointerEvent) => {
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     pointer.current = { x: e.clientX, y: e.clientY };
     isTouchingRef.current = true;
-    setIsHoveringOrTouching(true);
     soundService.playTap();
   };
 
@@ -207,6 +206,8 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
         <div
           ref={arenaRef}
           className="motor-tracking-arena card"
+          onPointerDown={handlePointerDownArena}
+          onLostPointerCapture={handlePointerUp}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onPointerMove={handlePointerMoveArena}
@@ -217,7 +218,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
             aria-label="Mantén pulsado para acompañar al personaje; con teclado, mantén Espacio"
             onKeyDown={event => { if (event.code === 'Space' || event.code === 'Enter') { event.preventDefault(); keyboard.current = true; } }}
             onKeyUp={handlePointerUp}
-            onBlur={handlePointerUp}
+            onBlur={() => { keyboard.current = false; }}
             className={`tracking-target ${isHoveringOrTouching ? 'target-contacted' : ''}`}
             style={{
               left: `${targetPos.x}%`,
@@ -225,7 +226,6 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
               width: `${TARGET_SIZE}px`,
               height: `${TARGET_SIZE}px`,
             }}
-            onPointerDown={handlePointerDownTarget}
           >
             <PaperTarget variant="companion" />
             {isHoveringOrTouching && <div className="tracking-target-halo" />}

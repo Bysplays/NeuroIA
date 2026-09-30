@@ -2,7 +2,7 @@ import { exerciseStages, sessionProgress } from '../services/sessionProgress';
 import { FittedGameArea } from './FittedGameArea';
 import { useGameSession } from '../services/gameSession';
 import { getExerciseById } from '../services/exerciseCatalog';
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { RotateCcw, ArrowRight, Check } from 'lucide-react';
 import type { CognitiveDomain, ExerciseId, ExerciseResult } from '../types';
 import { soundService } from '../services/soundService';
@@ -47,9 +47,9 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 }) => {
   const session = useGameSession();
   const { finish } = session;
-  const stages = exerciseStages(exerciseId, session.config);
+  const stages = exerciseStages(exerciseId, session.config, !session.progressScope && !planProgress && !session.lockedLevel);
   const bar = sessionProgress(isCompleted ? stages : completedStages, stages, session.progressScope);
-  useEffect(() => { finish(isCompleted); }, [isCompleted, finish]);
+  useLayoutEffect(() => { finish(isCompleted); }, [isCompleted, finish]);
   useEffect(() => {
     if (isCompleted) {
       window.scrollTo(0, 0);
@@ -59,11 +59,11 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 
   return (
     <div className={`exercise-container${isCompleted && result ? ' exercise-container-completed' : ''}`} data-domain={domain}>
-      {!isCompleted && <h1 className="game-task-title">{title}</h1>}<div className="game-stage-progress" role="progressbar" aria-valuemin={0} aria-valuenow={bar.value} aria-valuemax={bar.max} aria-label={session.progressScope ? "Progreso de la sesión" : "Progreso del juego"}>
+      {!isCompleted && <h1 className="game-task-title">{title}</h1>}{!isCompleted && <div className="game-stage-progress" role="progressbar" aria-valuemin={0} aria-valuenow={bar.value} aria-valuemax={bar.max} aria-label={session.progressScope ? "Progreso de la sesión" : "Progreso del juego"}>
         {Array.from({ length: Math.ceil(bar.max) }, (_, index) => <span key={index} aria-hidden="true"><i style={{ width: `${Math.max(0, Math.min(1, bar.value - index)) * 100}%` }}/></span>)}
-      </div>
+      </div>}
       {/* Contenido interactivo del ejercicio o pantalla de finalización */}
-      <FittedGameArea>
+      <FittedGameArea action={!isCompleted ? nextAction : undefined}>
         {isCompleted && result ? (
           <section className="exercise-result" aria-labelledby="result-title">
             <div className="result-heading">
@@ -89,11 +89,11 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
                   else onBack();
                 }}
               >
-                <span>{planProgress && onNextPlanExercise ? (planProgress.isLast ? 'Terminar mi sesión' : 'Siguiente ejercicio') : 'Volver al inicio'}</span>
+                <span>{planProgress && onNextPlanExercise ? 'Continuar' : 'Volver al inicio'}</span>
                 <ArrowRight size={20} aria-hidden="true" />
               </button>
               {!session.lockedLevel && <div className="result-secondary-actions">
-                <button className="result-text-action" onClick={() => { soundService.playTap(); session.restart();
+                <button className="touch-btn touch-btn-secondary result-repeat" onClick={() => { soundService.playTap(); session.restart();
                   onRestart(); }}>
                   <RotateCcw size={18} aria-hidden="true" /> Repetir
                 </button>
@@ -106,7 +106,6 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
           children
         )}
       </FittedGameArea>
-      {!isCompleted && nextAction && <div className="game-stage-action">{nextAction}</div>}
 
 
     </div>

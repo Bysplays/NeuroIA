@@ -36,14 +36,19 @@ and hide-companions preference. Do not reset a user's appearance to introduce a 
 | Secondary text | `#566F81` |
 
 Use semantic tokens in `src/interface.css`, not independent component palettes.
-Contrast themes override surfaces and ink. Preserve stimulus colors and existing
-historical chart series: they carry identity beyond decoration. Use explicit text,
+Contrast themes override surfaces and ink. Preserve stimulus colors. Activity charts
+use one stable blue/teal/slate color per exercise across all metrics and legends. Use explicit text,
 icons and borders for selection and answer feedback, not color alone.
 
 Manrope is the interface family with a system sans-serif fallback. Headings have
 compact line height and moderate weight, body copy comfortable line spacing.
 Keep type in rem so normal, large (118%) and very large (135%) settings work.
 Controls target 48 px or more, primary actions 54–56 px. Do not disable browser zoom.
+Native dropdowns share a global surface, border, text and CSS chevron, with explicit
+WebKit appearance reset and room for the arrow. Keep their native keyboard and
+mobile picker behavior; the expanded options use the platform picker. Use at least
+16px text in dropdowns to prevent focus zoom on iOS. Forced colors restores the
+platform arrow. Individual forms may adjust layout but must not reset the shared arrow.
 Use a restrained 2 px primary-color focus outline: 2 px offset for actions, flush
 with the border for fields. Apply focus-visible rather than outlining every pointer
 click; interest cards highlight only keyboard-visible input focus. Preserve contrast
@@ -67,7 +72,7 @@ reconstruct institutional or brand logos with generated artwork.
 `PracticeMotif` draws two abstract blue cards using CSS for public entry and the
 featured daily activity. It is decorative and hidden from accessibility APIs. It
 never substitutes for an object the player must identify. Existing paper companions,
-header illustrations and achievement assets remain available in their supporting
+header illustrations remain available in their supporting
 roles; hiding companions never hides question stimuli.
 
 The game-object recipe below remains authoritative. Preserve answer keys, object
@@ -79,14 +84,31 @@ The player workspace has persistent **bottom navigation**: Hoy, Juegos, optional
 Para ti, Actividad and Mi cuenta. Reuse `TabletTabs`, its ARIA relationships and
 keyboard navigation, through the existing Header portal. Keep generous bottom
 content clearance and safe-area spacing so the final action remains reachable.
-The header contains the brand, labelled Muse connection, sound, settings and
-visible sign-out. Mi cuenta also offers sign-out and access management.
+The header contains the brand, labelled Muse connection, sound and settings.
+Player and professional headers use the same Settings gear icon.
+Sign-out is available only inside Settings in the active workspace. Mi cuenta
+uses icon-led action cards for settings, activity, achievements and access, with
+no profile illustration or duplicate sign-out. Activity uses equal-width top tabs
+that fill the whole row at every viewport, with wrapping labels at large text sizes, and the
+same white, softly bordered cards as home. Achievements use twenty distinct blue
+Lucide symbols in fine hexagonal frames, with 10px card corners and an icon-led
+heading. Detail dialogs use a compact white surface with 8px corners, a status
+row, a small emblem beside the title, the requirement and a pale progress panel.
+Use one full-width Cerrar action and retain Escape and focus return. Lock/check indicators
+and real progress distinguish pending and earned milestones; symbols remain
+visible independently of the legacy companion preference.
 
 Hoy keeps copy minimal: a greeting and actual streak, “Para hoy” with a named three-game
 session and “Jugar”, a “Tu sesión de hoy” list containing game names only, and icon-led
 area shortcuts. Do not repeat greetings with an eyebrow or supporting slogan,
 repeat area labels under every game, or add descriptions under area shortcuts.
-Use short concrete labels: “Explorar”, “Ver todos”. The three list entries open
+Use short concrete labels: “Explorar”, “Ver todos”. A linked professional proposal takes precedence in Hoy, identified by its title
+and author. Jugar starts or resumes the prescribed sequence; list entries open its
+individual steps at the prescribed level. Show the first three pending steps and
+replace completed ones with the next pending entries. With fewer than three pending,
+fill remaining places with completed steps and checks; completed proposal entries
+are disabled. Preserve repeated games as separate steps. Without a proposal, use
+the automatic daily queue. The three list entries open
 individually; the featured Jugar starts their complete sequence. Each of the 56
 unordered triples has its own explicit Spanish title. Account identity and local
 calendar day determine the session and its order, independently of completed games
@@ -97,12 +119,28 @@ The authenticated home's featured Jugar action spans its entire title column wit
 centered text and a right arrow, matching the public entry action. Catalog headers
 have no legacy companion illustration; its eight blue Lucide icons describe each
 interaction (search, naming, letters, sequence, pairs, sorting, target, tracking).
+Use CircleDot for target practice and Hand for continuous tracking.
 Keep real illustrated game stimuli unchanged: catalog icons are navigation only.
 
 Juegos presents the eight real exercises with area filters, distinct Lucide line icons and
 an explicit instruction entry action. Preserve paging when necessary for viewport
 height and text size. Activity and achievements reuse the existing read-only
-statistics, archive pagination and cumulative milestone logic. Secondary tabs
+statistics, archive pagination and cumulative milestone logic. Resumen groups the
+practiced-area radar and level radar. Each level axis shows the full game name
+and its current level in the same label style as the area radar; no separate table. Unknown levels remain
+Sin probar, not zero. Gráficas contains Precisión, Velocidad and Niveles; level
+history draws every recorded game together without a game dropdown. Filtros owns
+area, exercise and date controls, affecting area counts, all three charts and history;
+current levels remain the account's latest values, independently of date filtering.
+Use white 10px-corner cards and the shared blue palette. Hovering a series shows its
+name in a noninteractive chip at the upper right of the card and fades other lines.
+Omit the separate legend. Series support keyboard focus and a persistent click/tap
+selection; Escape clears selection. Axis labels stay small at every chart size.
+History shows ten results per page on every viewport. Preserve the
+full-history disclosure and never show a partial-data historical mean as complete.
+All three time charts include the full-history mean. The level mean uses recorded
+valid levels per non-practice session, deduplicated by result ID.
+Secondary tabs
 remain within their section; they must not be confused with the primary navigation.
 
 ## Public entry and institutional funding
@@ -253,8 +291,8 @@ evidence. Existing saved higher-stage ladders remain readable and can finish;
 ordinary adaptation still supports levels 1–10. This is a conservative starting
 recommendation, not a validated measurement of cognitive ability.
 
-A wrong Simon input ends its assessment attempt immediately; ordinary practice
-retains replay. The parent waits for durable evidence before advancing. Trial
+A wrong Simon input marks both the selected and expected tile, locks the attempt,
+and saves it as failed after Continuar. Replay is available before a round is resolved. The parent waits for durable evidence before advancing. Trial
 buttons say “Continuar”, not “Ver resultados”. Initial trials do not enter the
 ordinary results archive or count as completed exercises. Reassessment preserves
 unselected levels and existing history.
@@ -265,7 +303,7 @@ Visual search keeps incorrectly selected distractors softly red, with a red bord
 and an accessible incorrect label until the next board. Found targets retain their
 green feedback; neither state changes the target or advances a phase on its own.
 Reserve the search continuation action below the fitted board before it becomes
-visible, aligned to the same width and gutters as segmented progress. Completing
+visible in the shared action slot directly below the board. Completing
 a board must not move or resize its objects.
 
 Each game starts with a full instruction page using `ExerciseIllustration`: eight
@@ -281,47 +319,61 @@ flat internal edges and only the outer group corners are rounded. Keep the back 
 Short landscape viewports reduce artwork and spacing; allow scrolling when needed. Help
 opens a compact Cómo jugar modal, preserves answers and pauses the existing game clock.
 
-Leaving the tab or window during active play pauses the game clock and retains
-answers. On return, revalidate access without resetting navigation, then show a
-compact “¿Seguimos?” dialog with “Tu actividad está pausada.” and “Continuar actividad”. Escape/backdrop must not
-restart the clock; only the explicit action resumes. Internal focus changes from
-buttons or dialog dismissal must not trigger a new pause or access refresh. During
-active play, access revalidation stays inside this same mounted dialog: disable
-its primary action while checking, offer retry on failure, and enable Continuar
-actividad only after server confirmation. Never swap it for a second recovery modal. This return dialog is distinct
-from the retired fatigue/rest screen and does not appear on game introductions.
+Games have no pause/resume screen or controls, including assigned sessions.
+Hidden tabs retain answers and stop active-time accounting silently; help, settings
+and Muse likewise suspend the clock only while their explicit dialog is open.
+Focus/blur never hides the board or opens a dialog. Returning to a visible tab checks
+access in the background while its server lease is still valid. Only actual access
+failure/expiry blocks interaction with a connection recovery dialog over the retained,
+visible board; successful confirmation closes it automatically. Repetir on completion restarts directly at the played level,
+without returning to instructions or adopting a newly adapted level.
 
 Active play has utilities/time above the task, a clear stimulus and response area,
 and reachable assistance/back/next controls. Use the shared GameSession and
 ExerciseWrapper; do not fork navigation, timers or results. Boards may reflow and
 active boards must fit the remaining viewport without page scrolling. Keep the
 navigation, title and segmented progress anchored at the top, with modest spacing
-above and below the title. Vertically center each playground in its available area,
-after reserving continuation controls even before they appear. Uniformly scale only
+above and below the title. Vertically center the board and its action as one group,
+reserving the action space even before it appears. Uniformly scale only
 the playground when necessary;
-keep footer controls outside it. Keep complete motor hit areas inside their measured arenas.
+keep footer controls outside it. Categorization uses the same outlined Escuchar
+control and icon size as other games, retaining current-object narration. Empty
+assistance portal slots take no space or extra gap. Keep complete motor hit areas inside their measured arenas.
 
 - Search: retain the exact target and all matching objects.
 - Naming and words: distinguish stimulus, choices and next action.
-- Simon: preserve the sequence and distinct tile colors/labels.
-- Pairs: start face down, flip on touch or keyboard; an optional preview is a
-  counted hint with an early-end control. Matching and mismatching are visible.
+- Simon: preserve the sequence and distinct tile colors/labels. Use blue Comenzar,
+  an unfilled disabled Reproduciendo during playback, then white Repetir. Repetition
+  clears partial input and replays the same sequence, counting one hint. Omit the
+  attention/status banner or automatic “Observa y memoriza” narration. Continuar resolves success or failure; subsequent rounds
+  wait for Comenzar instead of playing automatically.
+- Pairs: start face down and disabled until Comenzar reveals the board. Ocultar shows
+  the countdown and can end the preview early. Repetir resets the current board at
+  the same positions, clears matches and replays its preview, counting one hint.
+  Do not show pairs/attempt counters. Individual games have three boards with one
+  aggregated result; placement, daily and assigned activities have one. Continuar
+  advances after all pairs match. Matching and mismatching remain visible.
 - Categorization: preserve group identity and clear selected/answer states.
 - Targets/tracking: preserve pointer contact, keyboard interaction and arena bounds.
-  Missed target taps show a soft red circle at the actual contact point for 900 ms
-  of active play, including scaled boards. The indicator never intercepts input.
+  Missed target taps leave unfilled red circles at the actual contact points until
+  restart/completion, including scaled boards. Indicators never intercept input.
+  Tracking accepts contact starting anywhere in the arena and reevaluates the
+  pointer against the moving target each frame, in both directions.
 
 Use in-place answer states rather than success popups or praise narration. Preserve
 spoken instructions, object names and corrective content when needed by the task.
-Game continuation is a stable blue action with 12 px corners, a 52 px minimum
-height and a right arrow; never bounce it. Secondary controls have restrained
+Game continuation always says Continuar: a stable blue action with 12 px corners,
+a 52 px minimum height and a right arrow. Keep it 16px below the board in the
+shared action slot, not anchored above the footer. In sequence and pairs, Continuar
+replaces Comenzar/Repetir in exactly the same position and dimensions. Only the
+board scales to fit; actions retain their touch size. Never bounce the action. Secondary controls have restrained
 borders. Touch audio uses a quiet sine tone with smooth attack/release; correct
 answers use a brief low-volume two-note cue. Audio starts muted on each page load. The sound toggle explicitly enables
 effects and narration; muting stops speech and effects. Restored profile audio
 settings must not automatically unmute the page. Completion retains the existing result and daily-plan callbacks. The completion
-page uses the brand and completed progress above a centered check, activity name
+page uses the brand without a progress bar above a centered check, activity name
 and played level. Three unboxed metrics show actual answers, accuracy and active
-time; a full-width primary action precedes a restrained Repetir control. No legacy
+time; the primary action and white Repetir control have identical width and height. No legacy
 mascot, confetti or oversized decorative card. Short landscape uses two columns
 to preserve readable text and controls. Level gains use the shared compact white
 notification modal, a heading with an upward icon, the exercise name and the actual
@@ -355,7 +407,11 @@ with Spanish hyphenation to reduce uneven word spacing. Titles, controls and dat
 from the preceding section with 24 px of top spacing. Sound and narration remain independent preferences.
 
 Professional workspace, proposals, participant activity, recovery and verification
-share these tokens, controls and typography. Retain functional distinctions: free
+share these tokens, controls and typography. The professional home has bottom
+Personas/Asientos navigation, an icon-led heading and one purchase action beside it.
+Use white cards with 10px corners, blue outlined labelled actions, restrained status
+text and the same activity charts. Session editors/review/cancellation dialogs use
+compact 8px corners, white headers, shared dropdowns and blue primary actions. Retain functional distinctions: free
 professional entry, paid seats, read-only linked activity, immutable proposals and
 server-confirmed permissions. Tables need usable horizontal scrolling if they cannot
 reflow; do not hide meaningful fields simply to fit a viewport.
@@ -439,7 +495,7 @@ ambiguous or clipped object separately rather than changing the answer to fit it
    characters, concentric target center, circular boundary and full hit area.
    Never change gameplay geometry to compensate for an unsuitable image.
 
-The decorative mascot/header/badge family retains its own paper-style references;
+The decorative mascot/header family retains its own paper-style references;
 this recipe applies to objects and tokens used inside games. UI controls remain
 code-native icons. See the [atlas provenance and complete prompts](assets/images/objects/illustrated/README.md).
 
@@ -494,9 +550,9 @@ The initial instruction screen remains a full page before starting ordinary play
 Active exercises use a full-width segmented progress track below the task title and above the
 play area, without numeric counters in the title. Search boards, naming/letter/
 classification questions and complete memory sequences each contribute one stage.
-Pairs, target practice and tracking each have one continuous stage. Individual
-objects within a search board, matched pairs, target taps and contact time never
-fill a stage on their own. Daily and professional paths sum the actual stage counts. Placement reserves
+Individual target practice fills one segment per successful tap; individual pairs
+have three complete-board stages. Grouped target/pair games and tracking have one
+stage. Search objects, individual matched pairs and contact time do not fill stages. Daily and professional paths sum the actual stage counts. Placement reserves
 its two possible assessment stages per selected game; finishing early or skipping
 resolves that game's remaining allocation, so changing games never resets the bar.
 A stage fills only when its complete round is resolved; there is no fractional fill.
@@ -580,8 +636,8 @@ on one row, exact typed phrase, identity confirmation, explicit irreversible sco
 Paid subscribers first see a Stripe-management action; trials/invitations proceed
 to confirmation. Closing or Escape restores focus without starting deletion.
 Acceptance signs out; durable server cleanup continues independently of the tab.
-Cerrar sesión uses a white surface with primary-blue text and icon in both header
-and settings, following the surface token in contrast themes.
+Cerrar sesión appears only in Settings and uses a white surface with primary-blue
+text and icon, following the surface token in contrast themes.
 
 All Mi cuenta action rows align buttons with the top of their text block, including
 Rehacer prueba and Borrar cuenta; multiline descriptions do not vertically center

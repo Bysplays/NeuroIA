@@ -96,24 +96,37 @@ uses a transaction with stale-draft checks and preserves identity and creation d
 a seat occupant grants no access to the previous occupant's sessions. CEOABERTO
 has no paid seat and does not expose this new feature.
 
-The participant home lists pending proposals, identifying the professional and
-showing games, levels and completed steps. Instructions, help and timing reuse
-GameSession; proposed levels and repeat controls are locked. Pausing preserves
-the current game. Returning home preserves completed games; an unfinished game
-starts again on resume. Assigned sessions do not change the automatic daily plan
-or personal level recommendations. Their ordinary results still count as activity.
+The participant's Hoy prioritizes an in-progress proposal, then the newest assigned
+proposal, over the automatic daily suggestion. A completed proposal remains visible
+on its completion day. Its title and professional identify the recommendation.
+Jugar opens its guided sequence; the adjacent list opens individual prescribed
+steps, retaining each step index even when the same game appears twice. Up to three
+pending steps appear in order. As each is completed the next pending step takes its
+place; if fewer than three remain, completed steps fill the spare places with checks.
+Para ti retains the complete inbox, games, levels and completed steps. Instructions, help and timing reuse
+GameSession; proposed levels and repeat controls are locked. There is no manual
+pause/resume control. Help/settings retain the current game while open. Returning home preserves completed games; an unfinished game
+starts again on resume. The automatic daily suggestion remains the fallback when there is no proposal.
+Prescribed step levels remain independent of personal level recommendations. Their ordinary results still count as activity.
 
 Each result uses `assigned-{sessionId}-{zeroBasedStep}` and includes assignment,
 owner, seat and step fields. The existing ProgressSync queue saves it and its
 permanent receipt. A separate transaction advances the proposal only after the
-matching archived result exists. Resume reconciles an interrupted advancement;
+matching archived result exists. Individual steps may be saved out of order. The
+existing completedCount remains a contiguous prefix; no schema or rule change is
+required. Home and professional analytics also read validated per-step archived
+results, so later completed steps are shown without inventing completion of gaps.
+Guided resume consumes consecutive archived steps and skips already completed games.
+The recommendation subscribes to its result archive and overlays this account's
+pending results for display; durable server advancement still requires saved results.
+Resume reconciles an interrupted advancement;
 only pending confirmation polls (every three seconds while the player is open).
 Duplicate device saves/advances confirm the committed receipt/current step after
-transaction permission conflicts. No local or cached snapshot grants completion.
+transaction permission conflicts. No local or cached snapshot grants server advancement.
 Cancel/expiry/departure stops proposal access but never blocks saving ordinary
 results. Recovery requires the same valid reciprocal relationship.
 
-The professional list is limited to the latest 50 proposals; the participant query
+The professional list and Hoy recommendation lookup use the latest 50 proposals; the participant query
 filters assigned/in-progress proposals before its 50-item limit. Lists disclose
 these limits. There is no composite index or new backend billing endpoint.
 Publish the reviewed Firestore rules before releasing this frontend. See TODO for

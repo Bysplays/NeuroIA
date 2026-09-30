@@ -1,5 +1,5 @@
 import { ModalFrame } from './ModalFrame';
-import { useAccessSuspended, useAccessRecovery } from '../services/accountAccessContext';
+import { useAccessSuspended } from '../services/accountAccessContext';
 import { Brand } from './Brand';
 import { EegButton } from './EegButton';
 import { EegLive } from './EegLive';
@@ -20,9 +20,6 @@ import { soundService } from '../services/soundService';
 
 export function GameSession({ id, step, progressScope, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true, autoStart = false, onSettings, onSkip }: { progressScope?: { before: number; after: number }; onSettings?: () => void; onSkip?: () => void; autoStart?: boolean; id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
   const accessSuspended = useAccessSuspended();
-  const recovery = useAccessRecovery();
-  const setGameRecovery = recovery?.setGameRecovery;
-  const [resumeRequired, setResumeRequired] = useState(false);
   const panel = useViewportPanel<HTMLDivElement>();
   const [assistanceTarget, setAssistanceTarget] = useState<HTMLDivElement | null>(null);
   const [eegOpen, setEegOpen] = useState(false);
@@ -41,40 +38,14 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
   const [help, setHelp] = useState(!autoStart);
   const [completed, finish] = useState(false);
   useEffect(() => {
-    setGameRecovery?.(started && !completed && !help && !eegOpen && !paused);
-    return () => setGameRecovery?.(false);
-  }, [setGameRecovery, started, completed, help, eegOpen, paused]);
-  const [lastAccessSuspended, setLastAccessSuspended] = useState(accessSuspended);
-  if (lastAccessSuspended !== accessSuspended) {
-    setLastAccessSuspended(accessSuspended);
-    if (accessSuspended && started && !completed) setResumeRequired(true);
-  }
-  useEffect(() => {
-    let blurTimer: ReturnType<typeof setTimeout>;
-    const pause = () => {
-      setBackground(true);
-      if (started && !completed) { setResumeRequired(true); soundService.stopSpeaking(); }
+    const visibility = () => {
+      setBackground(document.hidden);
+      if (document.hidden) soundService.stopSpeaking();
     };
-    const blur = (event: FocusEvent) => {
-      if (event.target !== window) return;
-      clearTimeout(blurTimer);
-      blurTimer = setTimeout(() => {
-        // Removing a focused control or closing a dialog is not leaving the app.
-        if (!event.isTrusted || !document.hasFocus()) pause();
-      }, 0);
-    };
-    const focus = () => { clearTimeout(blurTimer); setBackground(document.hidden); };
-    const visibility = () => document.hidden ? pause() : focus();
-    window.addEventListener('blur', blur);
-    window.addEventListener('focus', focus);
     document.addEventListener('visibilitychange', visibility);
-    return () => {
-      clearTimeout(blurTimer);
-      window.removeEventListener('blur', blur);
-      window.removeEventListener('focus', focus);
-      document.removeEventListener('visibilitychange', visibility);
-    };
-  }, [started, completed]);
+    return () => document.removeEventListener('visibilitychange', visibility);
+  }, []);
+  const [run, setRun] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const helpButton = useRef<HTMLButtonElement>(null);
@@ -84,7 +55,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     'language-naming': 'Mira la imagen y toca su nombre.',
     'word-completion': 'Mira la imagen y elige la letra que falta.',
     'memory-path': 'Pulsa el botón para ver la secuencia. Mira qué fichas se iluminan y después tócalas en el mismo orden.',
-    'memory-pairs': 'Toca una carta para descubrirla. Después, toca otra y busca los objetos que son iguales.',
+    'memory-pairs': 'Pulsa Comenzar y memoriza las cartas. Cuando se oculten, toca dos cartas para encontrar las parejas.',
     categorization: 'Mira el objeto y toca el grupo al que pertenece.',
     'motor-target': 'Toca el centro de cada diana. Aparecerá una nueva en otro lugar. No hay prisa.',
     'motor-tracking': 'Mantén pulsado sobre el personaje y acompáñalo mientras se mueve. Con teclado, enfócalo y mantén Espacio. Llena la barra a tu ritmo.',
@@ -96,7 +67,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     else helpButton.current?.focus();
   }, [help, paused, started]);
   useEffect(() => {
-    if (paused || help || completed || !started || eegOpen || background || resumeRequired || accessSuspended) return;
+    if (paused || help || completed || !started || eegOpen || background || accessSuspended) return;
     let previous = performance.now();
     let frame: number;
     const tick = (now: number) => {
@@ -108,7 +79,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [clock, help, completed, started, paused, eegOpen, background, resumeRequired, accessSuspended]);
+  }, [clock, help, completed, started, paused, eegOpen, background, accessSuspended]);
   useEffect(() => {
     const timer = clock.setInterval(() => {
       const state = eegService.getSnapshot();
@@ -126,8 +97,8 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
       }
     }, 1000);
     return () => clock.clearInterval(timer);
-  }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started]);
-  return <SessionContext.Provider value={{ config, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setLevel(initialLevel); setStarted(false); finish(false); setHelp(true); setSeconds(0); } }}>
+  }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started, run]);
+  return <SessionContext.Provider value={{ config, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setRun(value => value + 1); setStarted(true); finish(false); setHelp(false); setSeconds(0); } }}>
     <div className={`game-session${started ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
     {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>
@@ -172,18 +143,6 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         </div>
       </footer>}
     </div>}
-    {(resumeRequired || accessSuspended) && started && !help && !eegOpen && !paused && !completed && <ModalFrame labelledBy="activity-resume-title" onClose={() => {}} dismissOnBackdrop={false}>
-      <section className="entry-error-notification game-resume-dialog">
-        <h2 id="activity-resume-title">¿Seguimos?</h2>
-        <p>Tu actividad está pausada.</p>
-        {accessSuspended && recovery?.error && <p role="status">{recovery.error}</p>}
-        <button className="touch-btn touch-btn-primary" disabled={accessSuspended && !recovery?.error} onClick={() => {
-          if (accessSuspended) recovery?.retry();
-          else setResumeRequired(false);
-        }}>{accessSuspended ? recovery?.error ? 'Reintentar' : 'Comprobando acceso' : 'Continuar actividad'}</button>
-        {accessSuspended && recovery?.error && <button className="text-link" onClick={recovery.signOut}>Cerrar sesión</button>}
-      </section>
-    </ModalFrame>}
     {help && started && <ModalFrame labelledBy="game-help-title" onClose={() => { soundService.stopSpeaking(); setHelp(false); }}>
       <section className="entry-error-notification game-help-dialog">
         <div className="entry-error-heading"><CircleHelp size={24} aria-hidden="true"/><h2 id="game-help-title">Cómo jugar</h2><button className="entry-toolbar-action" onClick={() => soundService.speak(instruction)}><Volume2 size={18} aria-hidden="true"/>Escuchar</button></div>

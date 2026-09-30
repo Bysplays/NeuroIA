@@ -134,11 +134,18 @@ subject to the confirmed deadline and available client materials.
   disclosure before public release; the implemented consent checkbox is not legal certification.
 - [x] **CR-05 — Pressure-free assessment wording (local).** Trial controls say “A tu ritmo”; numeric levels are retained only in ordinary play and the final evidence summary. No numeric trial announcement is narrated.
 
-- [x] **CR-06 — Misleading results action during trials (local).** Naming, words and categorization use “Continuar” during assessment. Ordinary completion keeps its results action; placement advances after durable evidence.
+- [x] **CR-06 — Misleading results action during trials (local).** Every in-game next action says “Continuar” in the shared action slot directly below the board, replacing memory playback/repeat in place. Placement advances after durable evidence. Completion hides progress and gives Repetir the same dimensions as the exit action; repetition preserves the played level and starts directly.
 
-- [x] **CR-07 — Simon failure advances (local).** A wrong trial input saves one failed attempt and ends that ladder. No forced replay or apologetic retry prompt; ordinary practice retains replay. Browser regression verifies single completion.
+- [x] **CR-07 — Simon failure advances (local).** A wrong input marks both selected and correct tiles, then Continuar saves one failed attempt. No forced replay or attention banner. Before resolution, Repetir clears partial input and replays the same sequence. Browser regression verifies single completion.
 
-- [x] **CR-08 — Pairs reveal on touch (local).** All play starts face down with immediate click/keyboard reveal. Optional timed preview remains a counted hint and can be ended early. Mismatch timers clean up on hint, restart and unmount.
+- [x] **CR-08 — Pairs preview and repetition (local).** Cards start face down until Comenzar; Ocultar shows a countdown and ends the preview early. Repetir resets the same board and counts a hint. Solo games aggregate three boards; placement and plans use one. Pair/attempt counters are hidden. Mismatch timers clean up on repeat, restart and unmount.
+
+- [x] **Motor feedback and game recovery (local).** Solo targets progress per hit;
+  grouped targets remain one stage. Red miss outlines persist. Tracking captures
+  drags starting anywhere and checks contact every frame. All game pause/resume controls and the game recovery dialog
+  are removed; focus never hides play and valid access rechecks run in the background; help/settings/visibility and server access still pause the clock.
+  Browser checks cover 390, 820, 1280 px and short landscape; physical touch acceptance
+  remains part of the target-device release check.
 
 - [x] **CR-09 — Shorter assessment (local).** New ladders stop after at most two stages (1/4), with conservative prior evidence on failure. Legacy higher stages remain compatible. Further calibration and client timing acceptance remain open; this is not a validated cognitive measurement.
 
@@ -150,7 +157,7 @@ subject to the confirmed deadline and available client materials.
 
 - [x] **CR-12 — Purchase before assessment (local).** The unauthenticated home has no purchase pitch; existing signed-in access choices and Mi acceso expose the authenticated subscription flow before placement and from Mi cuenta. Server availability and Stripe confirmation remain required; repeat real Sandbox lifecycle acceptance before release.
 
-- [x] **CR-13 — Home sign-out (local).** Visible Cerrar sesión in Header and Mi cuenta reuses the existing logout; queued progress persistence is unchanged.
+- [x] **CR-13 — Settings sign-out (local).** Cerrar sesión lives only in Settings in the active workspace; Header and the account overview omit it. Queued progress persistence is unchanged.
 
 - [x] **CR-14 — Muse label (local).** Visible Conectar Muse / Conectando Muse / Muse conectado uses the same service and unsupported-browser explanation. Check physical hardware before release.
 
@@ -270,6 +277,7 @@ Seats, difficulty/placement and professional session proposals are also implemen
 - [x] Test cross-account isolation, seat expiry, departure, replaced occupants,
   duplicate games, concurrent completion and durable result recovery in the emulator.
 - [x] Publish the session Firestore rules and verify the active release matches the tested rules.
+- [x] Restyle the professional workspace, proposals and analytics in Calma; prioritize professional proposals in Hoy and rotate three pending steps, supporting individual prescribed games and out-of-order archived-result reconciliation.
 - [ ] Publish the session frontend and verify a real professional/participant
   pair on physical tablets. No production fixture activity is used for verification.
 - [ ] Add older professional-session pagination beyond the latest 50; participant
