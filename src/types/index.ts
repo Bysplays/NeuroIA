@@ -127,7 +127,7 @@ export interface CognitiveDomainInfo {
 
 export interface DailyPlanSession {
   inProgress: boolean;
-  queue: CognitiveDomain[];
+  queue: ExerciseId[];
   currentIndex: number;
   completedResults: ExerciseResult[];
 }

@@ -1368,15 +1368,14 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
 .stats-legend .stats-mean-swatch { height: 0; width: 24px; border-top: 2px dashed var(--color-text-main); border-radius: 0; }
 .stats-archive-notice { color: var(--color-text-muted); font-size: .75rem; margin-bottom: 12px; }
 
-/* Level milestones use a static approved friend; only the card enters. */
-.level-up-screen { width: min(600px, calc(100vw - 32px)); padding: clamp(24px, 4vh, 48px); text-align: center; background: var(--color-bg); border-radius: 36px; display: grid; justify-items: center; gap: 14px; animation: level-arrival 650ms both; }
-.level-up-screen h1, .level-up-screen p { margin: 0; }
-.level-up-screen h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
-.level-up-screen .level-up-friend { width: min(220px, 28vh); height: min(220px, 28vh); object-fit: contain; }
-.level-up-eyebrow { font-weight: 800; letter-spacing: .06em; color: var(--color-primary); }
-.level-up-screen .touch-btn { width: 100%; margin-top: 12px; }
-@keyframes level-arrival { 0% { opacity: 0; transform: scale(.65); } 55% { opacity: 1; transform: scale(1.055); } 78% { transform: scale(.98); } 100% { transform: scale(1); } }
-@media (prefers-reduced-motion: reduce) { .level-up-screen { animation: none; } }
+/* Level milestones share the restrained notification dialog. */
+.level-up-screen { display: grid; gap: 20px; }
+.level-up-screen p { margin: 0; font-size: .8rem; line-height: 1.5; color: var(--color-text-muted); }
+.level-up-screen .level-up-game { color: var(--color-text-main); }
+.level-up-transition { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 24px 16px; background: var(--panel-blue); border-radius: 6px; color: var(--color-primary); }
+.level-up-transition span { font-size: .85rem; }
+.level-up-transition strong { font-size: 1.25rem; }
+.level-up-screen .touch-btn { width: 100%; gap: 16px; }
 .level-statistics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
 .level-statistics .stats-card { min-width: 0; padding: 20px; display: flex; flex-direction: column; }
 .level-statistics h2 { font-size: 1.1rem; }
@@ -1690,6 +1689,7 @@ body[data-font="xlarge"] .tablet-dashboard .library-filters { grid-template-colu
   .editorial-hero .practice-motif { width: 160px; position: absolute; right: -38px; top: -25px; opacity: .45; pointer-events: none; }
   .editorial-hero-copy { position: relative; z-index: 1; }
   .editorial-hero .editorial-eyebrow { max-width: 70%; }
+  .editorial-hero h2 { padding-right: 80px; }
   .editorial-areas { grid-template-columns: 1fr; }
   .editorial-areas > button { flex-wrap: nowrap; padding: 18px; }
   .editorial-areas > button > svg { display: block; }

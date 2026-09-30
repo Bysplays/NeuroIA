@@ -1,7 +1,7 @@
 import { Brand } from './Brand';
 import { ConnectionRecovery } from './ConnectionRecovery';
 import { ModalFrame } from './ModalFrame';
-import { AccountAccessContext, AccessSuspendedContext } from '../services/accountAccessContext';
+import { AccountAccessContext, AccessSuspendedContext, AccessRecoveryContext } from '../services/accountAccessContext';
 import { AppLoading } from './AppLoading';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { accessService, accessError, type AccountAccess } from '../services/accessService';
@@ -9,6 +9,7 @@ import { OnboardingModal } from './OnboardingModal';
 import { soundService } from '../services/soundService';
 
 export default function AccessGate({ onSignOut, children }: { onSignOut: () => void; children: ReactNode }) {
+  const [gameRecovery, setGameRecovery] = useState(false);
   const [access, setAccess] = useState<AccountAccess | null>(null);
   const [retainedAccess, setRetainedAccess] = useState<AccountAccess | null>(null);
   const [error, setError] = useState('');
@@ -38,7 +39,24 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     alive.current = true;
     const initial = window.setTimeout(() => { void refresh(); }, 0);
     const interval = window.setInterval(() => { if (!locked.current) void refresh(); }, 30000);
-    const onFocus = () => { if (!locked.current) { version.current++; setAccess(null); setError(''); void refresh(); } };
+    let windowLeft = false;
+    let blurTimer: ReturnType<typeof setTimeout>;
+    const onBlur = (event: FocusEvent) => {
+      if (event.target !== window) return;
+      clearTimeout(blurTimer);
+      blurTimer = setTimeout(() => {
+        if (!event.isTrusted || !document.hasFocus()) windowLeft = true;
+      }, 0);
+    };
+    window.addEventListener('blur', onBlur);
+    const onFocus = (event?: Event) => {
+      if (event?.type === 'focus') {
+        if (event.target !== window) return;
+        clearTimeout(blurTimer);
+        if (!windowLeft) return;
+        windowLeft = false;
+      }
+      if (!locked.current) { version.current++; setAccess(null); setError(''); void refresh(); } };
     window.addEventListener('focus', onFocus);
     const invalidate = () => { version.current++; setAccess(null); setError('Comprueba la conexión y vuelve a intentarlo.'); };
     const onVisibility = () => { if (document.visibilityState === 'visible') { invalidate(); onFocus(); } };
@@ -47,7 +65,7 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     document.addEventListener('visibilitychange', onVisibility);
     const onAccessChanged = () => { version.current++; setAccess(null); void refresh(); };
     window.addEventListener('neuroia-access-changed', onAccessChanged);
-    return () => { alive.current = false; clearTimeout(initial); clearInterval(interval); window.removeEventListener('focus', onFocus); window.removeEventListener('offline', invalidate); window.removeEventListener('online', onFocus); document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('neuroia-access-changed', onAccessChanged); };
+    return () => { alive.current = false; clearTimeout(initial); clearTimeout(blurTimer); clearInterval(interval); window.removeEventListener('blur', onBlur); window.removeEventListener('focus', onFocus); window.removeEventListener('offline', invalidate); window.removeEventListener('online', onFocus); document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('neuroia-access-changed', onAccessChanged); };
   }, [refresh]);
   useEffect(() => {
     if (!access?.active) return;
@@ -87,8 +105,10 @@ export default function AccessGate({ onSignOut, children }: { onSignOut: () => v
     const suspended = !access?.active;
     return <AccountAccessContext.Provider value={access ?? { ...retainedAccess!, active: false }}>
       <AccessSuspendedContext.Provider value={suspended}>
-        <div hidden={suspended} inert={suspended}>{children}</div>
-        {suspended && <ModalFrame labelledBy="access-recheck-title" onClose={() => {}} dismissOnBackdrop={false}>
+        <AccessRecoveryContext.Provider value={{ setGameRecovery, error, retry: () => { setError(''); void refresh(); }, signOut: onSignOut }}>
+          <div hidden={suspended} inert={suspended}>{children}</div>
+        </AccessRecoveryContext.Provider>
+        {suspended && !gameRecovery && <ModalFrame labelledBy="access-recheck-title" onClose={() => {}} dismissOnBackdrop={false}>
           <section className="entry-error-notification access-recheck-dialog">
             <h2 id="access-recheck-title">{error ? 'Vamos a reconectar' : 'Comprobando tu acceso'}</h2>
             <p role="status">{error || 'Tu actividad sigue aquí. Un momento…'}</p>

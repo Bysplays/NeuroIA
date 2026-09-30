@@ -1,17 +1,5 @@
 # Working on NeuroIA
 
-## Locally protected design archive
-
-The owner archived `codex/neuroia-ahead-redesign` on 2026-09-29. Preserve this
-branch and the `archive/neuroia-ahead-redesign-2026-09-29` tag. Do not commit,
-reset, rebase, force-update or delete either reference without an explicit new
-instruction to reopen or remove this archive. New experiments must start on a
-separate branch. A local Git reference-transaction hook enforces this protection
-in the shared Git directory; its maintenance notes are in
-`.git/info/neuroia-protected-design.md` (resolved against the common Git directory).
-This is a local archive, not a remote branch-protection rule or a published backup.
-
-
 This is the repository-wide guide for coding agents. Read [DESIGN.md](docs/DESIGN.md)
 before changing any interface, interaction, copy, or visual asset. Read
 [CONTRIBUTING.md](CONTRIBUTING.md) for branch, commit, and merge conventions.
@@ -78,6 +66,7 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/services/productCopy.ts` and `src/components/ProductInformation.tsx` | Supplied public presentation and notice, accessible from login and dashboard |
 | `src/components/Dashboard.tsx` | Home, entry points to areas and all exercises |
 | `src/components/ExerciseCatalog.tsx` | Eight-game catalog and area filters |
+| `src/services/dailySession.ts` | 56 named three-game combinations, deterministically selected by account and local date for home and daily play |
 | `src/services/exerciseCatalog.ts` | Eight active exercise definitions and short summaries |
 | `src/services/activityExercises.ts` | Historical names and stable chart styles, including retired daily sequencing |
 | `src/components/ExerciseIllustration.tsx` | Eight decorative SVG compositions for game introductions; not playable stimuli |
@@ -323,7 +312,7 @@ that account before cloud loading; cached identity never grants access. `Storage
 and pending writes are scoped to the UID. Auth changes unmount the old boundary,
 unsubscribe listeners, and prevent late callbacks from touching the next account.
 
-`AccessGate` is lazy loaded after authentication and validates server-owned access through the authenticated Worker `/access` endpoint before mounting `CloudProgress`. Its server-time confirmation lasts at most 60 seconds, capped by expiry, with 30-second refresh; failure, offline or unconfirmed resume blocks play and pauses its clock through `AccessSuspendedContext`. After initial approval, temporary revalidation keeps the workspace mounted behind an inert, hidden boundary and a blocking dialog. Confirmed denied access unmounts it; cached access never grants play. The Worker API URL is required independently of the purchase feature flag. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
+`AccessGate` is lazy loaded after authentication and validates server-owned access through the authenticated Worker `/access` endpoint before mounting `CloudProgress`. Its server-time confirmation lasts at most 60 seconds, capped by expiry, with 30-second refresh; failure, offline or unconfirmed resume blocks play and pauses its clock through `AccessSuspendedContext`. After initial approval, temporary revalidation keeps the workspace mounted behind an inert, hidden boundary and a blocking dialog. `AccessRecoveryContext` lets an active GameSession own one persistent pause/recovery modal through rechecks; it disables continuation until server confirmation and exposes retry/logout on failure. Other views retain AccessGate’s recovery modal. Confirmed denied access unmounts it; cached access never grants play. The Worker API URL is required independently of the purchase feature flag. See [ONBOARDING.md](docs/ONBOARDING.md) for setup, provisioning and billing tests. `CloudProgress` is lazy loaded after access approval. It loads from the server
 before mounting games; an inaccessible/offline initial load shows retry/logout,
 never an empty replacement profile. First cloud initialization offers an explicit
 import of account-local activity or the older unscoped profile when present.

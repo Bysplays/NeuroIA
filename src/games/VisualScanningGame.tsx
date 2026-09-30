@@ -25,6 +25,7 @@ interface GridItem {
   symbol: string;
   isTarget: boolean;
   found: boolean;
+  incorrect?: boolean;
   col: number;
   row: number;
 }
@@ -166,6 +167,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
         }
       }
     } else {
+      setItems(previous => previous.map(cell => cell.id === item.id ? { ...cell, incorrect: true } : cell));
       soundService.playGentlePrompt();
       const newMistakes = mistakes + 1;
       setMistakes(newMistakes);
@@ -232,6 +234,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   return (
     <ExerciseWrapper
+      nextAction={<button className="touch-btn touch-btn-primary game-next-action" style={{ visibility: foundCount >= totalTargets ? 'visible' : 'hidden' }} disabled={foundCount < totalTargets} onClick={() => { setCompletedTargets(value => value + totalTargets); initRound(); }}>Continuar</button>}
       completedStages={completedRounds}
       exerciseId="visual-scanning"
       title={
@@ -256,9 +259,9 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
           {items.map(item => (
             <button
               key={item.id}
-              className={`scanning-cell ${item.found ? 'cell-found' : ''} ${item.col === 0 ? 'cell-left-edge' : ''}`}
+              className={`scanning-cell ${item.found ? 'cell-found' : ''} ${item.incorrect ? 'cell-incorrect' : ''} ${item.col === 0 ? 'cell-left-edge' : ''}`}
               onClick={() => handleItemClick(item)}
-              aria-label={item.found ? 'Elemento ya encontrado' : 'Posible objetivo'}
+              aria-label={item.found ? 'Elemento ya encontrado' : item.incorrect ? 'Este objeto no es el que buscas' : 'Posible objetivo'}
             >
               <span className="cell-emoji"><GameObject symbol={item.symbol} /></span>
 
@@ -266,7 +269,6 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
           ))}
         </div>
       </div>
-      {foundCount >= totalTargets && !isCompleted && <div className="actions-bar"><button className="touch-btn touch-btn-primary game-next-action" onClick={() => { setCompletedTargets(value => value + totalTargets); initRound(); }}>Continuar</button></div>}
     </ExerciseWrapper>
   );
 };

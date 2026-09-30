@@ -1,3 +1,4 @@
+import { dailySession } from './services/dailySession';
 import { exerciseStages } from './services/sessionProgress';
 import { gameConfig as progressGameConfig } from './services/difficulty';
 import { InformationPage, type InformationKind } from "./components/InformationPage";
@@ -174,15 +175,10 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
   // Iniciar el Plan del Día (secuencia guiada alternando ejercicios)
   const handleStartDailyPlan = (selectedQueue?: ExerciseId[]) => {
     soundService.playSuccess();
-    const domainQueue = StorageService.generateDailyPlanQueue(profile);
-    const exerciseQueue = selectedQueue ?? domainQueue.map(domain => {
-      const exList = getExercisesForDomain(domain);
-      const chosen = exList[Math.floor(Math.random() * exList.length)];
-      return chosen ? chosen.id : (domain as unknown as ExerciseId);
-    });
+    const exerciseQueue = selectedQueue ?? [...dailySession(uid).games];
     setDailyPlanSession({
       inProgress: true,
-      queue: exerciseQueue as unknown as CognitiveDomain[],
+      queue: exerciseQueue,
       currentIndex: 0,
       completedResults: [],
     });
@@ -200,7 +196,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
         ...dailyPlanSession,
         currentIndex: nextIndex,
       });
-      setActiveView(dailyPlanSession.queue[nextIndex] as unknown as (CognitiveDomain | ExerciseId));
+      setActiveView(dailyPlanSession.queue[nextIndex]);
     } else {
       // Fin del plan del día completo
       soundService.playCompletionFanfare();
@@ -224,8 +220,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
     isLast: dailyPlanSession.currentIndex + 1 >= dailyPlanSession.queue.length,
   } : null;
 
-  const pathProgress = dailyPlanSession?.inProgress ? dailyPlanSession.queue.reduce((scope, domain, index) => {
-    const game = getExercisesForDomain(domain)[0].id;
+  const pathProgress = dailyPlanSession?.inProgress ? dailyPlanSession.queue.reduce((scope, game, index) => {
     const stages = exerciseStages(game, progressGameConfig(assignedLevel(profile, game)));
     if (index < dailyPlanSession.currentIndex) scope.before += stages;
     if (index > dailyPlanSession.currentIndex) scope.after += stages;

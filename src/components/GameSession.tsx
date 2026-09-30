@@ -1,5 +1,5 @@
 import { ModalFrame } from './ModalFrame';
-import { useAccessSuspended } from '../services/accountAccessContext';
+import { useAccessSuspended, useAccessRecovery } from '../services/accountAccessContext';
 import { Brand } from './Brand';
 import { EegButton } from './EegButton';
 import { EegLive } from './EegLive';
@@ -20,6 +20,8 @@ import { soundService } from '../services/soundService';
 
 export function GameSession({ id, step, progressScope, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true, autoStart = false, onSettings, onSkip }: { progressScope?: { before: number; after: number }; onSettings?: () => void; onSkip?: () => void; autoStart?: boolean; id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
   const accessSuspended = useAccessSuspended();
+  const recovery = useAccessRecovery();
+  const setGameRecovery = recovery?.setGameRecovery;
   const [resumeRequired, setResumeRequired] = useState(false);
   const panel = useViewportPanel<HTMLDivElement>();
   const [assistanceTarget, setAssistanceTarget] = useState<HTMLDivElement | null>(null);
@@ -39,17 +41,36 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
   const [help, setHelp] = useState(!autoStart);
   const [completed, finish] = useState(false);
   useEffect(() => {
+    setGameRecovery?.(started && !completed && !help && !eegOpen && !paused);
+    return () => setGameRecovery?.(false);
+  }, [setGameRecovery, started, completed, help, eegOpen, paused]);
+  const [lastAccessSuspended, setLastAccessSuspended] = useState(accessSuspended);
+  if (lastAccessSuspended !== accessSuspended) {
+    setLastAccessSuspended(accessSuspended);
+    if (accessSuspended && started && !completed) setResumeRequired(true);
+  }
+  useEffect(() => {
+    let blurTimer: ReturnType<typeof setTimeout>;
     const pause = () => {
       setBackground(true);
       if (started && !completed) { setResumeRequired(true); soundService.stopSpeaking(); }
     };
-    const focus = () => setBackground(document.hidden);
+    const blur = (event: FocusEvent) => {
+      if (event.target !== window) return;
+      clearTimeout(blurTimer);
+      blurTimer = setTimeout(() => {
+        // Removing a focused control or closing a dialog is not leaving the app.
+        if (!event.isTrusted || !document.hasFocus()) pause();
+      }, 0);
+    };
+    const focus = () => { clearTimeout(blurTimer); setBackground(document.hidden); };
     const visibility = () => document.hidden ? pause() : focus();
-    window.addEventListener('blur', pause);
+    window.addEventListener('blur', blur);
     window.addEventListener('focus', focus);
     document.addEventListener('visibilitychange', visibility);
     return () => {
-      window.removeEventListener('blur', pause);
+      clearTimeout(blurTimer);
+      window.removeEventListener('blur', blur);
       window.removeEventListener('focus', focus);
       document.removeEventListener('visibilitychange', visibility);
     };
@@ -107,7 +128,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     return () => clock.clearInterval(timer);
   }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started]);
   return <SessionContext.Provider value={{ config, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setLevel(initialLevel); setStarted(false); finish(false); setHelp(true); setSeconds(0); } }}>
-    <div className={`game-session${started && !completed ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
+    <div className={`game-session${started ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
     {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>
       <div className="placement-card">
@@ -130,6 +151,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
       <footer className="instruction-navigation">{!lockedLevel && <button className="entry-toolbar-action" onClick={onBack}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}<button className="paper-nav-button instruction-listen" onClick={() => soundService.speak(instruction)}><Volume2 size={20} aria-hidden="true"/>Escuchar</button>{step && <span className="instruction-step soft-label">{step}</span>}</footer>
     </section>}
     {started && <div className="game-session-play">
+      {completed && <header className="viewport-session-header"><Brand/></header>}
       {!completed && <header className="viewport-session-header">
         <span className="game-session-time" aria-label="Tiempo de juego"><Clock size={22}/>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span>
         <div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/><FullscreenButton/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}</div>
@@ -150,11 +172,16 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         </div>
       </footer>}
     </div>}
-    {resumeRequired && !accessSuspended && !help && !eegOpen && !paused && !completed && <ModalFrame labelledBy="activity-resume-title" onClose={() => {}} dismissOnBackdrop={false}>
+    {(resumeRequired || accessSuspended) && started && !help && !eegOpen && !paused && !completed && <ModalFrame labelledBy="activity-resume-title" onClose={() => {}} dismissOnBackdrop={false}>
       <section className="entry-error-notification game-resume-dialog">
         <h2 id="activity-resume-title">¿Seguimos?</h2>
         <p>Tu actividad está pausada.</p>
-        <button className="touch-btn touch-btn-primary" onClick={() => setResumeRequired(false)}>Continuar actividad</button>
+        {accessSuspended && recovery?.error && <p role="status">{recovery.error}</p>}
+        <button className="touch-btn touch-btn-primary" disabled={accessSuspended && !recovery?.error} onClick={() => {
+          if (accessSuspended) recovery?.retry();
+          else setResumeRequired(false);
+        }}>{accessSuspended ? recovery?.error ? 'Reintentar' : 'Comprobando acceso' : 'Continuar actividad'}</button>
+        {accessSuspended && recovery?.error && <button className="text-link" onClick={recovery.signOut}>Cerrar sesión</button>}
       </section>
     </ModalFrame>}
     {help && started && <ModalFrame labelledBy="game-help-title" onClose={() => { soundService.stopSpeaking(); setHelp(false); }}>

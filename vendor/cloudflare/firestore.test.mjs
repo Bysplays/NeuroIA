@@ -51,6 +51,7 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  const deletedUid='delete-rest-'+Date.now();
  const email=deletedUid+'@example.test';
  await startTrial(deletedUid,email,lifecycleEnv,db);
+ const originalTrial=await db.runTransaction(tx=>tx.get(`users/${deletedUid}/access/main`));
  await db.runTransaction(async tx=>{
    tx.set(`users/${deletedUid}/results/a`,{value:'private'},false);
    tx.set(`users/${deletedUid}/operations/a`,{value:'receipt'},false);
@@ -69,6 +70,9 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  assert.deepEqual(deleted,[['delete',deletedUid]]);
  const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
  assert.deepEqual(remaining,[null,null,null,null]);
- await assert.rejects(startTrial('recreated-'+deletedUid,email,lifecycleEnv,db),{status:409});
+ await startTrial('recreated-'+deletedUid,email,lifecycleEnv,db);
+ const resumedTrial=await db.runTransaction(tx=>tx.get(`users/recreated-${deletedUid}/access/main`));
+ assert.equal(resumedTrial.kind,'trial');
+ assert.equal(resumedTrial.trialStartedAt,originalTrial.trialStartedAt);
  }finally{globalThis.fetch=nativeFetch;}
 });

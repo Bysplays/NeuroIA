@@ -24,9 +24,8 @@ import { PracticeMotif } from "./PracticeMotif";
 import { PlanButton } from "./PlanButton";
 import {
   getExerciseById,
-  getExercisesForDomain,
 } from "../services/exerciseCatalog";
-import { StorageService } from "../services/storageService";
+import { dailySession } from "../services/dailySession";
 import { soundService } from "../services/soundService";
 import type {
   UserProfile,
@@ -60,6 +59,7 @@ export function Dashboard({
   proposedSessions,
   onSelectDomain,
   onSelectExercise,
+  onStartDailyPlan,
   onOpenSettings,
   onSignOut,
   signingOut,
@@ -68,15 +68,10 @@ export function Dashboard({
   const tab = selectedTab ?? localTab;
   const setTab = onTabChange ?? setLocalTab;
   const [progressTab, setProgressTab] = useState("overview");
-  const [queue] = useState(() =>
-    StorageService.generateDailyPlanQueue(profile).map((domain) => {
-      const exercises = getExercisesForDomain(domain);
-      return exercises[Math.floor(Math.random() * exercises.length)].id;
-    }),
-  );
+  const session = dailySession(uid);
+  const queue = session.games;
   const todayKey = localDay(new Date().toISOString());
   const completedToday = new Set(history.filter(result => !result.practice && localDay(result.date) === todayKey).map(result => result.exerciseId));
-  const featured = getExerciseById(queue[0])!;
   const choose = (id: ExerciseId) => {
     soundService.playTap();
     if (onSelectExercise) onSelectExercise(id);
@@ -106,10 +101,10 @@ export function Dashboard({
               <i />
               Para hoy
             </p>
-            <h2>{featured.title}</h2>
+            <h2>{session.title}</h2>
             <button
               className="touch-btn touch-btn-primary"
-              onClick={() => choose(featured.id)}
+              onClick={() => onStartDailyPlan([...queue])}
             >
               Jugar
               <ArrowRight size={21} />

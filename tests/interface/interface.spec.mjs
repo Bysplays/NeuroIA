@@ -104,7 +104,7 @@ test('trial continuation has no results promise and target success is visible wi
     await target.click();
     if(i===0) await expect(page.getByRole('status').filter({hasText:'Bien hecho. Sigue a tu ritmo.'})).toHaveCount(0);
   }
-  await expect(page.getByRole('heading',{name:'Un paso más. Bien hecho.'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Actividad completada'})).toBeVisible();
   expect(JSON.parse(await page.getByTestId('results').textContent())).toHaveLength(1);
 });
 test('large text, short landscape and settings dialog preserve access',async({page})=>{
@@ -541,7 +541,15 @@ test('returning to a game preserves its mounted board, revalidates access and wa
   });
   await page.goto(fixture+'?resume-game');
   await page.getByRole('button',{name:'Empezar a jugar'}).click();
+  const initialReads=await page.evaluate(()=>window.accessReads);
+  await page.evaluate(()=>{
+    document.querySelector('.game-help-button').dispatchEvent(new FocusEvent('blur',{bubbles:true}));
+    document.querySelector('.game-help-button').dispatchEvent(new FocusEvent('focus',{bubbles:true}));
+    window.dispatchEvent(new Event('focus'));
+  });
   await page.clock.runFor(2200);
+  expect(await page.evaluate(()=>window.accessReads)).toBe(initialReads);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   const timer=page.getByLabel('Tiempo de juego');
   const before=await timer.textContent();
   await page.locator('.game-session').evaluate(el=>el.dataset.preserved='yes');
@@ -549,11 +557,22 @@ test('returning to a game preserves its mounted board, revalidates access and wa
   await page.clock.runFor(5000);
   expect(await timer.textContent()).toBe(before);
   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
-  await expect(page.getByRole('dialog',{name:'Comprobando tu acceso'})).toBeVisible();
+  await expect(page.getByRole('dialog',{name:'¿Seguimos?'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Comprobando acceso'})).toBeDisabled();
+  await page.getByRole('dialog',{name:'¿Seguimos?'}).evaluate(el=>el.dataset.stable='yes');
   await expect(page.locator('.game-session')).toBeHidden();
   await page.evaluate(()=>{window.delayAccess=false;window.releaseAccess();});
   const resume=page.getByRole('dialog',{name:'¿Seguimos?'});
   await expect(resume).toBeVisible();
+  await expect(resume).toHaveAttribute('data-stable','yes');
+  for (let attempt=0;attempt<2;attempt++) {
+    await page.evaluate(()=>{window.delayAccess=true;window.dispatchEvent(new Event('neuroia-access-changed'));});
+    await expect(resume.getByRole('button',{name:'Comprobando acceso'})).toBeDisabled();
+    await expect(resume).toHaveAttribute('data-stable','yes');
+    await page.evaluate(()=>{window.delayAccess=false;window.releaseAccess();});
+    await expect(resume.getByRole('button',{name:'Continuar actividad'})).toBeEnabled();
+    await expect(resume).toHaveAttribute('data-stable','yes');
+  }
   await expect(page.locator('.game-session')).toHaveAttribute('data-preserved','yes');
   await page.clock.runFor(2000);
   expect(await timer.textContent()).toBe(before);
@@ -571,7 +590,12 @@ test('returning to a game preserves its mounted board, revalidates access and wa
     await page.screenshot({path:`/tmp/neuroia-resume-modal-${width}.png`});
   }
   await resume.getByRole('button',{name:'Continuar actividad'}).click();
+  await page.evaluate(()=>{
+    document.querySelector('.game-help-button').focus();
+    window.dispatchEvent(new Event('focus'));
+  });
   await page.clock.runFor(1200);
+  await expect(resume).toHaveCount(0);
   expect(await timer.textContent()).not.toBe(before);
   const after=await timer.textContent();
   await page.evaluate(()=>{
@@ -589,7 +613,8 @@ test('returning to a game preserves its mounted board, revalidates access and wa
   await expect(resume).toBeVisible();
   await resume.getByRole('button',{name:'Continuar actividad'}).click();
   await page.evaluate(()=>{window.failAccess=true;window.dispatchEvent(new Event('offline'));});
-  await expect(page.getByRole('dialog',{name:'Vamos a reconectar'})).toBeVisible();
+  await expect(resume).toBeVisible();
+  await expect(resume.getByRole('button',{name:'Reintentar'})).toBeVisible();
   await expect(page.locator('.game-session')).toBeHidden();
   await page.evaluate(()=>{window.failAccess=false;});
   await page.getByRole('button',{name:'Reintentar',exact:true}).click();
@@ -609,13 +634,24 @@ test('search fills three stages only after completing each board', async ({page}
   for(let round=0;round<3;round++) {
     const cells=page.locator('.scanning-cell');
     const count=await cells.count();
+    const boardBefore=await page.locator('.scanning-grid').boundingBox();
     for(let i=0;i<count;i++) {
       await cells.nth(i).click();
       if(await page.locator('.exercise-result').count()) break;
     }
     await expect(bar).toHaveAttribute('aria-valuenow',String(round+1));
     expect(await bar.locator('i').evaluateAll(items=>items.filter(e=>e.style.width==='100%').length)).toBe(round+1);
-    if(round<2) await page.getByRole('button',{name:'Continuar',exact:true}).click();
+    if(round<2) {
+      const boardAfter=await page.locator('.scanning-grid').boundingBox();
+      expect(boardAfter).toEqual(boardBefore);
+      const button=page.getByRole('button',{name:'Continuar',exact:true});
+      const buttonBox=await button.boundingBox();
+      const barBox=await bar.boundingBox();
+      expect(Math.abs(buttonBox.x-barBox.x)).toBeLessThan(1);
+      expect(Math.abs(buttonBox.width-barBox.width)).toBeLessThan(1);
+      await page.screenshot({path:`/tmp/neuroia-stable-next-${round}.png`});
+      await button.click();
+    }
   }
   await expect(page.locator('.exercise-result')).toBeVisible();
 });
@@ -635,7 +671,137 @@ test('every board fits below its fixed title and progress without page scrolling
       const area=await page.locator('.exercise-viewport').boundingBox();
       const board=await page.locator('.game-playground').boundingBox();
       expect(board.y+board.height).toBeLessThanOrEqual(area.y+area.height+2);
+      await expect.poll(() => page.evaluate(() => {
+        const board=document.querySelector('.game-playground').getBoundingClientRect();
+        const area=document.querySelector('.exercise-viewport').getBoundingClientRect();
+        return Math.abs((board.y+board.height/2)-(area.y+area.height/2));
+      }), {message:`${id} ${size.width} ${mode}`}).toBeLessThanOrEqual(2);
       if(!mode) await page.screenshot({path:`/tmp/neuroia-fitted-${id}-${size.width}.png`});
     }
   }
+});
+
+test('search marks incorrect objects red and clears feedback on the next board', async ({page}) => {
+  // Keep a known distractor before the final target, rather than depending on a random board.
+  await page.addInitScript(() => { Math.random = () => 0.5; });
+  for (const width of [390, 820, 1280]) {
+    await page.setViewportSize({width,height:844});
+    await page.goto(fixture+'?game=visual-scanning');
+    await page.getByRole('button',{name:'Empezar a jugar'}).click();
+    const cells = page.locator('.scanning-cell');
+    for (let index=0; index<await cells.count(); index++) {
+      await cells.nth(index).click();
+      if (await page.locator('.cell-incorrect').count()) break;
+    }
+    const wrong=page.locator('.cell-incorrect').first();
+    await expect(wrong).toHaveAttribute('aria-label','Este objeto no es el que buscas');
+    await expect(wrong).toHaveCSS('background-color','rgb(244, 217, 211)');
+    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow','0');
+    await page.screenshot({path:`/tmp/neuroia-search-incorrect-${width}.png`});
+    const boardBefore=await page.locator('.scanning-grid').boundingBox();
+    for(let index=0;index<await cells.count();index++) await cells.nth(index).click();
+    expect(await page.locator('.scanning-grid').boundingBox()).toEqual(boardBefore);
+    const next=page.getByRole('button',{name:'Continuar',exact:true});
+    const nextBox=await next.boundingBox();
+    const progressBox=await page.getByRole('progressbar').boundingBox();
+    expect(Math.abs(nextBox.width-progressBox.width)).toBeLessThan(1);
+    await page.screenshot({path:`/tmp/neuroia-next-reserved-${width}.png`});
+    await next.click();
+    await expect(page.locator('.cell-incorrect')).toHaveCount(0);
+  }
+});
+
+test('daily home preserves its named three-game session after returning and reloading', async ({page}) => {
+  await page.goto(fixture);
+  const names=await page.locator('.editorial-today-games strong').allTextContents();
+  const title=await page.locator('.editorial-hero h2').textContent();
+  expect(names).toHaveLength(3);
+  expect(new Set(names).size).toBe(3);
+  expect(names).not.toContain(title);
+  for(const width of [390,820,1280]) {
+    await page.setViewportSize({width,height:844});
+    await page.getByRole('button',{name:'Jugar',exact:true}).click();
+    await expect(page.locator('#game-instruction-title')).toHaveText(names[0]);
+    await page.getByRole('button',{name:'Volver',exact:true}).click();
+    await expect(page.locator('.editorial-hero h2')).toHaveText(title);
+    expect(await page.locator('.editorial-today-games strong').allTextContents()).toEqual(names);
+    await page.screenshot({path:`/tmp/neuroia-named-session-${width}.png`});
+  }
+  await page.reload();
+  await expect(page.locator('.editorial-hero h2')).toHaveText(title);
+  expect(await page.locator('.editorial-today-games strong').allTextContents()).toEqual(names);
+});
+
+test('completion and level gain use compact responsive surfaces with working exits', async ({page}) => {
+  await page.addInitScript(()=>{Math.random=()=>0.5;});
+  for(const size of [{width:390,height:844},{width:820,height:1180},{width:1280,height:800},{width:844,height:390}]) {
+    await page.setViewportSize(size);
+    await page.goto(fixture+'?game=visual-scanning');
+    await page.getByRole('button',{name:'Empezar a jugar'}).click();
+    for(let round=0;round<3;round++) {
+      const cells=page.locator('.scanning-cell');
+      for(let i=0;i<await cells.count();i++) {
+        await cells.nth(i).click();
+        if(await page.locator('.exercise-result').count()) break;
+      }
+      if(round<2) await page.getByRole('button',{name:'Continuar',exact:true}).click();
+    }
+    await expect(page.getByRole('heading',{name:'Actividad completada'})).toBeVisible();
+    await expect(page.locator('.result-message')).toHaveText('Busca la figura · Nivel 1');
+    await expect(page.locator('.game-completion-art')).toHaveCount(0);
+    expect(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1)).toBe(true);
+    await page.screenshot({path:`/tmp/neuroia-completion-${size.width}.png`});
+    await page.getByRole('button',{name:'Repetir',exact:true}).click();
+    await expect(page.getByRole('button',{name:'Empezar a jugar'})).toBeVisible();
+    await page.goto(fixture+'?level-up');
+    const trigger=page.getByRole('button',{name:'Simular resultado'});
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await trigger.click();
+    const dialog=page.getByRole('dialog',{name:'Un nuevo nivel'});
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByLabel('Has pasado del nivel 2 al nivel 3')).toBeVisible();
+    await page.mouse.click(1,1);
+    await expect(dialog).toBeVisible();
+    await page.screenshot({path:`/tmp/neuroia-level-up-${size.width}.png`});
+    await dialog.getByRole('button',{name:'Continuar',exact:true}).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+  }
+});
+
+test.describe('target miss feedback', () => {
+  test.use({hasTouch:true});
+  test('red circle follows mouse and touch misses without counting target taps twice', async ({page}) => {
+    for (const size of [{width:390,height:844},{width:820,height:1180},{width:844,height:390}]) {
+      await page.setViewportSize(size);
+      await page.goto(fixture+'?game=motor-target');
+      await page.getByRole('button',{name:'Empezar a jugar'}).click();
+      const arena=page.locator('.motor-touch-arena');
+      const bounds=await arena.boundingBox();
+      const x=bounds.x+32, y=bounds.y+32;
+      await page.mouse.click(x,y);
+      const circle=page.locator('.motor-miss-circle');
+      await expect(circle).toBeVisible();
+      const mark=await circle.boundingBox();
+      expect(Math.abs(mark.x+mark.width/2-x)).toBeLessThan(2);
+      expect(Math.abs(mark.y+mark.height/2-y)).toBeLessThan(2);
+      await expect(circle).toHaveCSS('border-top-color','rgb(170, 97, 86)');
+      await page.screenshot({path:`/tmp/neuroia-target-miss-${size.width}.png`});
+      await expect(circle).toHaveCount(0);
+      await page.touchscreen.tap(x,y);
+      await expect(circle).toBeVisible();
+      await expect(circle).toHaveCount(0);
+      const target=page.getByRole('button',{name:'Tocar diana de coordinación'});
+      for(let hit=0;hit<5;hit++) {
+        await expect(target).toBeVisible();
+        await target.tap();
+        await expect(circle).toHaveCount(0);
+      }
+      await expect(page.getByRole('heading',{name:'Actividad completada'})).toBeVisible();
+      const results=JSON.parse(await page.getByTestId('results').textContent());
+      expect(results).toHaveLength(1);
+      expect(results[0].correctAnswers).toBe(5);
+      expect(results[0].totalQuestions).toBe(7);
+    }
+  });
 });

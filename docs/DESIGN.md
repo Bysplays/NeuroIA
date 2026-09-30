@@ -82,11 +82,15 @@ content clearance and safe-area spacing so the final action remains reachable.
 The header contains the brand, labelled Muse connection, sound, settings and
 visible sign-out. Mi cuenta also offers sign-out and access management.
 
-Hoy keeps copy minimal: a greeting and actual streak, “Para hoy” with the featured
-game title and “Jugar”, a “Tu sesión de hoy” list containing game names only, and icon-led
+Hoy keeps copy minimal: a greeting and actual streak, “Para hoy” with a named three-game
+session and “Jugar”, a “Tu sesión de hoy” list containing game names only, and icon-led
 area shortcuts. Do not repeat greetings with an eyebrow or supporting slogan,
 repeat area labels under every game, or add descriptions under area shortcuts.
-Use short concrete labels: “Explorar”, “Ver todos”. The suggested games open individually.
+Use short concrete labels: “Explorar”, “Ver todos”. The three list entries open
+individually; the featured Jugar starts their complete sequence. Each of the 56
+unordered triples has its own explicit Spanish title. Account identity and local
+calendar day determine the session and its order, independently of completed games
+or profile updates. Returning home or reloading must not reshuffle it.
 Do not add fake map progress, completion counts or placeholders for patient data.
 
 The authenticated home's featured Jugar action spans its entire title column with
@@ -257,6 +261,13 @@ unselected levels and existing history.
 
 ## Game instructions, play and feedback
 
+Visual search keeps incorrectly selected distractors softly red, with a red border
+and an accessible incorrect label until the next board. Found targets retain their
+green feedback; neither state changes the target or advances a phase on its own.
+Reserve the search continuation action below the fitted board before it becomes
+visible, aligned to the same width and gutters as segmented progress. Completing
+a board must not move or resize its objects.
+
 Each game starts with a full instruction page using `ExerciseIllustration`: eight
 distinct blue-and-white compositions tied to each interaction (search, naming,
 letters, sequence, pairs, sorting, target and tracking). Never reuse the login/home
@@ -273,7 +284,11 @@ opens a compact Cómo jugar modal, preserves answers and pauses the existing gam
 Leaving the tab or window during active play pauses the game clock and retains
 answers. On return, revalidate access without resetting navigation, then show a
 compact “¿Seguimos?” dialog with “Tu actividad está pausada.” and “Continuar actividad”. Escape/backdrop must not
-restart the clock; only the explicit action resumes. This return dialog is distinct
+restart the clock; only the explicit action resumes. Internal focus changes from
+buttons or dialog dismissal must not trigger a new pause or access refresh. During
+active play, access revalidation stays inside this same mounted dialog: disable
+its primary action while checking, offer retry on failure, and enable Continuar
+actividad only after server confirmation. Never swap it for a second recovery modal. This return dialog is distinct
 from the retired fatigue/rest screen and does not appear on game introductions.
 
 Active play has utilities/time above the task, a clear stimulus and response area,
@@ -281,7 +296,9 @@ and reachable assistance/back/next controls. Use the shared GameSession and
 ExerciseWrapper; do not fork navigation, timers or results. Boards may reflow and
 active boards must fit the remaining viewport without page scrolling. Keep the
 navigation, title and segmented progress anchored at the top, with modest spacing
-above and below the title. Uniformly scale only the playground when necessary;
+above and below the title. Vertically center each playground in its available area,
+after reserving continuation controls even before they appear. Uniformly scale only
+the playground when necessary;
 keep footer controls outside it. Keep complete motor hit areas inside their measured arenas.
 
 - Search: retain the exact target and all matching objects.
@@ -291,6 +308,8 @@ keep footer controls outside it. Keep complete motor hit areas inside their meas
   counted hint with an early-end control. Matching and mismatching are visible.
 - Categorization: preserve group identity and clear selected/answer states.
 - Targets/tracking: preserve pointer contact, keyboard interaction and arena bounds.
+  Missed target taps show a soft red circle at the actual contact point for 900 ms
+  of active play, including scaled boards. The indicator never intercepts input.
 
 Use in-place answer states rather than success popups or praise narration. Preserve
 spoken instructions, object names and corrective content when needed by the task.
@@ -299,7 +318,15 @@ height and a right arrow; never bounce it. Secondary controls have restrained
 borders. Touch audio uses a quiet sine tone with smooth attack/release; correct
 answers use a brief low-volume two-note cue. Audio starts muted on each page load. The sound toggle explicitly enables
 effects and narration; muting stops speech and effects. Restored profile audio
-settings must not automatically unmute the page. Completion retains the existing result and daily-plan callbacks.
+settings must not automatically unmute the page. Completion retains the existing result and daily-plan callbacks. The completion
+page uses the brand and completed progress above a centered check, activity name
+and played level. Three unboxed metrics show actual answers, accuracy and active
+time; a full-width primary action precedes a restrained Repetir control. No legacy
+mascot, confetti or oversized decorative card. Short landscape uses two columns
+to preserve readable text and controls. Level gains use the shared compact white
+notification modal, a heading with an upward icon, the exercise name and the actual
+previous-to-new level in a pale blue strip. Keep its corners subtle and omit bounce
+animations; Continuar dismisses it without changing the underlying activity.
 
 ## Responsive and accessible behavior
 
