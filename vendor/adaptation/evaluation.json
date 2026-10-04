@@ -1,0 +1,23 @@
+{
+  "scope": "synthetic held-out seeds only",
+  "metrics": {
+    "ppo": {
+      "episodes": 100,
+      "meanReward": 0.781749753415538,
+      "meanAccuracyDeviation": 0.053600061646115485,
+      "changeFraction": 0.15399999999999997
+    },
+    "hold": {
+      "episodes": 100,
+      "meanReward": -0.1340092912501743,
+      "meanAccuracyDeviation": 0.2835023228125436,
+      "changeFraction": 0.0
+    },
+    "threshold": {
+      "episodes": 100,
+      "meanReward": 0.7796574388622449,
+      "meanAccuracyDeviation": 0.05433095278443879,
+      "changeFraction": 0.12074999999999997
+    }
+  }
+}

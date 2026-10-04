@@ -1,6 +1,7 @@
 import { summarizeEvidence } from './evidenceSummary.ts';
 import type { EvidenceChunk } from './sessionEvidence.ts';
 import type { ExerciseResult } from '../types/index.ts';
+import { readAdaptationDecision } from './adaptivePolicy.ts';
 
 /** Export measurements, not identity or clinical narrative. Fresh ordinal attempt
  * references deliberately omit UID, session/result IDs, wall timestamps, free
@@ -31,6 +32,7 @@ export function buildEvidenceExport(chunks: EvidenceChunk[], results: ExerciseRe
       mode:start?.mode ?? null, level:start?.level ?? null,
       status:summary.status, issues:summary.issues, measurements:summary.metrics,
       resultSaved:summary.status==='completed' ? linked : null,
+      adaptation:linked ? readAdaptationDecision(saved[0].adaptation) : null,
       eegWindows:summary.status==='invalid' ? null : summary.events.filter(event=>event.kind==='eeg').map(event=>({activeMs:event.activeMs,channels:event.frame.channels})),
     };
   });

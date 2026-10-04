@@ -7,6 +7,7 @@ import { firestoreProgress } from '../src/services/firestoreProgress.ts';
 import { getInitialProfile } from '../src/services/storageService.ts';
 import { patientProgress } from '../src/services/progressData.ts';
 import { loadEvidencePage, loadEvidenceExport } from '../src/services/evidenceArchive.ts';
+import { decideAdaptation } from '../src/services/adaptivePolicy.ts';
 
 let env;
 before(async () => {
@@ -16,6 +17,23 @@ before(async () => {
 after(async () => { await env?.cleanup(); });
 const fresh = () => patientProgress({ profile: getInitialProfile(), history: [] });
 const op = id => ({ id: `result:${id}`, kind: 'result', result: { id, exerciseId: 'visual-scanning', domain: 'attention', date: '2026-09-16T12:00:00.000Z', durationSeconds: 60, accuracy: 100, score: 10, correctAnswers: 1, totalQuestions: 1, feedbackMessage: '' } });
+
+test('proposal learned decisions persist with results and retries do not apply another level change',async()=>{
+  const uid='learned-policy';const db=env.authenticatedContext(uid).firestore();const backend=firestoreProgress(uid,db);
+  await backend.initialize(fresh());
+  await env.withSecurityRulesDisabled(async context=>{
+    await updateDoc(doc(context.firestore(),`users/${uid}/progress/main`),{'data.profile.gameLevels':{'visual-scanning':{level:5,evidence:[]}}});
+  });
+  const vector=Array(40).fill(0);vector[0]=1;vector[8]=4/9;vector[9]=1;vector[13]=1;
+  const decision=decideAdaptation({vector,level:5,eligible:true},{locked:false,mode:'normal',baseLevel:5});
+  assert.equal(decision.action,-1);
+  const operation=op('learned-result');Object.assign(operation.result,{level:5,configVersion:1,adaptation:JSON.stringify(decision)});
+  await backend.commit(operation);await backend.commit(operation);
+  assert.equal((await backend.load()).profile.gameLevels['visual-scanning'].level,4);
+  assert.equal((await backend.load()).profile.totalSessions,1);
+  assert.deepEqual(JSON.parse((await getDoc(doc(db,`users/${uid}/results/learned-result`))).data().adaptation),{...decision,application:'applied'});
+  await assertFails(setDoc(doc(db,`users/${uid}/results/oversized-policy`),{...operation.result,adaptation:'x'.repeat(12001)}));
+});
 
 test('proposal evidence export paginates beyond 200 documents and enforces isolation and cancellation', async () => {
   const uid='evidence-export';

@@ -1,5 +1,6 @@
 import { placementExercises, validPlacementPreferences, type PlacementPreferences } from './placementPreferences.ts';
 import { readEvidenceChunk, type EvidenceChunk } from './sessionEvidence.ts';
+import { readAdaptationDecision } from './adaptivePolicy.ts';
 import { adaptDifficulty, applyPlacement, applyPlacementPreferences, applyPlacementStage, hasPlacement, EXERCISE_IDS, type PlacementTrial, type PlacementStage } from './difficulty.ts';
 import type { ExerciseId } from '../types/index.ts';
 import type { AccessibilitySettings, ExerciseResult, UserProfile } from '../types/index.ts';
@@ -17,12 +18,15 @@ export type ProgressOperation =
 
 /** Same exercise counters as local storage; safe to call repeatedly in a transaction. */
 export function applyProgressOperation(data: ProgressData, operation: ProgressOperation): ProgressData {
+  return reduceProgressOperation(data,operation).data;
+}
+export function reduceProgressOperation(data: ProgressData, operation: ProgressOperation): { data: ProgressData; result?: ExerciseResult } {
   const next = structuredClone(data);
   const profile = next.profile;
   if (operation.kind === 'evidence') {
     if (!readEvidenceChunk(operation.chunk).length || operation.id !== `evidence:${operation.chunk.sessionId}:${operation.chunk.firstSequence}`) throw Error('invalid-evidence-operation');
     // Detailed evidence is archived independently; never grow the recent profile.
-    return next;
+    return {data:next};
   }
   if (operation.kind === 'placement') {
     if ('trials' in operation) {
@@ -43,7 +47,7 @@ export function applyProgressOperation(data: ProgressData, operation: ProgressOp
     } else if ('preferences' in operation) applyPlacementPreferences(profile, operation.preferences);
     else if ('stage' in operation) applyPlacementStage(profile, operation.exerciseId, operation.stage);
     else applyPlacement(profile, operation.exerciseId, operation.trial);
-    return next;
+    return {data:next};
   }
   if (operation.kind === 'settings') {
     if (operation.name !== undefined) {
@@ -52,13 +56,15 @@ export function applyProgressOperation(data: ProgressData, operation: ProgressOp
       profile.name = name;
     }
     profile.settings = { ...profile.settings, ...operation.settings };
-    return next;
+    return {data:next};
   }
   const result = structuredClone(operation.result);
-  if (next.history.some(item => item.id === result.id)) return next;
+  if (next.history.some(item => item.id === result.id)) return {data:next};
   result.accuracy = Math.min(100, Math.max(0, result.accuracy));
   result.correctAnswers = Math.min(result.totalQuestions, Math.max(0, result.correctAnswers));
-  adaptDifficulty(profile, result);
+  const application=adaptDifficulty(profile, result);
+  const decision=readAdaptationDecision(result.adaptation);
+  if(decision && application) result.adaptation=JSON.stringify({...decision,application});
   const date = result.date.slice(0, 10);
   if (date > profile.lastActiveDate) {
     const days = Math.round((Date.parse(date) - Date.parse(profile.lastActiveDate)) / 86400000);
@@ -78,7 +84,7 @@ export function applyProgressOperation(data: ProgressData, operation: ProgressOp
   domain.history.push({ date: result.date, accuracy: result.accuracy, score: result.score });
   domain.history = domain.history.slice(-60);
   next.history = [result, ...next.history].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 60);
-  return next;
+  return {data:next,result};
 }
 
 /** Clinical access is a separate future feature, never imported from local demo data. */

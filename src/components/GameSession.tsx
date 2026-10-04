@@ -1,5 +1,6 @@
 import { SessionEvidenceContext } from '../services/sessionEvidenceContext';
 import { createSessionEvidence } from '../services/sessionEvidence';
+import { decideAdaptation } from '../services/adaptivePolicy';
 import { ModalFrame } from './ModalFrame';
 import { useAccessSuspended } from '../services/accountAccessContext';
 import { Brand } from './Brand';
@@ -20,7 +21,7 @@ import { getExerciseById, getExercisesForDomain } from '../services/exerciseCata
 import type { CognitiveDomain, ExerciseId } from '../types';
 import { soundService } from '../services/soundService';
 
-export function GameSession({ id, step, progressScope, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true, autoStart = false, onSettings, onSkip }: { progressScope?: { before: number; after: number }; onSettings?: () => void; onSkip?: () => void; autoStart?: boolean; id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
+export function GameSession({ id, step, progressScope, onBack, children, initialLevel = 1, mode = 'normal', paused = false, lockedLevel = false, nextReady = true, autoStart = false, onSettings, onSkip, adaptationEnabled = import.meta.env.VITE_PROPOSAL_ADAPTATION === 'true' }: { adaptationEnabled?: boolean; progressScope?: { before: number; after: number }; onSettings?: () => void; onSkip?: () => void; autoStart?: boolean; id: string; initialLevel?: number; mode?: GameMode; paused?: boolean; lockedLevel?: boolean; nextReady?: boolean; step?: string; onBack: () => void; children: ReactNode }) {
   const accessSuspended = useAccessSuspended();
   const panel = useViewportPanel<HTMLDivElement>();
   const [assistanceTarget, setAssistanceTarget] = useState<HTMLDivElement | null>(null);
@@ -34,6 +35,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
 
   const [eeg, setEeg] = useState<EegRecording>();
   const [level, setLevel] = useState(initialLevel);
+  const [baseLevel] = useState(initialLevel);
   const config = gameConfig(level, mode);
   const [clock] = useState(createGameClock);
   const [started, setStarted] = useState(autoStart);
@@ -56,6 +58,8 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
   useLayoutEffect(() => { if (started) evidence?.start(config.level, mode, lockedLevel); }, [evidence, started, config.level, mode, lockedLevel]);
   const leave = () => { evidence?.abandon('back'); onBack(); };
   const recordHelp = () => { evidence?.hint(); evidence?.flush(); };
+  const adaptation = () => adaptationEnabled && evidence
+    ? JSON.stringify(decideAdaptation(evidence.observation(),{locked:lockedLevel,mode,baseLevel})) : undefined;
 
   const [seconds, setSeconds] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -116,7 +120,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     }, 1000);
     return () => clock.clearInterval(timer);
   }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started, run, evidence]);
-  return <SessionContext.Provider value={{ config, evidence, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { evidence?.abandon('leave'); recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setRun(value => value + 1); setStarted(true); finish(false); setHelp(false); setSeconds(0); } }}>
+  return <SessionContext.Provider value={{ config, evidence, adaptation, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { evidence?.abandon('leave'); recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setRun(value => value + 1); setStarted(true); finish(false); setHelp(false); setSeconds(0); } }}>
     <div className={`game-session${started ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
     {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>

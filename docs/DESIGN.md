@@ -20,6 +20,14 @@ are recorded in DESIGN-CONCEPTS.md. Reference patterns, not their branded assets
 
 ## Color, type and surfaces
 
+The proposal's separately enabled learned-adaptation trial changes the suggested
+default only after a completed exercise, for a new entry to that game. Never
+change the current board, answer keys or touch targets mid-response. Repeat keeps
+the explicitly chosen level, and professional proposals retain their assigned
+levels. LLM recommendations remain optional suggestions; they are not the learned
+controller. The current controller is simulation-trained and stays disabled for
+production pending the validation gates in PROPOSAL.md.
+
 When proposal evidence collection is enabled, Historial includes a quiet
 “Exportar datos de evaluación” action below its ordinary history controls.
 Explain that it exports all saved evaluation records independently of filters,

@@ -1,4 +1,5 @@
 import { validMuseFeatureFrame, type MuseFeatureFrame } from './museFeatures.ts';
+import { createAdaptationObservation } from './adaptationObservation.ts';
 
 export type EvidenceEvent = {
   sequence: number;
@@ -84,6 +85,7 @@ export function createSessionEvidence(options: {
 }) {
   if (!identifier(options.sessionId) || !identifier(options.exerciseId)) throw Error('invalid-evidence-identity');
   const wallNow = options.wallNow ?? (() => new Date());
+  const observation = createAdaptationObservation(options.exerciseId);
   let next = 0, pending: EvidenceEvent[] = [], started = false, closed = false;
   let stimulus: { id: string; since: number } | undefined;
   let trackingMs = 0, contactMs = 0;
@@ -104,7 +106,7 @@ export function createSessionEvidence(options: {
     const event = { ...payload, sequence: next, activeMs: now(), at: wallNow().toISOString() } as EvidenceEvent;
     // Fail at creation, never silently discard a malformed event during export.
     if (!readEvidenceChunk({version:1,sessionId:options.sessionId,exerciseId:options.exerciseId,firstSequence:next,count:1,events:JSON.stringify([event])}).length) throw Error('invalid-session-evidence');
-    pending.push(event); next++;
+    pending.push(event); next++; observation.add(event);
   };
   const flushTracking = () => {
     if (Math.round(trackingMs) > 0) {
@@ -114,6 +116,7 @@ export function createSessionEvidence(options: {
   };
   return {
     id: options.sessionId,
+    observation:()=>observation.snapshot(now()),
     start(level: number, mode: 'normal'|'placement'|'practice', locked: boolean) {
       if (started || closed) return;
       emit({kind:'start',level,configVersion:1,mode,locked}); started = true; flush();

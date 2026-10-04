@@ -7,6 +7,7 @@ import { ProfessionalDashboard } from '../../src/components/ProfessionalDashboar
 import { RecommendationFixture } from './recommendation-fixture';
 import { LevelUpScreen } from '../../src/components/LevelUpScreen';
 import type { ProgressData } from '../../src/services/progressData';
+import { applyProgressOperation } from '../../src/services/progressData';
 import { InformationPage, type InformationKind } from "../../src/components/InformationPage";
 // Browser-only fixture. No production entry imports this file, no authenticated writes.
 import { useState } from "react";
@@ -49,6 +50,7 @@ export function Fixture() {
   const [profile, setProfile] = useState(() => {
     const p = getInitialProfile();
     p.name = "Lucía";
+    if (query.has('adaptive') && query.get('game')) p.gameLevels = {[query.get('game')!]:{level:Number(query.get('level')||1),evidence:[]}};
     if (query.has('activity-demo')) p.gameLevels = { 'visual-scanning': { level: 4, evidence: [] }, 'memory-path': { level: 6, evidence: [] } };
     p.settings.fontSize = query.has("large") ? "xlarge" : "normal";
     p.settings.contrast = query.has("contrast") ? "high-contrast" : "standard";
@@ -101,12 +103,13 @@ export function Fixture() {
         <GameSession
           key={game}
           id={game}
+          adaptationEnabled={query.has('adaptive')}
           onBack={back}
           onSettings={() => setSettings(true)}
           paused={settings}
           progressScope={query.has("plan") ? { before: 2, after: 3 } : undefined}
           lockedLevel={query.has("assigned")}
-          initialLevel={Number(query.get("level") || 1)}
+          initialLevel={query.has('adaptive') ? profile.gameLevels?.[game]?.level ?? 1 : Number(query.get("level") || 1)}
           mode={query.has("placement") ? "placement" : "normal"}
           autoStart={query.has("placement")}
         >
@@ -114,7 +117,10 @@ export function Fixture() {
             id={game}
             profile={profile}
             onBack={back}
-            onSaveResult={(result) => setResults((value) => [...value, result])}
+            onSaveResult={(result) => {
+              setResults((value) => [...value, result]);
+              if(query.has('adaptive')) setProfile(value=>applyProgressOperation({profile:value,history:results},{id:`result:${result.id}`,kind:'result',result}).profile);
+            }}
           />
         </GameSession>
         </main>
@@ -166,6 +172,7 @@ export function Fixture() {
       <output data-testid="results" hidden>
         {JSON.stringify(results)}
       </output>
+      <output data-testid="levels" hidden>{JSON.stringify(profile.gameLevels)}</output>
       </div>
       </SessionEvidenceContext.Provider>
     </>

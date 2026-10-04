@@ -1,6 +1,7 @@
 import { placementExercises, validPlacementPreferences, type PlacementPreferences } from './placementPreferences.ts';
 import { validAssessmentLevel, type AssessmentLevel } from './placementAssessment.ts';
 import type { ExerciseId, ExerciseResult, UserProfile } from '../types/index.ts';
+import { readAdaptationDecision, decisionMatchesExercise } from './adaptivePolicy.ts';
 
 export const DIFFICULTY_VERSION = 1;
 export const EXERCISE_IDS: ExerciseId[] = ['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking'];
@@ -103,6 +104,18 @@ export function applyPlacementStage(profile: UserProfile, id: ExerciseId, stage:
 
 export function adaptDifficulty(profile: UserProfile, result: ExerciseResult) {
   const id = result.exerciseId as ExerciseId;
+  if(result.adaptation!==undefined) {
+    const decision=readAdaptationDecision(result.adaptation);
+    const current=profile.gameLevels?.[id];
+    if(decision?.reason==='policy' && decisionMatchesExercise(decision,id) && current?.level===decision.fromLevel
+      && result.level===decision.fromLevel && result.configVersion===DIFFICULTY_VERSION && result.totalQuestions>0 && !result.practice && !result.assignmentId) {
+      current.level=decision.nextLevel; current.evidence=[]; current.qualifyingRuns=0;
+      return 'applied' as const;
+    }
+    // A blocked/stale/invalid learned decision must never fall through to the
+    // legacy promotion rule. Concurrent newer levels remain authoritative.
+    return decision?.reason==='policy' && current && current.level!==decision.fromLevel ? 'stale' as const : 'blocked' as const;
+  }
   if (result.configVersion !== DIFFICULTY_VERSION
     || result.practice === true || !validLevel(result.level) || result.totalQuestions <= 0 || !EXERCISE_IDS.includes(id)) return;
   // A previously unassessed game acquires a practice level only after actual play.

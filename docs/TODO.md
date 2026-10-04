@@ -74,6 +74,9 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   `VITE_PROPOSAL_EVIDENCE`.
 - [ ] Implement and integrate a learned adaptive policy, training/export provenance,
   bounded decisions, EEG-optional operation and professional-level protection.
+  PPO simulation training, deterministic browser inference, bounded result-boundary
+  integration and application audit are implemented behind a separate flag. Real
+  calibration, scientific reward approval and pilot evaluation remain mandatory.
 - [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
 - [ ] Complete real-user and hardware pilot evidence and scientific interpretation

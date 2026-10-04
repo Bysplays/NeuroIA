@@ -220,6 +220,17 @@ and tracking records active contact windows. Result links use optional
 at most once per active second.
 `evidenceSummary.ts` validates contiguous session events across chunks before
 exposing metrics; invalid logs and unfinished attempts never count as completions.
+`adaptationObservation.ts` derives bounded recent response/contact observations and
+independent baseline-relative spectral features. `adaptivePolicy.ts` runs the
+versioned PPO actor exported from `scripts/adaptation/train.py`; its current model
+is trained on simulation and has not passed real-user acceptance. A separate
+`VITE_PROPOSAL_ADAPTATION=true` flag (also requiring evidence collection) enables
+end-of-exercise decisions. `difficulty.ts` applies verified decisions only against
+the same current base level and excludes professional assignments. The reducer
+returns the normalized result as well as bounded progress so the immutable archive
+retains application outcome even when an old result falls outside the latest 60.
+Never replace the model silently or present simulated evaluation as pilot evidence;
+reproduction, independent parity and activation gates are in docs/PROPOSAL.md.
 `evidenceArchive.ts` paginates evidence/results from the server with cancellation;
 `evidenceExport.ts` omits account/session/result IDs, wall timestamps and free text.
 `EvidenceExportButton` exposes the complete evaluation download from Historial
