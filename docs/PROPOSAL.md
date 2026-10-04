@@ -469,7 +469,7 @@ Tests include a 2 → 3 → 2 attempt with different timings, an intentionally d
 result-level field, duplicate archive pages, separate UI/PDF blocks and one unique
 session count. This prepares accounting for the controller; it does not yet connect
 live round transitions or change ordinary activity speed/level charts. Those charts
-and persistence still need the mixed-level result contract in the game integration.
+still need rendered mixed-level presentation; persistence now has the contract below, awaiting game integration.
 
 
 ## Durable round decision audit
@@ -486,3 +486,24 @@ windows and an emulator case checks durable retries and archive reconstruction.
 These APIs are not yet called by GameSession: live integration and the final mixed-
 level result/profile contract remain open. A recorded local decision is not proof
 of a server-confirmed profile adjustment.
+
+
+## Mixed-level result persistence
+
+`roundResult.ts` defines bounded `roundAdaptation` result metadata: starting profile
+level, ordered played levels, final actor decision and transaction application
+outcome. Full intermediate observations stay in the event archive. The reducer
+removes the single `level` field for mixed play, preventing fixed-level charts and
+legacy promotion rules from mislabelling it. A constant-level trace retains its
+actual level. The final recommendation applies only to an unchanged starting
+profile level; assigned, manual and non-normal play remain protected. A final
+insufficient-evidence hold can retain an earlier within-session change. Repeated
+result receipts do not apply the change twice.
+
+The metadata is self-reported, not an attestation. Evaluation exports additionally
+reconcile all played levels and the final decision with the reconstructed event
+chain; mismatches do not count as correctly registered results. Firestore accepts
+the new bounded field with a required evidence link and rejects simultaneous old
+and new adaptation payloads. Publish these rules before enabling game integration.
+The contract is tested in the reducer and demo emulator; GameSession and game
+handlers still need to create these traces at actual task boundaries.

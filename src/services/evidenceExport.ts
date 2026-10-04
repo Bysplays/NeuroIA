@@ -1,3 +1,4 @@
+import {readRoundResult} from './roundResult.ts';
 import {summarizeSaveEvidence} from './saveEvidence.ts';
 import { summarizeEvidence } from './evidenceSummary.ts';
 import type { EvidenceChunk } from './sessionEvidence.ts';
@@ -26,6 +27,12 @@ export function buildEvidenceExport(chunks: EvidenceChunk[], results: ExerciseRe
     const saved=summary.resultId ? resultGroups.get(summary.resultId) ?? [] : [];
     const linked=saved.length>0 && saved.every(result => result.evidenceSessionId===summary.sessionId && result.exerciseId===summary.exerciseId)
       && new Set(saved.map(result=>JSON.stringify(result))).size===1;
+    const roundResult=linked?readRoundResult(saved[0].roundAdaptation):null;
+    const lastDecision=summary.rounds?.at(-1)?.decision;
+    const roundResultVerified=linked&&saved[0].roundAdaptation!==undefined ? Boolean(roundResult&&lastDecision
+      &&summary.rounds?.length===roundResult.levels.length
+      &&summary.rounds.every((round,i)=>round.level===roundResult.levels[i]&&round.nextStarted===(i<roundResult.levels.length-1))
+      &&Object.keys(lastDecision).every(key=>JSON.stringify(lastDecision[key as keyof typeof lastDecision])===JSON.stringify(roundResult.finalDecision[key as keyof typeof lastDecision]))) : null;
     const start=summary.events.find(event=>event.kind==='start');
     // Do not echo unvalidated archive exercise names or arbitrary record fields.
     const allowed=['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
@@ -33,7 +40,8 @@ export function buildEvidenceExport(chunks: EvidenceChunk[], results: ExerciseRe
       mode:start?.mode ?? null, level:start?.level ?? null,
       status:summary.status, issues:summary.issues, measurements:summary.metrics, levelMeasurements:summary.levelMeasurements,
       rounds:summary.rounds?.map((round,index)=>({round:index+1,level:round.level,decision:round.decision,nextStarted:round.nextStarted}))??null,
-      resultSaved:summary.status==='completed' ? linked : null,
+      resultSaved:summary.status==='completed' ? linked&&roundResultVerified!==false : null,
+      roundResult,roundResultVerified,
       adaptation:linked ? readAdaptationDecision(saved[0].adaptation) : null,
       eegWindows:summary.status==='invalid' ? null : summary.events.filter(event=>event.kind==='eeg').map(event=>({activeMs:event.activeMs,channels:event.frame.channels})),
     };

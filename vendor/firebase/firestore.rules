@@ -229,7 +229,8 @@ service cloud.firestore {
     function validExerciseResult(value) {
       return value.keys().hasOnly(['id', 'exerciseId', 'domain', 'date',
           'durationSeconds', 'accuracy', 'score', 'correctAnswers', 'totalQuestions',
-          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice', 'assignmentId', 'assignmentStep', 'assignmentOwnerId', 'assignmentSeatId', 'eeg', 'ppg', 'evidenceSessionId', 'adaptation'])
+          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice', 'assignmentId', 'assignmentStep', 'assignmentOwnerId', 'assignmentSeatId', 'eeg', 'ppg', 'evidenceSessionId', 'adaptation', 'roundAdaptation'])
+        && (!('roundAdaptation' in value) || (value.roundAdaptation is string && value.roundAdaptation.size() > 0 && value.roundAdaptation.size() <= 14000 && !('adaptation' in value) && ('evidenceSessionId' in value)))
         && (!('adaptation' in value) || (value.adaptation is string && value.adaptation.size() > 0 && value.adaptation.size() <= 12000))
         && (!('evidenceSessionId' in value) || (value.evidenceSessionId is string && value.evidenceSessionId.matches('[a-zA-Z0-9:_-]{1,128}')))
         && (!('eeg' in value) || validEeg(value.eeg))

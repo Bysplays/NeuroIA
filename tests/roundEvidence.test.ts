@@ -1,3 +1,4 @@
+import {encodeRoundResult} from '../src/services/roundResult.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createSessionEvidence,readEvidenceChunk,type EvidenceChunk} from '../src/services/sessionEvidence.ts';
@@ -50,4 +51,14 @@ test('preparing a tracking boundary flushes the last partial window before infer
  const observation=r.prepareRoundDecision();assert.equal(observation.vector[14],2000/3500);
  r.roundDecision('contact','contact-release',decideAdaptation(observation,{locked:false,mode:'normal',baseLevel:2}));r.finish('tracking-result');
  assert.equal(summarizeEvidence(chunks).status,'completed');assert.equal(summarizeEvidence(chunks).metrics?.trackingMs,3500);
+});
+
+test('round result metadata must reconcile with the archived transitions before counting a registered result',()=>{
+ const {chunks,first,second}=fixture();
+ const roundAdaptation=encodeRoundResult([{round:'first',boundary:'search-board',decision:first,nextStarted:true},{round:'second',boundary:'search-board',decision:second,nextStarted:false}],5);
+ const result={id:'result',exerciseId:'visual-scanning',evidenceSessionId:'round-evidence',roundAdaptation} as ExerciseResult;
+ const valid=buildEvidenceExport(chunks,[result],true);assert.equal(valid.attempts[0].roundResultVerified,true);assert.equal(valid.counts.registeredNormalCompleted,1);
+ const altered=JSON.parse(roundAdaptation);altered.levels[0]=first.nextLevel;
+ const invalid=buildEvidenceExport(chunks,[{...result,roundAdaptation:JSON.stringify(altered)}],true);
+ assert.equal(invalid.attempts[0].roundResultVerified,false);assert.equal(invalid.counts.registeredNormalCompleted,0);
 });

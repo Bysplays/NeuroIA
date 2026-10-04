@@ -894,3 +894,10 @@ Round evidence uses explicit `round-start`/`round-decision` events. Call
 actor observations are replayed during reconstruction. Local decision application
 remains `pending`; export `nextStarted` only proves that a subsequent round began,
 not a cloud profile update. These recorder APIs await GameSession integration.
+
+`roundResult.ts` owns compact mixed-level result metadata (`roundAdaptation`),
+separate from legacy single-decision `adaptation`. The reducer normalizes the
+single-level field, protects concurrent profile changes and records the transaction
+outcome. Full intermediate actor observations remain in evidence events. Export
+checks the compact trace against those events before counting registration. The
+new result field needs the updated Firestore rules before game integration is enabled.

@@ -1,3 +1,4 @@
+import {normalizeRoundResult} from './roundResult.ts';
 import {validSaveEvent,type SaveEvent} from './saveEvidence.ts';
 import {validReportEvent,type ReportEvent} from './reportLifecycle.ts';
 import { placementExercises, validPlacementPreferences, type PlacementPreferences } from './placementPreferences.ts';
@@ -71,10 +72,12 @@ export function reduceProgressOperation(data: ProgressData, operation: ProgressO
     return {data:next};
   }
   const result = structuredClone(operation.result);
+  const roundSummary=normalizeRoundResult(result);
   if (next.history.some(item => item.id === result.id)) return {data:next};
   result.accuracy = Math.min(100, Math.max(0, result.accuracy));
   result.correctAnswers = Math.min(result.totalQuestions, Math.max(0, result.correctAnswers));
   const application=adaptDifficulty(profile, result);
+  if(roundSummary&&application)result.roundAdaptation=JSON.stringify({...roundSummary,application});
   const decision=readAdaptationDecision(result.adaptation);
   if(decision && application) result.adaptation=JSON.stringify({...decision,application});
   const date = result.date.slice(0, 10);

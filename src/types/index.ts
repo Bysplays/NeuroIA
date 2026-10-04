@@ -90,6 +90,7 @@ export interface MistakeDetail {
 export interface ExerciseResult {
   evidenceSessionId?: string;
   adaptation?: string;
+  roundAdaptation?: string;
   eeg?: import('../services/eegData').EegRecording;
   ppg?: import('../services/eegData').EegRecording;
   id: string;

@@ -1,3 +1,4 @@
+import {encodeRoundResult,readRoundResult} from '../src/services/roundResult.ts';
 import {loadPracticeAdherence} from '../src/services/practiceScheduleArchive.ts';
 import {loadReportEvidenceExport} from '../src/services/reportEvidenceArchive.ts';
 import { test, before, after } from 'node:test';
@@ -793,4 +794,24 @@ test('round transition audit survives durable retries and archive reconstruction
   assert.equal(exported.attempts[0].rounds[0].decision.nextLevel,decision.nextLevel);
   assert.equal(exported.attempts[0].rounds[0].nextStarted,true);assert.equal(exported.attempts[0].rounds[1].nextStarted,false);
   assert.equal((await backend.load()).profile.totalSessions,1);
+});
+
+
+test('mixed round result commits its final level atomically and preserves the retry audit',async()=>{
+  const uid='mixed-round-result',db=env.authenticatedContext(uid).firestore(),backend=firestoreProgress(uid,db);
+  const initial=fresh();initial.profile.gameLevels={'visual-scanning':{level:5,evidence:[]}};
+  await backend.initialize(initial);
+  await env.withSecurityRulesDisabled(async context=>{await updateDoc(doc(context.firestore(),`users/${uid}/progress/main`),{'data.profile.gameLevels':{'visual-scanning':{level:5,evidence:[]}}});});
+  const vector=Array(40).fill(0);vector[0]=1;vector[8]=4/9;vector[9]=1;vector[13]=1;
+  const first=decideAdaptation({vector,level:5,eligible:true},{locked:false,mode:'normal',baseLevel:5});
+  const finalVector=Array(40).fill(0);finalVector[0]=1;finalVector[8]=(first.nextLevel-1)/9;
+  const final=decideAdaptation({vector:finalVector,level:first.nextLevel,eligible:false},{locked:false,mode:'normal',baseLevel:first.nextLevel});
+  const operation=op('mixed-result');Object.assign(operation.result,{level:5,configVersion:1,evidenceSessionId:'mixed-trace',roundAdaptation:encodeRoundResult([
+    {round:'first',boundary:'search-board',decision:first,nextStarted:true},{round:'last',boundary:'search-board',decision:final,nextStarted:false}],5)});
+  await backend.commit(operation);await backend.commit(operation);
+  const saved=(await getDoc(doc(db,`users/${uid}/results/mixed-result`))).data();
+  assert.equal(saved.level,undefined);assert.equal(readRoundResult(saved.roundAdaptation).application,'applied');
+  const profile=(await backend.load()).profile;assert.equal(profile.totalSessions,1);assert.equal(profile.gameLevels['visual-scanning'].level,first.nextLevel);
+  await assertFails(setDoc(doc(db,`users/${uid}/results/oversized-round`),{...saved,roundAdaptation:'x'.repeat(14001)}));
+  await assertFails(setDoc(doc(db,`users/${uid}/results/dual-round`),{...saved,adaptation:JSON.stringify(first)}));
 });

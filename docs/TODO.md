@@ -89,7 +89,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   the PDF now separate measured stimulus levels without inflating session counts.
   Round events now preserve decisions and replay observations during archive
   validation, including next-round start evidence. Game integration and mixed-level
-  result/history/profile accounting remain open. Real
+  result/history presentation remain open. The mixed-level result contract now
+  omits a false single level, applies the final recommendation transactionally
+  against the original profile level and reconciles its archive trace; its rules
+  are not deployed. Real
   calibration, scientific reward approval and pilot evaluation remain mandatory.
 - [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
   Server report attempts now persist start/generated/failure/cancellation outcomes
