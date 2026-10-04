@@ -212,6 +212,10 @@ durable queue/receipt protocol and archives immutable bounded chunks under
 increments completed-exercise totals. Rules bound the JSON envelope; readers
 must use `readEvidenceChunk` and treat values as self-reported. New rules require
 emulator verification and separate publication before enabling collection.
+`VITE_PROPOSAL_EVIDENCE=true` enables the GameSession provider; leave it unset
+until those rules are published. Response hooks currently cover scanning, naming,
+word completion, categorization and motor targets only. Result links use optional
+`evidenceSessionId`; memory and tracking input coverage remains in docs/TODO.md.
 
 Firestore is authoritative for signed-in progress. `users/{uid}/progress/main`
 contains the profile and latest 60 results; `users/{uid}/results/{resultId}` retains

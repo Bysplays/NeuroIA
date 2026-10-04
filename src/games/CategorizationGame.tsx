@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { selectPool, CLASSIFICATION_POOL, categoryChoices, CATEGORY_NAMES } from '../services/gameObjectPool';
 import type { GameConfig } from '../services/difficulty';
 import { useGameSession } from '../services/gameSession';
@@ -56,6 +57,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   const { clock, config, assistanceTarget } = useGameSession();
   const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => createItems(config));
   const [currentIdx, setCurrentIdx] = useState(0);
+  const responseEvidence = useResponseEvidence(`question-${currentIdx}`);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
@@ -84,6 +86,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
 
     setSelectedCategory(categoryId);
     const correct = categoryId === currentItem.correctCategoryId;
+    responseEvidence.respond(correct);
 
     if (correct) {
       soundService.playSuccess();

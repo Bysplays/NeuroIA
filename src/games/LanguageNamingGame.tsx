@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { selectPool, namingChoices } from '../services/gameObjectPool';
 import type { GameConfig } from '../services/difficulty';
 import { useGameSession } from '../services/gameSession';
@@ -44,6 +45,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   // Preguntas seleccionadas al azar para esta sesión
   const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>(() => createQuestions(config));
   const [currentIdx, setCurrentIdx] = useState(0);
+  const responseEvidence = useResponseEvidence(`question-${currentIdx}`);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -76,6 +78,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
     setSelectedOption(option);
     const correct = option === currentQ.word;
+    responseEvidence.respond(correct);
 
     if (correct) {
       soundService.playSuccess();

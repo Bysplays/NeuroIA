@@ -65,7 +65,11 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
 
 - [ ] Preserve four EEG channels and spectral/quality features end to end, including
   live/history views, compatible persistence, authorization and deletion.
-- [ ] Add response-level timing and explicit outcomes across all eight games.
+- [ ] Complete response-level timing and explicit outcomes across all eight games.
+  Gated hooks now cover scanning, naming, word completion, categorization and
+  motor targets; memory path/pairs, continuous tracking, hints and evidence
+  readers/exports remain. Publish archive/result-link rules before enabling
+  `VITE_PROPOSAL_EVIDENCE`.
 - [ ] Implement and integrate a learned adaptive policy, training/export provenance,
   bounded decisions, EEG-optional operation and professional-level protection.
 - [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.

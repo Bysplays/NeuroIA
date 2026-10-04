@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { selectPool, completionRound, GAME_OBJECT_POOL } from '../services/gameObjectPool';
 import type { GameConfig } from '../services/difficulty';
 import { useGameSession } from '../services/gameSession';
@@ -46,6 +47,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   const { clock, config } = useGameSession();
   const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => createWords(config));
   const [currentIdx, setCurrentIdx] = useState(0);
+  const responseEvidence = useResponseEvidence(`question-${currentIdx}`);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -85,6 +87,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
 
     setSelectedLetter(letter);
     const correct = letter === targetLetter;
+    responseEvidence.respond(correct);
     setIsCorrect(correct);
 
     if (correct) {

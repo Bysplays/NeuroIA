@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { shuffle } from '../services/gameObjectPool';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
@@ -139,6 +140,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
+  const responseEvidence = useResponseEvidence(`board-${completedTargets}`, !isCompleted);
 
   const initRound = () => {
     const next = createRound(config);
@@ -151,6 +153,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   const handleItemClick = (item: GridItem) => {
     if (item.found || isCompleted || foundCount >= totalTargets) return;
 
+    responseEvidence.respond(item.isTarget, item.isTarget && foundCount + 1 === totalTargets);
     if (item.isTarget) {
       soundService.playSuccess();
       const updated = items.map(i => (i.id === item.id ? { ...i, found: true } : i));

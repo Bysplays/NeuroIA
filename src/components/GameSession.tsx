@@ -1,3 +1,5 @@
+import { SessionEvidenceContext } from '../services/sessionEvidenceContext';
+import { createSessionEvidence } from '../services/sessionEvidence';
 import { ModalFrame } from './ModalFrame';
 import { useAccessSuspended } from '../services/accountAccessContext';
 import { Brand } from './Brand';
@@ -11,7 +13,7 @@ import { useViewportPanel } from '../services/viewport';
 import { gameConfig, type GameMode } from '../services/difficulty';
 import { SessionContext } from '../services/gameSession';
 import { ExerciseIllustration } from './ExerciseIllustration';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Minus, Plus, CircleHelp, Clock, Settings2, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { createGameClock } from '../services/gameClock';
 import { getExerciseById, getExercisesForDomain } from '../services/exerciseCatalog';
@@ -46,6 +48,14 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     return () => document.removeEventListener('visibilitychange', visibility);
   }, []);
   const [run, setRun] = useState(0);
+  const evidenceBackend = useContext(SessionEvidenceContext);
+  const evidence = useMemo(() => evidenceBackend ? createSessionEvidence({
+    sessionId: `${run}-${crypto.randomUUID()}`, exerciseId: id, activeNow: clock.performanceNow,
+    sink: chunk => evidenceBackend.enqueue({id:`evidence:${chunk.sessionId}:${chunk.firstSequence}`,kind:'evidence',chunk}),
+  }) : undefined, [evidenceBackend, id, clock, run]);
+  useLayoutEffect(() => { if (started) evidence?.start(config.level, mode, lockedLevel); }, [evidence, started, config.level, mode, lockedLevel]);
+  const leave = () => { evidence?.abandon('back'); onBack(); };
+
   const [seconds, setSeconds] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const helpButton = useRef<HTMLButtonElement>(null);
@@ -98,7 +108,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     }, 1000);
     return () => clock.clearInterval(timer);
   }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started, run]);
-  return <SessionContext.Provider value={{ config, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setRun(value => value + 1); setStarted(true); finish(false); setHelp(false); setSeconds(0); } }}>
+  return <SessionContext.Provider value={{ config, evidence, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { evidence?.abandon('leave'); recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setRun(value => value + 1); setStarted(true); finish(false); setHelp(false); setSeconds(0); } }}>
     <div className={`game-session${started ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
     {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>
@@ -119,7 +129,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         <button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setStarted(true); setHelp(false); }}>{started ? 'Continuar jugando' : 'Empezar a jugar'}</button></div>
         </div>
       </div>
-      <footer className="instruction-navigation">{!lockedLevel && <button className="entry-toolbar-action" onClick={onBack}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}<button className="paper-nav-button instruction-listen" onClick={() => soundService.speak(instruction)}><Volume2 size={20} aria-hidden="true"/>Escuchar</button>{step && <span className="instruction-step soft-label">{step}</span>}</footer>
+      <footer className="instruction-navigation">{!lockedLevel && <button className="entry-toolbar-action" onClick={leave}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>}<button className="paper-nav-button instruction-listen" onClick={() => soundService.speak(instruction)}><Volume2 size={20} aria-hidden="true"/>Escuchar</button>{step && <span className="instruction-step soft-label">{step}</span>}</footer>
     </section>}
     {started && <div className="game-session-play">
       {completed && <header className="viewport-session-header"><Brand/></header>}
@@ -131,7 +141,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
       {!completed && <EegLive recording={eeg} ppg={ppg} eegMean={recorder.mean()} ppgMean={ppgRecorder.mean()} recordable={mode === 'normal'}/>}
       {children}
       {!completed && <footer className="viewport-session-footer">
-        <button className="entry-toolbar-action" onClick={onBack}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>
+        <button className="entry-toolbar-action" onClick={leave}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>
         <div className="viewport-assistance-row">
           <div ref={setAssistanceTarget}/>
           {id !== 'categorization' && <button className="paper-nav-button" onClick={() => soundService.speak(instruction)}><Volume2 size={20}/>Escuchar</button>}
@@ -139,7 +149,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         </div>
         <div className="viewport-navigation-row">
           {mode !== 'placement' && <span className="soft-label">Nivel {level}</span>}
-          {onSkip && <button className="entry-toolbar-action" onClick={onSkip}>Omitir<ArrowRight size={18} aria-hidden="true"/></button>}
+          {onSkip && <button className="entry-toolbar-action" onClick={() => { evidence?.abandon('skip'); onSkip(); }}>Omitir<ArrowRight size={18} aria-hidden="true"/></button>}
         </div>
       </footer>}
     </div>}

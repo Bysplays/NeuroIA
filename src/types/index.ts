@@ -88,6 +88,7 @@ export interface MistakeDetail {
 }
 
 export interface ExerciseResult {
+  evidenceSessionId?: string;
   eeg?: import('../services/eegData').EegRecording;
   ppg?: import('../services/eegData').EegRecording;
   id: string;

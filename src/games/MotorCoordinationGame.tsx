@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { useGameSession } from '../services/gameSession';
 import { PaperTarget } from '../components/PaperTarget';
 import React, { useState } from 'react';
@@ -53,6 +54,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
   const [targets, setTargets] = useState<TargetPosition[]>(() => generateRandomTargets(totalTargets, targetSize));
   const [targetIdx, setTargetIdx] = useState(0);
+  const responseEvidence = useResponseEvidence(`target-${targetIdx}`);
   const [touches, setTouches] = useState<{ x: number; y: number; id: number }[]>([]);
   const [accuracySum, setAccuracySum] = useState(0);
   const [misses, setMisses] = useState(0);
@@ -83,6 +85,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     e.stopPropagation();
     if (isCompleted) return;
 
+    responseEvidence.respond(true);
     soundService.playSuccess();
 
     const newTouch = { x: currentTarget.x, y: currentTarget.y, id: targetIdx };
@@ -124,6 +127,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
   const handleArenaClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isCompleted) return;
+    responseEvidence.respond(false, false);
     const bounds = event.currentTarget.getBoundingClientRect();
     setMissPoints(points => [...points, {
       x: Math.max(0, Math.min(100, (event.clientX - bounds.left) / bounds.width * 100)),

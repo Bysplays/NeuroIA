@@ -1,3 +1,4 @@
+import { SessionEvidenceContext } from './services/sessionEvidenceContext';
 import { useAssignedRecommendation } from './services/useAssignedRecommendation';
 import { dailySession } from './services/dailySession';
 import { exerciseStages } from './services/sessionProgress';
@@ -239,6 +240,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
     <>
     {information && <InformationPage kind={information} onBack={() => setInformation(null)}/>}
     <div hidden={information !== null}>
+    <SessionEvidenceContext.Provider value={import.meta.env.VITE_PROPOSAL_EVIDENCE === 'true' ? sync : null}>
     <div className={`app-root ${isPlayingGame ? 'app-root-focus-mode' : ''}`}>
       {!placement && !isPlayingGame && (
         <Header
@@ -303,6 +305,7 @@ const Workspace: React.FC<{ uid: string; onSignOut: () => void; signingOut: bool
       />
 
     </div>
+    </SessionEvidenceContext.Provider>
     </div>
     </>
   );

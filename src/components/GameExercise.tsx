@@ -25,5 +25,5 @@ const games: Record<ExerciseId, ComponentType<Props>> = {
 export function GameExercise({ id, ...props }: Props & { id: ExerciseId }) {
   const session = useGameSession();
   const Game = games[id];
-  return <Game {...props} onSaveResult={result => { const eeg = session.eegResult?.(); const ppg = session.ppgResult?.(); props.onSaveResult({ ...result, ...(eeg ? { eeg } : {}), ...(ppg ? { ppg } : {}) }); }} />;
+  return <Game {...props} onSaveResult={result => { session.evidence?.finish(result.id); const eeg = session.eegResult?.(); const ppg = session.ppgResult?.(); props.onSaveResult({ ...result, ...(session.evidence ? { evidenceSessionId: session.evidence.id } : {}), ...(eeg ? { eeg } : {}), ...(ppg ? { ppg } : {}) }); }} />;
 }

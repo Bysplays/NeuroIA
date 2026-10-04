@@ -1,3 +1,6 @@
+import { SessionEvidenceContext } from '../../src/services/sessionEvidenceContext';
+import type { ProgressOperation } from '../../src/services/progressData';
+import type { EvidenceChunk } from '../../src/services/sessionEvidence';
 import { ProfessionalDashboard } from '../../src/components/ProfessionalDashboard';
 import { RecommendationFixture } from './recommendation-fixture';
 import { LevelUpScreen } from '../../src/components/LevelUpScreen';
@@ -29,6 +32,12 @@ import "../../src/index.css";
 import "../../src/interface.css";
 import "../../src/games.css";
 const query = new URLSearchParams(location.search);
+const evidenceChunks: EvidenceChunk[] = [];
+Object.assign(window, {evidenceChunks});
+const evidenceBackend = { enqueue(operation: ProgressOperation) {
+  if (operation.kind === 'evidence') evidenceChunks.push(structuredClone(operation.chunk));
+} };
+
 soundService.setSoundEnabled(false);
 soundService.speak = (_text, end) => {
   queueMicrotask(() => end?.());
@@ -82,6 +91,7 @@ export function Fixture() {
   return (
     <>
       {information && <InformationPage kind={information} onBack={() => setInformation(null)}/>}
+      <SessionEvidenceContext.Provider value={query.has('evidence') ? evidenceBackend : null}>
       <div hidden={information !== null} className={`app-root ${game ? 'app-root-focus-mode' : ''}`}>
       {game ? (
         <main className="main-content main-content-focus">
@@ -154,6 +164,7 @@ export function Fixture() {
         {JSON.stringify(results)}
       </output>
       </div>
+      </SessionEvidenceContext.Provider>
     </>
   );
 }

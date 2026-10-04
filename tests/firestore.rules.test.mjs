@@ -16,6 +16,21 @@ after(async () => { await env?.cleanup(); });
 const fresh = () => patientProgress({ profile: getInitialProfile(), history: [] });
 const op = id => ({ id: `result:${id}`, kind: 'result', result: { id, exerciseId: 'visual-scanning', domain: 'attention', date: '2026-09-16T12:00:00.000Z', durationSeconds: 60, accuracy: 100, score: 10, correctAnswers: 1, totalQuestions: 1, feedbackMessage: '' } });
 
+test('proposal result links round-trip and malformed evidence identities are denied', async () => {
+  const uid = 'proposal-result-link';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  await backend.initialize(fresh());
+  const operation = op('linked-result');
+  operation.result.evidenceSessionId = '0-attempt-123';
+  await backend.commit(operation);
+  assert.equal((await backend.load()).history[0].evidenceSessionId, '0-attempt-123');
+  assert.equal((await getDoc(doc(db, `users/${uid}/results/linked-result`))).data().evidenceSessionId, '0-attempt-123');
+  for (const value of ['', 'invalid/path', 123, 'x'.repeat(129)]) {
+    await assertFails(setDoc(doc(db, `users/${uid}/results/invalid-link`), {...operation.result, evidenceSessionId:value}));
+  }
+});
+
 test('password accounts must verify email before progress, trials, invitations or professional entry', async () => {
   const uid = 'email-account';
   for (const email_verified of [false, undefined]) {

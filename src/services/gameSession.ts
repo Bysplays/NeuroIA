@@ -4,6 +4,7 @@ import type { createGameClock } from './gameClock';
 
 export const SessionContext = createContext<{
   config: GameConfig;
+  evidence?: ReturnType<typeof import('./sessionEvidence').createSessionEvidence>;
   progressScope?: { before: number; after: number };
   eegResult?: () => import('./eegData').EegRecording | undefined;
   ppgResult?: () => import('./eegData').EegRecording | undefined;
