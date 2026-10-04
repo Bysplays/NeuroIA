@@ -790,3 +790,9 @@ Report evaluation tooling lives in `scripts/evaluation/`: versioned synthetic ca
 offline-by-default provider runner and hash-bound review/KPI aggregation. See
 `vendor/openrouter/README.md` for offline/live commands and measurement definitions.
 Do not present mock generation timings or schema checks as factuality or pilot evidence.
+
+`vendor/cloudflare/reportEvidence.mjs` owns the optional server report-attempt ledger
+and caller-only paginated read endpoint. `PROPOSAL_REPORT_EVIDENCE` defaults off.
+Generated means a server-validated narrative, never a confirmed PDF download or
+human-approved report. Client Firestore access is denied; deletion locks guard
+writes and every page. See `vendor/cloudflare/README.md` for measurement boundaries.

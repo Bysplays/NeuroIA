@@ -124,8 +124,9 @@ npm run test:interface -- tests/interface/activity-ai.spec.mjs tests/interface/a
 The combined Firestore command in CONTRIBUTING also covers the real REST adapter
 for nested profile/history and archived results. Existing Firestore rules deny
 client reads/writes to the server-only quota path; no new client authorization rule
-is needed. Recursive account deletion covers that subcollection. Reports are
-downloaded only, so no additional database archive/retention schema is introduced.
+is needed. Recursive account deletion covers that subcollection. Report content remains download-only. The optional proposal report-attempt ledger
+stores server operational metadata without drafts; see the Worker guide for its
+flag, pagination, authorization and deletion contract.
 
 ## Reproducible report evaluation
 

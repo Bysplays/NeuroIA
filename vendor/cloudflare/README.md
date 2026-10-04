@@ -258,3 +258,38 @@ removes it. Existing rules deny client access without a new rule deployment.
 Include `node --experimental-strip-types --test vendor/cloudflare/ai.test.mjs`
 with the Worker checks. The shared TypeScript evidence module is bundled by
 Wrangler; real nested Firestore retrieval is covered by the combined demo suite.
+
+### Proposal report operational evidence
+
+`PROPOSAL_REPORT_EVIDENCE=true` enables server-owned report attempt records; it is
+absent/disabled in the production configuration. `reportEvidence.mjs` wraps only
+authorized report generation, not daily recommendations. Before activity retrieval
+or provider work it writes a UUID record under the caller's
+`users/{uid}/reportAttempts/{attemptId}`. A terminal transaction records generated,
+failed or cancelled, the source/quota/provider/validation/authorization stage,
+HTTP status and monotonic elapsed milliseconds. Generated records retain prompt
+version and source hash, but no draft, prompt, participant ID, name or free text.
+The model is the configured model, not a claim about provider routing internals.
+
+A failed initial evidence write prevents provider work. A failed final write
+returns an error and leaves the existing start with unknown outcome; it is never
+silently counted as a successful report. Deletion locks are checked in both
+transactions, preventing recreation of a deleted account subtree. Recursive
+account deletion includes this collection. Firestore client access remains denied.
+These records measure authorized server attempts while the flag is enabled, not
+all button presses, unsent requests, PDF downloads or professional review.
+
+Authenticated POST `/ai/report-evidence` accepts `{}` or `{ "cursor": "..." }` and
+returns only the caller's records, at most 25 per page, with `nextCursor`. It accepts
+no target account selector and needs no current paid access to retrieve the caller's
+own operational history. Account deletion is checked before and after each page.
+Consume pages until the cursor is null, deduplicate by the random `attemptId`, and
+retain `invalid` rows in coverage. Opaque cursors belong to this API; the export
+omits Firestore paths and source hashes. Dates and model versions remain operational
+metadata, not legally anonymous data. Pagination is not an atomic snapshot.
+
+Do not derive the memory's automation or preparation-time KPI from `generated`.
+Client PDF lifecycle telemetry, reviewed synthesis units and paired manual/assisted
+preparation times remain separate requirements. Generation failures before
+successful start persistence are also absent from this ledger, so an independent
+pilot register remains necessary for completeness claims.

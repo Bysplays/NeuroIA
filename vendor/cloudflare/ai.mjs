@@ -1,3 +1,4 @@
+import { withReportEvidence } from './reportEvidence.mjs';
 import { INSIGHTS_VERSION, buildActivityInsights, validAiNarrative, validInsightFilters } from '../../src/services/activityInsights.ts';
 import { activityMessages, PROMPT_VERSION, RESPONSE_FORMAT, ZERO_DATA_RETENTION } from '../openrouter/prompts.mjs';
 
@@ -59,14 +60,20 @@ export async function generateAnalysis(actor, input, env, db, confirmedAccess, s
     || input.consent !== 'activity-summary-v1' || !['recommendations', 'report'].includes(input.mode)
     || typeof input.targetUid !== 'string' || !validInsightFilters(input.filters)) fail(400, 'Revisa la selección y confirma el envío del resumen de actividad.');
   await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
+  return withReportEvidence(actor, input.mode, env, db, signal, context => generateAuthorizedAnalysis(actor, input, env, db, confirmedAccess, signal, fetcher, context));
+}
+async function generateAuthorizedAnalysis(actor, input, env, db, confirmedAccess, signal, fetcher, context) {
   const source = await db.readActivity(input.targetUid);
   const insights = buildActivityInsights(source.history, source.levels, input.filters, { partial: source.partial, tapsOnly: source.tapsOnly });
   insights.limitations.push('La IA consulta como máximo las 400 partidas más recientes del archivo y los registros recientes conservados en el perfil. Solo incluye datos ya sincronizados.');
   if (!insights.count) fail(422, 'No hay partidas válidas guardadas en esta selección. Revisa los filtros o espera a que se sincronicen.');
   signal?.throwIfAborted();
+  context.stage = 'authorization';
   // Recheck after reading, before any disclosure and before charging the quota.
   await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
+  context.stage = 'quota';
   await reserveGeneration(actor, env, db, Date.now(), input.mode);
+  context.stage = 'provider';
   const abort = AbortSignal.any([...(signal ? [signal] : []), AbortSignal.timeout(25000)]);
   const endpoint = env.OPENROUTER_REGION === 'eu' ? 'https://eu.openrouter.ai/api/v1/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
   let result;
@@ -92,6 +99,7 @@ export async function generateAnalysis(actor, input, env, db, confirmedAccess, s
     if (error.status) throw error;
     fail(503, 'El análisis se ha interrumpido o ha tardado demasiado. Puedes volver a intentarlo.');
   }
+  context.stage = 'validation';
   let narrative;
   try {
     if (result.error || result.choices?.[0]?.finish_reason !== 'stop') throw Error();
@@ -99,8 +107,10 @@ export async function generateAnalysis(actor, input, env, db, confirmedAccess, s
   } catch { fail(502, 'No se ha podido comprobar el borrador de IA. Usa la plantilla o vuelve a intentarlo.'); }
   if (!validAiNarrative(narrative, insights)) fail(502, 'El borrador no cumple el formato o las referencias requeridas. Usa la plantilla o vuelve a intentarlo.');
   signal?.throwIfAborted();
+  context.stage = 'authorization';
   // Revocation, expiry and deletion during generation must not release a late result.
   await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
+  context.stage = 'complete';
   const snapshotHash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(insights)))), b => b.toString(16).padStart(2, '0')).join('');
   return { narrative, insights, provenance: { generatedAt: new Date().toISOString(), model: typeof result.model === 'string' ? result.model : env.OPENROUTER_MODEL,
     promptVersion: PROMPT_VERSION, snapshotHash, mode: input.mode } };

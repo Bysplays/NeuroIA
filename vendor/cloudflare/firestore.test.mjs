@@ -1,3 +1,4 @@
+import {withReportEvidence,readReportEvidence} from './reportEvidence.mjs';
 import { startTrial, requestDeletion, processDeletion } from './accountLifecycle.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -26,6 +27,19 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  await put(`users/${aiUid}/results/archive`,{id:'archived',date:'2026-09-20T12:00:00Z',exerciseId:'memory-pairs'});
  const source=await db.readActivity(aiUid);
  assert.deepEqual(source.history.map(r=>r.id),['imported','archived']);assert.equal(source.levels['memory-pairs'].level,4);assert.equal(source.tapsOnly,true);assert.equal(source.partial,true);
+
+ const reportEnv={PROPOSAL_REPORT_EVIDENCE:'true',OPENROUTER_MODEL:'fixture/model'};
+ await withReportEvidence(aiUid,'report',reportEnv,db,undefined,async context=>{context.stage='complete';return {provenance:{promptVersion:'fixture-v1',snapshotHash:'a'.repeat(64)}};});
+ await Promise.all(Array.from({length:27},()=>put(`users/${aiUid}/reportAttempts/${crypto.randomUUID()}`,{version:1,status:'started',startedAt:123,model:'fixture/model'})));
+ const reportFirst=await readReportEvidence(aiUid,{},db);
+ assert.equal(reportFirst.records.length,25);assert.ok(reportFirst.nextCursor);
+ const reportSecond=await readReportEvidence(aiUid,{cursor:reportFirst.nextCursor},db);
+ const reportRows=[...reportFirst.records,...reportSecond.records];
+ assert.equal(reportRows.length,28);assert.equal(reportSecond.nextCursor,null);
+ assert.equal(new Set(reportRows.map(row=>row.attemptId)).size,28);
+ assert.equal(reportRows.filter(row=>row.status==='generated').length,1);
+ assert.equal(reportRows.filter(row=>row.invalid).length,0);
+ await db.erase(reportRows.map(row=>`users/${aiUid}/reportAttempts/${row.attemptId}`));
  await db.erase([`users/${aiUid}/progress/main`,`users/${aiUid}/results/archive`]);
  await db.transaction(uid,(access,billing,patch)=>{assert.deepEqual(access,{});assert.deepEqual(billing,{});patch(0,{kind:'trial',trialStartedAt:123});patch(1,{attempt:'original',count:0});});
  await Promise.all(Array.from({length:2},()=>db.transaction(uid,async(_a,b,patch)=>{await new Promise(r=>setTimeout(r,50));patch(1,{count:b.count+1});})));
@@ -64,6 +78,7 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  await db.runTransaction(async tx=>{
    tx.set(`users/${deletedUid}/results/a`,{value:'private'},false);
    tx.set(`users/${deletedUid}/operations/a`,{value:'receipt'},false);
+   tx.set(`users/${deletedUid}/reportAttempts/a`,{version:1,status:'started'},false);
    tx.set(`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`,{patientId:deletedUid},false);
  });
  assert.ok(await db.nextDeletion() === undefined);
@@ -77,8 +92,8 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
    if(job.phase==='done') break;
  }
  assert.deepEqual(deleted,[['delete',deletedUid]]);
- const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
- assert.deepEqual(remaining,[null,null,null,null]);
+ const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`users/${deletedUid}/reportAttempts/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
+ assert.deepEqual(remaining,[null,null,null,null,null]);
  await startTrial('recreated-'+deletedUid,email,lifecycleEnv,db);
  const resumedTrial=await db.runTransaction(tx=>tx.get(`users/recreated-${deletedUid}/access/main`));
  assert.equal(resumedTrial.kind,'trial');

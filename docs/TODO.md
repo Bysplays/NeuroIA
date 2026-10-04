@@ -81,6 +81,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   integration and application audit are implemented behind a separate flag. Real
   calibration, scientific reward approval and pilot evaluation remain mandatory.
 - [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
+  Server report attempts now persist start/generated/failure/cancellation outcomes
+  and monotonic timings, with own-account paginated retrieval and deletion locks.
+  The separate server flag defaults off. Client PDF/save outcomes, adherence
+  schedules and an independent pilot denominator remain open.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
   Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
   review forms and paired preparation/unit aggregation are implemented. Independent

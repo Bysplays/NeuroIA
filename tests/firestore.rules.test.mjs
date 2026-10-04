@@ -130,7 +130,7 @@ test('roles, clinical data, result edits/deletes and receipt forgery formats are
 });
 
 test('AI usage and daily recommendations are server-only even for the account owner', async () => {
-  for (const path of ['users/quota-owner/aiUsage/daily', 'users/quota-owner/aiRecommendations/player']) {
+  for (const path of ['users/quota-owner/aiUsage/daily', 'users/quota-owner/aiRecommendations/player', 'users/quota-owner/reportAttempts/attempt']) {
     await env.withSecurityRulesDisabled(async context => {
       await setDoc(doc(context.firestore(), path), { day: '2026-09-30', analysis: 'private-cache' });
     });
