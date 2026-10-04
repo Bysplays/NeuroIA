@@ -74,7 +74,7 @@ The new rules have not been deployed; never claim production event collection.
 | --- | --- | --- |
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
-| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded boundary decisions in all eight games and persistent application audit behind a separate flag | Finish mixed-level history presentation, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
+| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded boundary decisions in all eight games and persistent application audit behind a separate flag | Complete real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance; Gráficas and a separate whole-archive PDF appendix expose validated game/level response metrics separately from speed |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
@@ -496,9 +496,12 @@ allocation to level-specific previews or unobserved intervals is invented.
 
 Tests include a 2 → 3 → 2 attempt with different timings, an intentionally different
 result-level field, duplicate archive pages, separate UI/PDF blocks and one unique
-session count. All eight games use this accounting. Ordinary activity speed/level
-charts still need rendered mixed-level presentation; they do not assign a single
-level to these attempts.
+session count. All eight games use this accounting. History and the result detail now show played ranges and ordered changes. The
+general level chart retains one point at the last played level plus a min–max bar,
+using the known result date; it never invents round timestamps. Its explicitly labelled
+historical mean includes only constant-level sessions. Invalid linked metadata
+supplies no level, and a next-session recommendation is never plotted as played.
+Accuracy and speed remain whole-result/daily aggregates, not fabricated per-level values.
 
 
 ## Durable round decision audit

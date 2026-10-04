@@ -2114,3 +2114,6 @@ select option { background-color: var(--color-surface); color: var(--color-text-
 .response-metrics-list dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 0; }
 .response-metrics-list dt { font-size: .9rem; overflow-wrap: anywhere; }
 .response-metrics-list dd { margin: .3rem 0 0; font-weight: 700; overflow-wrap: anywhere; }
+
+.stats-played-level { display: block; margin-top: 4px; font-size: .8em; font-weight: 500; }
+.stats-played-levels p { overflow-wrap: anywhere; }

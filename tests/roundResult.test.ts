@@ -26,7 +26,7 @@ test('mixed result preserves counts, omits false single level and applies final 
  assert.equal(reduced.data.profile.gameLevels?.['language-naming']?.qualifyingRuns,0);
  assert.equal(reduced.result?.level,undefined);assert.equal(reduced.result?.totalQuestions,4);
  assert.equal(readRoundResult(reduced.result?.roundAdaptation)?.application,'applied');
- assert.equal(levelTimeline(reduced.data.history,'language-naming').length,0);
+ assert.deepEqual(levelTimeline(reduced.data.history,'language-naming').map(p=>[p.level,p.low,p.high]),[[4,4,5]]);
  const retry=reduceProgressOperation(reduced.data,{id:'result:mixed',kind:'result',result});
  assert.equal(retry.data.profile.totalSessions,1);assert.equal(retry.data.profile.gameLevels?.['language-naming']?.level,4);
  assert.equal(result.level,5);assert.equal(profile.gameLevels?.['language-naming']?.level,5);

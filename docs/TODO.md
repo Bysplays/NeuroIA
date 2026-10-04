@@ -95,7 +95,8 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   preserving counts and positions. Memory sequences and pairs now adopt new configs
   on Continue, preserving replay contents and counting actual completed deck sizes.
   Tracking now adopts size/speed on contact release with a fixed contact goal and
-  bounded round audit. Mixed-level history presentation remains open. The mixed-level result contract now
+  bounded round audit. History/detail and the general level chart now show the played range and ordered
+  changes; the chart point represents the last played level, never a recommendation. The mixed-level result contract now
   omits a false single level, applies the final recommendation transactionally
   against the original profile level and reconciles its archive trace; its rules
   are not deployed. Real

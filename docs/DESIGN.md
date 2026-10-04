@@ -60,6 +60,13 @@ When proposal evidence is enabled, Gráficas includes an explicitly loaded
 validated, result-linked normal sessions by game and recorded stimulus level; state that it uses the
 whole archive independently of activity filters. Show response-weighted mean time,
 incorrect attempts, active-opportunity help openings and separate prior selections.
+Ordinary history labels each result with its played level or range. Its detail shows
+ordered changes without inventing per-level duration. In the Niveles chart, one point
+per exercise marks the last played level and a capped vertical bar spans its minimum
+and maximum; use the known completion date, not synthetic round timestamps. The
+historical mean explicitly includes only constant-level sessions. A recommendation
+for future play must never appear as a played level. Invalid metadata displays
+“Nivel no registrado” and supplies no chart point.
 A mixed-level session can appear in multiple game/level blocks, while the total
 counts it only once; label the row count “Partidas con este nivel”. Never use the
 last or initial level to label all responses from that session. Continuous tracking

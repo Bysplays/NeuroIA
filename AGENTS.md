@@ -911,6 +911,13 @@ actor observations are replayed during reconstruction. Local decision applicatio
 remains `pending`; export `nextStarted` only proves that a subsequent round began,
 not a cloud profile update. These APIs are connected through liveRoundSession for the eight games.
 
+`levelStatistics.ts` validates compact round metadata on a copy before exposing
+played levels; malformed metadata does not fall back to a legacy single level.
+History and ExerciseAnalytics show ranges/ordered changes. The shared line chart
+supports min/max bars at the recorded result date; the point is the last played
+level and its labelled mean includes only constant-level sessions. Do not infer
+round durations or plot future recommendations as played levels.
+
 `roundResult.ts` owns compact mixed-level result metadata (`roundAdaptation`),
 separate from legacy single-decision `adaptation`. The reducer normalizes the
 single-level field, protects concurrent profile changes and records the transaction
