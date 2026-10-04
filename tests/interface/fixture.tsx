@@ -1,4 +1,5 @@
 import { SessionEvidenceContext } from '../../src/services/sessionEvidenceContext';
+import { EvidenceExportButton } from '../../src/components/EvidenceExportButton';
 import { eegService } from '../../src/services/eegService';
 import type { ProgressOperation } from '../../src/services/progressData';
 import type { EvidenceChunk } from '../../src/services/sessionEvidence';
@@ -68,6 +69,7 @@ export function Fixture() {
   const [accessAction, setAccessAction] = useState('');
   const [accessBusy, setAccessBusy] = useState(false);
   const back = () => setGame(undefined);
+  if (query.has('evidence-export') && !loggedOut) return <main className="main-content"><section className="stats-card"><button onClick={()=>setLoggedOut(true)}>Volver</button><EvidenceExportButton uid="fixture-evidence"/></section></main>;
   if (query.has('professional')) return <ProfessionalDashboard uid="fixture-owner" profile={profile} onSignOut={()=>setLoggedOut(true)} onUpdateSettings={()=>{}} onUpdateName={()=>{}}/>;
   if (query.has('recommendations')) return <RecommendationFixture profile={profile}/>;
   if (query.has('level-up')) return <LevelUpFixture/>;

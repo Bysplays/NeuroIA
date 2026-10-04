@@ -20,6 +20,13 @@ are recorded in DESIGN-CONCEPTS.md. Reference patterns, not their branded assets
 
 ## Color, type and surfaces
 
+When proposal evidence collection is enabled, Historial includes a quiet
+“Exportar datos de evaluación” action below its ordinary history controls.
+Explain that it exports all saved evaluation records independently of filters,
+omitting account identifiers and free text. Disable it while preparing data,
+show recoverable errors inline, and use the shared confirmation dialog with focus
+returned to the action after download. Leaving the view cancels preparation.
+
 The persisted `pageStyle: default` now means **Calma**; `cozy` remains the compatible
 **Papel** alternative. Keep the existing profile settings, independent contrast modes
 and hide-companions preference. Do not reset a user's appearance to introduce a design.

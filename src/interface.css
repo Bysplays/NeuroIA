@@ -2060,3 +2060,10 @@ select option { background-color: var(--color-surface); color: var(--color-text-
   .activity-assistant-actions { width: 100%; }
   .activity-assistant-actions .stats-quiet-button { flex: 1 1 180px; }
 }
+.stats-evidence-export {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+.stats-evidence-export > button { display: inline-flex; align-items: center; gap: .5rem; }
+.stats-evidence-export > p { margin: .75rem 0 0; }

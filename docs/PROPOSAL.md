@@ -54,8 +54,13 @@ are published. Recording-enabled fresh four-channel snapshots are archived at
 most once per active second, without repeating stale frames. `evidenceSummary.ts`
 reconstructs out-of-order/retried chunks, rejects conflicting or missing events,
 checks stimulus/latency links and distinguishes unfinished attempts from completed
-or abandoned ones. Invalid evidence supplies no KPI metrics. Server pagination,
-exports and evidence UI remain pending. Do not interpret missing terminal
+or abandoned ones. Invalid evidence supplies no KPI metrics. `evidenceArchive.ts`
+reads all server pages and result links; `evidenceExport.ts` emits identity-free
+measurements and explicit coverage/limitations. Historial offers a JSON evaluation
+download behind the same flag, cancels on leaving/account change, and never
+downloads a partially failed load. Pagination is not an atomic snapshot; new
+writes during export may require another run. Four-channel history UI remains
+pending. Do not interpret missing terminal
 events as completed sessions; an abrupt exit can lose the final subsecond tracking
 window. Help is linked to an active response opportunity when one exists.
 The new rules have not been deployed; never claim production event collection.
@@ -67,9 +72,9 @@ The new rules have not been deployed; never claim production event collection.
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Report factuality/usefulness evaluation and measurable automation/preparation-time outcomes; generation alone does not prove those KPIs |
 | Learned dynamic adaptation (p. 10) | Rule-based progression in `difficulty.ts`; no trained policy | Training, model/version provenance, bounded up/hold/down inference, timing/error/optional EEG inputs, decision audit and benchmark |
-| Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows and cross-chunk validation; activity speed remains duration/questions | Server event readers/exports and broader keyboard/touch acceptance; distinguish speed from measured response latency |
+| Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance and visible response metrics; distinguish speed from measured response latency |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectral features and quality, gated recording in evidence archive; existing live/history metric is aggregate amplitude | Four-channel live/history UI, calibration, baseline-relative feedback, policy integration and scientifically validated interpretation |
-| Operational KPI verification (pp. 27–28) | Durable idempotent result saves and bounded event archive foundation | Save/report outcome telemetry, explicit attempts and adherence denominator, deduplicated exports and KPI aggregation |
+| Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Save/report outcome telemetry, adherence denominator and pilot KPI aggregation with an independent attempt register |
 | Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | Latency benchmark, report evaluation tooling and documented pilot protocol; hardware and real-user evidence cannot be completed by code alone |
 
 Memory acceptance targets remain unproven: adaptive latency <1 s, correctly

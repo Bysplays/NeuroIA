@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'fire
 import { firestoreProgress } from '../src/services/firestoreProgress.ts';
 import { getInitialProfile } from '../src/services/storageService.ts';
 import { patientProgress } from '../src/services/progressData.ts';
+import { loadEvidencePage, loadEvidenceExport } from '../src/services/evidenceArchive.ts';
 
 let env;
 before(async () => {
@@ -15,6 +16,30 @@ before(async () => {
 after(async () => { await env?.cleanup(); });
 const fresh = () => patientProgress({ profile: getInitialProfile(), history: [] });
 const op = id => ({ id: `result:${id}`, kind: 'result', result: { id, exerciseId: 'visual-scanning', domain: 'attention', date: '2026-09-16T12:00:00.000Z', durationSeconds: 60, accuracy: 100, score: 10, correctAnswers: 1, totalQuestions: 1, feedbackMessage: '' } });
+
+test('proposal evidence export paginates beyond 200 documents and enforces isolation and cancellation', async () => {
+  const uid='evidence-export';
+  await env.withSecurityRulesDisabled(async context => {
+    const db=context.firestore();
+    await Promise.all(Array.from({length:201},(_,i)=>setDoc(doc(db,`users/${uid}/evidence/chunk-${String(i).padStart(3,'0')}`),{
+      version:1,sessionId:`session-${i}`,exerciseId:'language-naming',firstSequence:0,count:1,
+      events:JSON.stringify([{kind:'start',level:1,configVersion:1,mode:'normal',locked:false,sequence:0,activeMs:0,at:'2026-10-04T12:00:00.000Z'}]),
+      receivedAt:serverTimestamp(),
+    })));
+  });
+  const db=env.authenticatedContext(uid).firestore();
+  const first=await loadEvidencePage(db,uid);
+  assert.equal(first.records.length,200);assert.equal(first.more,true);
+  const second=await loadEvidencePage(db,uid,{cursor:first.cursor});
+  assert.equal(second.records.length,1);assert.equal(second.more,false);
+  assert.equal((await loadEvidencePage(db,uid,{sessionId:'session-17'})).records.length,1);
+  const exported=await loadEvidenceExport(db,uid,new AbortController().signal);
+  assert.equal(exported.coverage.documents,201);assert.equal(exported.coverage.complete,true);
+  assert.equal(exported.counts.unfinished,201);assert.equal(exported.counts.completed,0);
+  await assertFails(loadEvidencePage(env.authenticatedContext('stranger-export').firestore(),uid));
+  const controller=new AbortController();controller.abort();
+  await assert.rejects(loadEvidenceExport(db,uid,controller.signal),{name:'AbortError'});
+});
 
 test('proposal result links round-trip and malformed evidence identities are denied', async () => {
   const uid = 'proposal-result-link';

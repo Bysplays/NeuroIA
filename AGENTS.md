@@ -217,9 +217,14 @@ until those rules are published. Response hooks cover all eight games; memory
 previews suspend the response opportunity, pair selections precede correctness,
 and tracking records active contact windows. Result links use optional
 `evidenceSessionId`. Fresh four-channel snapshots are archived only while recording,
-at most once per active second; evidence readers/exports remain in docs/TODO.md.
+at most once per active second.
 `evidenceSummary.ts` validates contiguous session events across chunks before
 exposing metrics; invalid logs and unfinished attempts never count as completions.
+`evidenceArchive.ts` paginates evidence/results from the server with cancellation;
+`evidenceExport.ts` omits account/session/result IDs, wall timestamps and free text.
+`EvidenceExportButton` exposes the complete evaluation download from Historial
+only behind the proposal flag. Page failures never download a partial export;
+pagination is not an atomic snapshot and the file discloses that limit.
 
 Firestore is authoritative for signed-in progress. `users/{uid}/progress/main`
 contains the profile and latest 60 results; `users/{uid}/results/{resultId}` retains

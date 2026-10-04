@@ -1,4 +1,5 @@
 import { ExerciseAnalytics } from './ExerciseAnalytics';
+import { EvidenceExportButton } from './EvidenceExportButton';
 import { ProfessionalPageHeader } from './ProfessionalPageHeader';
 import { ActivityLineChart } from './ActivityLineChart';
 import { EXERCISE_IDS } from '../services/difficulty';
@@ -108,6 +109,7 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
       <div className="stats-history-footer"><div className="stats-pagination"><button className="stats-quiet-button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><span>Página {currentPage + 1} de {Math.max(1, Math.ceil(results.length / pageSize))}</span><button className="stats-quiet-button" disabled={(currentPage + 1) * pageSize >= results.length} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
       {more && <button className="stats-quiet-button stats-load" disabled={busy} onClick={loadMore}>{busy ? 'Cargando historial…' : error ? 'Reintentar' : 'Cargar más historial'}</button>}</div>
       {error && <p role="alert">No hemos podido consultar el historial. Puedes volver a intentarlo.</p>}
+      {import.meta.env.VITE_PROPOSAL_EVIDENCE === 'true' && active && tab === 'history' && <EvidenceExportButton key={uid} uid={uid}/>}
     </section> },
     { id: 'filters', label: 'Filtros', content: <>
     <section className="stats-card stats-filter-panel" aria-labelledby="stats-filter-title">
