@@ -888,3 +888,9 @@ ResponseMetrics/PDF use these groups, with `includedSessions` counting distinct
 attempts rather than summing per-level row counts. Export `level` remains the initial
 level for compatibility. Reject tracking windows spanning a level boundary rather
 than estimating contact allocation; round integration must flush them first.
+
+Round evidence uses explicit `round-start`/`round-decision` events. Call
+`prepareRoundDecision` before inference to flush partial tracking windows; persisted
+actor observations are replayed during reconstruction. Local decision application
+remains `pending`; export `nextStarted` only proves that a subsequent round began,
+not a cloud profile update. These recorder APIs await GameSession integration.

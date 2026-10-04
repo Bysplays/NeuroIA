@@ -1,3 +1,5 @@
+import {ROUND_BOUNDARIES} from './roundAdaptation.ts';
+import {readAdaptationDecision,decisionMatchesExercise,type AdaptationDecision} from './adaptivePolicy.ts';
 import { validMuseFeatureFrame, type MuseFeatureFrame } from './museFeatures.ts';
 import { createAdaptationObservation } from './adaptationObservation.ts';
 
@@ -7,6 +9,8 @@ export type EvidenceEvent = {
   at: string;
 } & (
   | { kind: 'start'; level: number; configVersion: number; mode: 'normal' | 'placement' | 'practice'; locked: boolean }
+  | {kind:'round-start';round:string;level:number}
+  | {kind:'round-decision';round:string;boundary:string;decision:string}
   | { kind: 'stimulus'; stimulus: string; level: number }
   | { kind: 'response'; stimulus: string; correct: boolean; latencyMs: number; final: boolean }
   | { kind: 'selection'; stimulus: string; latencyMs: number }
@@ -48,6 +52,14 @@ export function readEvidenceChunk(chunk: EvidenceChunk): EvidenceEvent[] {
         case 'start':
           if (!levelValid(event.level) || event.configVersion !== 1 || !['normal','placement','practice'].includes(event.mode) || typeof event.locked !== 'boolean') return [];
           keys = ['level','configVersion','mode','locked']; break;
+        case 'round-start':
+          if(!identifier(event.round)||!levelValid(event.level))return [];keys=['round','level'];break;
+        case 'round-decision': {
+          const decision=readAdaptationDecision(event.decision);
+          if(!identifier(event.round)||event.boundary!==ROUND_BOUNDARIES[chunk.exerciseId]
+            ||!decision||decision.application!=='pending'||!decisionMatchesExercise(decision,chunk.exerciseId))return [];
+          keys=['round','boundary','decision'];break;
+        }
         case 'stimulus':
           if (!identifier(event.stimulus) || !levelValid(event.level)) return [];
           keys = ['stimulus','level']; break;
@@ -92,7 +104,8 @@ export function createSessionEvidence(options: {
   const now = () => Math.round(options.activeNow());
   const flush = () => {
     while (pending.length) {
-      const batch = pending.slice(0, 8);
+      let batch = pending.slice(0, 8);
+      while(batch.length>1&&JSON.stringify(batch).length>24000)batch=batch.slice(0,-1);
       const chunk: EvidenceChunk = { version: 1, sessionId: options.sessionId, exerciseId: options.exerciseId,
         firstSequence: batch[0].sequence, count: batch.length, events: JSON.stringify(batch) };
       if (readEvidenceChunk(chunk).length !== batch.length) throw Error('invalid-session-evidence');
@@ -120,6 +133,18 @@ export function createSessionEvidence(options: {
     start(level: number, mode: 'normal'|'placement'|'practice', locked: boolean) {
       if (started || closed) return;
       emit({kind:'start',level,configVersion:1,mode,locked}); started = true; flush();
+    },
+    roundStart(round:string,level:number){
+      if(!started||closed||stimulus)throw Error('round-start-not-ready');
+      flushTracking();emit({kind:'round-start',round,level});flush();
+    },
+    prepareRoundDecision(){
+      if(!started||closed||stimulus)throw Error('round-decision-not-ready');
+      flushTracking();flush();return observation.snapshot(now());
+    },
+    roundDecision(round:string,boundary:string,decision:AdaptationDecision){
+      if(!started||closed||stimulus)throw Error('round-decision-not-ready');
+      flushTracking();emit({kind:'round-decision',round,boundary,decision:JSON.stringify(decision)});flush();
     },
     present(id: string, level: number) {
       if (!started || closed || stimulus?.id === id) return;

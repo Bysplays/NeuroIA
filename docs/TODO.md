@@ -87,8 +87,9 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   between-round transition controller now preserves active configs and resets
   performance comparisons on level changes. Response reconstruction, Gráficas and
   the PDF now separate measured stimulus levels without inflating session counts.
-  Game integration, mixed-level result/history accounting and persistent transition
-  audits remain open. Real
+  Round events now preserve decisions and replay observations during archive
+  validation, including next-round start evidence. Game integration and mixed-level
+  result/history/profile accounting remain open. Real
   calibration, scientific reward approval and pilot evaluation remain mandatory.
 - [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
   Server report attempts now persist start/generated/failure/cancellation outcomes

@@ -1,3 +1,5 @@
+import {readAdaptationDecision,type AdaptationDecision} from './adaptivePolicy.ts';
+import {createAdaptationObservation} from './adaptationObservation.ts';
 import { readEvidenceChunk, type EvidenceChunk, type EvidenceEvent } from './sessionEvidence.ts';
 
 /** Server pages may arrive out of order or be repeated. Never accept a terminal
@@ -18,6 +20,10 @@ export function summarizeEvidence(chunks: EvidenceChunk[]) {
       ordered.set(event.sequence, event);
     }
   }
+  const observation=createAdaptationObservation(identity?.exerciseId??'');
+  const rounds:{round:string;level:number;decision:AdaptationDecision|null;nextStarted:boolean}[]=[];
+  let activeRound:typeof rounds[number]|null=null;
+  let initial:{level:number;mode:string;locked:boolean}|null=null;
   const events = [...ordered.values()].sort((a,b) => a.sequence-b.sequence);
   let stimulus: {id:string; since:number} | undefined;
   let lastMs = 0, terminal: EvidenceEvent | undefined;
@@ -37,9 +43,29 @@ export function summarizeEvidence(chunks: EvidenceChunk[]) {
     if (index === 0 && event.kind !== 'start') issues.add('missing-start');
     lastMs = event.activeMs;
     switch (event.kind) {
-      case 'start': if (index !== 0) issues.add('duplicate-start'); currentLevel=event.level;levelSinceMs=event.activeMs;break;
+      case 'start': if (index !== 0) issues.add('duplicate-start'); currentLevel=event.level;levelSinceMs=event.activeMs;initial=event;break;
+      case 'round-start': {
+        const previous=rounds.at(-1);
+        if(stimulus||activeRound||rounds.some(round=>round.round===event.round))issues.add('invalid-round-start');
+        if(event.level!==(previous?.decision?.nextLevel??initial?.level))issues.add('round-level-mismatch');
+        if(previous){if(!previous.decision)issues.add('missing-round-decision');previous.nextStarted=true;}
+        activeRound={round:event.round,level:event.level,decision:null,nextStarted:false};rounds.push(activeRound);
+        if(currentLevel!==event.level){currentLevel=event.level;levelSinceMs=event.activeMs;}
+        break;
+      }
+      case 'round-decision': {
+        const decision=readAdaptationDecision(event.decision),observed=observation.snapshot(event.activeMs);
+        if(stimulus||!activeRound||activeRound.round!==event.round||!decision||decision.fromLevel!==currentLevel)issues.add('invalid-round-decision');
+        if(decision){
+          if(decision.observation.some((value,i)=>Math.abs(value-observed.vector[i])>1e-6))issues.add('round-observation-mismatch');
+          if(decision.reason==='policy'&&(!observed.eligible||initial?.locked||initial?.mode!=='normal'))issues.add('protected-round-decision');
+          if(decision.reason==='insufficient-evidence'&&observed.eligible)issues.add('round-eligibility-mismatch');
+        }
+        if(activeRound)activeRound.decision=decision;activeRound=null;break;
+      }
       case 'stimulus':
         if (stimulus) issues.add('unclosed-stimulus');
+        if(rounds.length&&(!activeRound||event.level!==activeRound.level))issues.add('unrecorded-round-level');
         if(event.level!==currentLevel){currentLevel=event.level;levelSinceMs=event.activeMs;}
         stimulus = {id:event.stimulus,since:event.activeMs}; break;
       case 'selection': case 'response':
@@ -61,8 +87,9 @@ export function summarizeEvidence(chunks: EvidenceChunk[]) {
         lastTrackingEnd = event.activeMs;
         trackingMs += event.durationMs; contactMs += event.contactMs;
         measuredLevel().trackingMs+=event.durationMs;measuredLevel().contactMs+=event.contactMs;break;
-      case 'finish': case 'abandon': terminal = event; break;
+      case 'finish': case 'abandon': if(event.kind==='finish'&&activeRound)issues.add('unfinished-round');terminal = event; break;
     }
+    observation.add(event);
   }
   if (!events.length) issues.add('missing-start');
   const valid = issues.size === 0;
@@ -74,6 +101,7 @@ export function summarizeEvidence(chunks: EvidenceChunk[]) {
     // Invalid evidence contributes no apparently authoritative KPI numerator.
     metrics:valid ? {responseCount,errors,hints,selections,meanResponseMs:responseCount ? latencyMs/responseCount : null,
       activeMs:lastMs,trackingMs,contactMs} : null,
+    rounds:valid?rounds:null,
     levelMeasurements:valid?[...levels].sort(([a],[b])=>a-b).map(([level,{latencyMs:total,...measurements}])=>({level,
       measurements:{...measurements,meanResponseMs:measurements.responseCount?total/measurements.responseCount:null}})):null,
     events,

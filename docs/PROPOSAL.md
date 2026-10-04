@@ -74,7 +74,7 @@ The new rules have not been deployed; never claim production event collection.
 | --- | --- | --- |
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
-| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded end-of-exercise decisions and persistent application audit behind a separate flag | Real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
+| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded end-of-exercise decisions and persistent application audit behind a separate flag | Connect the tested between-round controller to all games, reconcile mixed-level results/history, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance; Gráficas and a separate whole-archive PDF appendix expose validated game/level response metrics separately from speed |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
@@ -470,3 +470,19 @@ result-level field, duplicate archive pages, separate UI/PDF blocks and one uniq
 session count. This prepares accounting for the controller; it does not yet connect
 live round transitions or change ordinary activity speed/level charts. Those charts
 and persistence still need the mixed-level result contract in the game integration.
+
+
+## Durable round decision audit
+
+The recorder accepts explicit `round-start` and `round-decision` events. Decisions
+carry the versioned actor output and observation, with local application still
+`pending`; a subsequent start demonstrates that the next round actually began.
+Reconstruction replays observations, checks game-specific boundaries and expected
+levels, and rejects substituted decisions, unfinished completed rounds and broken
+links. Invalid chains contribute no metrics. Exports use ordinal round numbers.
+Tracking is flushed before inference with `prepareRoundDecision`; batches obey both
+the eight-event and 24,000-character limits. Unit coverage includes partial tracking
+windows and an emulator case checks durable retries and archive reconstruction.
+These APIs are not yet called by GameSession: live integration and the final mixed-
+level result/profile contract remain open. A recorded local decision is not proof
+of a server-confirmed profile adjustment.

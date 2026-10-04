@@ -771,3 +771,26 @@ test('adaptive response pipeline measures real queued emulator persistence separ
   // target. Correctness must pass independently; emulator timing is not release acceptance.
   assert.equal(samples.length,3);
 });
+
+
+test('round transition audit survives durable retries and archive reconstruction', async () => {
+  const uid='round-transition-audit', db=env.authenticatedContext(uid).firestore();
+  const backend=firestoreProgress(uid,db);await backend.initialize(fresh());
+  let now=0;const chunks=[];
+  const recorder=createSessionEvidence({sessionId:'round-audit',exerciseId:'visual-scanning',activeNow:()=>now,sink:chunk=>chunks.push(chunk)});
+  recorder.start(5,'normal',false);recorder.roundStart('first',5);
+  for(let i=0;i<3;i++){recorder.present(`q${i}`,5);now+=1000;recorder.respond(false);}
+  const decision=decideAdaptation(recorder.prepareRoundDecision(),{locked:false,mode:'normal',baseLevel:5});
+  recorder.roundDecision('first','search-board',decision);
+  recorder.roundStart('second',decision.nextLevel);recorder.present('last',decision.nextLevel);now+=1000;recorder.respond(true);
+  recorder.roundDecision('second','search-board',decideAdaptation(recorder.prepareRoundDecision(),{locked:false,mode:'normal',baseLevel:decision.nextLevel}));
+  recorder.finish('round-result');
+  for(const chunk of chunks){const operation={id:`evidence:round-audit:${chunk.firstSequence}`,kind:'evidence',chunk};await backend.commit(operation);await backend.commit(operation);}
+  const operation=op('round-result');Object.assign(operation.result,{evidenceSessionId:'round-audit',correctAnswers:1,totalQuestions:4,accuracy:25});
+  await backend.commit(operation);await backend.commit(operation);
+  const exported=await loadEvidenceExport(db,uid,new AbortController().signal);
+  assert.equal(exported.counts.completed,1);assert.equal(exported.attempts[0].rounds.length,2);
+  assert.equal(exported.attempts[0].rounds[0].decision.nextLevel,decision.nextLevel);
+  assert.equal(exported.attempts[0].rounds[0].nextStarted,true);assert.equal(exported.attempts[0].rounds[1].nextStarted,false);
+  assert.equal((await backend.load()).profile.totalSessions,1);
+});

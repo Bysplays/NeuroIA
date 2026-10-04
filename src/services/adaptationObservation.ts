@@ -13,15 +13,17 @@ export function createAdaptationObservation(exerciseId:string) {
   const responses:{latency:number;error:number}[]=[];
   const firstLatencies:number[]=[];
   const eeg=createMuseBaseline();
-  return {
-    beginLevel(nextLevel:number) {
+  const beginLevel=(nextLevel:number)=>{
       if(!validLevel(nextLevel))throw Error('invalid-observation-level');
       level=nextLevel;hints=0;trackingMs=0;contactMs=0;responses.length=0;firstLatencies.length=0;
       // EEG baseline belongs to the session; changing task level does not create
       // a fictitious new physiological baseline.
-    },
+  };
+  return {
+    beginLevel,
     add(event:EvidenceEvent) {
       if (event.kind==='start') level=event.level;
+      if (event.kind==='round-start'&&event.level!==level)beginLevel(event.level);
       if (event.kind==='hint') hints++;
       if (event.kind==='response') {
         if (firstLatencies.length<3 && event.latencyMs>0) firstLatencies.push(event.latencyMs);

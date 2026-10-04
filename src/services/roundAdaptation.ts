@@ -4,13 +4,13 @@ import {gameConfig,type GameMode} from './difficulty.ts';
 import type {EvidenceEvent} from './sessionEvidence.ts';
 
 export type RoundBoundary='question'|'search-board'|'memory-sequence'|'memory-board'|'target'|'contact-release';
-const boundaries:Record<string,RoundBoundary>={'visual-scanning':'search-board','language-naming':'question','word-completion':'question',categorization:'question','memory-path':'memory-sequence','memory-pairs':'memory-board','motor-target':'target','motor-tracking':'contact-release'};
+export const ROUND_BOUNDARIES:Readonly<Record<string,RoundBoundary>>=Object.freeze({'visual-scanning':'search-board','language-naming':'question','word-completion':'question',categorization:'question','memory-path':'memory-sequence','memory-pairs':'memory-board','motor-target':'target','motor-tracking':'contact-release'});
 export interface RoundTransition {round:string;boundary:RoundBoundary;decision:AdaptationDecision;nextStarted:boolean}
 /** Controller for the experimental between-round integration. A decision never
  * mutates an active config: only explicitly beginning the next round adopts it.
  * This is local session state, not a confirmed cloud-level write. */
 export function createRoundAdaptation(options:{exerciseId:string;level:number;mode:GameMode;locked:boolean;manualLevel?:boolean;now?:()=>number}){
- if(!Object.hasOwn(boundaries,options.exerciseId))throw Error('invalid-round-exercise');
+ if(!Object.hasOwn(ROUND_BOUNDARIES,options.exerciseId))throw Error('invalid-round-exercise');
  const now=options.now??(()=>performance.now());
  const observation=createAdaptationObservation(options.exerciseId);
  observation.beginLevel(options.level);
@@ -50,7 +50,7 @@ export function createRoundAdaptation(options:{exerciseId:string;level:number;mo
    if(closed)throw Error('closed-round-controller');
    if(pending?.round===round){if(pending.boundary!==boundary)throw Error('conflicting-round-boundary');return structuredClone(pending);}
    if(active!==round||openOpportunity||!Number.isFinite(activeMs)||activeMs<0)throw Error('round-not-ready');
-   if(boundary!==boundaries[options.exerciseId])throw Error('invalid-round-boundary');
+   if(boundary!==ROUND_BOUNDARIES[options.exerciseId])throw Error('invalid-round-boundary');
    const decision=decideAdaptation(observation.snapshot(activeMs),{locked:options.locked,mode:options.mode,baseLevel:current.level,manualLevel:options.manualLevel},now);
    pending={round,boundary,decision,nextStarted:false};transitions.push(pending);active=null;
    return structuredClone(pending);
