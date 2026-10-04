@@ -2067,3 +2067,31 @@ select option { background-color: var(--color-surface); color: var(--color-text-
 }
 .stats-evidence-export > button { display: inline-flex; align-items: center; gap: .5rem; }
 .stats-evidence-export > p { margin: .75rem 0 0; }
+.muse-channel-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+.muse-channel { min-width: 0; border: 1px solid var(--color-border); padding: 14px; background: var(--color-surface); }
+.muse-channel header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; }
+.muse-channel header span { font-size: .72rem; color: var(--color-text-muted); }
+.muse-channel .muse-rms { margin: 10px 0; font-size: .85rem; }
+.muse-rms b { font-size: 1.2rem; }
+.muse-channel table { width: 100%; border-collapse: collapse; font-size: .75rem; }
+.muse-channel caption { text-align: left; padding: 8px 0; color: var(--color-text-muted); }
+.muse-channel th, .muse-channel td { padding: 7px 3px; text-align: right; border-bottom: 1px solid var(--color-border); }
+.muse-channel th:first-child { text-align: left; }
+.muse-band-bar { display: block; width: 48px; height: 3px; margin-top: 4px; background: var(--color-border); }
+.muse-band-bar i { display: block; height: 100%; background: var(--color-action-bg); }
+.muse-explanation { color: var(--color-text-muted); line-height: 1.6; font-size: .8rem; }
+.muse-compact-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+.muse-compact-grid .muse-channel { border: 0; padding: 2px; }
+.muse-compact-grid .muse-channel header { display: block; }
+.muse-compact-grid .muse-channel header strong { font-size: .75rem; }
+.muse-compact-grid .muse-channel header span { display: block; font-size: .6rem; }
+.muse-compact-grid .muse-channel .muse-rms { margin: 2px 0; font-size: .65rem; }
+.muse-compact-grid .muse-rms b { font-size: .8rem; }
+@media(max-width:600px) { .muse-channel-grid { grid-template-columns: minmax(0,1fr); } }
+.muse-history-position { display: grid; gap: 10px; margin: 20px 0; }
+.muse-history-position input { width: 100%; min-height: 44px; accent-color: var(--color-action-bg); }
+.muse-history-plots { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.muse-history-plots figure { margin: 0; min-width: 0; color: var(--color-action-bg); }
+.muse-history-plots svg { width: 100%; display: block; }
+.muse-history-plots text { fill: currentColor; font-size: 12px; }
+@media(max-width:600px) { .muse-history-plots { grid-template-columns: minmax(0,1fr); } }

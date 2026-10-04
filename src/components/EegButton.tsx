@@ -2,6 +2,7 @@ import { useState, useSyncExternalStore } from 'react';
 import { Battery, Bluetooth, AudioLines, X } from 'lucide-react';
 import { eegService } from '../services/eegService';
 import { ModalFrame } from './ModalFrame';
+import {LiveMuseChannels} from './MuseChannels';
 
 export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
   const state = useSyncExternalStore(eegService.subscribe, eegService.getSnapshot);
@@ -36,6 +37,7 @@ export function EegButton({ onOpenChange }: { onOpenChange?: (open: boolean) => 
                 : <button className="subscription-upgrade" disabled={!available} aria-describedby="eeg-connection-status" onClick={() => void eegService.connect(true)}>{available ? 'Conectar diadema' : 'Navegador no soportado'}</button>}
             </div>
             {state.status === 'connected' && <p className="eeg-battery"><Battery size={18} aria-hidden="true"/>Batería: {state.battery === null ? 'esperando datos…' : `${state.battery} %`}</p>}
+            {(state.channels || state.status==='connected') && <LiveMuseChannels/>}
           </section>
 
         </div>

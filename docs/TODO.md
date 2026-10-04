@@ -65,6 +65,9 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
 
 - [ ] Preserve four EEG channels and spectral/quality features end to end, including
   live/history views, compatible persistence, authorization and deletion.
+  Four-channel live/history views, independent baseline feedback and paginated
+  retrieval are implemented. Hardware calibration and retention/deletion acceptance
+  remain; archive rules are not deployed.
 - [ ] Complete response-level timing and explicit outcomes across all eight games.
   Gated hooks now cover all eight games, including memory preview exclusion,
   hints, card selections and continuous tracking windows. Cross-chunk validation

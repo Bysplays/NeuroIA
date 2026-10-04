@@ -59,8 +59,11 @@ reads all server pages and result links; `evidenceExport.ts` emits identity-free
 measurements and explicit coverage/limitations. Historial offers a JSON evaluation
 download behind the same flag, cancels on leaving/account change, and never
 downloads a partially failed load. Pagination is not an atomic snapshot; new
-writes during export may require another run. Four-channel history UI remains
-pending. Do not interpret missing terminal
+writes during export may require another run. Four-channel live and history views now display individual quality, RMS and five
+band powers, with five-window baseline-relative changes. History loads all session
+pages, validates the result link and offers a sample selector with 60-sample chart
+windows; missing signal stays a gap. Connection baselines and game baselines are
+separate and explicitly labelled. Do not interpret missing terminal
 events as completed sessions; an abrupt exit can lose the final subsecond tracking
 window. Help is linked to an active response opportunity when one exists.
 The new rules have not been deployed; never claim production event collection.
@@ -73,9 +76,9 @@ The new rules have not been deployed; never claim production event collection.
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Report factuality/usefulness evaluation and measurable automation/preparation-time outcomes; generation alone does not prove those KPIs |
 | Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded end-of-exercise decisions and persistent application audit behind a separate flag | Real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance and visible response metrics; distinguish speed from measured response latency |
-| EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectral features and quality, gated recording in evidence archive; existing live/history metric is aggregate amplitude | Four-channel live/history UI, calibration, baseline-relative feedback, policy integration and scientifically validated interpretation |
+| EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Save/report outcome telemetry, adherence denominator and pilot KPI aggregation with an independent attempt register |
-| Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | Latency benchmark, report evaluation tooling and documented pilot protocol; hardware and real-user evidence cannot be completed by code alone |
+| Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | End-to-end latency acceptance, report evaluation tooling and documented pilot protocol; a local actor benchmark exists, but hardware and real-user evidence cannot be completed by code alone |
 
 Memory acceptance targets remain unproven: adaptive latency <1 s, correctly
 registered sessions >95%, synthesis automation >70%, adherence >60%, report

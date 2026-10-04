@@ -779,3 +779,9 @@ fixed code constants in vendor/openrouter/prompts.mjs, not env options. Never pu
 only; it is not a CI test. Test local configuration preservation with
 `node --experimental-strip-types --test vendor/openrouter/local-config.test.mjs vendor/openrouter/prompts.test.mjs`. Env setup does not deploy
 or activate the remote Worker. See vendor/openrouter/README.md for bindings.
+
+`MuseChannels.tsx` renders independent live electrode features; `MuseHistory.tsx`
+loads and validates a complete result-linked evidence session with cancellation.
+`museBaseline.ts` shares five-window baseline calculations between live feedback,
+archived feedback and policy observations. Live baselines are connection-scoped;
+archive/policy baselines use game active time. Keep these meanings distinct.

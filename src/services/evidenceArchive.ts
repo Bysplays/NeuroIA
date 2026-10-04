@@ -2,6 +2,7 @@ import { collection, documentId, getDocsFromServer, limit, orderBy, query, start
 import type { EvidenceChunk } from './sessionEvidence.ts';
 import type { ExerciseResult } from '../types/index.ts';
 import { buildEvidenceExport } from './evidenceExport.ts';
+import {summarizeEvidence} from './evidenceSummary.ts';
 
 /** Explicit server pagination, with no client-side date cutoff or silent cap.
  * Authorization remains with owner/active-linked-professional Firestore rules.
@@ -19,6 +20,19 @@ export async function loadEvidencePage(db: Firestore, uid: string, options: {cur
     records:snapshot.docs.map(doc => ({documentId:doc.id, chunk:doc.data() as EvidenceChunk})),
     cursor:snapshot.docs.at(-1)?.id, more:snapshot.size===200,
   };
+}
+
+export async function loadSessionEvidence(db:Firestore,uid:string,sessionId:string,signal:AbortSignal) {
+  const chunks:EvidenceChunk[]=[];let cursor:string|undefined;
+  while(true) {
+    const page=await loadEvidencePage(db,uid,{sessionId,cursor,signal});
+    chunks.push(...page.records.map(record=>record.chunk));
+    if(!page.more)break;
+    if(!page.cursor||page.cursor===cursor)throw Error('evidence-pagination-stalled');
+    cursor=page.cursor;
+  }
+  signal.throwIfAborted();
+  return summarizeEvidence(chunks);
 }
 
 /** No partial-success download: cancellation, revocation or any page failure

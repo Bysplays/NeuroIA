@@ -26,7 +26,7 @@ export function SessionAnalytics({ session, name, loadResults, onBack }: {
   const state = !current ? 'loading' : response.error ? 'error' : 'ready';
   const data = sessionAnalytics(session, current ? response.results : []);
   const ready = state === 'ready';
-  if (selectedResult) return <ExerciseAnalytics result={selectedResult} onBack={() => setSelectedResult(null)}/>;
+  if (selectedResult) return <ExerciseAnalytics uid={session.patientId} result={selectedResult} onBack={() => setSelectedResult(null)}/>;
   return <section className="session-dashboard">
     <ProfessionalPageHeader title={session.title} icon={<ChartNoAxesCombined size={24}/>} name={name} detail={sessionStatusLabel[session.status]} backLabel="Volver a sesiones" onBack={onBack} action={<button className="stats-quiet-button" disabled={state === 'loading'} onClick={() => setRetry(value => value + 1)}><RotateCcw size={16}/>Actualizar</button>}/>
     <div className="session-summary">

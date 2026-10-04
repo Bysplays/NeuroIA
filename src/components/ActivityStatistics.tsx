@@ -92,7 +92,7 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
   return <div ref={panel} className={`tablet-screen ${embedded ? 'activity-statistics activity-embedded' : 'professional-panel activity-professional'}`}>
     {embedded && <header className="workspace-section-heading"><span className="workspace-section-icon" aria-hidden="true"><Activity size={26}/></span><div><h1>Actividad</h1><p>Consulta tus juegos, resultados y niveles.</p></div></header>}
     {!embedded && <ProfessionalPageHeader title={heading} icon={<ChartNoAxesCombined size={24}/>} name={subtitle} backLabel={backLabel} onBack={onBack}/> }
-    {selectedResult ? <ExerciseAnalytics result={selectedResult} onBack={() => setSelectedResult(null)}/> : <TabletTabs position="top" label="Actividad" value={tab} onChange={setTab} tabs={[
+    {selectedResult ? <ExerciseAnalytics uid={uid} result={selectedResult} onBack={() => setSelectedResult(null)}/> : <TabletTabs position="top" label="Actividad" value={tab} onChange={setTab} tabs={[
       { id: 'overview', label: 'Resumen', content: <>
     <div className="stats-overview"><CategoryRadar results={results}/>
     <LevelStatistics levels={levels}/></div>

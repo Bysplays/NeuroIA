@@ -639,6 +639,15 @@ action form one joined row. The clock is a noninteractive outlined chip matching
 the transparent utility controls. Opening settings pauses placement in place;
 closing settings resumes it without a separate rest screen or Retomar action.
 
+Muse displays TP9, AF7, AF8 and TP10 independently in a compact game strip.
+The connection dialog expands each electrode into quality, RMS and five band
+powers with baseline-relative changes. Use two columns on larger screens and one
+on phones; keep scrolling inside the shared dialog. Missing or stale data uses
+an em dash and explicit status, never a fabricated zero. History offers a native
+sample slider and four labelled RMS charts, with disclosed independent scales
+and 60-sample windows. Explain connection versus game baselines and never label
+these measurements attention, fatigue or relaxation.
+
 The Muse modal places the EEG/PPG explanation beneath its title and introduction,
 without a Tus partidas heading. It retains Bluetooth connection controls. It does not show a recording toggle, analytics-sharing
 copy or instructions to disconnect to change recording.

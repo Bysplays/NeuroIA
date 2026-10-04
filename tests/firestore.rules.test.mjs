@@ -6,7 +6,7 @@ import { doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'fire
 import { firestoreProgress } from '../src/services/firestoreProgress.ts';
 import { getInitialProfile } from '../src/services/storageService.ts';
 import { patientProgress } from '../src/services/progressData.ts';
-import { loadEvidencePage, loadEvidenceExport } from '../src/services/evidenceArchive.ts';
+import { loadEvidencePage, loadEvidenceExport, loadSessionEvidence } from '../src/services/evidenceArchive.ts';
 import { decideAdaptation } from '../src/services/adaptivePolicy.ts';
 
 let env;
@@ -51,6 +51,8 @@ test('proposal evidence export paginates beyond 200 documents and enforces isola
   const second=await loadEvidencePage(db,uid,{cursor:first.cursor});
   assert.equal(second.records.length,1);assert.equal(second.more,false);
   assert.equal((await loadEvidencePage(db,uid,{sessionId:'session-17'})).records.length,1);
+  const session=await loadSessionEvidence(db,uid,'session-17',new AbortController().signal);
+  assert.equal(session.status,'unfinished');assert.equal(session.sessionId,'session-17');
   const exported=await loadEvidenceExport(db,uid,new AbortController().signal);
   assert.equal(exported.coverage.documents,201);assert.equal(exported.coverage.complete,true);
   assert.equal(exported.counts.unfinished,201);assert.equal(exported.counts.completed,0);

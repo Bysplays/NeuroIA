@@ -24,8 +24,16 @@ This is spectral measurement, not validated fatigue/attention inference.
 With `VITE_PROPOSAL_EVIDENCE=true`, GameSession archives fresh feature snapshots
 only when recording is enabled, at most once per active second. The flag remains
 off pending publication of archive rules. It is sampled feature evidence, not a
-lossless raw EEG archive. Live/history four-channel UI, baseline feedback and policy
-integration remain tracked in [the proposal](../PROPOSAL.md). Disconnect/cancellation clears
+lossless raw EEG archive. Four-channel live/history UI and baseline feedback are
+implemented. Live feedback uses the first five valid windows of the connection;
+history and optional policy input use the first five valid windows of the game.
+Each channel compares five later valid windows independently; stale signal expires
+after three seconds. This is relative band power, not a mental-state classifier.
+History validates the completed result link and reads all server pages, showing
+60-sample chart windows and a selector for the full recording. Loading failures
+are recoverable; leaving the view cancels retrieval. The gated simulation-trained
+policy and scientific acceptance are documented in [the proposal](../PROPOSAL.md).
+Disconnect/cancellation clears
 channel snapshots. Independent comparison uses
 `python scripts/verify_muse_features.py` (Node 22+ and an isolated Python environment
 installed with `pip install -r vendor/muse/requirements-evaluation.txt`; verified
@@ -44,9 +52,10 @@ and are never added to the account cache/outbox. Missing, clipped, flat, malform
 or incomplete windows produce gaps. This is basic integrity checking, **not**
 validated electrode contact or movement-artifact classification.
 
-During play, two compact horizontal traces show EEG/PPG and the arithmetic mean of
+For legacy adapters, two compact horizontal traces show EEG/PPG and the arithmetic mean of
 valid active-second summaries for that game. Means exclude pauses and gaps and are
-computed before chart decimation. Detailed analytics show separate labelled plots
+computed before chart decimation. Muse now shows four compact channel readings
+in place of the aggregate EEG trace; PPG remains separate. Detailed analytics show separate labelled plots
 and tables with active timestamps. The traces are amplitude trends, not raw 256 Hz
 EEG / 64 Hz PPG waveforms. Battery percentage appears only in the Bluetooth dialog;
 it is reset on disconnect and is not saved with results.
@@ -84,7 +93,7 @@ mention of a device model.
 
 Record the tested Muse 2 firmware/version and browser/OS combinations. Any future
 attention or heart-rate metric needs its own specified algorithm and validation;
-the current adapter provides amplitude only.
+the current adapter provides amplitude and spectral measurements only.
 
 ## Recording and access
 
@@ -93,11 +102,12 @@ The connection dialog explains saving and professional visibility and offers
 connecting gives live-only display. A later disconnect keeps already recorded
 points; new connections record only with their selected saving choice. Recording
 is per completed exercise, including each assigned-session step, never a daily
-plan aggregate. Abandoned games have no result or saved EEG. Placement/practice
+plan aggregate. Abandoned games have no legacy result EEG; proposal evidence may retain opted-in
+feature events and the explicit abandonment event. Placement/practice
 never attaches EEG to progress. Repeating resets both buffers.
 
 The GameSession active clock samples at most once per second. Instructions,
-settings, the device dialog, portrait, background tabs and explicit pauses suspend
+settings, the device dialog, background tabs and explicit pauses suspend
 capture. Samples use active-play seconds. Bad/stale/disconnected periods are gaps.
 A recording locks its first metric; a different metric later in the same game is
 not spliced into that scale.
@@ -107,8 +117,8 @@ not spliced into that scale.
 the series and doubles the interval, preserving its duration and missing-signal
 gaps. The cap is 120 points, 24 hours and 6000 characters per series (two series per result). This is a
 bounded visualization, not a raw EEG recording or a precision research export.
-Sparse individual points may be lost on downsampling. No derived diagnostic claim
-or EEG-based difficulty adjustment is implemented.
+Sparse individual points may be lost on downsampling. No derived diagnostic claim is implemented. Optional proposal-policy EEG inputs
+use the separate feature archive, not these decimated legacy series.
 
 The existing account-scoped ProgressSync outbox and result transaction save EEG
 with its result and permanent receipt. It is included in the latest-60 cache and

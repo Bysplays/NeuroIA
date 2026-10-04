@@ -1,5 +1,8 @@
 import { SessionEvidenceContext } from '../../src/services/sessionEvidenceContext';
 import { EvidenceExportButton } from '../../src/components/EvidenceExportButton';
+import {MuseHistoryView} from '../../src/components/MuseHistory';
+import {ExerciseAnalytics} from '../../src/components/ExerciseAnalytics';
+import {museFeatureFrame} from '../../src/services/museFeatures';
 import { eegService } from '../../src/services/eegService';
 import type { ProgressOperation } from '../../src/services/progressData';
 import type { EvidenceChunk } from '../../src/services/sessionEvidence';
@@ -71,6 +74,8 @@ export function Fixture() {
   const [accessAction, setAccessAction] = useState('');
   const [accessBusy, setAccessBusy] = useState(false);
   const back = () => setGame(undefined);
+  if(query.has('muse-history'))return <MuseHistoryFixture/>;
+  if(query.has('muse-archive')&&!loggedOut)return <main className="main-content"><ExerciseAnalytics uid="fixture-owner" result={{id:'fixture-result',exerciseId:'motor-target',domain:'motor',date:'2026-10-04T12:00:00Z',durationSeconds:10,accuracy:100,score:0,correctAnswers:1,totalQuestions:1,feedbackMessage:'',evidenceSessionId:'fixture-session'}} onBack={()=>setLoggedOut(true)}/></main>;
   if (query.has('evidence-export') && !loggedOut) return <main className="main-content"><section className="stats-card"><button onClick={()=>setLoggedOut(true)}>Volver</button><EvidenceExportButton uid="fixture-evidence"/></section></main>;
   if (query.has('professional')) return <ProfessionalDashboard uid="fixture-owner" profile={profile} onSignOut={()=>setLoggedOut(true)} onUpdateSettings={()=>{}} onUpdateName={()=>{}}/>;
   if (query.has('recommendations')) return <RecommendationFixture profile={profile}/>;
@@ -183,4 +188,13 @@ createRoot(document.getElementById("root")!).render(<Fixture />);
 function LevelUpFixture() {
   const [data, setData] = useState<ProgressData>(() => ({ profile: { ...getInitialProfile(), gameLevels: { 'visual-scanning': { level: 2, evidence: [] } } }, history: [] }));
   return <><button onClick={() => setData(value => ({ profile: {...value.profile, gameLevels: { 'visual-scanning': {level: 3, evidence: []}}}, history: [{id: 'new-gain', exerciseId: 'visual-scanning', domain: 'attention', date: new Date().toISOString(), durationSeconds: 30, accuracy: 100, score: 0, correctAnswers: 3, totalQuestions: 3, feedbackMessage: ''}] }))}>Simular resultado</button><LevelUpScreen data={data}/></>;
+}
+function MuseHistoryFixture() {
+  const [samples]=useState(()=>{
+    const wave=(hz:number)=>Array.from({length:256},(_,i)=>20*Math.sin(2*Math.PI*hz*i/256));
+    const initial=museFeatureFrame(0,[wave(10),wave(6),wave(20),wave(35)]);
+    const later=museFeatureFrame(1,[wave(20),wave(6),undefined,wave(35)]);
+    return Array.from({length:130},(_,i)=>({activeMs:(i+1)*1000,frame:i<5?initial:later}));
+  });
+  return <main className="main-content"><section className="stats-card"><h1>EEG · cuatro canales</h1><MuseHistoryView samples={samples}/></section></main>;
 }
