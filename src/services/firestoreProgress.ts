@@ -38,6 +38,13 @@ export function firestoreProgress(uid: string, db: Firestore) {
         const before = current.data().data as ProgressData;
         if (applied.exists()) return before;
         const data = applyProgressOperation(before, operation);
+        if (operation.kind === 'evidence') {
+          tx.set(doc(db, 'users', uid, 'evidence', encodeURIComponent(operation.id)), {
+            ...clean(operation.chunk), receivedAt: serverTimestamp(),
+          });
+          tx.set(receipt, { kind: operation.kind, createdAt: serverTimestamp() });
+          return data;
+        }
         tx.set(ref, { schemaVersion: 1, data: clean(data), updatedAt: serverTimestamp() });
         tx.set(receipt, { kind: operation.kind, createdAt: serverTimestamp() });
         if (operation.kind === 'result') tx.set(doc(db, 'users', uid, 'results', encodeURIComponent(operation.result.id)), clean(operation.result));

@@ -61,9 +61,11 @@ export function museFeatureFrame(sequence: number, windows: readonly (readonly n
 /** Adapter boundary: reject arbitrary IDs, non-finite values and contradictory quality. */
 export function validMuseFeatureFrame(frame: MuseFeatureFrame): boolean {
   return !!frame && frame.version === 1 && frame.sampleRate === 256 && frame.samplesPerChannel === 256
+    && Object.keys(frame).every(key => ['version','sampleRate','samplesPerChannel','sequence','channels'].includes(key))
     && Number.isInteger(frame.sequence) && frame.sequence >= 0 && frame.sequence <= 65535
     && Array.isArray(frame.channels) && frame.channels.length === 4
     && frame.channels.every((value, i) => value?.channel === MUSE_CHANNELS[i]
+      && Object.keys(value).every(key => ['channel','quality','rms','power'].includes(key))
       && (value.quality === 'valid'
         ? typeof value.rms === 'number' && Number.isFinite(value.rms) && value.rms > 0 && value.rms < 1000
           && !!value.power && Object.keys(value.power).length === 5

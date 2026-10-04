@@ -24,7 +24,9 @@ This is spectral measurement, not validated fatigue/attention inference. Live
 four-channel UI, archive persistence, baseline feedback and policy integration
 remain tracked in [the proposal](../PROPOSAL.md). Disconnect/cancellation clears
 channel snapshots. Independent comparison uses
-`python scripts/verify_muse_features.py` (NumPy/SciPy + Node 22+).
+`python scripts/verify_muse_features.py` (Node 22+ and an isolated Python environment
+installed with `pip install -r vendor/muse/requirements-evaluation.txt`; verified
+with Python 3.14). No Python dependency is shipped to the browser.
 It checks 20 band values and four RMS values against synthetic reference signals.
 References: [MuseJS channel order/sample rate](https://github.com/urish/muse-js/blob/master/src/muse.ts)
 and [SciPy periodogram scaling](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.periodogram.html).

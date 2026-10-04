@@ -1,0 +1,3 @@
+# Independent numerical reference only; not bundled into the browser.
+numpy==2.5.3
+scipy==1.18.1

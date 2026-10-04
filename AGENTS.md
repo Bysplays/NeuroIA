@@ -205,6 +205,14 @@ files. Commit the application assets actually used by the UI.
 
 ## Data and interaction contracts
 
+On `propuesta`, `sessionEvidence.ts` defines versioned active-clock response and
+four-channel feature chunks. The `evidence` ProgressSync operation uses the same
+durable queue/receipt protocol and archives immutable bounded chunks under
+`users/{uid}/evidence/{encodedOperationId}`; it never grows `progress/main` or
+increments completed-exercise totals. Rules bound the JSON envelope; readers
+must use `readEvidenceChunk` and treat values as self-reported. New rules require
+emulator verification and separate publication before enabling collection.
+
 Firestore is authoritative for signed-in progress. `users/{uid}/progress/main`
 contains the profile and latest 60 results; `users/{uid}/results/{resultId}` retains
 new completed results and `users/{uid}/operations/{operationId}` holds permanent

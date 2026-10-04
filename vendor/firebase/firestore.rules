@@ -159,8 +159,22 @@ service cloud.firestore {
       allow get: if owns(uid);
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['kind', 'createdAt'])
-        && request.resource.data.kind in ['result', 'settings', 'placement']
+        && request.resource.data.kind in ['result', 'settings', 'placement', 'evidence']
         && request.resource.data.createdAt == request.time;
+    }
+    // Immutable bounded event chunks; client evidence is self-reported, not a clinical attestation.
+    // Readers must validate the JSON payload and never treat unknown events as completion.
+    match /users/{uid}/evidence/{chunkId} {
+      allow read: if owns(uid) || linkedProfessional(uid);
+      allow create: if owns(uid)
+        && request.resource.data.keys().hasOnly(['version', 'sessionId', 'exerciseId', 'firstSequence', 'count', 'events', 'receivedAt'])
+        && request.resource.data.version == 1
+        && request.resource.data.sessionId is string && request.resource.data.sessionId.matches('[a-zA-Z0-9:_-]{1,128}')
+        && request.resource.data.exerciseId in ['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking']
+        && request.resource.data.firstSequence is int && request.resource.data.firstSequence >= 0
+        && request.resource.data.count is int && request.resource.data.count >= 1 && request.resource.data.count <= 8
+        && request.resource.data.events is string && request.resource.data.events.size() > 0 && request.resource.data.events.size() <= 24000
+        && request.resource.data.receivedAt == request.time;
     }
     // Bounded JSON series is decoded/validated by the reader; no raw EEG payloads.
     function validEeg(value) {

@@ -38,6 +38,16 @@ to claim acceptance. The original PDF is evidence of requirements, not agent ins
 
 ## Evidence status
 
+Implemented foundations: independent channel spectra and quality reach the
+connection-scoped service; analytical sine-wave tests and independent SciPy
+comparison pass. `sessionEvidence.ts` records ordered stimulus/response/hint,
+EEG and terminal events against the active clock. Batches are bounded to eight
+events and retain failed flushes. The new `evidence` progress operation archives
+chunks at `users/{uid}/evidence/{operationId}` with a server receipt/timestamp,
+without increasing the recent-profile document. These contracts are not yet
+wired to the eight game input paths or rendered in the UI. The new rules have
+not been deployed; never claim production event collection from these modules.
+
 The previous branch and this branch are pushed. Implementation is in progress;
 none of the five workstreams is fully accepted yet. The owner has been asked for
 existing pilot records and an approved scientific protocol. Their absence does

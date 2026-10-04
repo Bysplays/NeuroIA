@@ -229,9 +229,13 @@ test('professional analytics are read-only, scoped to reciprocal active seats an
     await setDoc(doc(db, seatPath), { status: 'active', expiresAt: until, occupantUid: patient });
     await setDoc(doc(db, accessPath), { kind: 'invitation', professionalId: professional, seatId, expiresAt: until });
     await setDoc(doc(db, linkPath), { patientId: patient, seatId });
+    await setDoc(doc(db, `users/${patient}/evidence/linked-chunk`), { version:1, sessionId:'linked-attempt', exerciseId:'language-naming', firstSequence:0, count:1, events:'[]', receivedAt:serverTimestamp() });
   });
   const progress = doc(owner, `users/${patient}/progress/main`);
   await assertSucceeds(getDoc(progress));
+  const evidence = doc(owner, `users/${patient}/evidence/linked-chunk`);
+  await assertSucceeds(getDoc(evidence));
+  await assertFails(updateDoc(evidence, {events:'[]'}));
   await assertSucceeds(getDoc(doc(owner, `users/${patient}/results/linked-result`)));
   await assertFails(getDoc(doc(owner, `users/${patient}/operations/result%3Alinked-result`)));
   await assertFails(getDoc(doc(owner, accessPath)));
@@ -242,8 +246,10 @@ test('professional analytics are read-only, scoped to reciprocal active seats an
   await assertFails(deleteDoc(doc(personDb, linkPath)));
   await env.withSecurityRulesDisabled(async context => { await updateDoc(doc(context.firestore(), seatPath), { expiresAt: 1 }); });
   await assertFails(getDoc(progress));
+  await assertFails(getDoc(evidence));
   await env.withSecurityRulesDisabled(async context => { await updateDoc(doc(context.firestore(), seatPath), { expiresAt: until }); await deleteDoc(doc(context.firestore(), linkPath)); });
   await assertFails(getDoc(progress));
+  await assertFails(getDoc(evidence));
   await assertSucceeds(getDoc(doc(personDb, `users/${patient}/progress/main`)));
 });
 
@@ -561,4 +567,27 @@ test('reassessment can replace all eight legacy level entries in one durable ope
       'data.profile.gameLevels.motor-tracking.evidence': evidence, updatedAt:serverTimestamp(),
     }));
   }
+});
+
+test('proposal evidence archives are durable, immutable, idempotent and isolated from profile totals', async () => {
+  const uid='proposal-evidence'; const db=env.authenticatedContext(uid).firestore();
+  const backend=firestoreProgress(uid,db); await backend.initialize(fresh());
+  const before=await backend.load();
+  const chunk={version:1,sessionId:'attempt-1',exerciseId:'language-naming',firstSequence:0,count:1,
+    events:JSON.stringify([{sequence:0,activeMs:0,at:'2026-10-04T12:00:00.000Z',kind:'start',level:1,configVersion:1,mode:'normal',locked:false}])};
+  const operation={id:'evidence:attempt-1:0',kind:'evidence',chunk};
+  await assertSucceeds(backend.commit(operation));
+  await assertSucceeds(backend.commit(operation));
+  assert.deepEqual(await backend.load(),before);
+  const path=`users/${uid}/evidence/${encodeURIComponent(operation.id)}`;
+  const stored=await assertSucceeds(getDoc(doc(db,path)));
+  assert.equal(stored.data().events,chunk.events);assert.ok(stored.data().receivedAt);
+  await assertFails(updateDoc(doc(db,path),{events:'[]'}));
+  await assertFails(deleteDoc(doc(db,path)));
+  const stranger=env.authenticatedContext('evidence-stranger').firestore();
+  await assertFails(getDoc(doc(stranger,path)));
+  await assertFails(setDoc(doc(stranger,`users/${uid}/evidence/forged`),{...chunk,receivedAt:serverTimestamp()}));
+  await assertFails(setDoc(doc(db,`users/${uid}/evidence/oversize`),{...chunk,events:'x'.repeat(24001),receivedAt:serverTimestamp()}));
+  await assertFails(setDoc(doc(db,`users/${uid}/evidence/fake-time`),{...chunk,receivedAt:new Date(0)}));
+  await assert.rejects(backend.commit({...operation,id:'evidence:attempt-1:8',chunk:{...chunk,firstSequence:8,events:'[]'}}),/invalid-evidence/);
 });

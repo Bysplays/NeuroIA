@@ -1,10 +1,12 @@
 import { placementExercises, validPlacementPreferences, type PlacementPreferences } from './placementPreferences.ts';
+import { readEvidenceChunk, type EvidenceChunk } from './sessionEvidence.ts';
 import { adaptDifficulty, applyPlacement, applyPlacementPreferences, applyPlacementStage, hasPlacement, EXERCISE_IDS, type PlacementTrial, type PlacementStage } from './difficulty.ts';
 import type { ExerciseId } from '../types/index.ts';
 import type { AccessibilitySettings, ExerciseResult, UserProfile } from '../types/index.ts';
 
 export interface ProgressData { profile: UserProfile; history: ExerciseResult[] }
 export type ProgressOperation =
+  | { id: string; kind: 'evidence'; chunk: EvidenceChunk }
   | { id: string; kind: 'placement'; trials: Partial<Record<ExerciseId, PlacementTrial>>; preferences?: PlacementPreferences }
   | { id: string; kind: 'placement'; preferences: PlacementPreferences }
   | { id: string; kind: 'placement'; retakePreferences: PlacementPreferences }
@@ -17,6 +19,11 @@ export type ProgressOperation =
 export function applyProgressOperation(data: ProgressData, operation: ProgressOperation): ProgressData {
   const next = structuredClone(data);
   const profile = next.profile;
+  if (operation.kind === 'evidence') {
+    if (!readEvidenceChunk(operation.chunk).length || operation.id !== `evidence:${operation.chunk.sessionId}:${operation.chunk.firstSequence}`) throw Error('invalid-evidence-operation');
+    // Detailed evidence is archived independently; never grow the recent profile.
+    return next;
+  }
   if (operation.kind === 'placement') {
     if ('trials' in operation) {
       const selected = operation.preferences ? placementExercises(operation.preferences) : EXERCISE_IDS;
