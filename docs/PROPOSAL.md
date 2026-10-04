@@ -75,7 +75,7 @@ The new rules have not been deployed; never claim production event collection.
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
 | Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded end-of-exercise decisions and persistent application audit behind a separate flag | Real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
-| Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance and visible response metrics; distinguish speed from measured response latency |
+| Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance and report integration; the Gráficas card now exposes validated game/level response metrics separately from speed |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
 | Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | End-to-end latency acceptance, completed report evaluation and documented pilot protocol; a local actor benchmark exists, but hardware and real-user evidence cannot be completed by code alone |
@@ -248,10 +248,11 @@ The remaining engineering work is:
 - Add a reproducible end-to-end latency trace and acceptance runner covering input
   acquisition, feature preparation, policy decision and effective UI application.
   The existing actor-only benchmark cannot establish the memory's <1 s target.
-- Surface measured response latency, incorrect attempts and help usage with valid
-  coverage in professional analytics/reports. Existing duration/questions charts
-  must remain labelled speed, not measured response latency. Complete per-game
-  touch/keyboard acceptance of the recording paths.
+- Integrate measured response latency, incorrect attempts and help usage into
+  reports. The Gráficas card now exposes these measures to owners and linked
+  professionals, with game/level grouping, weighted means and coverage. Existing
+  duration/questions charts remain speed. Complete per-game touch/keyboard
+  acceptance of the recording paths.
 - Add an independent pilot-session register and cohort aggregation with versioned
   definitions, exclusions, evidence provenance and a final validation artifact.
   Per-account exports and result-save receipts alone do not establish the >95%

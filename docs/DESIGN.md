@@ -43,6 +43,15 @@ action while loading, show retryable errors inline, cancel when leaving and rest
 focus after confirmation. Export coverage explicitly distinguishes requested downloads
 from reviewed reports; do not introduce a visual completion claim for pilot KPIs.
 
+When proposal evidence is enabled, Gráficas includes an explicitly loaded
+“Respuestas medidas” card for owners and linked professionals. Group only completed,
+validated, result-linked normal sessions by game and level; state that it uses the
+whole archive independently of activity filters. Show response-weighted mean time,
+incorrect attempts, active-opportunity help openings and separate prior selections.
+Continuous tracking shows duration-weighted contact without invented response latency.
+Use responsive definition lists, explicit excluded/malformed coverage and retryable
+errors. Do not label these task measurements clinical reaction time.
+
 The proposal calendar appears as a separate Resumen card before AI suggestions.
 Use native weekday checkboxes with full Spanish day names, a labelled 1–8 exercise
 selector and quiet Save/Pause actions. Do not imply a professional prescription.

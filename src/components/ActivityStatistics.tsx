@@ -1,4 +1,5 @@
 import {PracticeCalendar} from './PracticeCalendar';
+import {ResponseMetrics} from './ResponseMetrics';
 import { ExerciseAnalytics } from './ExerciseAnalytics';
 import { EvidenceExportButton } from './EvidenceExportButton';
 import { ProfessionalPageHeader } from './ProfessionalPageHeader';
@@ -104,6 +105,7 @@ function AccountActivityStatistics({ uid, history, levels, onBack, heading = 'Tu
     <>
       {more && <div className="stats-archive-notice" role="status">{error ? <>No se pudo cargar todo el historial. <button className="stats-quiet-button" onClick={loadMore}>Reintentar</button></> : 'Cargando el historial completo para calcular las medias…'}</div>}
       <div className="stats-lines"><LineChart results={results} history={all} complete={!more} metric="accuracy"/><LineChart results={results} history={all} complete={!more} metric="speed"/><LevelChart results={results} history={all} complete={!more}/></div>
+      {import.meta.env.VITE_PROPOSAL_EVIDENCE==='true'&&active&&tab==='charts'&&<ResponseMetrics uid={uid}/>}
     </>
     }, { id: 'history', label: 'Historial', content: <section className="stats-card stats-history" aria-labelledby="stats-history-title"><div className="stats-section-heading"><div><h2 id="stats-history-title">Ejercicios resueltos</h2><p>{more ? 'Historial reciente · Puedes cargar más registros' : 'Todo el historial disponible'}</p></div><span className="stats-count" role="status">{results.length} registros</span></div>
       <div className="stats-table-scroll" role="region" aria-label="Historial de ejercicios" tabIndex={0}><table><thead><tr>{['Ejercicio', 'Fecha y hora', 'Aciertos', 'Precisión', 'Duración', 'Seg./pregunta', 'Analíticas'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{results.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map(r => <tr key={r.id}><th scope="row">{title(r.exerciseId)}</th><td><ActivityTimestamp date={r.date}/></td><td>{r.correctAnswers} / {r.totalQuestions}</td><td>{number(r.accuracy)}%</td><td>{number(r.durationSeconds)} s</td><td>{number(secondsPerQuestion(r))}</td><td><button className="header-icon-btn" aria-label={`Ver partida de ${title(r.exerciseId)} del ${formatActivityDate(r.date).day}`} onClick={() => setSelectedResult(r)}><ChartNoAxesCombined size={20}/></button></td></tr>)}</tbody></table></div>

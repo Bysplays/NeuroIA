@@ -828,3 +828,11 @@ server `PROPOSAL_SCHEDULE_ENABLED` flag. Both remain off in production. See
 Run `vendor/cloudflare/practiceSchedule.test.mjs` with other Worker checks. Billing
 transport now accepts an optional cancellation signal and rejects cross-account
 responses; preserve those guards when sharing it with calendar requests.
+
+Proposal response analytics use `ResponseMetrics.tsx` and `responseMetrics.ts` in
+Actividad → Gráficas behind `VITE_PROPOSAL_EVIDENCE`. The explicit load reuses the
+complete validated evidence archive and excludes unlinked, invalid, incomplete and
+non-normal attempts. Group by game/level, weight latency by response counts, and
+keep tracking contact duration separate. This whole-archive view ignores activity
+filters and never replaces the existing duration/questions speed metric. Cancel
+on unmount and reject late responses after authenticated account changes.
