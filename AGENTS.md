@@ -836,3 +836,10 @@ non-normal attempts. Group by game/level, weight latency by response counts, and
 keep tracking contact duration separate. This whole-archive view ignores activity
 filters and never replaces the existing duration/questions speed metric. Cancel
 on unmount and reject late responses after authenticated account changes.
+
+When the proposal evidence context is present, report generation loads
+`reportResponses.ts` before creating the PDF. The optional measured-response appendix
+uses the same complete archive/reducer as Gráficas, verifies caller identity, respects
+cancellation and fails the download on archive errors. It is a whole-archive appendix,
+not filtered activity or LLM input; its copy must disclose that scope. Existing reports
+without the evidence context retain the ordinary PDF path.

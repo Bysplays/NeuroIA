@@ -1,8 +1,9 @@
 import { jsPDF } from 'jspdf';
 import { ACTIVITY_EXERCISES } from './activityExercises';
 import type { ActivityInsights, AiAnalysis } from './activityInsights';
+import type {responseMetrics} from './responseMetrics';
 
-interface ReportInput { insights: ActivityInsights; text: string; reference: string; provenance?: AiAnalysis['provenance'] }
+interface ReportInput { insights: ActivityInsights; text: string; reference: string; provenance?: AiAnalysis['provenance']; responses?: ReturnType<typeof responseMetrics> }
 const ink = '#173B55', blue = '#276A93', muted = '#566F81', pale = '#EAF3F8', border = '#D4E4EE';
 const number = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: 1 });
 const day = (s: string | null) => s ? new Date(`${s}T12:00:00Z`).toLocaleDateString('es-ES', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' }) : 'Sin datos';
@@ -181,6 +182,29 @@ export async function createActivityReportPdf(input: ReportInput, signal: AbortS
   for (const limitation of insights.limitations) {
     ensure(16); doc.setDrawColor(border); doc.setLineWidth(.6); doc.line(20, y - 3, 20, y + 1);
     paragraph(limitation, 8, muted, 24, 166);
+  }
+  if(input.responses){
+    nextPage();section('05','Respuestas medidas · anexo');
+    paragraph('Archivo completo de respuestas verificables, independiente del periodo y los filtros del informe. Solo partidas normales completadas y vinculadas; se agrupan por juego y nivel.',9,muted);
+    paragraph('Tiempo activo hasta cada respuesta, sin pausas. Se reinicia tras cada intento o selección previa. No equivale a segundos por pregunta ni a tiempo de reacción clínico. Las ayudas cuentan aperturas durante una oportunidad activa.',9,muted);
+    const measured=input.responses;
+    paragraph(`Intentos excluidos: ${measured.excluded}. Documentos no válidos: ${measured.malformed}.`,9,muted);
+    if(!measured.complete)paragraph('Archivo incompleto: no se muestran totales.',10);
+    else if(!measured.rows.length)paragraph('No hay partidas con medidas verificables.',10);
+    else for(const row of measured.rows){
+      ensure(90);
+      paragraph(`${ACTIVITY_EXERCISES.find(game=>game.id===row.exercise)?.title??'Juego'} · Nivel ${row.level}`,12,blue,20,170,'bold');
+      const cells=[['Partidas',String(row.sessions)],['Respuestas',String(row.responses)],['Media por respuesta',row.meanResponseMs===null?'Sin respuestas discretas':`${number(row.meanResponseMs/1000)} s`],['Intentos incorrectos',String(row.errors)],['Ayudas abiertas',String(row.hints)],['Selecciones previas',String(row.selections)]];
+      const top=y;
+      cells.forEach(([label,value],index)=>{
+        const x=20+(index%3)*58,cy=top+Math.floor(index/3)*22;
+        doc.setFillColor(pale);doc.rect(x,cy,54,20,'F');
+        style(7.5,'normal',muted);doc.text(label,x+27,cy+7,{align:'center'});
+        style(10,'bold',ink);doc.text(value,x+27,cy+15,{align:'center'});
+      });y+=49;
+      if(row.contactRatio!==null)paragraph(`Seguimiento en contacto: ${number(row.contactRatio*100)} % de ${number(row.trackingMs/1000)} s medidos.`,9,muted);
+    }
+    paragraph('Sin estimaciones para partidas antiguas sin registro, pruebas iniciales, prácticas, intentos incompletos o enlaces no confirmados. El seguimiento continuo mide contacto; no produce respuestas discretas. La lectura paginada no es una instantánea atómica.',8,muted);
   }
   y += 4;
   paragraph(`Documento generado: ${new Date().toLocaleString('es-ES')}. NeuroIA no guarda una copia de este documento.`, 8, muted);

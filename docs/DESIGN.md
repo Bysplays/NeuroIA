@@ -49,6 +49,10 @@ validated, result-linked normal sessions by game and level; state that it uses t
 whole archive independently of activity filters. Show response-weighted mean time,
 incorrect attempts, active-opportunity help openings and separate prior selections.
 Continuous tracking shows duration-weighted contact without invented response latency.
+Reports include these local measurements as a separate appendix after scope, explicitly
+covering the whole archive independently of report filters. Use square metric cells,
+centered labels/values and keep each game/level block together across pages. An archive
+read failure prevents download instead of silently omitting the requested appendix.
 Use responsive definition lists, explicit excluded/malformed coverage and retryable
 errors. Do not label these task measurements clinical reaction time.
 

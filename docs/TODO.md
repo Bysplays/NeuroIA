@@ -73,8 +73,9 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   hints, card selections and continuous tracking windows. Cross-chunk validation
   rejects gaps and conflicting retries. Server pagination and a JSON evaluation
   export are implemented. Gráficas now shows validated per-game/per-level response
-  times, errors, help and continuous contact with explicit coverage; report
-  integration and broader input acceptance remain. Publish archive/result-link rules before enabling
+  times, errors, help and continuous contact with explicit coverage. The PDF includes
+  a separate whole-archive appendix calculated locally, with pagination and failure
+  handling; broader input acceptance remains. Publish archive/result-link rules before enabling
   `VITE_PROPOSAL_EVIDENCE`.
 - [ ] Implement and integrate a learned adaptive policy, training/export provenance,
   bounded decisions, EEG-optional operation and professional-level protection.

@@ -80,7 +80,9 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
       controller.signal.throwIfAborted();
       const data = result?.insights ?? insights;
       const text = reportNarrative(result?.narrative ?? basicNarrative(insights), data);
-      const pdf = await createActivityReportPdf({ insights: data, text, reference: subjectLabel, provenance: result?.provenance }, controller.signal);
+      const responses = evidence ? await (await import('../services/reportResponses')).loadReportResponses(uid, controller.signal) : undefined;
+      controller.signal.throwIfAborted();
+      const pdf = await createActivityReportPdf({ insights: data, text, reference: subjectLabel, provenance: result?.provenance, responses }, controller.signal);
       if (controller.signal.aborted || requests.current.version !== requestId) return;
       lifecycle?.emit('pdf-ready');
       downloadActivityReport(pdf); lifecycle?.emit('download-requested'); setNotice('Informe PDF descargado');
