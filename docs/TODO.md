@@ -92,8 +92,9 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   categorization now apply changes on Continue with fixed round totals, mixed-level
   completion and protected repeat/manual/professional flows. Search now adopts the
   next board config on Continue; motor targets adopt the next size after a hit,
-  preserving counts and positions. The two memory games, tracking integration and
-  mixed-level history presentation remain open. The mixed-level result contract now
+  preserving counts and positions. Memory sequences and pairs now adopt new configs
+  on Continue, preserving replay contents and counting actual completed deck sizes.
+  Tracking integration and mixed-level history presentation remain open. The mixed-level result contract now
   omits a false single level, applies the final recommendation transactionally
   against the original profile level and reconciles its archive trace; its rules
   are not deployed. Real

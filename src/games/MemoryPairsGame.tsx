@@ -71,7 +71,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, progressScope, lockedLevel } = useGameSession();
+  const { clock, nextRound, config, progressScope, lockedLevel } = useGameSession();
   const maxRounds = config.mode === 'normal' && !progressScope && !planProgress && !lockedLevel ? 3 : 1;
   const [round, setRound] = useState(1);
   const [started, setStarted] = useState(false);
@@ -81,6 +81,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [attempts, setAttempts] = useState(0);
+  const [completedPairs,setCompletedPairs] = useState(0);
   const [mistakesList, setMistakesList] = useState<MistakeDetail[]>([]);
   const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
@@ -135,6 +136,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     setSelectedCards([]);
     setIsEvaluating(false);
     setAttempts(0);
+    setCompletedPairs(0);
     setMistakesList([]);
     setIsCompleted(false);
     setResult(null);
@@ -204,8 +206,10 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
   const handleGameFinish = (finalAttempts: number, mistakes: MistakeDetail[]) => {
     const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
-    // Aggregate completed boards against all attempts, including repetitions.
-    const accuracy = Math.min(100, Math.max(0, Math.round((config.pairs * maxRounds / Math.max(config.pairs * maxRounds, finalAttempts)) * 100)));
+    // Sum the actual boards: the last level cannot describe earlier deck sizes.
+    const correctPairs=completedPairs+cards.length/2;
+    // Replays stay attempts; previously replayed matches do not inflate completed boards.
+    const accuracy = Math.min(100, Math.max(0, Math.round((correctPairs / Math.max(correctPairs, finalAttempts)) * 100)));
 
     const gameResult: ExerciseResult = {
       id: crypto.randomUUID(),
@@ -218,8 +222,8 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       date: new Date().toISOString(),
       durationSeconds: elapsedSeconds,
       accuracy,
-      score: 300 + Math.max(0, 200 - (finalAttempts - config.pairs * maxRounds) * 30),
-      correctAnswers: config.pairs * maxRounds,
+      score: 300 + Math.max(0, 200 - (finalAttempts - correctPairs) * 30),
+      correctAnswers: correctPairs,
       totalQuestions: finalAttempts,
       feedbackMessage:
         accuracy >= 80
@@ -250,8 +254,10 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     if (!roundDone) return;
     if (round === maxRounds) handleGameFinish(attempts, mistakesList);
     else {
+      const nextConfig=nextRound?.()??config;
+      setCompletedPairs(completedPairs+cards.length/2);
       setRound(value => value + 1);
-      setCards(createDeck(config.pairs, config.level));
+      setCards(createDeck(nextConfig.pairs, nextConfig.level));
       setStarted(false);
       setRoundDone(false);
       setSelectedCards([]);
@@ -288,7 +294,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
     >
       <div className="memory-pairs-game-container">
         <div className="pairs-board-card">
-          <div className="pairs-grid" style={{
+          <div key={round} className="pairs-grid" style={{
             '--pair-columns': config.pairs,
             '--pair-mobile-columns': config.pairs <= 3 ? config.pairs : config.pairs === 6 ? 3 : 2,
           } as CSSProperties}>

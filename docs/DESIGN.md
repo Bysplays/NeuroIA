@@ -30,7 +30,11 @@ initial round count. The footer shows the active level; mixed completion shows t
 played level range, never a single achieved level. New question options must not
 inherit the previous answer's animated highlight. Repeat returns to the explicitly
 selected starting level and holds it, as do manual and professional levels.
-The two memory games and tracking still change only the next-entry default after completion. LLM
+Memory sequences and pairs adopt the next config only on Continue after a completed
+round; preview/replay keeps the current sequence or deck intact. Preserve three solo
+boards/sequences and existing grouped-mode counts. Pair results sum the actual
+completed board sizes, counting replayed work as attempts rather than extra boards.
+Tracking still changes only the next-entry default after completion. LLM
 recommendations remain optional suggestions; they are not the learned controller.
 The simulation-trained controller stays disabled in production pending PROPOSAL.md.
 

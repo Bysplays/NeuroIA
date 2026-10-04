@@ -74,7 +74,7 @@ The new rules have not been deployed; never claim production event collection.
 | --- | --- | --- |
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
-| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded boundary decisions in naming/completion/categorization/search/targets, end-of-exercise decisions in memory/tracking and persistent application audit behind a separate flag | Connect the remaining three games to their task boundaries, finish mixed-level history presentation, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
+| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded boundary decisions in naming/completion/categorization/search/targets/memory, end-of-exercise decisions in tracking and persistent application audit behind a separate flag | Connect tracking to its contact-release boundaries, finish mixed-level history presentation, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance; Gráficas and a separate whole-archive PDF appendix expose validated game/level response metrics separately from speed |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
@@ -242,14 +242,15 @@ The original PDF's section 1.2.8 promises continuous adaptation and EEG-derived
 fatigue/inattention, not merely a learned algorithm. Current observations are
 collected during play. Naming, word completion and categorization now apply the
 policy between questions; search adopts new boards and motor targets new sizes
-at their boundaries. Memory and tracking still change only the next-entry default
-after completion. Complete their defined boundaries and acceptance paths. Do not change answer keys or targets in the middle of a response.
+at their boundaries. Memory adopts new sequence/board configs on Continue. Tracking
+still changes only the next-entry default
+after completion. Complete its contact-release boundary and acceptance paths. Do not change answer keys or targets in the middle of a response.
 
 The remaining engineering work is:
 
 - Add a reproducible end-to-end latency trace and acceptance runner covering input
   acquisition, feature preparation, policy decision and effective UI application.
-  The existing actor-only benchmark cannot establish the memory's <1 s target.
+  Existing browser and emulator traces cover separate pipeline stages; neither establishes physical Muse-to-display latency.
 - Complete per-game touch/keyboard acceptance of the recording paths. Gráficas
   and the PDF appendix now expose response latency, incorrect attempts and help
   usage with game/level grouping, weighted means and coverage. The appendix is
@@ -454,12 +455,19 @@ positions and fixed total while updating unplayed target sizes. Browser acceptan
 covers completed mixed-level traces, missed-input stability, target growth/shrink
 containment and professional protection at the same three widths.
 
-Memory sequence, memory pairs and tracking still need their boundary handlers
-connected and verified. In particular, pair totals must count
-actual boards rather than final-level pairs × rounds. Their existing end-of-exercise
-behavior remains until each integration is ready. No production flag is enabled. Recording readiness gates input mount, and response
-opportunities register in layout effects so fast keyboard actions cannot precede
-their stimulus event. This ordering also applies to the other recorded games.
+Memory sequences adopt their next length and playback timing after Continue; a new
+sequence is generated only when Comenzar is pressed. Replaying a partial sequence
+preserves its order and level. Pair boards similarly adopt the next deck size,
+content and preview duration on Continue, keeping the same positions on replay.
+Their completed-pair numerator sums actual finished boards. Repeated partial work
+remains in attempts and evidence without inventing additional completed boards.
+Existing solo/grouped round counts, early sequence failure and protected levels stay
+intact. Sequence result counters remain rounds; individual taps are separate evidence.
+
+Tracking still needs contact-release integration and acceptance. No production flag
+is enabled. Recording readiness gates input mount, and response opportunities
+register in layout effects so fast keyboard actions cannot precede their stimulus
+event. This ordering also applies to the other recorded games.
 
 ## Mixed-level measurement accounting
 
@@ -481,7 +489,7 @@ allocation to level-specific previews or unobserved intervals is invented.
 
 Tests include a 2 → 3 → 2 attempt with different timings, an intentionally different
 result-level field, duplicate archive pages, separate UI/PDF blocks and one unique
-session count. The three question games, search and motor targets use this accounting. Ordinary activity speed/level
+session count. The three question games, search, motor targets and memory use this accounting. Ordinary activity speed/level
 charts still need rendered mixed-level presentation; they do not assign a single
 level to these attempts.
 
@@ -497,8 +505,8 @@ links. Invalid chains contribute no metrics. Exports use ordinal round numbers.
 Tracking is flushed before inference with `prepareRoundDecision`; batches obey both
 the eight-event and 24,000-character limits. Unit coverage includes partial tracking
 windows and an emulator case checks durable retries and archive reconstruction.
-GameSession calls these APIs through liveRoundSession in the three question games, search and motor targets;
-the remaining game integrations are open. A recorded local decision is not proof
+GameSession calls these APIs through liveRoundSession in the three question games, search, motor targets and memory;
+tracking integration remains open. A recorded local decision is not proof
 of a server-confirmed profile adjustment.
 
 
@@ -520,6 +528,6 @@ chain; mismatches do not count as correctly registered results. Firestore accept
 the new bounded field with a required evidence link and rejects simultaneous old
 and new adaptation payloads. Publish these rules before enabling game integration.
 The contract is tested in the reducer and demo emulator and created by the three
-question games, search and motor targets at their actual boundaries. Browser checks cover completion, repeat,
+question games, search, motor targets and memory at their actual boundaries. Browser checks cover completion, repeat,
 manual/professional protection, fixed totals and trace/result reconciliation at
-390, 820 and 1280 px; the remaining game integrations are still open.
+390, 820 and 1280 px; tracking integration remains open.

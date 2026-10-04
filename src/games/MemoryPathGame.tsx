@@ -42,7 +42,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, nextRound, config } = useGameSession();
   const activeTiles = ALL_TILES;
   const maxRounds = config.mode === 'normal' ? 3 : 1;
 
@@ -76,7 +76,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
   const startCurrentRound = () => {
     clearTimeouts();
-    const seqLength = config.sequenceLength; // Fixed for this level throughout the session.
+    const seqLength = config.sequenceLength; // Fixed until this sequence has ended.
 
     const newSeq = createMemorySequence(activeTiles.map(tile => tile.id), seqLength);
 
@@ -171,6 +171,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     if (!roundDone) return;
     if (failure || round === maxRounds) finishGame(score, !!failure);
     else {
+      nextRound?.();
       clearTimeouts();
       setRound(value => value + 1);
       setSequence([]);
