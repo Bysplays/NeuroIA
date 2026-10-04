@@ -843,3 +843,11 @@ uses the same complete archive/reducer as Gráficas, verifies caller identity, r
 cancellation and fails the download on archive errors. It is a whole-archive appendix,
 not filtered activity or LLM input; its copy must disclose that scope. Existing reports
 without the evidence context retain the ordinary PDF path.
+
+Pilot registration/adherence reconciliation lives in `scripts/evaluation/pilot.mjs`.
+Use the empty `--template` workflow in docs/PROPOSAL.md and observed records only for
+real pilot review. `npm test` covers strict KPI boundaries, missing participants,
+export hashes, duplicate links and calendar-denominator reconstruction. Outputs use
+exclusive creation; codes are pseudonymous, not necessarily anonymous. This CLI
+cannot attest observer declarations, infer ambiguous identity-free export matches,
+or replace scientific, hardware, report and end-to-end latency acceptance.

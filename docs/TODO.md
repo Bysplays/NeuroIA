@@ -95,7 +95,9 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   reconcile against archived results without inflating completed-session totals.
   Prospective, server-versioned personal calendars now supply a fixed-timezone
   elapsed-day adherence denominator, with read-only professional views and complete
-  exports. Protocol approval, independent pilot registration and cohort acceptance
+  exports. An independent observer-register CLI now reconciles exact hashed exports
+  and aggregates cohort registration/adherence without silently dropping missing
+  participants or planned days. Protocol approval, real pilot registration and cohort acceptance
   remain open; fixture percentages do not establish the memory’s targets.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
   Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish

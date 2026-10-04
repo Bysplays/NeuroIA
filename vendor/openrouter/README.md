@@ -166,4 +166,6 @@ uses `1 - sum(assisted) / sum(manual)` over complete pairs; automation uses acce
 units / total units over measured cases. Targets retain strict `<600 seconds` and
 `>70%`, and inclusive `>=50%` reduction. Passing these on synthetic cases does not
 prove pilot KPIs, report usefulness in the target population, or TRL 7. This tooling
-is separate from still-pending durable runtime report/save telemetry and adherence.
+is separate from the implemented runtime report/save telemetry and adherence calendar.
+The pilot reconciliation CLI in docs/PROPOSAL.md consolidates registration/adherence;
+real reviewer measurements and final pilot acceptance remain open.

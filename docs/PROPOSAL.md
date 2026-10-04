@@ -253,10 +253,11 @@ The remaining engineering work is:
   usage with game/level grouping, weighted means and coverage. The appendix is
   calculated locally, never sent to the LLM, and explicitly covers the whole archive
   independently of the report filters. Existing duration/questions charts remain speed.
-- Add an independent pilot-session register and cohort aggregation with versioned
-  definitions, exclusions, evidence provenance and a final validation artifact.
-  Per-account exports and result-save receipts alone do not establish the >95%
-  registration denominator or population adherence.
+- Complete the pilot evidence package and final validation artifact. The independent
+  observer-register reconciliation CLI now aggregates registration and adherence
+  with strict coverage, versioned definitions and export hashes. Real observations,
+  unambiguous reconciliation and approved units remain necessary; report/latency
+  aggregation and the signed final validation report remain open.
 - Resolve report factuality/scope failures found in live evaluation and complete
   the hash-bound review workflow. Spanish activity summaries do not automatically
   satisfy the memory's proposed neuropsychological technical report; approved
@@ -272,3 +273,57 @@ The remaining engineering work is:
 Real hardware recordings, reviewer measurements, comparison against manual report
 preparation and a real-user/professional pilot are separate evidence deliverables.
 Code and synthetic fixtures cannot close TRL 7, efficacy or the numerical pilot KPIs.
+
+## Independent pilot reconciliation tool
+
+`scripts/evaluation/pilot.mjs` consolidates an independent observer register and
+per-participant evidence/calendar exports. It does not manufacture observations,
+sign a pilot report, attest the exports or establish TRL 7. Create an empty input:
+
+```sh
+node --experimental-strip-types scripts/evaluation/pilot.mjs --template /tmp/pilot-input.json
+node --experimental-strip-types scripts/evaluation/pilot.mjs /tmp/pilot-input.json /tmp/pilot-summary.json
+```
+
+Both commands refuse to overwrite an existing destination. Fill the template from
+an approved prospective protocol: pseudonymous pilot/participant codes, inclusive
+study dates, approved-by code/time and provenance (`synthetic` or `observed`). Keep
+identity mappings separately. Approval must precede the study start to qualify for
+review; this is an auditable declaration, not a digital signature. Never change a
+synthetic run to observed to obtain a passing flag.
+
+`register` contains one independently observed exercise attempt per row:
+`sessionCode`, `participant`, `day`, `outcome` (`completed`, `abandoned`,
+`not-attended`, `unknown`) and `observerCode`. Completed exercises, not whole daily
+plans, define the registration denominator (`registrationDefinition: observed-completed-exercises-v1`). The protocol must explicitly approve
+that unit before comparison with the memory's session KPI. Include all roster
+participants and attempted observations, including missing outcomes.
+
+Each `participants` entry contains `code`, the observer's `registerComplete`
+boolean, the exact JSON evaluation export under `evidence`, the exact calendar
+export under `calendar`, and a `reconciliation` array. Each completed register row
+needs a review with `sessionCode`, `reviewerCode`, `archiveHash` and `attempt`.
+Compute the hash with the exported `pilotHash(evidence)` helper; it is SHA-256 of
+`JSON.stringify` of the parsed export. `attempt` is the export's positive ordinal,
+or null only for a reviewed, confirmed missing completion. Leave the review absent
+when the match is uncertain: uncertainty is not a confirmed missing result. Ordinals
+are scoped to one export and cannot be reused after redownloading. Duplicate matches,
+unknown observations and changed export hashes are rejected. The current identity-free
+export lacks wall timestamps, so ambiguous matches require independent supporting
+records; the tool must not guess them from game order or approximate timing.
+
+Registration counts only normal completed attempts with valid measurements and a
+confirmed result link. Incomplete registers, unknown outcomes, missing participants
+or incomplete exports suppress the cohort percentage. Calendar denominators are
+reconstructed from immutable schedule revisions for the exact study interval;
+missing days, unfinished observation windows, conflicting data and empty schedules
+prevent a cohort adherence claim. The cohort uses fulfilled planned days / planned
+days, not an unweighted mean of participant percentages. Thresholds are strictly
+>95% and >60%; equality fails. Source and protocol hashes accompany per-participant
+coverage in the output. `eligibleForPilotReview` indicates only sufficient declared
+inputs, never acceptance of the pilot or success of all numerical targets.
+
+Still required: independent real observations and reconciliation, approved session
+and adherence definitions, real report reviews/timings, end-to-end latency traces,
+scientific/hardware validation and the signed final validation report. This tool
+supplies registration/adherence aggregation only; it does not replace those gates.
