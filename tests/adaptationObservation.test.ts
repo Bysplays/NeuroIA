@@ -39,3 +39,13 @@ test('tracking eligibility comes from measured windows and a terminal partial wi
   assert.equal(observation.eligible,true);assert.equal(observation.vector[13],0);
   assert.equal(observation.vector[14],2000/3500);assert.equal(observation.vector[15],1);
 });
+test('changing task level resets performance comparisons but preserves the independent EEG baseline',async()=>{
+ const {createAdaptationObservation}=await import('../src/services/adaptationObservation.ts');
+ const observation=createAdaptationObservation('visual-scanning');observation.beginLevel(5);
+ const wave=(hz:number)=>Array.from({length:256},(_,i)=>20*Math.sin(2*Math.PI*hz*i/256));
+ for(let i=0;i<10;i++)observation.add({kind:'eeg',sequence:i,activeMs:(i+1)*1000,at:'2026-10-04T00:00:00.000Z',frame:museFeatureFrame(i,[wave(i<5?10:20),wave(5),undefined,wave(35)])});
+ for(let i=0;i<3;i++)observation.add({kind:'response',sequence:10+i,activeMs:10000,at:'2026-10-04T00:00:00.000Z',stimulus:`q${i}`,correct:false,final:true,latencyMs:1000});
+ const before=observation.snapshot(10000);assert.equal(before.eligible,true);
+ observation.beginLevel(4);const after=observation.snapshot(10000);
+ assert.equal(after.eligible,false);assert.equal(after.level,4);assert.deepEqual(after.vector.slice(9,16),Array(7).fill(0));assert.deepEqual(after.vector.slice(16),before.vector.slice(16));
+});

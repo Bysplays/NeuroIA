@@ -14,11 +14,11 @@ export function policyLogits(observation:number[]) {
   }
   return values;
 }
-export function decideAdaptation(input:{vector:number[];level:number;eligible:boolean},context:{locked:boolean;mode:string;baseLevel:number},now=()=>performance.now()):AdaptationDecision {
+export function decideAdaptation(input:{vector:number[];level:number;eligible:boolean},context:{locked:boolean;mode:string;baseLevel:number;manualLevel?:boolean},now=()=>performance.now()):AdaptationDecision {
   if(!Number.isInteger(input.level)||input.level<1||input.level>10) throw Error('invalid-policy-level');
   const started=now();
   const logits=policyLogits(input.vector);
-  const reason=context.locked ? 'professional' : context.mode!=='normal' ? 'non-normal' : context.baseLevel!==input.level ? 'manual-level' : !input.eligible ? 'insufficient-evidence' : 'policy';
+  const reason=context.locked ? 'professional' : context.mode!=='normal' ? 'non-normal' : context.manualLevel || context.baseLevel!==input.level ? 'manual-level' : !input.eligible ? 'insufficient-evidence' : 'policy';
   const action=(reason==='policy' ? logits.indexOf(Math.max(...logits))-1 : 0) as -1|0|1;
   return {version:1,model:model.id,trainingData:'synthetic',fromLevel:input.level,nextLevel:Math.max(1,Math.min(10,input.level+action)),action,
     reason,application:'pending',observation:[...input.vector],logits,inferenceMs:Math.max(0,now()-started)};

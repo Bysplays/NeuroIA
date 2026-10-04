@@ -420,3 +420,29 @@ npm run test:interface -- tests/interface/evidence.spec.mjs tests/interface/evid
 These checks cover a controlled browser input matrix, not all levels, full successful
 completion paths of every game, physical tablet accessibility or real Muse hardware.
 Keep those acceptance scopes separate; no pilot or cognitive benefit is inferred.
+
+## Between-round adaptation integration in progress
+
+`roundAdaptation.ts` now provides the pure transition controller for this remaining
+memory requirement. It reuses the existing learned actor and observation builder,
+with explicit game-specific boundaries: question, search board, memory sequence,
+memory board, target, or contact release. An open response opportunity blocks a
+boundary decision. Completing a round computes a proposed next config; only
+explicitly beginning a new, uniquely identified round adopts it. Repeated completion
+callbacks return the same decision, copied audit data cannot mutate internal state,
+and closing the controller rejects late events.
+
+The controller freezes the initial planned round/target/contact totals, keeps
+±1/1–10 policy bounds, and protects professional, manual, placement and practice
+levels. On a level change, response/tracking performance comparisons reset so
+observations from different task difficulties are not silently compared. EEG
+baseline calibration remains session-scoped and is not reset into a fictional new
+baseline merely because the task level changed.
+
+This controller is tested but **not yet connected to GameSession or the games**.
+The existing flag still adapts only after exercise completion. Remaining integration
+must regenerate only the next round's content, preserve current stimuli/touch areas,
+record each level segment and transition, and reconcile mixed-level result metrics
+and persistent audit validation. In particular, pair counts cannot be calculated as
+final-level pairs × rounds once levels vary. Do not enable or describe mid-session
+adaptation as shipped until those contracts and rendered input paths are verified.

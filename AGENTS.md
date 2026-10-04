@@ -875,3 +875,10 @@ and `evidence-inputs.spec.mjs`. The latter runs all eight games with keyboard an
 emulated touch, checks help pause exclusion and validates reconstructed event links;
 it also checks full naming/word-completion/categorization rounds, result linkage and
 repeat isolation. This is not coverage of every level or physical tablet input.
+
+`roundAdaptation.ts` is a tested pure controller for pending between-round policy
+integration, not yet wired into GameSession. Reuse it when adding explicit round
+boundaries; its decision must not mutate an active board. `beginLevel` resets only
+performance observation windows, preserving the independent session EEG baseline.
+Keep the distinction between local next-round application and server-confirmed
+profile writes. See docs/PROPOSAL.md for mixed-level accounting/audit prerequisites.

@@ -1,6 +1,6 @@
 import type { EvidenceEvent } from './sessionEvidence.ts';
 import { createMuseBaseline } from './museBaseline.ts';
-import { EXERCISE_IDS } from './difficulty.ts';
+import { EXERCISE_IDS, validLevel } from './difficulty.ts';
 
 const clamp=(n:number,min=-1,max=1)=>Math.max(min,Math.min(max,n));
 const mean=(values:number[])=>values.reduce((sum,n)=>sum+n,0)/values.length;
@@ -14,6 +14,12 @@ export function createAdaptationObservation(exerciseId:string) {
   const firstLatencies:number[]=[];
   const eeg=createMuseBaseline();
   return {
+    beginLevel(nextLevel:number) {
+      if(!validLevel(nextLevel))throw Error('invalid-observation-level');
+      level=nextLevel;hints=0;trackingMs=0;contactMs=0;responses.length=0;firstLatencies.length=0;
+      // EEG baseline belongs to the session; changing task level does not create
+      // a fictitious new physiological baseline.
+    },
     add(event:EvidenceEvent) {
       if (event.kind==='start') level=event.level;
       if (event.kind==='hint') hints++;
