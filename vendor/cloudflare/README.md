@@ -267,7 +267,9 @@ authorized report generation, not daily recommendations. Before activity retriev
 or provider work it writes a UUID record under the caller's
 `users/{uid}/reportAttempts/{attemptId}`. A terminal transaction records generated,
 failed or cancelled, the source/quota/provider/validation/authorization stage,
-HTTP status and monotonic elapsed milliseconds. Generated records retain prompt
+HTTP status and monotonic elapsed milliseconds. An optional bounded `clientAttemptId`
+on report requests correlates browser phases without a participant identifier; it
+is not sent to the model. Generated records retain prompt
 version and source hash, but no draft, prompt, participant ID, name or free text.
 The model is the configured model, not a claim about provider routing internals.
 
@@ -289,7 +291,8 @@ omits Firestore paths and source hashes. Dates and model versions remain operati
 metadata, not legally anonymous data. Pagination is not an atomic snapshot.
 
 Do not derive the memory's automation or preparation-time KPI from `generated`.
-Client PDF lifecycle telemetry, reviewed synthesis units and paired manual/assisted
+Client PDF lifecycle telemetry and the combined caller-owned export are implemented
+behind the frontend evidence flag; reviewed synthesis units and paired manual/assisted
 preparation times remain separate requirements. Generation failures before
 successful start persistence are also absent from this ledger, so an independent
 pilot register remains necessary for completeness claims.

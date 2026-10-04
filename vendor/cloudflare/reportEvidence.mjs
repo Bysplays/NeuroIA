@@ -1,12 +1,12 @@
 // Server-owned operational evidence, separate from report content and human review.
 // Disabled until explicitly enabled. No names, target IDs, prompts or drafts are saved.
-export async function withReportEvidence(actor, mode, env, db, signal, generate) {
+export async function withReportEvidence(actor, mode, env, db, signal, generate, clientAttemptId) {
   const context={stage:'source'};
   if(env.PROPOSAL_REPORT_EVIDENCE!=='true' || mode!=='report')return generate(context);
   const id=crypto.randomUUID();
   const path=`users/${actor}/reportAttempts/${id}`;
   const startedAt=Date.now(),monotonic=performance.now();
-  const start={version:1,status:'started',startedAt,model:env.OPENROUTER_MODEL.trim().slice(0,200)};
+  const start={version:1,status:'started',startedAt,model:env.OPENROUTER_MODEL.trim().slice(0,200),...(clientAttemptId?{clientAttemptId}:{})};
   try{
     await db.runTransaction(async tx=>{
       if(await tx.get(`accountDeletions/${actor}`))throw Object.assign(Error('La cuenta se está eliminando.'),{status:409});
@@ -62,9 +62,10 @@ export async function readReportEvidence(actor,input,db,signal) {
     const valid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(attemptId) && row.version===1 && ['started','generated','failed','cancelled'].includes(row.status)
       && Number.isFinite(row.startedAt) && typeof row.model==='string' && row.model.length<=200;
     const terminal=row.status!=='started';
-    if(!valid || terminal && (!Number.isFinite(row.finishedAt) || !Number.isSafeInteger(row.durationMs) || row.durationMs<0
+    const validClientId=row.clientAttemptId===undefined || typeof row.clientAttemptId==='string' && /^[a-zA-Z0-9_-]{1,128}$/.test(row.clientAttemptId);
+    if(!valid || !validClientId || terminal && (!Number.isFinite(row.finishedAt) || !Number.isSafeInteger(row.durationMs) || row.durationMs<0
       || !Number.isInteger(row.httpStatus) || !['source','quota','provider','validation','authorization','complete'].includes(row.stage)))return {invalid:true};
-    return {version:1,attemptId,status:row.status,startedAt:row.startedAt,model:row.model,
+    return {version:1,attemptId,...(row.clientAttemptId?{clientAttemptId:row.clientAttemptId}:{}),status:row.status,startedAt:row.startedAt,model:row.model,
       ...(terminal?{finishedAt:row.finishedAt,durationMs:row.durationMs,httpStatus:row.httpStatus,stage:row.stage}:{}),
       ...(typeof row.promptVersion==='string' && row.promptVersion.length<=100?{promptVersion:row.promptVersion}:{}),
     };

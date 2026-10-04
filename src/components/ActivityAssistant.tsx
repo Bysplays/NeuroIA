@@ -1,3 +1,4 @@
+import {ReportEvidenceExportButton} from './ReportEvidenceExportButton';
 import {SessionEvidenceContext} from '../services/sessionEvidenceContext';
 import {createReportLifecycle} from '../services/reportLifecycle';
 import { useContext, useEffect, useId, useRef, useState } from 'react';
@@ -63,14 +64,16 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
     const controller = new AbortController(); requests.current.controller = controller;
     const requestId = ++requests.current.version;
     setBusy('report'); setError(''); setNotice('');
+    let clientAttemptId:string|undefined;
     let lifecycle:ReturnType<typeof createReportLifecycle>|null=null;
     try {
       if(evidence){
-        lifecycle=createReportLifecycle({attemptId:crypto.randomUUID(),source:available?'ai':'template',sink:event=>evidence.enqueue({id:`report:${event.attemptId}:${event.sequence}`,kind:'report',event})});
+        clientAttemptId=crypto.randomUUID();
+        lifecycle=createReportLifecycle({attemptId:clientAttemptId,source:available?'ai':'template',sink:event=>evidence.enqueue({id:`report:${event.attemptId}:${event.sequence}`,kind:'report',event})});
         requests.current.lifecycle=lifecycle;
       }
       // Reports use the current selected activity; recommendations use their daily snapshot.
-      const result = available ? await activityAi.generate(uid, insights.filters, 'report', controller.signal) : undefined;
+      const result = available ? await activityAi.generate(uid, insights.filters, 'report', controller.signal, clientAttemptId) : undefined;
       if (controller.signal.aborted || requests.current.version !== requestId) return;
       if(result)lifecycle?.emit('ai-ready');
       const { createActivityReportPdf, downloadActivityReport } = await import('../services/activityReportPdf');
@@ -124,6 +127,7 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
     <details className="activity-assistant-limits"><summary>Sobre la IA<ChevronDown size={16} aria-hidden="true"/></summary>
       <p>La IA analiza un resumen de tu actividad —juegos, frecuencia, precisión, velocidad y niveles— para proponerte ideas de práctica y generar informes. Las recomendaciones se actualizan la primera vez que abres este resumen cada día y se conservan hasta la siguiente actualización. Para ello, enviamos datos agregados a servidores externos, sin nombres, correos ni identificadores de cuenta. Tú decides qué sugerencias seguir; los niveles y las propuestas profesionales no se modifican.</p>
     </details>
+    {evidence && <ReportEvidenceExportButton/>}
     {error && <p role="alert">{error}</p>}
     <p className="activity-assistant-status" role="status">{busy === 'recommendations' ? 'Preparando tus recomendaciones del día…' : ''}</p>
     {notice && <ModalFrame labelledBy={`${id}-download-title`} onClose={closeDownloadNotice}>

@@ -1,3 +1,4 @@
+import {loadReportEvidenceExport} from '../src/services/reportEvidenceArchive.ts';
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -665,4 +666,20 @@ test('report lifecycle uses immutable owner-only archives and idempotent outbox 
   await assertFails(getDoc(doc(env.authenticatedContext('other').firestore(),path)));
   await assertFails(setDoc(doc(db,`users/${uid}/reportEvents/bad`),{...event,draft:'not allowed',receivedAt:serverTimestamp()}));
   await assert.rejects(backend.commit({...operation,id:'wrong'}),/invalid-report-operation/);
+});
+
+test('report export reads beyond 200 events, follows server cursors and refuses partial failures',async()=>{
+  const uid='report-export-pages',db=env.authenticatedContext(uid).firestore();
+  await env.withSecurityRulesDisabled(async context=>{
+    await Promise.all(Array.from({length:201},(_,i)=>setDoc(doc(context.firestore(),`users/${uid}/reportEvents/${i}`),{version:1,attemptId:`attempt-${i}`,sequence:0,phase:'started',source:'ai',elapsedMs:0,at:'2026-10-04T12:00:00.000Z',receivedAt:serverTimestamp()})));
+  });
+  const cursors=[];
+  const page=async cursor=>{cursors.push(cursor);return {records:[],nextCursor:cursor?null:'next'};};
+  const result=await loadReportEvidenceExport(db,uid,page,new AbortController().signal);
+  assert.equal(result.coverage.clientDocuments,201);assert.equal(result.counts.unfinished,201);
+  assert.deepEqual(cursors,[undefined,'next',undefined]);
+  await assert.rejects(loadReportEvidenceExport(db,uid,async cursor=>{if(cursor)throw Error('page-failed');return {records:[],nextCursor:'next'};},new AbortController().signal),/page-failed/);
+  await assert.rejects(loadReportEvidenceExport(db,uid,async()=>({records:[],nextCursor:'loop'}),new AbortController().signal),/stalled-server-pagination/);
+  const cancelled=new AbortController();cancelled.abort();await assert.rejects(loadReportEvidenceExport(db,uid,page,cancelled.signal),{name:'AbortError'});
+  await assert.rejects(loadReportEvidenceExport(env.authenticatedContext('unrelated-report').firestore(),uid,page,new AbortController().signal));
 });

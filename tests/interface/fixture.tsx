@@ -1,3 +1,4 @@
+import {ReportEvidenceDownload} from '../../src/components/ReportEvidenceExportButton';
 import { SessionEvidenceContext } from '../../src/services/sessionEvidenceContext';
 import { EvidenceExportButton } from '../../src/components/EvidenceExportButton';
 import {MuseHistoryView} from '../../src/components/MuseHistory';
@@ -76,6 +77,7 @@ export function Fixture() {
   const [accessAction, setAccessAction] = useState('');
   const [accessBusy, setAccessBusy] = useState(false);
   const back = () => setGame(undefined);
+  if(query.has('report-export')&&!loggedOut)return <main className="main-content"><section className="stats-card"><button onClick={()=>setLoggedOut(true)}>Volver</button><ReportEvidenceDownload uid="fixture-report" load={signal=>new Promise((resolve,reject)=>{Object.assign(window,{finishReportExport:()=>resolve({version:1,coverage:{clientDocuments:1},attempts:[]}),failReportExport:()=>reject(Error('fixture-failure'))});signal.addEventListener('abort',()=>{Object.assign(window,{reportExportAborted:true});reject(signal.reason);});})}/></section></main>;
   if(query.has('muse-history'))return <MuseHistoryFixture/>;
   if(query.has('muse-archive')&&!loggedOut)return <main className="main-content"><ExerciseAnalytics uid="fixture-owner" result={{id:'fixture-result',exerciseId:'motor-target',domain:'motor',date:'2026-10-04T12:00:00Z',durationSeconds:10,accuracy:100,score:0,correctAnswers:1,totalQuestions:1,feedbackMessage:'',evidenceSessionId:'fixture-session'}} onBack={()=>setLoggedOut(true)}/></main>;
   if (query.has('evidence-export') && !loggedOut) return <main className="main-content"><section className="stats-card"><button onClick={()=>setLoggedOut(true)}>Volver</button><EvidenceExportButton uid="fixture-evidence"/></section></main>;

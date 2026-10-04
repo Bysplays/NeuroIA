@@ -2,6 +2,8 @@ import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 test.beforeEach(async({page})=>{
   await page.route('**/src/services/evidenceArchive.ts*',route=>route.fulfill({contentType:'text/javascript',body:`
+    export async function loadEvidencePage(){}
+    export async function loadSessionEvidence(){}
     export async function loadEvidenceExport(db,uid,signal) {
       return new Promise((resolve,reject)=>{
         window.releaseExport=()=>resolve({version:1,coverage:{complete:true},counts:{completed:2}});

@@ -802,3 +802,10 @@ workspaces. `reportLifecycle.ts` records client PDF phases via `ProgressOperatio
 kind `report`, the existing durable outbox, immutable `reportEvents` and permanent
 receipts. Metadata belongs to the caller, not the report subject; never put patient
 identity or report text in it. Publish compatible rules before enabling collection.
+
+`reportEvidenceExport.ts` validates report event chains and correlates exact client
+request IDs with unique server attempts. `reportEvidenceArchive.ts` reads all client
+and server pages before releasing an export. `ReportEvidenceExportButton` uses the
+shared `EvidenceDownload` controls; identity and deletion guards remain enforced.
+The export belongs to the caller, never a selected participant. Preserve malformed,
+unlinked and ambiguous coverage; do not match by wall-clock proximity.

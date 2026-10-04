@@ -86,8 +86,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   The separate server flag defaults off. Client PDF events now cover start, AI
   readiness, PDF readiness, download request, failure and cancellation using the
   owner-scoped progress outbox in both workspaces. Publish compatible report-event
-  rules before enabling the frontend evidence flag. Lifecycle export/aggregation,
-  save outcomes, adherence schedules and an independent pilot denominator remain open.
+  rules before enabling the frontend evidence flag. Exact request-ID correlation
+  and a separate caller-owned report export now audit all client/server pages,
+  conflicts and missing links without exporting identities or drafts. Save outcomes,
+  adherence schedules and an independent pilot denominator remain open.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
   Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
   review forms and paired preparation/unit aggregation are implemented. Independent

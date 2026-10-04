@@ -163,5 +163,6 @@ Inspection still found broad claims citing only three games in two outputs. The
 evaluator flags these for explicit factuality/scope review; schema success does not
 close report acceptance. Independent human review and measured pilot outcomes remain
 pending. Server report-attempt telemetry is now implemented behind `PROPOSAL_REPORT_EVIDENCE`;
-client PDF phases now persist through the ordinary outbox. Save outcomes, lifecycle
-export/aggregation and adherence denominators remain separate open work.
+client PDF phases now persist through the ordinary outbox. Client/server correlation and complete paginated lifecycle export now preserve
+invalid, unfinished, ambiguous and unlinked coverage. Save outcomes and adherence
+denominators remain separate open work.

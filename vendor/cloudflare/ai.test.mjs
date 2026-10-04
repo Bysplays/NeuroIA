@@ -246,13 +246,24 @@ test('report terminal writes respect deletion and preserve cancellation as a dis
 });
 test('own report evidence endpoint paginates, projects fields and rejects target selectors',async()=>{
   const db=store();let cursor;
-  db.list=async(path,next)=>{assert.equal(path,'users/player/reportAttempts');cursor=next;return {documents:[{version:1,status:'started',startedAt:123,model:'fixture',path:'users/player/reportAttempts/11111111-1111-4111-8111-111111111111',targetUid:'private-person',draft:'private-draft'},{version:5}],nextPageToken:'next'};};
+  db.list=async(path,next)=>{assert.equal(path,'users/player/reportAttempts');cursor=next;return {documents:[{version:1,status:'started',startedAt:123,model:'fixture',clientAttemptId:'client-link',path:'users/player/reportAttempts/11111111-1111-4111-8111-111111111111',targetUid:'private-person',draft:'private-draft'},{version:5}],nextPageToken:'next'};};
   const handler=createHandler({database:()=>db,verifyUser:async()=> 'player'});
   const request=body=>new Request('https://worker/ai/report-evidence',{method:'POST',headers:{Authorization:'Bearer fixture',Origin:env.APP_URL},body:JSON.stringify(body)});
   const response=await handler(request({cursor:'page'}),env);assert.equal(response.status,200);
-  const data=await response.json();assert.equal(cursor,'page');assert.equal(data.nextCursor,'next');assert.equal(data.records.length,2);assert.equal(data.records[0].attemptId,'11111111-1111-4111-8111-111111111111');
+  const data=await response.json();assert.equal(cursor,'page');assert.equal(data.nextCursor,'next');assert.equal(data.records.length,2);assert.equal(data.records[0].attemptId,'11111111-1111-4111-8111-111111111111');assert.equal(data.records[0].clientAttemptId,'client-link');
   assert.deepEqual(data.records[1],{invalid:true});assert.doesNotMatch(JSON.stringify(data),/private/);
   assert.equal((await handler(request({targetUid:'victim'}),env)).status,400);
   db.list=async()=>{db.documents.set('accountDeletions/player',{phase:'tree'});return {documents:[]};};
   assert.equal((await handler(request({}),env)).status,409);
+});
+
+test('client report correlation is explicit, bounded, report-only and absent from provider prompts',async()=>{
+  const db=store();
+  await generateAnalysis('player',{...input,clientAttemptId:'CLIENT-ATTEMPT'},evidenceEnv,db,confirmedAccess,undefined,async(url,init)=>{
+    assert.doesNotMatch(init.body,/CLIENT-ATTEMPT/);return provider(url,init);
+  });
+  assert.equal(reportRows(db)[0].clientAttemptId,'CLIENT-ATTEMPT');
+  for(const patch of [{clientAttemptId:'../bad'},{clientAttemptId:''},{clientAttemptId:'x'.repeat(129)},{clientAttemptId:'valid',mode:'recommendations'}]){
+    await assert.rejects(generateAnalysis('player',{...input,...patch},evidenceEnv,store(),confirmedAccess),{status:400});
+  }
 });

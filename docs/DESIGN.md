@@ -35,6 +35,14 @@ omitting account identifiers and free text. Disable it while preparing data,
 show recoverable errors inline, and use the shared confirmation dialog with focus
 returned to the action after download. Leaving the view cancels preparation.
 
+When proposal evidence is enabled, the activity assistant also offers “Exportar
+registro de informes”. Place it below the AI explanation using the shared quiet
+export control and confirmation dialog. Explain that it concerns reports requested
+by the current account, not the selected participant's game history. Disable the
+action while loading, show retryable errors inline, cancel when leaving and restore
+focus after confirmation. Export coverage explicitly distinguishes requested downloads
+from reviewed reports; do not introduce a visual completion claim for pilot KPIs.
+
 The persisted `pageStyle: default` now means **Calma**; `cozy` remains the compatible
 **Papel** alternative. Keep the existing profile settings, independent contrast modes
 and hide-companions preference. Do not reset a user's appearance to introduce a design.

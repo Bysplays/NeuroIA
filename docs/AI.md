@@ -190,7 +190,18 @@ ledger. Publish compatible rules before enabling the flag; it remains off by def
 
 An abrupt tab exit or closed account session can leave an unfinished attempt. The
 browser only confirms a download request, never successful disk storage. Local-storage
-failure retains the ordinary in-memory/pending-save behavior. These events and the
-server report-attempt ledger have distinct attempt identifiers and must not be joined
-by guessing timestamps. Correlated export/aggregation and measurement of professional
-review remain open work; neither ledger alone establishes synthesis automation.
+failure retains the ordinary in-memory/pending-save behavior. The browser sends a random `clientAttemptId` only for an instrumented report; the
+server stores it alongside its independent attempt ID, never in provider prompts.
+Correlation requires that exact ID and a single nonconflicting server attempt.
+Older, missing or repeated links remain absent or ambiguous, never joined by dates.
+
+The gated “Exportar registro de informes” action downloads all synchronized records
+requested by the current caller, including reports about linked participants. It
+does not export report text or participant identity and is distinct from exporting
+a participant’s game evidence. The browser loads every 200-event client page and
+every server cursor, rechecks permissions and cancels on account/view changes.
+Any page failure prevents download. Output uses fresh ordinal attempt references,
+omits account/attempt IDs and wall dates, preserves model/prompt metadata and reports
+invalid, unfinished, ambiguous and unlinked coverage. Client download requests and
+server-correlated AI downloads are separate counts; neither establishes human review,
+synthesis automation or a confirmed file on disk. Professional review remains open.

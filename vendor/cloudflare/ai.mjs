@@ -56,11 +56,13 @@ async function boundedJson(response) {
 }
 export async function generateAnalysis(actor, input, env, db, confirmedAccess, signal, fetcher = fetch) {
   if (!aiStatus(env).available) fail(503, 'La ayuda con IA no está disponible ahora. Puedes usar las sugerencias y la plantilla sin IA.');
-  if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).length !== 4
+  if (!input || typeof input !== 'object' || Array.isArray(input) || !Object.keys(input).every(key=>['targetUid','mode','consent','filters','clientAttemptId'].includes(key))
+    || ![4,5].includes(Object.keys(input).length)
+    || ('clientAttemptId' in input && (input.mode!=='report' || typeof input.clientAttemptId!=='string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(input.clientAttemptId)))
     || input.consent !== 'activity-summary-v1' || !['recommendations', 'report'].includes(input.mode)
     || typeof input.targetUid !== 'string' || !validInsightFilters(input.filters)) fail(400, 'Revisa la selección y confirma el envío del resumen de actividad.');
   await authorizeAnalysis(actor, input.targetUid, db, confirmedAccess);
-  return withReportEvidence(actor, input.mode, env, db, signal, context => generateAuthorizedAnalysis(actor, input, env, db, confirmedAccess, signal, fetcher, context));
+  return withReportEvidence(actor, input.mode, env, db, signal, context => generateAuthorizedAnalysis(actor, input, env, db, confirmedAccess, signal, fetcher, context), input.clientAttemptId);
 }
 async function generateAuthorizedAnalysis(actor, input, env, db, confirmedAccess, signal, fetcher, context) {
   const source = await db.readActivity(input.targetUid);
