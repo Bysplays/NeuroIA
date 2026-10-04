@@ -851,3 +851,13 @@ export hashes, duplicate links and calendar-denominator reconstruction. Outputs 
 exclusive creation; codes are pseudonymous, not necessarily anonymous. This CLI
 cannot attest observer declarations, infer ambiguous identity-free export matches,
 or replace scientific, hardware, report and end-to-end latency acceptance.
+
+Adaptation performance checks separate browser input/local-state/paint-opportunity
+measurements (`tests/interface/adaptation-latency.spec.mjs`) from emulator queue/
+server-confirmation measurements (`adaptive response pipeline` in Firestore tests).
+Their versioned JSON traces live in /tmp and must not be committed. Do not add their
+timings together or label either physical-device end-to-end acceptance. For filtered
+Firestore runs, verify the named test and trace rather than only exit status. The
+verified Node 26 focused command pairs `--test-isolation=none` with
+`--test-force-exit`; see docs/PROPOSAL.md. Force-exit alone skipped the selected test
+locally. Do not substitute this focused run for the combined rules/REST suite.

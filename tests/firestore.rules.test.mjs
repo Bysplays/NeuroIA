@@ -2,7 +2,9 @@ import {loadPracticeAdherence} from '../src/services/practiceScheduleArchive.ts'
 import {loadReportEvidenceExport} from '../src/services/reportEvidenceArchive.ts';
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import {ProgressSync} from '../src/services/progressSync.ts';
+import {createSessionEvidence} from '../src/services/sessionEvidence.ts';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { firestoreProgress } from '../src/services/firestoreProgress.ts';
@@ -726,4 +728,46 @@ test('practice calendars are server-owned, immutable to clients and paginated wi
   const professional=env.authenticatedContext('calendar-professional').firestore();
   await assertSucceeds(getDoc(doc(professional,path)));await assertFails(updateDoc(doc(professional,path),{daysMask:0}));
 
+});
+
+test('adaptive response pipeline measures real queued emulator persistence separately from actor time',async()=>{
+  const samples=[];
+  for(let index=0;index<3;index++){
+    const uid=`latency-policy-${index}`,id=`latency-result-${index}`;
+    const db=env.authenticatedContext(uid).firestore(),backend=firestoreProgress(uid,db);
+    await backend.initialize(fresh());
+    await env.withSecurityRulesDisabled(async context=>updateDoc(doc(context.firestore(),`users/${uid}/progress/main`),{'data.profile.gameLevels':{'visual-scanning':{level:5,evidence:[]}}}));
+    const initial=await backend.load();let queue=[];let activeMs=0;let localAt;
+    let resolveSaved,rejectSaved;
+    const saved=new Promise((resolve,reject)=>{resolveSaved=resolve;rejectSaved=reject;});
+    const sync=new ProgressSync(initial,[],backend,next=>queue=structuredClone(next),(data,status,error)=>{
+      if(error)rejectSaved(error);
+      if(data.history.some(row=>row.id===id)){
+        if(localAt===undefined)localAt=performance.now();
+        if(status==='saved')resolveSaved(performance.now());
+      }
+    },{recordSaves:true});
+    try{
+      const recorder=createSessionEvidence({sessionId:`latency-session-${index}`,exerciseId:'visual-scanning',activeNow:()=>activeMs,sink:chunk=>sync.enqueue({id:`evidence:${chunk.sessionId}:${chunk.firstSequence}`,kind:'evidence',chunk})});
+      recorder.start(5,'normal',false);
+      for(let response=0;response<2;response++){recorder.present(`q${response}`,5);activeMs+=1000;recorder.respond(false);}
+      recorder.present('q2',5);activeMs+=1000;
+      const start=performance.now();recorder.respond(false);
+      const decision=decideAdaptation(recorder.observation(),{locked:false,mode:'normal',baseLevel:5});
+      const decidedAt=performance.now();recorder.finish(id);
+      const operation=op(id);Object.assign(operation.result,{level:5,configVersion:1,correctAnswers:0,totalQuestions:3,accuracy:0,durationSeconds:3,evidenceSessionId:recorder.id,adaptation:JSON.stringify(decision)});
+      sync.enqueue(operation);
+      const savedAt=await saved;
+      const archived=(await getDoc(doc(db,`users/${uid}/results/${id}`))).data();
+      const confirmed=await backend.load();
+      assert.equal(JSON.parse(archived.adaptation).application,'applied');
+      assert.equal(confirmed.profile.gameLevels['visual-scanning'].level,decision.nextLevel);
+      assert.equal(queue.length,0);
+      samples.push({model:decision.model,responseToDecisionMs:decidedAt-start,actorMs:decision.inferenceMs,responseToLocalStateMs:localAt-start,responseToSyncedMs:savedAt-start,responseToVerifiedReadMs:performance.now()-start,level:decision.nextLevel});
+    }finally{sync.stop();}
+  }
+  await writeFile('/tmp/neuroia-adaptation-emulator-latency.json',JSON.stringify({version:1,generatedAt:new Date().toISOString(),node:process.version,scope:'Synthetic final response -> observation -> actor -> real ProgressSync evidence/save queue -> Firestore emulator transactions -> verified archive/profile reads. Excludes physical input, BLE, React paint and production network.',samples,allSyncedUnderOneSecond:samples.every(row=>row.responseToSyncedMs<1000),hardwareAcceptance:false},null,2));
+  // Persist the measured outcome even if the environment misses the performance
+  // target. Correctness must pass independently; emulator timing is not release acceptance.
+  assert.equal(samples.length,3);
 });

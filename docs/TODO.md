@@ -102,8 +102,11 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
   Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
   review forms and paired preparation/unit aggregation are implemented. Independent
-  signal comparison and actor benchmark exist; actual reviewer results, end-to-end
-  timings and real pilot evidence remain open.
+  signal comparison and actor benchmark exist. Browser pipeline measurements now
+  cover input through local React commit/paint opportunity at three widths and
+  throttled CPU; the emulator suite separately traces queue synchronization and
+  confirmed result/profile reads. Physical-device end-to-end timings, actual
+  reviewer results and real pilot evidence remain open.
 - [ ] Complete real-user and hardware pilot evidence and scientific interpretation
   review; do not close from synthetic tests or source inspection.
 

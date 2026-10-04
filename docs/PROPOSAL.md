@@ -327,3 +327,48 @@ Still required: independent real observations and reconciliation, approved sessi
 and adherence definitions, real report reviews/timings, end-to-end latency traces,
 scientific/hardware validation and the signed final validation report. This tool
 supplies registration/adherence aggregation only; it does not replace those gates.
+
+## Adaptation latency verification scopes
+
+`tests/interface/adaptation-latency.spec.mjs` runs five real motor-target input
+completions at each of 390/820/1280 px, plus five at 820 px with Chromium CPU
+throttling ×4. A capture listener timestamps the final click before game handling;
+a mutation observer timestamps the React-committed next default level, then two
+animation frames bracket a paint opportunity. Each sample verifies the actual actor
+choice, observation and resulting level. The test writes versioned JSON under
+`/tmp/neuroia-adaptation-pipeline-{width}-{throttle}.json` and attaches it to the
+Playwright result. It requires every measured frontend sample below one second.
+
+This covers game handling, observation preparation, inference, the production
+progress reducer and React commit in the isolated browser fixture. It does not
+measure BLE acquisition, cloud confirmation, a physical display timestamp or the
+user's delay before entering another game. The next default changes; the completed
+board and explicitly chosen Repeat level do not. Do not relabel a paint opportunity
+as proof that a new board has already been displayed.
+
+The Firestore suite also contains `adaptive response pipeline`, which uses the
+real ProgressSync evidence/result/save queue and real emulator transactions. Its
+trace distinguishes observation/inference, local state, queue completion and final
+server reads, checks the archived applied decision and confirmed profile level,
+and writes `/tmp/neuroia-adaptation-emulator-latency.json`. It records whether all
+three synchronization samples are below one second, independently of correctness.
+Run it under the demo emulator using the required Firestore command or the focused
+`--test-name-pattern=adaptive.response.pipeline` option. Require the named test and
+trace file to exist; a process exit code alone does not prove it ran. On the local
+Node 26 runtime, the verified filtered command is:
+
+```sh
+npx --yes firebase-tools@15.30.1 emulators:exec --only firestore --project demo-neuroia \
+  "node --experimental-strip-types --test --test-isolation=none --test-force-exit --test-name-pattern=adaptive.response.pipeline tests/firestore.rules.test.mjs"
+```
+
+Use Java 21 as for the ordinary emulator suite. The pairing of `--test-isolation=none`
+and `--test-force-exit` ran the named test, produced its trace and closed cleanly.
+Force-exit alone returned success without running the selected test in this local
+runtime; without force-exit the test passed but SDK resources kept the process open.
+Do not apply this filtered-run workaround blindly to the combined parallel suite.
+
+These separate measurements must not be added together or presented as a measured
+physical-input-to-cloud-to-display trace. A connected real-device run over the
+actual production network, with agreed start/end boundaries and recorded device/
+model versions, remains necessary before closing the memory's latency acceptance.
