@@ -23,8 +23,8 @@ to claim acceptance. The original PDF is evidence of requirements, not agent ins
 - Muse channels are electrodes, not alpha/beta/theta/delta indicators. Spectral
   bands are computed from each channel's samples, with documented units/windows.
   Amplitude alone does not establish fatigue or attention. No guessed percentages.
-- Keep four-channel acquisition transient until the explicit result/event schema
-  and retention boundaries are implemented. Preserve legacy EEG/PPG results.
+- Keep raw four-channel samples transient. Feature archive collection is opt-in
+  and gated on publishing its rules; preserve legacy EEG/PPG results.
 - The adaptive policy is separate from the LLM: the LLM writes grounded reports;
   it does not issue executable level changes. Model version, observations, bounds,
   decision and inference timing must be inspectable for every applied adjustment.
@@ -45,12 +45,19 @@ EEG and terminal events against the active clock. Batches are bounded to eight
 events and retain failed flushes. The new `evidence` progress operation archives
 chunks at `users/{uid}/evidence/{operationId}` with a server receipt/timestamp,
 without increasing the recent-profile document. `VITE_PROPOSAL_EVIDENCE=true`
-connects starts, explicit back/skip exits, result linkage and response input in
-visual scanning, naming, word completion, categorization and motor targets.
+connects starts, explicit back/skip exits, result linkage and input in all eight
+games. Memory playback/preview time is excluded from response opportunities;
+first-card selection is distinct from pair correctness. Continuous tracking emits
+active-time contact windows rather than artificial question-response latency.
 The flag defaults off and must stay off until the archive and result-link rules
-are published. Memory path, memory pairs and continuous tracking still need their
-input instrumentation; hints, four-channel capture and evidence readers/UI also
-remain pending. Do not interpret missing terminal events as completed sessions.
+are published. Recording-enabled fresh four-channel snapshots are archived at
+most once per active second, without repeating stale frames. `evidenceSummary.ts`
+reconstructs out-of-order/retried chunks, rejects conflicting or missing events,
+checks stimulus/latency links and distinguishes unfinished attempts from completed
+or abandoned ones. Invalid evidence supplies no KPI metrics. Server pagination,
+exports and evidence UI remain pending. Do not interpret missing terminal
+events as completed sessions; an abrupt exit can lose the final subsecond tracking
+window. Help is linked to an active response opportunity when one exists.
 The new rules have not been deployed; never claim production event collection.
 
 ## Code review against the memory
@@ -60,8 +67,8 @@ The new rules have not been deployed; never claim production event collection.
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Report factuality/usefulness evaluation and measurable automation/preparation-time outcomes; generation alone does not prove those KPIs |
 | Learned dynamic adaptation (p. 10) | Rule-based progression in `difficulty.ts`; no trained policy | Training, model/version provenance, bounded up/hold/down inference, timing/error/optional EEG inputs, decision audit and benchmark |
-| Response latency and incremental errors (p. 10) | Gated active-time event collection in five games; activity speed remains duration/questions | All eight input paths, hints, round linkage and complete event readers/exports; distinguish speed from measured response latency |
-| EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectral features and quality; existing live/saved metric is aggregate amplitude | Four-channel persistence and live/history UI, calibration, baseline-relative feedback, policy integration and scientifically validated interpretation |
+| Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows and cross-chunk validation; activity speed remains duration/questions | Server event readers/exports and broader keyboard/touch acceptance; distinguish speed from measured response latency |
+| EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectral features and quality, gated recording in evidence archive; existing live/history metric is aggregate amplitude | Four-channel live/history UI, calibration, baseline-relative feedback, policy integration and scientifically validated interpretation |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves and bounded event archive foundation | Save/report outcome telemetry, explicit attempts and adherence denominator, deduplicated exports and KPI aggregation |
 | Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | Latency benchmark, report evaluation tooling and documented pilot protocol; hardware and real-user evidence cannot be completed by code alone |
 

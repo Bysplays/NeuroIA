@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { createMemorySequence } from '../services/memorySequence';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
@@ -58,6 +59,8 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
   const [startTime, setStartTime] = useState<number>(clock.now());
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
+  const responseEvidence = useResponseEvidence(`round-${round}-replay-${hintsUsed}-step-${playerInput.length}`,
+    !isPlayingDemo && !roundDone && !isCompleted && sequence.length > 0);
 
   const completedRef = useRef(false);
   const timeoutRefs = useRef<number[]>([]);
@@ -122,6 +125,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
     setPlayerInput(nextInput);
 
     const currentStep = nextInput.length - 1;
+    responseEvidence.respond(tileId === sequence[currentStep]);
 
     if (tileId !== sequence[currentStep]) {
       clearTimeouts();
@@ -155,6 +159,7 @@ export const MemoryPathGame: React.FC<MemoryPathGameProps> = ({
 
   const handleRepeatDemo = () => {
     if (isPlayingDemo || roundDone || sequence.length === 0) return;
+    responseEvidence.hint();
     clearTimeouts();
     setHintsUsed(value => value + 1);
     setPlayerInput([]);

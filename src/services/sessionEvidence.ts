@@ -8,6 +8,9 @@ export type EvidenceEvent = {
   | { kind: 'start'; level: number; configVersion: number; mode: 'normal' | 'placement' | 'practice'; locked: boolean }
   | { kind: 'stimulus'; stimulus: string; level: number }
   | { kind: 'response'; stimulus: string; correct: boolean; latencyMs: number; final: boolean }
+  | { kind: 'selection'; stimulus: string; latencyMs: number }
+  | { kind: 'cancel'; stimulus: string }
+  | { kind: 'tracking'; durationMs: number; contactMs: number }
   | { kind: 'hint'; stimulus: string }
   | { kind: 'eeg'; frame: MuseFeatureFrame }
   | { kind: 'finish'; resultId: string }
@@ -51,6 +54,14 @@ export function readEvidenceChunk(chunk: EvidenceChunk): EvidenceEvent[] {
           if (!identifier(event.stimulus) || typeof event.correct !== 'boolean' || typeof event.final !== 'boolean' || !boundedMs(event.latencyMs) || event.latencyMs > event.activeMs) return [];
           keys = ['stimulus','correct','latencyMs','final']; break;
         case 'hint': if (!identifier(event.stimulus)) return []; keys = ['stimulus']; break;
+        case 'cancel': if (!identifier(event.stimulus)) return []; keys = ['stimulus']; break;
+        case 'selection':
+          if (!identifier(event.stimulus) || !boundedMs(event.latencyMs) || event.latencyMs > event.activeMs) return [];
+          keys = ['stimulus','latencyMs']; break;
+        case 'tracking':
+          if (!boundedMs(event.durationMs) || event.durationMs === 0 || event.durationMs > event.activeMs
+            || !boundedMs(event.contactMs) || event.contactMs > event.durationMs) return [];
+          keys = ['durationMs','contactMs']; break;
         case 'eeg': if (!validMuseFeatureFrame(event.frame)) return []; keys = ['frame']; break;
         case 'finish': if (!identifier(event.resultId)) return []; keys = ['resultId']; break;
         case 'abandon': if (!['back','skip','leave'].includes(event.reason)) return []; keys = ['reason']; break;
@@ -75,6 +86,7 @@ export function createSessionEvidence(options: {
   const wallNow = options.wallNow ?? (() => new Date());
   let next = 0, pending: EvidenceEvent[] = [], started = false, closed = false;
   let stimulus: { id: string; since: number } | undefined;
+  let trackingMs = 0, contactMs = 0;
   const now = () => Math.round(options.activeNow());
   const flush = () => {
     while (pending.length) {
@@ -94,6 +106,12 @@ export function createSessionEvidence(options: {
     if (!readEvidenceChunk({version:1,sessionId:options.sessionId,exerciseId:options.exerciseId,firstSequence:next,count:1,events:JSON.stringify([event])}).length) throw Error('invalid-session-evidence');
     pending.push(event); next++;
   };
+  const flushTracking = () => {
+    if (Math.round(trackingMs) > 0) {
+      emit({kind:'tracking',durationMs:Math.round(trackingMs),contactMs:Math.round(contactMs)});
+      trackingMs = 0; contactMs = 0;
+    }
+  };
   return {
     id: options.sessionId,
     start(level: number, mode: 'normal'|'placement'|'practice', locked: boolean) {
@@ -102,6 +120,7 @@ export function createSessionEvidence(options: {
     },
     present(id: string, level: number) {
       if (!started || closed || stimulus?.id === id) return;
+      if (stimulus) emit({kind:'cancel',stimulus:stimulus.id});
       emit({kind:'stimulus',stimulus:id,level}); stimulus = {id, since:now()};
     },
     respond(correct: boolean, final = true) {
@@ -111,15 +130,29 @@ export function createSessionEvidence(options: {
       stimulus = final ? undefined : {...stimulus,since:now()};
     },
     hint() { if (stimulus && !closed) emit({kind:'hint',stimulus:stimulus.id}); },
+    cancel() {
+      if (stimulus && !closed) { emit({kind:'cancel',stimulus:stimulus.id}); stimulus = undefined; }
+    },
+    select() {
+      if (!stimulus || closed) return;
+      emit({kind:'selection',stimulus:stimulus.id,latencyMs:now()-stimulus.since});
+      stimulus = {...stimulus,since:now()};
+    },
+    track(deltaMs: number, contact: boolean) {
+      if (!started || closed) return;
+      if (!Number.isFinite(deltaMs) || deltaMs < 0 || typeof contact !== 'boolean') throw Error('invalid-tracking-sample');
+      trackingMs += deltaMs; if (contact) contactMs += deltaMs;
+      if (trackingMs >= 1000) { flushTracking(); flush(); }
+    },
     eeg(frame: MuseFeatureFrame) { if (started && !closed) emit({kind:'eeg',frame:structuredClone(frame)}); },
     finish(resultId: string) {
       if (!started) return;
-      if (!closed) { emit({kind:'finish',resultId}); closed = true; stimulus = undefined; }
+      if (!closed) { flushTracking(); emit({kind:'finish',resultId}); closed = true; stimulus = undefined; }
       flush();
     },
     abandon(reason: 'back'|'skip'|'leave') {
       if (!started) return;
-      if (!closed) { emit({kind:'abandon',reason}); closed = true; stimulus = undefined; }
+      if (!closed) { flushTracking(); emit({kind:'abandon',reason}); closed = true; stimulus = undefined; }
       flush();
     },
     flush,

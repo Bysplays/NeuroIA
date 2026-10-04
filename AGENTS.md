@@ -213,9 +213,13 @@ increments completed-exercise totals. Rules bound the JSON envelope; readers
 must use `readEvidenceChunk` and treat values as self-reported. New rules require
 emulator verification and separate publication before enabling collection.
 `VITE_PROPOSAL_EVIDENCE=true` enables the GameSession provider; leave it unset
-until those rules are published. Response hooks currently cover scanning, naming,
-word completion, categorization and motor targets only. Result links use optional
-`evidenceSessionId`; memory and tracking input coverage remains in docs/TODO.md.
+until those rules are published. Response hooks cover all eight games; memory
+previews suspend the response opportunity, pair selections precede correctness,
+and tracking records active contact windows. Result links use optional
+`evidenceSessionId`. Fresh four-channel snapshots are archived only while recording,
+at most once per active second; evidence readers/exports remain in docs/TODO.md.
+`evidenceSummary.ts` validates contiguous session events across chunks before
+exposing metrics; invalid logs and unfinished attempts never count as completions.
 
 Firestore is authoritative for signed-in progress. `users/{uid}/progress/main`
 contains the profile and latest 60 results; `users/{uid}/results/{resultId}` retains

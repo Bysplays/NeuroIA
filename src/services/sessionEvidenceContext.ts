@@ -11,10 +11,13 @@ export const SessionEvidenceContext = createContext<{ enqueue(operation: Progres
 export function useResponseEvidence(stimulus: string, available = true) {
   const { evidence, config } = useGameSession();
   useEffect(() => {
-    if (available) { evidence?.present(stimulus, config.level); evidence?.flush(); }
+    if (available) evidence?.present(stimulus, config.level);
+    else evidence?.cancel();
+    evidence?.flush();
   }, [evidence, stimulus, available, config.level]);
   return {
     respond(correct: boolean, final = true) { evidence?.respond(correct, final); evidence?.flush(); },
     hint() { evidence?.hint(); evidence?.flush(); },
+    select() { evidence?.select(); evidence?.flush(); },
   };
 }

@@ -1,4 +1,5 @@
 import { SessionEvidenceContext } from '../../src/services/sessionEvidenceContext';
+import { eegService } from '../../src/services/eegService';
 import type { ProgressOperation } from '../../src/services/progressData';
 import type { EvidenceChunk } from '../../src/services/sessionEvidence';
 import { ProfessionalDashboard } from '../../src/components/ProfessionalDashboard';
@@ -33,7 +34,7 @@ import "../../src/interface.css";
 import "../../src/games.css";
 const query = new URLSearchParams(location.search);
 const evidenceChunks: EvidenceChunk[] = [];
-Object.assign(window, {evidenceChunks});
+Object.assign(window, {evidenceChunks, eegTestService:eegService});
 const evidenceBackend = { enqueue(operation: ProgressOperation) {
   if (operation.kind === 'evidence') evidenceChunks.push(structuredClone(operation.chunk));
 } };

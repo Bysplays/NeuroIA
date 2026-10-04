@@ -20,9 +20,12 @@ clipped, malformed and missing windows retain explicit quality; one invalid
 electrode does not replace the other electrodes' features with a global average.
 The legacy aggregate remains unavailable if any electrode is invalid.
 
-This is spectral measurement, not validated fatigue/attention inference. Live
-four-channel UI, archive persistence, baseline feedback and policy integration
-remain tracked in [the proposal](../PROPOSAL.md). Disconnect/cancellation clears
+This is spectral measurement, not validated fatigue/attention inference.
+With `VITE_PROPOSAL_EVIDENCE=true`, GameSession archives fresh feature snapshots
+only when recording is enabled, at most once per active second. The flag remains
+off pending publication of archive rules. It is sampled feature evidence, not a
+lossless raw EEG archive. Live/history four-channel UI, baseline feedback and policy
+integration remain tracked in [the proposal](../PROPOSAL.md). Disconnect/cancellation clears
 channel snapshots. Independent comparison uses
 `python scripts/verify_muse_features.py` (Node 22+ and an isolated Python environment
 installed with `pip install -r vendor/muse/requirements-evaluation.txt`; verified

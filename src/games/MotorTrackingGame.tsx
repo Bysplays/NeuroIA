@@ -26,7 +26,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, config, evidence } = useGameSession();
   const REQUIRED_CONTACT_SECONDS = config.contactSeconds;
   const TARGET_SIZE = config.targetSize;
   const pointer = useRef<{ x: number; y: number } | null>(null);
@@ -145,6 +145,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     const point = pointer.current;
     const contact = keyboard.current || (!!arena && !!point && isTouchingRef.current
       && Math.hypot(point.x - (arena.left + newX / 100 * arena.width), point.y - (arena.top + newY / 100 * arena.height)) <= renderedTargetSize / 2);
+    evidence?.track(deltaMs, contact);
     setIsHoveringOrTouching(contact);
     if (contact) {
       const next = contactTime + deltaMs / 1000;

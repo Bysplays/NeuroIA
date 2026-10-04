@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { GAME_OBJECT_POOL, shuffle } from '../services/gameObjectPool';
 import { useGameSession } from '../services/gameSession';
 import { GameObject } from '../components/GameObject';
@@ -102,6 +103,8 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   }, [clock]);
 
   const [previewVersion, setPreviewVersion] = useState(0);
+  const responseEvidence = useResponseEvidence(`board-${round}-preview-${previewVersion}-pair-${attempts}`,
+    started && !roundDone && !isCompleted && !isPreviewPhase && !isEvaluating);
   const mismatchTimerRef = useRef<number | undefined>(undefined);
   useEffect(() => {
     if (!isPreviewPhase) return;
@@ -150,6 +153,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
 
     const newSelected = [...selectedCards, index];
     setSelectedCards(newSelected);
+    if (newSelected.length === 1) responseEvidence.select();
 
     if (newSelected.length === 2) {
       setIsEvaluating(true);
@@ -158,6 +162,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
       const [firstIdx, secondIdx] = newSelected;
       const cardA = newCards[firstIdx];
       const cardB = newCards[secondIdx];
+      responseEvidence.respond(cardA.pairKey === cardB.pairKey);
 
       if (cardA.pairKey === cardB.pairKey) {
         // ¡Coincidencia!
@@ -231,7 +236,7 @@ export const MemoryPairsGame: React.FC<MemoryPairsGameProps> = ({
   const startPreview = () => {
     if (isPreviewPhase || roundDone) return;
     clock.clearTimeout(mismatchTimerRef.current);
-    if (started) setHintsUsed(value => value + 1);
+    if (started) { responseEvidence.hint(); setHintsUsed(value => value + 1); }
     setStarted(true);
     setSelectedCards([]);
     setIsEvaluating(false);

@@ -57,3 +57,23 @@ test('reader rejects invalid latency, out-of-order events and unapproved payload
     (e:any[])=>{e[0].activeMs=-1;},
   ]) {const events=JSON.parse(chunk.events);mutate(events);assert.deepEqual(readEvidenceChunk({...chunk,events:JSON.stringify(events)}),[]);}
 });
+test('preview cancellation restarts latency and card selection has no invented correctness', () => {
+  const f=fixture(); f.recorder.start(1,'normal',false); f.recorder.present('pair-1',1);
+  f.clock.advance(200); f.recorder.select(); f.clock.advance(300); f.recorder.hint(); f.recorder.cancel();
+  f.clock.advance(5000); f.recorder.present('pair-1-replay',1);
+  f.clock.advance(100); f.recorder.select(); f.clock.advance(400); f.recorder.respond(false); f.recorder.finish('r');
+  const events=flatten(f.chunks);
+  assert.deepEqual(events.filter(e=>e.kind==='selection').map(e=>e.latencyMs),[200,100]);
+  assert.equal(events.filter(e=>e.kind==='selection').some(e=>'correct' in e),false);
+  assert.deepEqual(events.filter(e=>e.kind==='response').map(e=>e.latencyMs),[400]);
+  assert.equal(events.filter(e=>e.kind==='cancel').length,1);
+});
+test('continuous tracking retains partial terminal windows and excludes stopped-clock time', () => {
+  const f=fixture(); f.recorder.start(1,'normal',false);
+  for (let i=0;i<15;i++) { f.clock.advance(100); f.recorder.track(100,i<7); }
+  f.pause(); f.recorder.abandon('back');
+  const windows=flatten(f.chunks).filter(e=>e.kind==='tracking');
+  assert.deepEqual(windows.map(e=>[e.durationMs,e.contactMs]),[[1000,700],[500,0]]);
+  assert.equal(windows.reduce((sum,e)=>sum+e.durationMs,0),1500);
+  assert.equal(flatten(f.chunks).at(-1)?.kind,'abandon');
+});

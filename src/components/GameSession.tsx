@@ -55,6 +55,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
   }) : undefined, [evidenceBackend, id, clock, run]);
   useLayoutEffect(() => { if (started) evidence?.start(config.level, mode, lockedLevel); }, [evidence, started, config.level, mode, lockedLevel]);
   const leave = () => { evidence?.abandon('back'); onBack(); };
+  const recordHelp = () => { evidence?.hint(); evidence?.flush(); };
 
   const [seconds, setSeconds] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -91,8 +92,15 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     return () => cancelAnimationFrame(frame);
   }, [clock, help, completed, started, paused, eegOpen, background, accessSuspended]);
   useEffect(() => {
+    let lastChannelsAt = 0;
     const timer = clock.setInterval(() => {
       const state = eegService.getSnapshot();
+      if (state.recording && state.status === 'connected' && state.channels
+        && state.channelsReceivedAt > lastChannelsAt && Date.now() - state.channelsReceivedAt <= 3000) {
+        evidence?.eeg(state.channels);
+        evidence?.flush();
+        lastChannelsAt = state.channelsReceivedAt;
+      }
       if (state.metric && state.adapter) {
         const source = { metric: state.metric, adapter: state.adapter, value: state.status === 'connected' && Date.now() - state.receivedAt <= 3000 ? state.value : null };
         recorder.add(clock.performanceNow() / 1000, source);
@@ -107,7 +115,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
       }
     }, 1000);
     return () => clock.clearInterval(timer);
-  }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started, run]);
+  }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started, run, evidence]);
   return <SessionContext.Provider value={{ config, evidence, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { evidence?.abandon('leave'); recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setRun(value => value + 1); setStarted(true); finish(false); setHelp(false); setSeconds(0); } }}>
     <div className={`game-session${started ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
     {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
@@ -144,8 +152,8 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         <button className="entry-toolbar-action" onClick={leave}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>
         <div className="viewport-assistance-row">
           <div ref={setAssistanceTarget}/>
-          {id !== 'categorization' && <button className="paper-nav-button" onClick={() => soundService.speak(instruction)}><Volume2 size={20}/>Escuchar</button>}
-          <button ref={helpButton} className="game-help-button" onClick={() => setHelp(true)} aria-label="Mostrar instrucciones"><CircleHelp size={24}/></button>
+          {id !== 'categorization' && <button className="paper-nav-button" onClick={() => { recordHelp(); soundService.speak(instruction); }}><Volume2 size={20}/>Escuchar</button>}
+          <button ref={helpButton} className="game-help-button" onClick={() => { recordHelp(); setHelp(true); }} aria-label="Mostrar instrucciones"><CircleHelp size={24}/></button>
         </div>
         <div className="viewport-navigation-row">
           {mode !== 'placement' && <span className="soft-label">Nivel {level}</span>}

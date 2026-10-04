@@ -167,7 +167,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
     >
       {assistanceTarget && createPortal(<button
               className="paper-nav-button"
-              onClick={() => soundService.speak(currentItem.name)}
+              onClick={() => { responseEvidence.hint(); soundService.speak(currentItem.name); }}
               title="Escuchar nombre del objeto"
             >
               <Volume2 size={20} />
