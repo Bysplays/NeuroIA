@@ -120,9 +120,12 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   remain open; fixture percentages do not establish the memory’s targets.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
   Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
-  review forms and paired preparation/unit aggregation are implemented. The v7
-  prompt/shared validator rejects the observed unsupported collective game claims
-  and revalidates daily caches; this does not replace factuality review. Independent
+  review forms and paired preparation/unit aggregation are implemented. The shared
+  validator rejects unsupported collective claims and revalidates daily caches.
+  The v9 prompt preassigns source-bound observation slots and separates factual
+  summaries from actions. Its live run accepted three reports before provider 429
+  responses prevented six cases; final live acceptance and factuality review remain
+  open. The v8 all-nonempty schema pass does not establish acceptance of v9. Independent
   signal comparison and actor benchmark exist. Browser pipeline measurements now
   cover input through next-target config, local React commit/paint opportunity at three widths and
   throttled CPU; the emulator suite separately traces queue synchronization and

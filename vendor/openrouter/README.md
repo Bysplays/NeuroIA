@@ -172,11 +172,14 @@ real reviewer measurements and final pilot acceptance remain open.
 
 ## Observation scope validation
 
-Prompt `neuroia-es-activity-v7` and the shared browser/Worker validator reject
+The shared browser/Worker validator rejects
 collective game observations (for example, “el resto de juegos”), duplicate fact
 references and a named game without its own `game:`, `recent:` or `speed:` evidence.
 The three-reference limit remains unchanged. Generic optional variety wording in
-the summary is not itself a collective factual observation. These lexical/scope
+the summary is not itself a collective factual observation.
+Prompt `neuroia-es-activity-v9` additionally prepares one-source observation slots,
+prioritizing comparable measurements and recorded games without filling the report
+with absent-game observations. It preserves the full source facts for synthesis. These lexical/scope
 checks are conservative, not a semantic truth verifier: numerical correctness,
 causality, trends, uncited summary text and usefulness still need human review.
 
@@ -187,3 +190,7 @@ authorization checks. A quota/provider failure never releases rejected cached te
 The evaluation summary version is `report-evaluation-v2`; archived broad claims remain
 flagged for review even when the new validator now rejects them. Existing record
 hashes remain tied to the original outputs; do not rewrite historical provider replies.
+
+The summary describes recorded activity only; actions belong in recommendations.
+The teaching summary contains no invitation to a challenge that could be copied
+into a case without a corresponding candidate.

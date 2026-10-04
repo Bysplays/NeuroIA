@@ -375,7 +375,7 @@ physical-input-to-cloud-to-display trace. A connected real-device run over the
 actual production network, with agreed start/end boundaries and recorded device/
 model versions, remains necessary before closing the memory's latency acceptance.
 
-## Latest live report scope regression
+## Earlier live report scope regression
 
 The v7 ten-case run with configured `dots-studio/dots-3-note-preview:free` returned
 eight accepted-by-validator reports, one expected empty-source rejection before
@@ -540,3 +540,35 @@ The contract is tested in the reducer and demo emulator and created by the three
 question games, search, motor targets, memory and tracking at their actual boundaries. Browser checks cover completion, repeat,
 manual/professional protection, fixed totals and trace/result reconciliation at
 390, 820 and 1280 px.
+
+
+## Source-bound observation templates and current report gate
+
+Prompt `neuroia-es-activity-v9` preselects up to four report / three recommendation
+observation sources. It prioritizes existing speed comparisons, recent comparable
+accuracy, games with recorded activity and the aggregate activity fact. Every slot
+contains its exact source text and one prefilled fact ID. The full facts remain
+available for synthesis and candidate explanations; no input activity is discarded.
+The model may omit a slot, but must not expand its subject or replace its reference.
+The existing shared scope validator is unchanged. This prompt instruction is not a
+semantic proof that the generated text obeys it.
+
+The v8 ten-case live run produced nine validator-accepted reports and the expected
+empty-data rejection. The previously rejected collective absence claim did not recur.
+Source inspection nevertheless found ambiguous “reto propuesto” wording in the
+assigned case with only a variety candidate. Version 9 therefore confines summary
+to recorded activity and reserves actions for recommendations; its worked summary
+contains no invitation that could be copied into a case without that candidate.
+
+The v9 live run generated three accepted reports (one-session, same-level-faster,
+accurate-but-slower), correctly rejected the empty case without provider work, then
+received provider HTTP 429 for the other six cases. Those six each reached the
+provider; this was not the local account quota. No fallback, alternate key or model
+was used. Artifacts are preserved in `/tmp/neuroia-report-evaluation-v8-source-slots`
+and `/tmp/neuroia-report-evaluation-v9-source-slots`; raw outputs are not committed.
+The final prompt's complete live acceptance remains OPEN. Do not substitute v8's
+successful structure check for v9 acceptance or claim independent human review.
+The 35 prompt/Worker checks pass, including source-slot priorities, exact references,
+empty inputs, current-data isolation and continued rejection of unsupported scope.
+Real reviewer factuality/usefulness, professional timing, repeated provider reliability
+and the real pilot remain separate requirements.
