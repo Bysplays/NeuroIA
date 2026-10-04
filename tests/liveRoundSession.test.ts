@@ -44,3 +44,18 @@ test('recording readiness notifies only after its initial evidence is queued, an
   recording.start();recording.start();assert.equal(notices,1);unsubscribe();
  }
 });
+
+test('tracking releases flush partial windows at their played level and keep a bounded complete audit',()=>{
+ let now=0;const chunks:EvidenceChunk[]=[];
+ const session=createLiveRoundSession({id:'tracking-rounds',exerciseId:'motor-tracking',level:5,baseLevel:5,mode:'normal',locked:false,manual:false,activeNow:()=>now,sink:chunk=>chunks.push(chunk)});
+ session.start();
+ for(let i=0;i<105;i++){
+  now+=3200;session.evidence.track(3200,true);session.next();
+  assert.equal(session.config().contactSeconds,10);
+ }
+ const encoded=session.finish('tracking-result');
+ const result=readRoundResult(encoded),summary=summarizeEvidence(chunks);
+ assert.equal(result?.levels.length,100);assert.equal(summary.status,'completed');assert.deepEqual(summary.issues,[]);
+ assert.equal(summary.rounds?.length,100);assert.ok(new Set(result?.levels).size>1);
+ assert.throws(()=>session.next(),/not-active/);
+});

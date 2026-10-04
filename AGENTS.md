@@ -228,7 +228,7 @@ is trained on simulation and has not passed real-user acceptance. A separate
 `VITE_PROPOSAL_ADAPTATION=true` flag (also requiring evidence collection) enables
 question-boundary decisions for naming, word completion and categorization,
 board-boundary decisions for search, target-boundary decisions for motor targets,
-sequence/board-boundary decisions for memory, and end-of-exercise decisions for tracking. `difficulty.ts` applies verified decisions only against
+sequence/board-boundary decisions for memory, and contact-release decisions for tracking. `difficulty.ts` applies verified decisions only against
 the same current base level and excludes professional assignments. The reducer
 returns the normalized result as well as bounded progress so the immutable archive
 retains application outcome even when an old result falls outside the latest 60.
@@ -506,7 +506,7 @@ verify both measured and skipped transitions with delayed profile delivery.
 New exercise results carry numeric level/configVersion and optional hint usage.
 Adaptation consumes three eligible results at the current recommended level, capped
 at one level change in 1–10. Manual different-level play cannot change recommendations.
-Tracking remains manual because its input methods are not comparable; actual pointer
+Outside the separately gated proposal trial, tracking remains manual because its input methods are not comparable; actual pointer
 contact is checked against the moving circle on every frame. Preserve historical
 results and legacy domain levels. Run difficulty/progress tests and the real demo
 Firestore adapter/rules suite together when changing these contracts. Publish rules
@@ -883,13 +883,17 @@ it also checks full naming/word-completion/categorization rounds, result linkage
 repeat isolation. This is not coverage of every level or physical tablet input.
 
 `roundAdaptation.ts` is the pure boundary controller. `liveRoundSession.ts` composes
-it with the recorder and compact result metadata. GameSession enables it for naming,
-word completion, categorization, search, motor targets and memory only when both proposal
+it with the recorder and compact result metadata. GameSession enables it for
+all eight games only when both proposal
 flags are active. Continue adopts `nextRound()` configs for questions/search boards;
 a target hit adopts its next size without changing planned positions/count.
 Memory Continue adopts the next config only after a completed sequence/board;
 replay stays in the same round. Pair totals sum completed deck sizes, not the final
-level’s pair count times the board count. Tracking still awaits boundary integration. Decisions must not mutate
+level’s pair count times the board count. Tracking flushes the sampled old-level interval on release and adopts speed/size together,
+clamping the complete target into the arena. Capture loss, pointerup and blur share an
+idempotent gesture release; completion prevents further boundary callbacks. The original
+contact goal stays fixed. After 99 release transitions the 100th round holds its config
+and continues recording until completion, preserving the bounded result contract. Decisions must not mutate
 an active board. `beginLevel` resets only
 performance observation windows, preserving the independent session EEG baseline.
 Keep the distinction between local next-round application and server-confirmed
@@ -905,7 +909,7 @@ Round evidence uses explicit `round-start`/`round-decision` events. Call
 `prepareRoundDecision` before inference to flush partial tracking windows; persisted
 actor observations are replayed during reconstruction. Local decision application
 remains `pending`; export `nextStarted` only proves that a subsequent round began,
-not a cloud profile update. These APIs are connected through liveRoundSession for the three question games, search, motor targets and both memory games.
+not a cloud profile update. These APIs are connected through liveRoundSession for the eight games.
 
 `roundResult.ts` owns compact mixed-level result metadata (`roundAdaptation`),
 separate from legacy single-decision `adaptation`. The reducer normalizes the

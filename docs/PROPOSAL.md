@@ -74,7 +74,7 @@ The new rules have not been deployed; never claim production event collection.
 | --- | --- | --- |
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
-| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded boundary decisions in naming/completion/categorization/search/targets/memory, end-of-exercise decisions in tracking and persistent application audit behind a separate flag | Connect tracking to its contact-release boundaries, finish mixed-level history presentation, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
+| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded boundary decisions in all eight games and persistent application audit behind a separate flag | Finish mixed-level history presentation, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance; Gráficas and a separate whole-archive PDF appendix expose validated game/level response metrics separately from speed |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
@@ -243,8 +243,7 @@ fatigue/inattention, not merely a learned algorithm. Current observations are
 collected during play. Naming, word completion and categorization now apply the
 policy between questions; search adopts new boards and motor targets new sizes
 at their boundaries. Memory adopts new sequence/board configs on Continue. Tracking
-still changes only the next-entry default
-after completion. Complete its contact-release boundary and acceptance paths. Do not change answer keys or targets in the middle of a response.
+adopts new size/speed on contact release while preserving its initial contact goal. Do not change answer keys or targets in the middle of a response.
 
 The remaining engineering work is:
 
@@ -464,7 +463,15 @@ remains in attempts and evidence without inventing additional completed boards.
 Existing solo/grouped round counts, early sequence failure and protected levels stay
 intact. Sequence result counters remain rounds; individual taps are separate evidence.
 
-Tracking still needs contact-release integration and acceptance. No production flag
+Tracking closes the sampled old-level interval before release inference, then updates
+size/speed and clamps its complete hit area inside the arena in the same commit.
+Duplicate pointerup/capture loss/blur callbacks do not create multiple decisions, and
+completion rejects late releases. To retain the bounded 100-round result audit,
+releases after the 99th transition hold the final round config while continuing
+to record contact evidence. `live-tracking.spec.mjs` checks completed mixed-level traces at 390/820/1280 px,
+original contact goals, repeat, containment, duplicate releases, professional protection
+and touch cancellation/help pause. The drag regression freezes the browser clock so
+assertion time cannot add contact before moving away. Physical input acceptance remains open. No production flag
 is enabled. Recording readiness gates input mount, and response opportunities
 register in layout effects so fast keyboard actions cannot precede their stimulus
 event. This ordering also applies to the other recorded games.
@@ -489,7 +496,7 @@ allocation to level-specific previews or unobserved intervals is invented.
 
 Tests include a 2 → 3 → 2 attempt with different timings, an intentionally different
 result-level field, duplicate archive pages, separate UI/PDF blocks and one unique
-session count. The three question games, search, motor targets and memory use this accounting. Ordinary activity speed/level
+session count. All eight games use this accounting. Ordinary activity speed/level
 charts still need rendered mixed-level presentation; they do not assign a single
 level to these attempts.
 
@@ -505,8 +512,7 @@ links. Invalid chains contribute no metrics. Exports use ordinal round numbers.
 Tracking is flushed before inference with `prepareRoundDecision`; batches obey both
 the eight-event and 24,000-character limits. Unit coverage includes partial tracking
 windows and an emulator case checks durable retries and archive reconstruction.
-GameSession calls these APIs through liveRoundSession in the three question games, search, motor targets and memory;
-tracking integration remains open. A recorded local decision is not proof
+GameSession calls these APIs through liveRoundSession in all eight games. A recorded local decision is not proof
 of a server-confirmed profile adjustment.
 
 
@@ -528,6 +534,6 @@ chain; mismatches do not count as correctly registered results. Firestore accept
 the new bounded field with a required evidence link and rejects simultaneous old
 and new adaptation payloads. Publish these rules before enabling game integration.
 The contract is tested in the reducer and demo emulator and created by the three
-question games, search, motor targets and memory at their actual boundaries. Browser checks cover completion, repeat,
+question games, search, motor targets, memory and tracking at their actual boundaries. Browser checks cover completion, repeat,
 manual/professional protection, fixed totals and trace/result reconciliation at
-390, 820 and 1280 px; tracking integration remains open.
+390, 820 and 1280 px.

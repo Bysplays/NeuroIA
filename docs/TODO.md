@@ -94,7 +94,8 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   next board config on Continue; motor targets adopt the next size after a hit,
   preserving counts and positions. Memory sequences and pairs now adopt new configs
   on Continue, preserving replay contents and counting actual completed deck sizes.
-  Tracking integration and mixed-level history presentation remain open. The mixed-level result contract now
+  Tracking now adopts size/speed on contact release with a fixed contact goal and
+  bounded round audit. Mixed-level history presentation remains open. The mixed-level result contract now
   omits a false single level, applies the final recommendation transactionally
   against the original profile level and reconciles its archive trace; its rules
   are not deployed. Real

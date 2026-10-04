@@ -34,7 +34,9 @@ Memory sequences and pairs adopt the next config only on Continue after a comple
 round; preview/replay keeps the current sequence or deck intact. Preserve three solo
 boards/sequences and existing grouped-mode counts. Pair results sum the actual
 completed board sizes, counting replayed work as attempts rather than extra boards.
-Tracking still changes only the next-entry default after completion. LLM
+Tracking adopts size and speed changes on contact release (including blur or capture loss),
+clamps the resized target into the arena immediately and preserves its initial contact goal.
+Repeated release notifications do not create extra rounds. LLM
 recommendations remain optional suggestions; they are not the learned controller.
 The simulation-trained controller stays disabled in production pending PROPOSAL.md.
 
