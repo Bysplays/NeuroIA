@@ -75,7 +75,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   export are implemented. Gráficas now shows validated per-game/per-level response
   times, errors, help and continuous contact with explicit coverage. The PDF includes
   a separate whole-archive appendix calculated locally, with pagination and failure
-  handling; broader input acceptance remains. Publish archive/result-link rules before enabling
+  handling. The eight-game keyboard/emulated-touch matrix now checks help pause
+  exclusion and valid stimulus linkage; naming/completion/categorization completion
+  checks also reconcile every round with the saved result. Full successful paths
+  across all games/levels and physical-device acceptance remain. Publish archive/result-link rules before enabling
   `VITE_PROPOSAL_EVIDENCE`.
 - [ ] Implement and integrate a learned adaptive policy, training/export provenance,
   bounded decisions, EEG-optional operation and professional-level protection.

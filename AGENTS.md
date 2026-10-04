@@ -869,3 +869,9 @@ semantic factuality. Daily recommendation cache reuse also requires the current
 prompt version and current narrative validation; failures use existing generation
 quotas, never a stale rejected cache. Keep prompt, validator, evaluation regressions
 and vendor/openrouter/README.md aligned when changing this contract.
+
+Response-evidence browser verification includes `tests/interface/evidence.spec.mjs`
+and `evidence-inputs.spec.mjs`. The latter runs all eight games with keyboard and
+emulated touch, checks help pause exclusion and validates reconstructed event links;
+it also checks full naming/word-completion/categorization rounds, result linkage and
+repeat isolation. This is not coverage of every level or physical tablet input.

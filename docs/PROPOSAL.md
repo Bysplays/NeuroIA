@@ -394,3 +394,29 @@ and a negative cross-game test; old raw artifacts remain unchanged. A v7 run sti
 requires independent factuality/usefulness review, and generation reliability remains
 open. Browser direct-PDF/cancellation/error paths and server rejection/cache tests
 are separate from this incomplete model-quality acceptance.
+
+## Response input acceptance matrix
+
+`tests/interface/evidence-inputs.spec.mjs` drives the real eight game components
+in an isolated 820 × 1180 browser context using native keyboard activation and
+emulated touch. Each case opens help for five controlled seconds, resumes play,
+performs the game input and leaves through the normal back action. The reconstructed
+archive must have contiguous valid links and an abandonment, with the help interval
+excluded from response/contact time. Pair selection remains separate from the pair
+outcome; continuous tracking must report contact time with no invented discrete
+responses. Discrete choice correctness is compared with the rendered answer state.
+
+Separate keyboard/touch completion cases for naming, word completion and
+categorization traverse every round, compare recorded outcomes with the final
+result counters, verify result/session linkage, and repeat/leave without creating
+a second completed result. Existing evidence tests cover target completion/repeat,
+memory replay/cancellation, opt-in boundaries, partial tracking windows and optional
+four-channel recording without stale repeats. Run both files:
+
+```sh
+npm run test:interface -- tests/interface/evidence.spec.mjs tests/interface/evidence-inputs.spec.mjs
+```
+
+These checks cover a controlled browser input matrix, not all levels, full successful
+completion paths of every game, physical tablet accessibility or real Muse hardware.
+Keep those acceptance scopes separate; no pilot or cognitive benefit is inferred.
