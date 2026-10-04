@@ -76,7 +76,7 @@ The new rules have not been deployed; never claim production event collection.
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
 | Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded boundary decisions in all eight games and persistent application audit behind a separate flag | Complete real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance; Gráficas and a separate whole-archive PDF appendix expose validated game/level response metrics separately from speed |
-| EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
+| EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation, retention policy and deployed deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
 | Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | End-to-end latency acceptance, completed report evaluation and documented pilot protocol; a local actor benchmark exists, but hardware and real-user evidence cannot be completed by code alone |
 
@@ -572,3 +572,23 @@ The 35 prompt/Worker checks pass, including source-slot priorities, exact refere
 empty inputs, current-data isolation and continued rejection of unsupported scope.
 Real reviewer factuality/usefulness, professional timing, repeated provider reliability
 and the real pilot remain separate requirements.
+
+
+## Four-channel archive deletion verification
+
+The real Worker REST adapter test now creates a recorder-generated archive of 240
+synthetic four-channel feature frames, spanning more than one 25-document page.
+It requests account deletion, verifies the deletion lock rejects new evidence,
+interrupts one archive erase, checks that the durable job remains retryable and
+Auth deletion has not yet occurred, then resumes the job to completion. Every
+archive document, client/server report event and calendar record is removed; an
+identical feature chunk in a different account remains unchanged. Existing result,
+receipt and orphan professional-session cleanup assertions still pass.
+
+The isolated `vendor/cloudflare/firestore.test.mjs` run and the required combined
+Firestore rules/session/Worker suite passed against `demo-neuroia` (48 combined
+tests), with actual REST transactions and pagination. It does not use
+production identities or write production records. This closes the local regression
+coverage gap for deletion of the proposal archive, not the release acceptance on
+published rules/Worker. No automatic age-based retention policy is introduced;
+account deletion, downloaded exports and provider retention are distinct concerns.

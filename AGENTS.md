@@ -931,3 +931,10 @@ Mount game input only after start/round-start have entered the recording queue;
 `useResponseEvidence` registers committed stimuli in a layout effect. A passive
 registration effect can miss a fast keyboard response between commits. Keep this
 ordering on initial start and repeat, including games without live adaptation.
+
+
+The Worker REST integration test in `vendor/cloudflare/firestore.test.mjs` also
+checks proposal-data erasure using a recorder-generated four-channel feature archive
+larger than one REST page. Preserve interruption recovery, the write lock, delayed
+Auth removal and cross-account preservation assertions when changing deletion.
+Run only against `demo-neuroia`; synthetic fixtures never belong in production.
