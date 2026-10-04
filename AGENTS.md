@@ -938,3 +938,11 @@ checks proposal-data erasure using a recorder-generated four-channel feature arc
 larger than one REST page. Preserve interruption recovery, the write lock, delayed
 Auth removal and cross-account preservation assertions when changing deletion.
 Run only against `demo-neuroia`; synthetic fixtures never belong in production.
+
+
+`scripts/evaluation/pilot-package.mjs` combines raw cohort, report review and physical
+latency evidence against a prospective protocol roster. It reuses the existing pilot
+and report evaluators, requires complete observed coverage and record/context hashes,
+and never issues scientific or TRL acceptance. Its CLI refuses existing outputs and
+writes private 0600 artifacts. See docs/PROPOSAL.md for the input contract; focused
+coverage lives in `tests/pilotPackage.test.ts` and runs in `npm test`.

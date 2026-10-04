@@ -118,8 +118,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   elapsed-day adherence denominator, with read-only professional views and complete
   exports. An independent observer-register CLI now reconciles exact hashed exports
   and aggregates cohort registration/adherence without silently dropping missing
-  participants or planned days. Protocol approval, real pilot registration and cohort acceptance
-  remain open; fixture percentages do not establish the memory’s targets.
+  participants or planned days. The consolidated pilot-package CLI now combines raw cohort/report/latency
+  inputs against a prospective case/trial roster, suppressing incomplete metrics and
+  binding reviews to their records and context. Protocol approval, real pilot
+  observations and independent acceptance remain open; fixture percentages do not establish the memory’s targets.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
   Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
   review forms and paired preparation/unit aggregation are implemented. The shared

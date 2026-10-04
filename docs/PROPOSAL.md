@@ -258,8 +258,8 @@ The remaining engineering work is:
 - Complete the pilot evidence package and final validation artifact. The independent
   observer-register reconciliation CLI now aggregates registration and adherence
   with strict coverage, versioned definitions and export hashes. Real observations,
-  unambiguous reconciliation and approved units remain necessary; report/latency
-  aggregation and the signed final validation report remain open.
+  unambiguous reconciliation and approved units remain necessary; report/latency aggregation is implemented in the review-package CLI below.
+  Real evidence and the signed final validation report remain open.
 - Complete report factuality evaluation and the hash-bound review workflow. The
   two observed collective-claim patterns are now rejected before release; remaining
   free-text claims still require source-based adjudication. Spanish activity summaries do not automatically
@@ -592,3 +592,75 @@ production identities or write production records. This closes the local regress
 coverage gap for deletion of the proposal archive, not the release acceptance on
 published rules/Worker. No automatic age-based retention policy is introduced;
 account deletion, downloaded exports and provider retention are distinct concerns.
+
+
+## Consolidated pilot review package
+
+`scripts/evaluation/pilot-package.mjs` recomputes registration/adherence with
+`evaluatePilot` and report acceptance with `summarizeReportEvaluation`, then combines
+all six numerical targets in a private local artifact. It does not sign a report,
+validate scientific interpretation or certify TRL 7. Run:
+
+```sh
+node --experimental-strip-types scripts/evaluation/pilot-package.mjs input.json new-package.json
+```
+
+The destination must not exist and is created with mode 0600. Input has three fields:
+`cohort` (the complete raw input accepted by pilot.mjs), `reports` and `latency`.
+Do not supply a precomputed passing summary in place of raw evidence. Add the
+following prospective plan under `cohort.protocol.evaluation` before protocol approval:
+
+- `version: 1`, an explicit IANA `timeZone` for evaluation observation days;
+- `reportDefinition: "complete-professional-preparation-and-reviewed-units-v1"`;
+- `latencyDefinition: "maximum-physical-input-to-effective-ui-v1"`;
+- `reports`: planned `{caseId, participant}` pairs;
+- `latency`: planned `{trialId, participant, deviceCode, modelVersion}` entries.
+
+Both IDs are unique in their own plan. Participants must belong to the cohort roster.
+An empty plan or missing planned row keeps that indicator incomplete; unknown,
+reassigned or duplicate rows are rejected. Every input report/trial includes its
+planned ID/participant, `day`, ISO `observedAt` and declared `provenance`. Observed
+UTC timestamps must map to `day` in the approved timezone, within the study period.
+Synthetic/live-provider fixture outputs must retain synthetic provenance. Never
+relabel them as observed evidence from participants.
+
+Report rows include `record` and `review` in the existing report-evaluation format.
+The record uses its planned caseId, actual returned narrative and exact source
+insights; reviews must cover every criterion, factuality, clarity, usefulness and
+scope, plus full manual/assisted preparation times and reviewed synthesis units.
+Capture these source artifacts only under the approved pilot procedure; runtime
+telemetry deliberately does not persist report bodies. Empty-source rejection is a
+useful engineering test but cannot stand in for a prepared pilot report. Every planned
+report must be observed, accepted, timed and unit-reviewed before aggregate metrics
+are exposed. Automation pools accepted units / total units; reduction compares summed
+paired preparation times, not an average of individual percentages.
+
+Latency `record` requires `scope: "physical-input-to-effective-ui-v1"`, the planned
+device/model, one `clockId`, positive `resolutionMs`, and ordered `events` containing
+`{stage, clockId, monotonicMs}`. Start with `input-acquired`, end with `ui-effective`;
+optional intermediate stages are `features-ready` and `decision-ready`, each at most
+once. All timestamps use the same clock and increase monotonically. The separately
+measured browser paint opportunity and emulator queue traces do not meet this scope;
+never add their durations or relabel them as a physical measurement. The protocol
+must define how physical start/end timestamps are acquired and calibrated. The
+consolidator uses the worst trial's elapsed time plus two resolution margins, and
+requires that upper bound to be strictly below 1000 ms.
+
+Latency reviews contain `recordHash: pilotHash(record)`, `reviewerCode`, ISO
+`reviewedAt`, and `accepted: true` only after actual review. Report reviews retain
+their existing exact-record hash. Both review types additionally require
+`contextHash: evaluationContextHash(row, "caseId" | "trialId")`; this binds the
+participant, date, provenance and record so an old review cannot silently approve
+reassigned evidence. Reviews must postdate observations. These hashes detect changed
+inputs, not fabricated data or forged reviewer identities: declarations still need
+independent verification.
+
+The output lists missing/rejected evidence, source/review hashes, coverage, metrics
+and strict targets. `eligibleForIndependentReview` requires observed, prospectively
+approved and complete inputs; it is not a pass. `allNumericTargetsMet` additionally
+requires every numerical target to pass. `validationStatus` always remains
+`requires-independent-validation`: scientific/hardware acceptance, professional
+validation, deployment, commercial operation and a signed final report remain
+external deliverables. The ten focused tests use synthetic fixtures only, covering
+missing denominators, provenance, review/context tampering, clock/scope mismatches,
+threshold boundaries, pooled units, the slowest trial and non-overwriting CLI output.
