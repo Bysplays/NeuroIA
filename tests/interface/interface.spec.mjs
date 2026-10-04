@@ -802,3 +802,49 @@ test.describe('target miss feedback', () => {
     }
   });
 });
+
+for (const size of [{width:768,height:1024},{width:820,height:1180},{width:1024,height:768},{width:1280,height:800}]) {
+  test(`home and resized games leave no empty page scroll at ${size.width}`, async ({page}) => {
+    await page.setViewportSize(size);
+    await page.goto(fixture);
+    await expect(page.getByRole('heading', {name:'Hola, Lucía.'})).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
+    const home = await page.locator('.editorial-home').boundingBox();
+    const navigation = await page.locator('.header-navigation').boundingBox();
+    expect(home.y + home.height).toBeLessThanOrEqual(navigation.y);
+    await page.screenshot({path:`/tmp/neuroia-home-viewport-${size.width}.png`});
+    await page.getByRole('button', {name:'Jugar',exact:true}).click();
+    await page.getByRole('button', {name:'Empezar a jugar'}).click();
+    // Browser toolbar / orientation changes must update the entire shell as well as the board.
+    for (const height of [size.height - 150, size.height]) {
+      await page.setViewportSize({...size, height});
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
+      const footer = await page.locator('.viewport-session-footer').boundingBox();
+      expect(footer.y + footer.height).toBeLessThanOrEqual(height);
+    }
+    await page.getByRole('button', {name:'Volver',exact:true}).click();
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
+  });
+}
+
+test('long activity and enlarged home content remain scrollable and reachable', async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(fixture+'?large');
+  await expect(page.getByRole('heading', {name:'Hola, Lucía.'})).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const lastArea = page.locator('.editorial-areas > button').last();
+  await expect(lastArea).toBeInViewport();
+  await expect.poll(() => page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    const last = document.querySelector('.editorial-areas > button:last-child').getBoundingClientRect();
+    const nav = document.querySelector('.header-navigation').getBoundingClientRect();
+    return last.bottom - nav.top;
+  })).toBeLessThanOrEqual(1);
+  await page.getByRole('tab', {name:'Actividad',exact:true}).click();
+  await page.getByRole('button', {name:'Generar informe',exact:true}).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('button', {name:'Generar informe',exact:true})).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)).toBe(true);
+  await page.screenshot({path:'/tmp/neuroia-scroll-activity-large.png'});
+});

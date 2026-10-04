@@ -1,7 +1,7 @@
 import { visibleSessionSteps, type AssignedSession } from '../services/assignedSessions';
 import { DIFFICULTY_VERSION } from '../services/difficulty';
 import { localDay } from '../services/activityStats';
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import {
   Activity,
   Check,
@@ -66,6 +66,19 @@ export function Dashboard({
   onStartDailyPlan,
   onOpenSettings,
 }: DashboardProps) {
+  const container = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const element = container.current;
+    if (!element || !navigationTarget) return;
+    const measure = () => element.style.setProperty('--dashboard-navigation-height', `${navigationTarget.getBoundingClientRect().height}px`);
+    const observer = new ResizeObserver(measure);
+    observer.observe(navigationTarget);
+    measure();
+    return () => {
+      observer.disconnect();
+      element.style.removeProperty('--dashboard-navigation-height');
+    };
+  }, [navigationTarget]);
   const [localTab, setLocalTab] = useState("today");
   const tab = selectedTab ?? localTab;
   const setTab = onTabChange ?? setLocalTab;
@@ -181,7 +194,7 @@ export function Dashboard({
     </div>
   );
   return (
-    <div className="dashboard-container editorial-dashboard">
+    <div ref={container} className="dashboard-container editorial-dashboard">
       <TabletTabs
         navigationTarget={navigationTarget}
         label="Tu espacio"

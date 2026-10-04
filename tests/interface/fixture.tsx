@@ -20,7 +20,6 @@ import type { User } from "firebase/auth";
 import { GameSession } from "../../src/components/GameSession";
 import { GameExercise } from "../../src/components/GameExercise";
 import { AccessibilityModal } from "../../src/components/AccessibilityModal";
-import { ProductInformation } from "../../src/components/ProductInformation";
 import { getInitialProfile } from "../../src/services/storageService";
 import { applyAppearance } from "../../src/services/appearance";
 import { soundService } from "../../src/services/soundService";
@@ -83,8 +82,9 @@ export function Fixture() {
   return (
     <>
       {information && <InformationPage kind={information} onBack={() => setInformation(null)}/>}
-      <div hidden={information !== null}>
+      <div hidden={information !== null} className={`app-root ${game ? 'app-root-focus-mode' : ''}`}>
       {game ? (
+        <main className="main-content main-content-focus">
         <GameSession
           key={game}
           id={game}
@@ -104,6 +104,7 @@ export function Fixture() {
             onSaveResult={(result) => setResults((value) => [...value, result])}
           />
         </GameSession>
+        </main>
       ) : (
         <>
           <Header
@@ -115,6 +116,7 @@ export function Fixture() {
             onSignOut={() => setLoggedOut(true)}
             signingOut={false}
           />
+          <main className="main-content">
           <Dashboard
             selectedTab={dashboardTab} onTabChange={setDashboardTab}
             uid="isolated-interface-fixture"
@@ -130,7 +132,7 @@ export function Fixture() {
             onSignOut={() => setLoggedOut(true)}
             signingOut={false}
           />
-          <ProductInformation onOpen={setInformation}/>
+          </main>
         </>
       )}
       <AccessibilityModal onReassess={() => setSettings(false)} onInformation={setInformation}

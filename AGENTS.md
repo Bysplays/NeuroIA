@@ -103,6 +103,14 @@ router or change persistence solely to implement a visual adjustment.
 
 ### Stylesheet ownership
 
+`src/services/viewport.ts` measures a panel's document offset and expresses its
+remaining height with CSS `100dvh`, matching the document root. Avoid mixing
+fixed JavaScript viewport heights with dynamic CSS heights.
+`Dashboard` observes the Header navigation slot to reserve its actual height,
+including enlarged labels and the bottom safe area. Interface fixtures
+include the real app/main shell; check page overflow as well as board bounds
+after resizing and returning home, while preserving scroll for long content.
+
 `src/main.tsx` imports styles in this order:
 
 1. `src/index.css`: base styles, accessibility themes, and legacy game rules.
@@ -138,6 +146,13 @@ available. `npm run build` runs TypeScript and the production build.
 `npm run lint` runs Oxlint.
 
 ### GitHub Pages
+
+The optional local production frontend uses `docker/Dockerfile` and
+`docker/compose.yml`: run `docker compose -f docker/compose.yml up --build -d`
+from the repository root. Node 22 builds static assets and Nginx serves them on
+localhost:5173; Firebase and the Worker stay external. `.dockerignore` allowlists
+build inputs. Pass only public Vite settings as build arguments, never secrets.
+See `docs/DEPLOYMENT.md` for configuration and shutdown.
 
 The target production URL is `https://neuroia.es/`; Vite development remains on
 `http://localhost:5173/`. See `docs/DEPLOYMENT.md` for DNS, Firebase authorization,

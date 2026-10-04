@@ -80,6 +80,14 @@ identities, full silhouettes and atlas mappings during all interface work.
 
 ## Navigation and home
 
+The document root and fitted game panels use the dynamic viewport height, so
+browser toolbar changes do not leave a taller, empty page behind the board.
+Home measures the floating navigation height (including wrapped, enlarged labels)
+and reserves only that height, a small content gap and the
+bottom safe area. Standard tablet layouts should fit without page scrolling;
+phones, enlarged text and long activity/report content retain natural scrolling.
+Do not hide overflow on the whole document to conceal sizing problems.
+
 The player workspace has persistent **bottom navigation**: Hoy, Juegos, optionally
 Para ti, Actividad and Mi cuenta. Reuse `TabletTabs`, its ARIA relationships and
 keyboard navigation, through the existing Header portal. Keep generous bottom

@@ -81,6 +81,45 @@ These settings separate URLs, not accounts or databases: the Firebase project
 is still shared. Automated fixtures must continue using `demo-neuroia` emulators.
 The production-domain migration does not enable live Stripe charges.
 
+## Docker
+
+`docker/Dockerfile` builds the frontend with Node 22 and serves the resulting
+static files with Nginx. `docker/compose.yml` binds it to `http://localhost:5173`,
+the existing allowed local origin. It has no hot reload; rebuild after changes.
+Stop any Vite process using that port before starting the container.
+
+Run these commands from the repository root:
+
+```sh
+docker compose -f docker/compose.yml up --build -d
+docker compose -f docker/compose.yml ps
+docker compose -f docker/compose.yml logs -f frontend
+docker compose -f docker/compose.yml down
+```
+
+Compose defaults to the hosted access/billing Worker, purchases enabled, and
+the original Firebase auth helper domain. To use the public settings from your
+existing `.env.local`, pass it explicitly when building:
+
+```sh
+docker compose --env-file .env.local -f docker/compose.yml up --build -d
+```
+
+Only `VITE_BILLING_API_URL`, `VITE_STRIPE_ENABLED` and
+`VITE_FIREBASE_AUTH_DOMAIN` are passed as build arguments. Vite embeds them into
+the JavaScript bundle; changing runtime environment variables cannot change an
+already built frontend. The root `.dockerignore` allowlists frontend inputs and
+excludes environment files; the final image contains only Nginx and built assets.
+Never add OpenRouter, Stripe or Firebase service-account secrets to build args.
+
+Firebase authentication/progress and the Cloudflare Worker remain external,
+including AI requests. Docker does not create a separate database or deploy
+backend code/rules. Local sign-in uses the configured real Firebase project.
+Payment returns still follow the Worker's `APP_URL`, as in local Vite development.
+The container includes an HTTP health check for its static frontend; this does
+not verify authentication or backend access. Other hostnames/ports need matching
+Firebase origin authorization and Worker CORS configuration.
+
 ## Identity and external services
 
 Local authenticated entry requires `VITE_BILLING_API_URL` even when purchases are

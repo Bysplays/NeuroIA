@@ -67,6 +67,19 @@ These variables are public. Stripe private keys, the webhook signing secret and
 the Firebase service account belong **only in Worker secrets**.
 See the [billing guide](vendor/cloudflare/README.md) for the complete setup.
 
+### Run with Docker
+
+From the repository root, with Docker Engine and Compose installed:
+
+```sh
+docker compose -f docker/compose.yml up --build -d
+```
+
+Open `http://localhost:5173` (stop Vite first if it occupies that port).
+This serves the production frontend with Nginx and uses the hosted Firebase and
+Worker services. For public build settings, shutdown and rebuild instructions,
+see [Docker deployment](docs/DEPLOYMENT.md#docker).
+
 ## Checks
 
 ```sh

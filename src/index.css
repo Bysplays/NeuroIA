@@ -185,7 +185,7 @@ button, [role="button"], [role="tab"], label, .brand {
 }
 
 #root {
-  min-height: 100vh;
+  min-height: 100dvh;
   background-image: var(--color-page-glow);
   background-attachment: fixed;
   display: flex;

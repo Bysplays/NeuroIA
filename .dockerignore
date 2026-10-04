@@ -1,0 +1,22 @@
+# Only the frontend build inputs enter the build context.
+**
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.app.json
+!tsconfig.node.json
+!vite.config.ts
+!index.html
+!src/
+!src/**
+!public/
+!public/**
+!docker/
+!docker/Dockerfile
+
+# Keep credentials excluded even if placed inside an allowed directory.
+**/.env
+**/.env.*
+**/.dev.vars*
+**/*.pem
+**/*.key
