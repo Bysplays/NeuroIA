@@ -9,5 +9,5 @@ for(const action of ['success','account-change','cancel'])test(`report appendix 
  await expect.poll(()=>page.evaluate(()=>window.target)).toBe('participant');
  await page.evaluate(action=>{if(action==='cancel')window.cancelResponses();if(action==='account-change')window.changeCaller();window.releaseResponses();},action);
  await expect.poll(()=>page.evaluate(()=>window.outcome)).toBe(action==='success'?'success':'AbortError');
- if(action==='success')expect(await page.evaluate(()=>window.metrics)).toEqual({complete:true,excluded:0,malformed:0,rows:[]});
+ if(action==='success')expect(await page.evaluate(()=>window.metrics)).toEqual({complete:true,includedSessions:0,excluded:0,malformed:0,rows:[]});
 });

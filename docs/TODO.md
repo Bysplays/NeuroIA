@@ -85,8 +85,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   PPO simulation training, deterministic browser inference, bounded result-boundary
   integration and application audit are implemented behind a separate flag. A tested
   between-round transition controller now preserves active configs and resets
-  performance comparisons on level changes, but game integration, mixed-level
-  accounting and persistent transition audits remain open. Real
+  performance comparisons on level changes. Response reconstruction, Gráficas and
+  the PDF now separate measured stimulus levels without inflating session counts.
+  Game integration, mixed-level result/history accounting and persistent transition
+  audits remain open. Real
   calibration, scientific reward approval and pilot evaluation remain mandatory.
 - [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
   Server report attempts now persist start/generated/failure/cancellation outcomes

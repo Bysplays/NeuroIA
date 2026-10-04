@@ -32,3 +32,13 @@ test('cross-chunk timestamps and response associations are checked beyond envelo
   chunks[3]={...chunks[3],events:JSON.stringify(events)};
   assert.ok(summarizeEvidence(chunks).issues.includes('invalid-response-link'));
 });
+test('tracking windows crossing a level boundary cannot be assigned to either level',()=>{
+ let time=0;const chunks:EvidenceChunk[]=[];
+ const r=createSessionEvidence({sessionId:'cross-level',exerciseId:'motor-tracking',activeNow:()=>time,sink:c=>chunks.push(c)});
+ r.start(1,'normal',false);time=500;r.track(500,true);r.present('level-2-window',2);time=1000;r.track(500,true);r.finish('r');
+ const summary=summarizeEvidence(chunks);assert.equal(summary.status,'invalid');assert.ok(summary.issues.includes('tracking-crosses-level-boundary'));assert.equal(summary.levelMeasurements,null);
+});
+test('invalid chains expose neither total nor per-level measurements',()=>{
+ const chunks=fixture();chunks.pop();chunks[1]={...chunks[1],firstSequence:20};
+ const summary=summarizeEvidence(chunks);assert.equal(summary.metrics,null);assert.equal(summary.levelMeasurements,null);
+});

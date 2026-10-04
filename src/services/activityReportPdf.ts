@@ -185,7 +185,7 @@ export async function createActivityReportPdf(input: ReportInput, signal: AbortS
   }
   if(input.responses){
     nextPage();section('05','Respuestas medidas · anexo');
-    paragraph('Archivo completo de respuestas verificables, independiente del periodo y los filtros del informe. Solo partidas normales completadas y vinculadas; se agrupan por juego y nivel.',9,muted);
+    paragraph('Archivo completo de respuestas verificables, independiente del periodo y los filtros del informe. Solo partidas normales completadas y vinculadas; se agrupan por juego y nivel. Una partida puede aparecer en varios niveles.',9,muted);
     paragraph('Tiempo activo hasta cada respuesta, sin pausas. Se reinicia tras cada intento o selección previa. No equivale a segundos por pregunta ni a tiempo de reacción clínico. Las ayudas cuentan aperturas durante una oportunidad activa.',9,muted);
     const measured=input.responses;
     paragraph(`Intentos excluidos: ${measured.excluded}. Documentos no válidos: ${measured.malformed}.`,9,muted);

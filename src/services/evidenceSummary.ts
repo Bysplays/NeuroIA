@@ -23,6 +23,13 @@ export function summarizeEvidence(chunks: EvidenceChunk[]) {
   let lastMs = 0, terminal: EvidenceEvent | undefined;
   let responseCount = 0, errors = 0, hints = 0, selections = 0, latencyMs = 0;
   let trackingMs = 0, contactMs = 0, lastTrackingEnd = 0;
+  let currentLevel=1,levelSinceMs=0;
+  const levels=new Map<number,{responseCount:number;errors:number;hints:number;selections:number;latencyMs:number;trackingMs:number;contactMs:number}>();
+  const measuredLevel=()=>{
+    let row=levels.get(currentLevel);
+    if(!row){row={responseCount:0,errors:0,hints:0,selections:0,latencyMs:0,trackingMs:0,contactMs:0};levels.set(currentLevel,row);}
+    return row;
+  };
   for (const [index,event] of events.entries()) {
     if (event.sequence !== index) issues.add('missing-events');
     if (event.activeMs < lastMs) issues.add('reversed-active-time');
@@ -30,26 +37,30 @@ export function summarizeEvidence(chunks: EvidenceChunk[]) {
     if (index === 0 && event.kind !== 'start') issues.add('missing-start');
     lastMs = event.activeMs;
     switch (event.kind) {
-      case 'start': if (index !== 0) issues.add('duplicate-start'); break;
+      case 'start': if (index !== 0) issues.add('duplicate-start'); currentLevel=event.level;levelSinceMs=event.activeMs;break;
       case 'stimulus':
         if (stimulus) issues.add('unclosed-stimulus');
+        if(event.level!==currentLevel){currentLevel=event.level;levelSinceMs=event.activeMs;}
         stimulus = {id:event.stimulus,since:event.activeMs}; break;
       case 'selection': case 'response':
         if (!stimulus || stimulus.id !== event.stimulus || event.latencyMs !== event.activeMs-stimulus.since) issues.add('invalid-response-link');
-        if (event.kind === 'selection') selections++;
-        else { responseCount++; errors += Number(!event.correct); latencyMs += event.latencyMs; }
+        if (event.kind === 'selection') {selections++;measuredLevel().selections++;}
+        else { responseCount++; errors += Number(!event.correct); latencyMs += event.latencyMs;
+          const row=measuredLevel();row.responseCount++;row.errors+=Number(!event.correct);row.latencyMs+=event.latencyMs; }
         stimulus = event.kind === 'response' && event.final ? undefined : {id:event.stimulus,since:event.activeMs};
         break;
       case 'hint': case 'cancel':
         if (stimulus?.id !== event.stimulus) issues.add('invalid-stimulus-link');
-        if (event.kind === 'hint') hints++;
+        if (event.kind === 'hint') {hints++;measuredLevel().hints++;}
         else stimulus = undefined;
         break;
       case 'tracking':
         // Rounded interval boundaries can differ by 1 ms, never by an entire window.
         if (event.activeMs-event.durationMs < lastTrackingEnd-1) issues.add('overlapping-tracking');
+        if(event.activeMs-event.durationMs<levelSinceMs-1)issues.add('tracking-crosses-level-boundary');
         lastTrackingEnd = event.activeMs;
-        trackingMs += event.durationMs; contactMs += event.contactMs; break;
+        trackingMs += event.durationMs; contactMs += event.contactMs;
+        measuredLevel().trackingMs+=event.durationMs;measuredLevel().contactMs+=event.contactMs;break;
       case 'finish': case 'abandon': terminal = event; break;
     }
   }
@@ -63,6 +74,8 @@ export function summarizeEvidence(chunks: EvidenceChunk[]) {
     // Invalid evidence contributes no apparently authoritative KPI numerator.
     metrics:valid ? {responseCount,errors,hints,selections,meanResponseMs:responseCount ? latencyMs/responseCount : null,
       activeMs:lastMs,trackingMs,contactMs} : null,
+    levelMeasurements:valid?[...levels].sort(([a],[b])=>a-b).map(([level,{latencyMs:total,...measurements}])=>({level,
+      measurements:{...measurements,meanResponseMs:measurements.responseCount?total/measurements.responseCount:null}})):null,
     events,
   };
 }

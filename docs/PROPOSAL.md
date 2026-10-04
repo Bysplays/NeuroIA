@@ -446,3 +446,27 @@ record each level segment and transition, and reconcile mixed-level result metri
 and persistent audit validation. In particular, pair counts cannot be calculated as
 final-level pairs × rounds once levels vary. Do not enable or describe mid-session
 adaptation as shipped until those contracts and rendered input paths are verified.
+
+## Mixed-level measurement accounting
+
+The evidence reconstructor now produces `levelMeasurements` from the recorded
+stimulus levels, while retaining the original whole-attempt totals. A level's
+response mean is weighted only by its own responses; incorrect attempts, help and
+pair selections follow the same opportunity. Returning to a prior level combines
+that level's measurements without borrowing time/errors from intervening levels.
+Export's legacy `level` remains the starting level; consumers must use the explicit
+measurement groups for response analysis, not treat it as a constant session level.
+
+Gráficas and the PDF appendix consume these groups. A completed attempt can appear
+in several level blocks, but `includedSessions` counts it once across the report.
+Result-level metadata does not override stimulus-level evidence. Invalid chains
+expose neither global nor grouped measurements. Tracking windows crossing a level
+boundary are rejected instead of proportionally guessing contact attribution;
+future round integration must flush tracking before changing level. No active-time
+allocation to level-specific previews or unobserved intervals is invented.
+
+Tests include a 2 → 3 → 2 attempt with different timings, an intentionally different
+result-level field, duplicate archive pages, separate UI/PDF blocks and one unique
+session count. This prepares accounting for the controller; it does not yet connect
+live round transitions or change ordinary activity speed/level charts. Those charts
+and persistence still need the mixed-level result contract in the game integration.

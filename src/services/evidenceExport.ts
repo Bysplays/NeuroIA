@@ -31,7 +31,7 @@ export function buildEvidenceExport(chunks: EvidenceChunk[], results: ExerciseRe
     const allowed=['visual-scanning','language-naming','word-completion','memory-path','memory-pairs','categorization','motor-target','motor-tracking'];
     return {attempt:index+1,exercise:allowed.includes(summary.exerciseId ?? '') ? summary.exerciseId : null,
       mode:start?.mode ?? null, level:start?.level ?? null,
-      status:summary.status, issues:summary.issues, measurements:summary.metrics,
+      status:summary.status, issues:summary.issues, measurements:summary.metrics, levelMeasurements:summary.levelMeasurements,
       resultSaved:summary.status==='completed' ? linked : null,
       adaptation:linked ? readAdaptationDecision(saved[0].adaptation) : null,
       eegWindows:summary.status==='invalid' ? null : summary.events.filter(event=>event.kind==='eeg').map(event=>({activeMs:event.activeMs,channels:event.frame.channels})),

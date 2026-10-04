@@ -45,10 +45,13 @@ from reviewed reports; do not introduce a visual completion claim for pilot KPIs
 
 When proposal evidence is enabled, Gráficas includes an explicitly loaded
 “Respuestas medidas” card for owners and linked professionals. Group only completed,
-validated, result-linked normal sessions by game and level; state that it uses the
+validated, result-linked normal sessions by game and recorded stimulus level; state that it uses the
 whole archive independently of activity filters. Show response-weighted mean time,
 incorrect attempts, active-opportunity help openings and separate prior selections.
-Continuous tracking shows duration-weighted contact without invented response latency.
+A mixed-level session can appear in multiple game/level blocks, while the total
+counts it only once; label the row count “Partidas con este nivel”. Never use the
+last or initial level to label all responses from that session. Continuous tracking
+shows duration-weighted contact without invented response latency.
 Reports include these local measurements as a separate appendix after scope, explicitly
 covering the whole archive independently of report filters. Use square metric cells,
 centered labels/values and keep each game/level block together across pages. An archive

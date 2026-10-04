@@ -32,3 +32,14 @@ test('continuous contact has duration-weighted contact and no fabricated respons
   const row=responseMetrics(buildEvidenceExport(chunks,[result],true)).rows[0];
   assert.equal(row.meanResponseMs,null);assert.equal(row.responses,0);assert.equal(row.contactRatio,.75);
 });
+test('mixed-level attempts retain per-level measurements without double-counting sessions',()=>{
+ const chunks:EvidenceChunk[]=[];let now=0;
+ const r=createSessionEvidence({sessionId:'mixed',exerciseId:'language-naming',activeNow:()=>now,sink:c=>chunks.push(c)});
+ r.start(2,'normal',false);r.present('q1',2);now=1000;r.respond(false);r.present('q2',3);r.hint();now=4000;r.respond(true);r.present('q3',2);now=6000;r.respond(true);r.finish('mixed');
+ const result={id:'mixed',evidenceSessionId:'mixed',exerciseId:'language-naming',level:3} as ExerciseResult;
+ const exported=buildEvidenceExport([...chunks,...chunks],[result],true),metrics=responseMetrics(exported);
+ assert.equal(exported.counts.completed,1);assert.equal(metrics.includedSessions,1);assert.equal(metrics.rows.length,2);
+ const [two,three]=metrics.rows;
+ assert.equal(two.level,2);assert.equal(two.sessions,1);assert.equal(two.responses,2);assert.equal(two.meanResponseMs,1500);assert.equal(two.errors,1);assert.equal(two.hints,0);
+ assert.equal(three.level,3);assert.equal(three.sessions,1);assert.equal(three.responses,1);assert.equal(three.meanResponseMs,3000);assert.equal(three.errors,0);assert.equal(three.hints,1);
+});

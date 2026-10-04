@@ -882,3 +882,9 @@ boundaries; its decision must not mutate an active board. `beginLevel` resets on
 performance observation windows, preserving the independent session EEG baseline.
 Keep the distinction between local next-round application and server-confirmed
 profile writes. See docs/PROPOSAL.md for mixed-level accounting/audit prerequisites.
+
+Evidence reconstruction exposes `levelMeasurements` by actual stimulus level.
+ResponseMetrics/PDF use these groups, with `includedSessions` counting distinct
+attempts rather than summing per-level row counts. Export `level` remains the initial
+level for compatibility. Reject tracking windows spanning a level boundary rather
+than estimating contact allocation; round integration must flush them first.
