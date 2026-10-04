@@ -418,6 +418,14 @@ profile creation/import and is never updated by the settings input.
 
 ## Account activity statistics
 
+The `propuesta` branch implements the full memory-alignment workstreams in
+`docs/PROPOSAL.md`, tracked in `docs/TODO.md`. Do not report them complete from
+synthetic tests. `museFeatures.ts` preserves independent TP9/AF7/AF8/TP10 RMS and
+one-second spectral powers; `EegService.channels` is connection-scoped and currently
+transient. The legacy aggregate recording remains compatible. Run
+`scripts/verify_muse_features.py` with NumPy/SciPy for an independent synthetic
+numerical comparison; real physiological interpretation remains a separate gate.
+
 `ActivityStatistics` is embedded in the player dashboard’s Actividad tab, with Resumen (area radar and labelled current-level radar), Gráficas (accuracy, speed and recorded levels), Historial, Filtros and Logros rendering `AchievementShowcase`. `ActivityLineChart` shares focusable series, emphasis and a noninteractive active-series chip across all three time charts; `LevelStatistics` owns the current-level summary. Primary `TabletTabs` navigation uses a portal into Header’s fixed bottom navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
 the shared `data-style` attribute and palette tokens; no separate theme state.
 `activityStats.ts` deduplicates results and computes local-day per-exercise means.

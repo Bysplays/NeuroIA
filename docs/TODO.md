@@ -57,6 +57,22 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 
 ## Current remaining scope
 
+### Proposal branch — full memory alignment
+
+The owner authorized implementation on `propuesta` of all five review gaps.
+[PROPOSAL.md](PROPOSAL.md) defines the original scope and completion evidence.
+This supersedes suggestion-only scope for this branch, not the deployed release.
+
+- [ ] Preserve four EEG channels and spectral/quality features end to end, including
+  live/history views, compatible persistence, authorization and deletion.
+- [ ] Add response-level timing and explicit outcomes across all eight games.
+- [ ] Implement and integrate a learned adaptive policy, training/export provenance,
+  bounded decisions, EEG-optional operation and professional-level protection.
+- [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
+- [ ] Add report evaluation, independent signal checks and latency benchmarks.
+- [ ] Complete real-user and hardware pilot evidence and scientific interpretation
+  review; do not close from synthetic tests or source inspection.
+
 - [x] Prepare three independent clinical-blue, tablet-first concepts using Mobbin
   references from Kit, Ahead and Brilliant. The review board is at
   `/design/concepts/`; see [DESIGN-CONCEPTS.md](DESIGN-CONCEPTS.md).

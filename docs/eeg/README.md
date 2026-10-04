@@ -9,6 +9,28 @@ automated and browser-fixture checks.
 
 ## Signals and platforms
 
+### Proposal branch channel analysis
+
+`museFeatures.ts` now emits TP9, AF7, AF8 and TP10 separately through the adapter
+and connection-scoped service. Each contiguous 256-sample window supplies RMS
+in µV and a detrended periodic-Hann one-sided periodogram integrated into
+half-open bands: delta [1,4), theta [4,8), alpha [8,13), beta [13,30), gamma [30,45)
+Hz. Power is µV², with 1 Hz bin spacing. Raw samples remain transient. Flat,
+clipped, malformed and missing windows retain explicit quality; one invalid
+electrode does not replace the other electrodes' features with a global average.
+The legacy aggregate remains unavailable if any electrode is invalid.
+
+This is spectral measurement, not validated fatigue/attention inference. Live
+four-channel UI, archive persistence, baseline feedback and policy integration
+remain tracked in [the proposal](../PROPOSAL.md). Disconnect/cancellation clears
+channel snapshots. Independent comparison uses
+`python scripts/verify_muse_features.py` (NumPy/SciPy + Node 22+).
+It checks 20 band values and four RMS values against synthetic reference signals.
+References: [MuseJS channel order/sample rate](https://github.com/urish/muse-js/blob/master/src/muse.ts)
+and [SciPy periodogram scaling](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.periodogram.html).
+
+### Existing stored summaries
+
 Only four EEG channels, infrared PPG and battery telemetry are consumed. EEG shows
 one-second AC RMS averaged across four aligned channels (µV). PPG shows one-second
 infrared AC RMS in thousands of ADC units (kADC). These summarize amplitude, not
