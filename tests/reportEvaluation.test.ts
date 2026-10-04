@@ -52,8 +52,8 @@ test('versioned report cases exercise their claimed distinctions in the real red
   assert.equal(data.get('legacy-date')!.firstDay,'2026-01-01');
 });
 
-test('broad claims remain visible for review even when their three references pass schema',()=>{
+test('broad claims fail validation and remain visible for review of archived outputs',()=>{
   const broad={...record,analysis:{insights,narrative:{...basicNarrative(insights),observations:[{text:'El resto de los juegos no aparece en esta selección.',evidence:['game:language-naming','game:word-completion','game:memory-path']}]}}};
   const outcome=summarizeReportEvaluation([broad]).outcomes[0];
-  assert.equal(outcome.schemaValid,true);assert.equal(outcome.reviewFlags.length,1);assert.equal(outcome.accepted,false);
+  assert.equal(outcome.schemaValid,false);assert.equal(outcome.reviewFlags.length,1);assert.equal(outcome.accepted,false);
 });

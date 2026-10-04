@@ -142,6 +142,17 @@ export function basicNarrative(insights: ActivityInsights): AiNarrative {
 
 // Schema conformance is checked again server-side. Structured output alone is
 // not evidence of factuality. Metrics/actions remain authored by the pure reducer.
+// This is a conservative scope guard, not semantic entailment: reject collective
+// game claims and named games without their own cited facts. Human factuality
+// review is still required for numbers, causality, trends and the free summary.
+export function validObservationScope(text: string, evidence: string[]) {
+  const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ');
+  const normalized = normalize(text);
+  if (/\b(resto|demas|otros|otras|todos|todas|ningun|ninguno|ninguna)\b[^.!?;]{0,35}\bjuegos?\b/.test(normalized)) return false;
+  if (new Set(evidence).size !== evidence.length) return false;
+  return ALL_EXERCISES.every(game => !normalized.includes(normalize(game.title))
+    || ['game', 'recent', 'speed'].some(kind => evidence.includes(`${kind}:${game.id}`)));
+}
 export function validAiNarrative(value: unknown, insights: ActivityInsights): value is AiNarrative {
   if (!value || typeof value !== 'object') return false;
   const v = value as AiNarrative;
@@ -152,7 +163,8 @@ export function validAiNarrative(value: unknown, insights: ActivityInsights): va
   const keys = (o: object, expected: string[]) => Object.keys(o).length === expected.length && expected.every(k => Object.hasOwn(o, k));
   if (!keys(v, ['summary', 'observations', 'recommendations']) || !safeText(v.summary, 1600)) return false;
   if (!Array.isArray(v.observations) || v.observations.length > 5 || !v.observations.every(o => o && keys(o, ['text', 'evidence']) && safeText(o.text, 700)
-    && Array.isArray(o.evidence) && o.evidence.length > 0 && o.evidence.length <= 3 && o.evidence.every(id => insights.facts.some(f => f.id === id)))) return false;
+    && Array.isArray(o.evidence) && o.evidence.length > 0 && o.evidence.length <= 3 && o.evidence.every(id => insights.facts.some(f => f.id === id))
+    && validObservationScope(o.text, o.evidence))) return false;
   return Array.isArray(v.recommendations) && v.recommendations.length <= 3 && v.recommendations.length === insights.suggestions.length
     && new Set(v.recommendations.map(r => r?.suggestionId)).size === v.recommendations.length
     && v.recommendations.every(r => r && keys(r, ['suggestionId', 'explanation']) && safeText(r.explanation, 700) && insights.suggestions.some(s => s.id === r.suggestionId));

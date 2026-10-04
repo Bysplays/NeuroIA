@@ -1,6 +1,6 @@
 import {createHash} from 'node:crypto';
 import {validAiNarrative} from '../../src/services/activityInsights.ts';
-export const REPORT_EVALUATION_VERSION = 'report-evaluation-v1';
+export const REPORT_EVALUATION_VERSION = 'report-evaluation-v2';
 export const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
 // A passed schema is not a passed factuality review. Every generated report needs
@@ -36,8 +36,8 @@ export function summarizeReportEvaluation(records,reviews=[]) {
     const units=reviewed && Number.isSafeInteger(review.synthesisUnitsTotal) && review.synthesisUnitsTotal>0
       && Number.isSafeInteger(review.synthesisUnitsAcceptedWithoutEdit) && review.synthesisUnitsAcceptedWithoutEdit>=0
       && review.synthesisUnitsAcceptedWithoutEdit<=review.synthesisUnitsTotal;
-    const reviewFlags=schemaValid?record.analysis.narrative.observations.flatMap((item,index)=>
-      /(?:resto|otros|demás).{0,14}juegos/i.test(item.text)?[{observation:index+1,reason:'Broad game claim: manually verify that cited facts support its entire scope.'}]:[]):[];
+    const reviewFlags=Array.isArray(record.analysis?.narrative?.observations)?record.analysis.narrative.observations.flatMap((item,index)=>
+      /(?:resto|otros|demás).{0,14}juegos/i.test(item?.text??'')?[{observation:index+1,reason:'Broad game claim: manually verify that cited facts support its entire scope.'}]:[]):[];
     return {caseId:record.caseId,schemaValid,expectedRejection,reviewed,approved,reviewFlags,
       accepted:record.expectedStatus!==undefined?expectedRejection:schemaValid&&approved,
       paired:paired&&schemaValid?{manual:review.manualPreparationSeconds,assisted:review.assistedPreparationSeconds}:null,

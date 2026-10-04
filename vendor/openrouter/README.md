@@ -169,3 +169,21 @@ prove pilot KPIs, report usefulness in the target population, or TRL 7. This too
 is separate from the implemented runtime report/save telemetry and adherence calendar.
 The pilot reconciliation CLI in docs/PROPOSAL.md consolidates registration/adherence;
 real reviewer measurements and final pilot acceptance remain open.
+
+## Observation scope validation
+
+Prompt `neuroia-es-activity-v7` and the shared browser/Worker validator reject
+collective game observations (for example, “el resto de juegos”), duplicate fact
+references and a named game without its own `game:`, `recent:` or `speed:` evidence.
+The three-reference limit remains unchanged. Generic optional variety wording in
+the summary is not itself a collective factual observation. These lexical/scope
+checks are conservative, not a semantic truth verifier: numerical correctness,
+causality, trends, uncited summary text and usefulness still need human review.
+
+Daily cached recommendations now require the current prompt version and must pass
+current narrative validation before release. Stale, malformed or newly rejected
+cache entries trigger the ordinary generation path, preserving existing quotas and
+authorization checks. A quota/provider failure never releases rejected cached text.
+The evaluation summary version is `report-evaluation-v2`; archived broad claims remain
+flagged for review even when the new validator now rejects them. Existing record
+hashes remain tied to the original outputs; do not rewrite historical provider replies.

@@ -861,3 +861,11 @@ Firestore runs, verify the named test and trace rather than only exit status. Th
 verified Node 26 focused command pairs `--test-isolation=none` with
 `--test-force-exit`; see docs/PROPOSAL.md. Force-exit alone skipped the selected test
 locally. Do not substitute this focused run for the combined rules/REST suite.
+
+AI observation scope is checked by `validObservationScope` inside the shared
+`validAiNarrative`: no collective game claims or repeated fact references, and each
+named active game needs its own game/recent/speed evidence. These checks do not prove
+semantic factuality. Daily recommendation cache reuse also requires the current
+prompt version and current narrative validation; failures use existing generation
+quotas, never a stale rejected cache. Keep prompt, validator, evaluation regressions
+and vendor/openrouter/README.md aligned when changing this contract.

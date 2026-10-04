@@ -36,3 +36,24 @@ test('report prompt narrows broad absence claims instead of accepting excessive 
   const evidence = insights.facts.filter(f => f.id.startsWith('game:')).map(f => f.id);
   assert.equal(validAiNarrative({...basicNarrative(insights), observations:[{text:'El resto de juegos no aparece en la selección.',evidence}]},insights),false);
 });
+
+test('three existing references cannot authorize a collective absence claim',()=>{
+ const insights=buildActivityInsights([],undefined,filters);
+ for(const text of ['Los otros juegos no aparecen en esta selección; eso no indica que nunca se hayan jugado.','El resto de los juegos no aparecen en esta selección; eso no indica que nunca los hayas jugado.','Todos los juegos tienen actividad.','Ningún juego aparece en la selección.']){
+  assert.equal(validAiNarrative({...basicNarrative(insights),observations:[{text,evidence:['game:language-naming','game:word-completion','game:memory-path']}]},insights),false);
+ }
+});
+test('named games require their own evidence and repeated references are invalid',()=>{
+ const insights=buildActivityInsights([],undefined,filters),narrative=basicNarrative(insights);
+ for(const evidence of [['activity'],['game:word-completion'],['game:language-naming','game:language-naming']])assert.equal(validAiNarrative({...narrative,observations:[{text:'«Ponle nombre» no aparece en esta selección.',evidence}]},insights),false);
+ assert.equal(validAiNarrative({...narrative,observations:[{text:'«Ponle nombre» no aparece en esta selección.',evidence:['game:language-naming']}]},insights),true);
+ // An optional variety recommendation is not a factual assertion about all games.
+ assert.equal(validAiNarrative({...narrative,summary:'Puedes probar otros juegos si te apetece.'},insights),true);
+});
+
+test('valid measured speed evidence supports the named game without unrelated citations',()=>{
+ const insights={...EXAMPLE_INPUT,facts:[...EXAMPLE_INPUT.facts,{id:'speed:visual-scanning',text:'Busca la figura: 9 s/pregunta antes y 6 s/pregunta después.'}]};
+ const narrative={...EXAMPLE_RESPONSE,observations:[{text:'«Busca la figura» pasó de 9 a 6 segundos por pregunta.',evidence:['speed:visual-scanning']}]};
+ assert.equal(validAiNarrative(narrative,insights),true);
+ assert.equal(validAiNarrative({...narrative,observations:[{...narrative.observations[0],text:'«Ponle nombre» pasó de 9 a 6 segundos por pregunta.'}]},insights),false);
+});

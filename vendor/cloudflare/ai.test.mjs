@@ -267,3 +267,26 @@ test('client report correlation is explicit, bounded, report-only and absent fro
     await assert.rejects(generateAnalysis('player',{...input,...patch},evidenceEnv,store(),confirmedAccess),{status:400});
   }
 });
+
+test('unsupported collective claims are rejected before release and recorded as validation failures',async()=>{
+ const db=store();
+ await assert.rejects(generateAnalysis('player',input,{...env,PROPOSAL_REPORT_EVIDENCE:'true'},db,confirmedAccess,undefined,async(_url,init)=>{
+  const body=JSON.parse(init.body),insights=JSON.parse(body.messages[1].content.split('\n')[1]);
+  const narrative={...basicNarrative(insights),observations:[{text:'El resto de los juegos no aparecen en esta selección; eso no indica que nunca los hayas jugado.',evidence:['game:language-naming','game:word-completion','game:memory-path']}]};
+  return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(narrative)}}]});
+ }),{status:502});
+ const record=[...db.documents.entries()].find(([path])=>path.includes('/reportAttempts/'))?.[1];
+ assert.equal(record.status,'failed');assert.equal(record.stage,'validation');
+});
+
+test('daily cache is revalidated for prompt version and observation scope before release',async()=>{
+ for(const corrupt of ['prompt','scope','json']){
+  const db=store();await dailyRecommendations('player',dailyInput,env,db,confirmedAccess,undefined,provider);
+  const path='users/player/aiRecommendations/player',cached=db.documents.get(path),analysis=JSON.parse(cached.analysis);
+  if(corrupt==='prompt')analysis.provenance.promptVersion='old-prompt';
+  if(corrupt==='scope')analysis.narrative.observations=[{text:'El resto de juegos no aparece en esta selección.',evidence:['game:language-naming']}];
+  db.documents.set(path,{...cached,analysis:corrupt==='json'?'invalid-json':JSON.stringify(analysis)});db.documents.delete('users/player/aiUsage/daily');
+  let calls=0;const result=await dailyRecommendations('player',dailyInput,env,db,confirmedAccess,undefined,async(...args)=>{calls++;return provider(...args)});
+  assert.equal(calls,1);assert.deepEqual(result.narrative.observations,[]);
+ }
+});

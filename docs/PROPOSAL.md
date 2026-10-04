@@ -159,9 +159,11 @@ absence claim). The v5 prompt narrows that instruction without relaxing validati
 A subsequent live run returned nine schema-valid reports and correctly rejected the
 empty case before a provider call; generation took approximately 3.6–5.9 seconds.
 This excludes PDF/rendering, professional preparation and ordinary backend access.
-Inspection still found broad claims citing only three games in two outputs. The
-evaluator flags these for explicit factuality/scope review; schema success does not
-close report acceptance. Independent human review and measured pilot outcomes remain
+Inspection of that v5 run found broad claims citing only three games in two outputs.
+The v7 shared validator now rejects collective game observations, repeated references
+and named games without their own game/recent/speed facts. The evaluator retains
+flags when rechecking old outputs. These conservative scope checks do not establish
+semantic factuality; schema success does not close report acceptance. Independent human review and measured pilot outcomes remain
 pending. Server report-attempt telemetry is now implemented behind `PROPOSAL_REPORT_EVIDENCE`;
 client PDF phases now persist through the ordinary outbox. Client/server correlation and complete paginated lifecycle export now preserve
 invalid, unfinished, ambiguous and unlinked coverage. Save-attempt outcomes now use the same durable outbox and are reconciled with the
@@ -258,8 +260,9 @@ The remaining engineering work is:
   with strict coverage, versioned definitions and export hashes. Real observations,
   unambiguous reconciliation and approved units remain necessary; report/latency
   aggregation and the signed final validation report remain open.
-- Resolve report factuality/scope failures found in live evaluation and complete
-  the hash-bound review workflow. Spanish activity summaries do not automatically
+- Complete report factuality evaluation and the hash-bound review workflow. The
+  two observed collective-claim patterns are now rejected before release; remaining
+  free-text claims still require source-based adjudication. Spanish activity summaries do not automatically
   satisfy the memory's proposed neuropsychological technical report; approved
   professional content and evaluation criteria are required, without invented
   diagnoses or unvalidated EEG interpretation.
@@ -372,3 +375,22 @@ These separate measurements must not be added together or presented as a measure
 physical-input-to-cloud-to-display trace. A connected real-device run over the
 actual production network, with agreed start/end boundaries and recorded device/
 model versions, remains necessary before closing the memory's latency acceptance.
+
+## Latest live report scope regression
+
+The v7 ten-case run with configured `dots-studio/dots-3-note-preview:free` returned
+eight accepted-by-validator reports, one expected empty-source rejection before
+provider work, and one rejected generated report. The rejected same-level-speed
+case again claimed “Los otros juegos…” while citing only one absent game; the
+shared scope guard returned 502 before release. Nonempty cases took approximately
+3.9–6.5 seconds including the rejected call, excluding PDF and professional work.
+The live runner correctly exited nonzero. This is evidence that the guard blocks
+the observed pattern, not evidence that all cases or pilot report acceptance pass.
+No retry, fallback provider or silent deletion of generated claims was used.
+
+The preceding v6 engineering run exposed an overly narrow guard that omitted valid
+`speed:` references. That defect was corrected with a positive speed-reference test
+and a negative cross-game test; old raw artifacts remain unchanged. A v7 run still
+requires independent factuality/usefulness review, and generation reliability remains
+open. Browser direct-PDF/cancellation/error paths and server rejection/cache tests
+are separate from this incomplete model-quality acceptance.

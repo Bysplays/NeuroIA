@@ -130,7 +130,12 @@ export async function dailyRecommendations(actor, input, env, db, confirmedAcces
   const claim = crypto.randomUUID();
   const cached = await db.runTransaction(async tx => {
     const previous = await tx.get(path);
-    if (previous?.day === day && previous.dataVersion === INSIGHTS_VERSION && previous.analysis) return previous.analysis;
+    if (previous?.day === day && previous.dataVersion === INSIGHTS_VERSION && previous.analysis) {
+      try {
+        const candidate=JSON.parse(previous.analysis);
+        if(candidate.provenance?.promptVersion===PROMPT_VERSION && validAiNarrative(candidate.narrative,candidate.insights))return previous.analysis;
+      }catch{/* Stale or malformed cached text must pass current validation before release. */}
+    }
     if (previous?.leaseUntil > Date.now()) fail(409, 'Las recomendaciones del día se están preparando. Vuelve a entrar en unos instantes.');
     tx.set(path, { day, claim, leaseUntil: Date.now() + 45000 }, false);
     return null;

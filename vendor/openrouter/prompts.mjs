@@ -1,5 +1,5 @@
 // Runtime prompt, worked example and response contract. Bump the version on edits.
-export const PROMPT_VERSION = 'neuroia-es-activity-v5';
+export const PROMPT_VERSION = 'neuroia-es-activity-v7';
 // Fixed product choices: compatible with Gemma JSON mode and other JSON endpoints.
 export const RESPONSE_FORMAT = Object.freeze({ type: 'json_object' });
 export const ZERO_DATA_RETENTION = false;
@@ -52,7 +52,7 @@ QUÉ RELLENAR
 Devuelve exactamente un objeto JSON con summary, observations y recommendations. No añadas claves, Markdown, encabezados, enlaces ni texto fuera del JSON.
 1. summary: redacta la síntesis del caso actual; máximo 700 caracteres. No repitas la lista de métricas: ya se muestra junto al texto.
 2. observations: hasta ${mode === 'report' ? 'cuatro' : 'tres'} objetos. En text escribe una sola observación concreta, de máximo 400 caracteres. En evidence COPIA entre uno y tres IDs de facts que respalden toda esa frase. Si no hay un hecho que la respalde, omite la observación. Puedes devolver [].
-LÍMITE ESTRICTO: evidence nunca puede contener más de tres IDs. No resumas «el resto de juegos» si esa afirmación exige cuatro o más hechos. Habla de un juego concreto, como en el ejemplo de «Ponle nombre», u omite la observación. Nunca recortes las referencias manteniendo una frase más amplia de lo que respaldan.
+LÍMITE ESTRICTO: evidence nunca puede contener más de tres IDs. No uses afirmaciones colectivas como «el resto de juegos», «otros juegos», «todos los juegos» o «ningún juego» en observations. Habla de un juego concreto, como en el ejemplo de «Ponle nombre», u omite la observación. Nunca recortes las referencias manteniendo una frase más amplia de lo que respaldan. Cada juego nombrado en una observación debe tener su propio hecho game:, recent: o speed: entre sus referencias; activity no sustituye ese hecho. No repitas IDs.
 3. recommendations: conserva exactamente una entrada por cada suggestions, en el mismo orden. COPIA suggestionId sin modificarlo. Rellena solo explanation, máximo 350 caracteres: explica la relación entre la opción y sus evidence. No añadas acciones ni niveles nuevos. No reformules el consejo como una obligación. Si suggestions está vacío, devuelve [].
 No rellenes evidence con nombres de secciones como «limitations», «suggestions», «games», «filters» o «summary»: NO son IDs de hechos. Las limitaciones se muestran aparte; no necesitan observaciones inventadas.
 No cambies niveles ni propuestas profesionales. Las opciones de dificultad se refieren exclusivamente a partidas libres y dependen de lo que la persona considere cómodo.

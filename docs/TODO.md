@@ -101,7 +101,9 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   remain open; fixture percentages do not establish the memory’s targets.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
   Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
-  review forms and paired preparation/unit aggregation are implemented. Independent
+  review forms and paired preparation/unit aggregation are implemented. The v7
+  prompt/shared validator rejects the observed unsupported collective game claims
+  and revalidates daily caches; this does not replace factuality review. Independent
   signal comparison and actor benchmark exist. Browser pipeline measurements now
   cover input through local React commit/paint opportunity at three widths and
   throttled CPU; the emulator suite separately traces queue synchronization and
