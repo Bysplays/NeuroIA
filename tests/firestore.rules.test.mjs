@@ -1,3 +1,4 @@
+import {loadPracticeAdherence} from '../src/services/practiceScheduleArchive.ts';
 import {loadReportEvidenceExport} from '../src/services/reportEvidenceArchive.ts';
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -701,4 +702,28 @@ test('save observations are immutable, receipt-idempotent and exported with resu
   await assertFails(updateDoc(doc(db,path),{status:'acknowledged'}));await assertFails(deleteDoc(doc(db,path)));
   await assertFails(getDoc(doc(env.authenticatedContext('save-stranger').firestore(),path)));
   await assertFails(setDoc(doc(db,`users/${uid}/saveEvents/leak`),{...start,errorMessage:'private',receivedAt:serverTimestamp()}));
+});
+
+test('practice calendars are server-owned, immutable to clients and paginated without losing revisions',async()=>{
+  const uid='calendar-owner',db=env.authenticatedContext(uid).firestore();
+  const revision={version:1,revision:1,timeZone:'Europe/Madrid',createdAt:Date.parse('2026-01-01T12:00:00Z'),effectiveFrom:'2026-01-02',daysMask:127,dailyExercises:1};
+  await env.withSecurityRulesDisabled(async context=>{
+    await Promise.all(Array.from({length:201},(_,i)=>setDoc(doc(context.firestore(),`users/${uid}/scheduleRevisions/${String(i+1).padStart(10,'0')}`),{...revision,revision:i+1,createdAt:revision.createdAt+i})));
+  });
+  const path=`users/${uid}/scheduleRevisions/0000000001`;
+  await assertSucceeds(getDoc(doc(db,path)));await assertFails(updateDoc(doc(db,path),{daysMask:0}));await assertFails(deleteDoc(doc(db,path)));
+  await assertFails(setDoc(doc(db,`users/${uid}/practiceSchedule/current`),revision));
+  await assertFails(getDoc(doc(env.authenticatedContext('calendar-stranger').firestore(),path)));
+  const data=await loadPracticeAdherence(db,uid,Date.parse('2026-01-05T12:00:00Z'),new AbortController().signal);
+  assert.equal(data.revisions.length,201);assert.equal(data.adherence.plannedDays,3);assert.equal(data.adherence.ratio,0);
+  await env.withSecurityRulesDisabled(async context=>{
+    const admin=context.firestore(),until=Date.now()+60000;
+    await setDoc(doc(admin,'professionals/calendar-professional'),{ownerUid:'calendar-professional',active:true});
+    await setDoc(doc(admin,`users/${uid}/access/main`),{kind:'invitation',professionalId:'calendar-professional',seatId:'seat',expiresAt:until});
+    await setDoc(doc(admin,'professionals/calendar-professional/seats/seat'),{status:'active',occupantUid:uid,expiresAt:until});
+    await setDoc(doc(admin,`professionals/calendar-professional/patients/${uid}`),{patientId:uid,seatId:'seat'});
+  });
+  const professional=env.authenticatedContext('calendar-professional').firestore();
+  await assertSucceeds(getDoc(doc(professional,path)));await assertFails(updateDoc(doc(professional,path),{daysMask:0}));
+
 });

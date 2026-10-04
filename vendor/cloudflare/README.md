@@ -296,3 +296,22 @@ behind the frontend evidence flag; reviewed synthesis units and paired manual/as
 preparation times remain separate requirements. Generation failures before
 successful start persistence are also absent from this ledger, so an independent
 pilot register remains necessary for completeness claims.
+
+### Proposal practice schedule
+
+`practiceSchedule.mjs` serves authenticated `/practice/schedule/status` and
+`/practice/schedule`. Status returns the server clock and current caller-owned
+configuration. Mutations require active personal access and the separate
+`PROPOSAL_SCHEDULE_ENABLED=true` flag (absent/off in production). The Worker, not
+the client, fixes next-day effectiveness in the original calendar timezone.
+Expected revisions and permanent operation receipts protect concurrent edits and
+lost responses. No target UID or retrospective start date is accepted. Revisions,
+current configuration and receipts are flat documents under the caller; recursive
+account deletion includes them and transaction deletion locks prevent recreation.
+
+See [proposal calendar contract](../../docs/PROPOSAL.md#prospective-practice-calendar-and-adherence)
+for storage paths, aggregation, permissions and pilot limitations. Publish the Worker
+and compatible calendar read rules before enabling the frontend evidence flag or
+server mutations. Keep protocol approval separate from implementation acceptance.
+Run `node --experimental-strip-types --test vendor/cloudflare/practiceSchedule.test.mjs`
+and the combined emulator suite when changing this module.

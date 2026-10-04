@@ -43,6 +43,16 @@ action while loading, show retryable errors inline, cancel when leaving and rest
 focus after confirmation. Export coverage explicitly distinguishes requested downloads
 from reviewed reports; do not introduce a visual completion claim for pilot KPIs.
 
+The proposal calendar appears as a separate Resumen card before AI suggestions.
+Use native weekday checkboxes with full Spanish day names, a labelled 1–8 exercise
+selector and quiet Save/Pause actions. Do not imply a professional prescription.
+Explain next-day effectiveness and show fulfilled/planned elapsed days together;
+never display a percentage for an unknown or zero denominator. Owner editing and
+linked-professional read-only copy must differ. Keep timezone and latest effective
+date visible. Natural analytics scrolling and responsive checkbox rows accommodate
+small screens and enlarged text. Calendar export reuses the shared evidence download
+and focus-return confirmation; it is independent of activity display filters.
+
 The persisted `pageStyle: default` now means **Calma**; `cozy` remains the compatible
 **Papel** alternative. Keep the existing profile settings, independent contrast modes
 and hide-companions preference. Do not reset a user's appearance to introduce a design.

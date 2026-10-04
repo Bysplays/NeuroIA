@@ -162,6 +162,13 @@ service cloud.firestore {
         && request.resource.data.kind in ['result', 'settings', 'placement', 'evidence', 'report', 'save-evidence']
         && request.resource.data.createdAt == request.time;
     }
+    // Prospective schedule revisions are written only by the authenticated Worker.
+    match /users/{uid}/scheduleRevisions/{revisionId} {
+      allow read: if owns(uid) || linkedProfessional(uid);
+    }
+    match /users/{uid}/practiceSchedule/current {
+      allow read: if owns(uid) || linkedProfessional(uid);
+    }
     // Result-save transport observations; immutable and separate from activity totals.
     match /users/{uid}/saveEvents/{eventId} {
       allow read: if owns(uid) || linkedProfessional(uid);

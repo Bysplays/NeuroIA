@@ -1,3 +1,4 @@
+import {updatePracticeSchedule} from './practiceSchedule.mjs';
 import {withReportEvidence,readReportEvidence} from './reportEvidence.mjs';
 import { startTrial, requestDeletion, processDeletion } from './accountLifecycle.mjs';
 import {test} from 'node:test';
@@ -70,6 +71,15 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  assert.equal(afterLeave[0].occupantUid, null); assert.equal(afterLeave[1].kind, 'revoked'); assert.equal(afterLeave[2], null);
  await assert.rejects(redeemSeat(people[1], { code }, db));
 
+ const scheduleUid='calendar-rest-'+Date.now();
+ const scheduleInput={operationId:'first',baseRevision:0,timeZone:'Europe/Madrid',daysMask:42,dailyExercises:3};
+ await updatePracticeSchedule(scheduleUid,scheduleInput,{PROPOSAL_SCHEDULE_ENABLED:'true'},db,async()=>({active:true}));
+ const schedule=await db.runTransaction(tx=>tx.get(`users/${scheduleUid}/scheduleRevisions/0000000001`));
+ assert.equal(schedule.daysMask,42);assert.equal(schedule.dailyExercises,3);
+ assert.deepEqual(await updatePracticeSchedule(scheduleUid,scheduleInput,{PROPOSAL_SCHEDULE_ENABLED:'true'},db,async()=>({active:true})),{revision:1,replayed:true});
+ await db.runTransaction(async tx=>tx.set(`accountDeletions/${scheduleUid}`,{phase:'tree'},false));
+ await assert.rejects(updatePracticeSchedule(scheduleUid,{...scheduleInput,operationId:'blocked',baseRevision:1},{PROPOSAL_SCHEDULE_ENABLED:'true'},db,async()=>({active:true})),{status:409});
+ await db.erase([`accountDeletions/${scheduleUid}`,`users/${scheduleUid}/scheduleRevisions/0000000001`,`users/${scheduleUid}/scheduleOperations/first`,`users/${scheduleUid}/practiceSchedule/current`]);
  const lifecycleEnv={TRIAL_IDENTITY_SECRET:'demo-lifecycle-secret-32-characters-minimum'};
  const deletedUid='delete-rest-'+Date.now();
  const email=deletedUid+'@example.test';
@@ -80,6 +90,7 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
    tx.set(`users/${deletedUid}/operations/a`,{value:'receipt'},false);
    tx.set(`users/${deletedUid}/reportAttempts/a`,{version:1,status:'started'},false);
    tx.set(`users/${deletedUid}/saveEvents/a`,{version:1,status:'started'},false);
+   tx.set(`users/${deletedUid}/scheduleRevisions/a`,{version:1,revision:1},false);
    tx.set(`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`,{patientId:deletedUid},false);
  });
  assert.ok(await db.nextDeletion() === undefined);
@@ -93,8 +104,8 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
    if(job.phase==='done') break;
  }
  assert.deepEqual(deleted,[['delete',deletedUid]]);
- const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`users/${deletedUid}/reportAttempts/a`,`users/${deletedUid}/saveEvents/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
- assert.deepEqual(remaining,[null,null,null,null,null,null]);
+ const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`users/${deletedUid}/reportAttempts/a`,`users/${deletedUid}/saveEvents/a`,`users/${deletedUid}/scheduleRevisions/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
+ assert.deepEqual(remaining,[null,null,null,null,null,null,null]);
  await startTrial('recreated-'+deletedUid,email,lifecycleEnv,db);
  const resumedTrial=await db.runTransaction(tx=>tx.get(`users/recreated-${deletedUid}/access/main`));
  assert.equal(resumedTrial.kind,'trial');

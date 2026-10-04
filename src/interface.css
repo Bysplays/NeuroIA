@@ -2095,3 +2095,14 @@ select option { background-color: var(--color-surface); color: var(--color-text-
 .muse-history-plots svg { width: 100%; display: block; }
 .muse-history-plots text { fill: currentColor; font-size: 12px; }
 @media(max-width:600px) { .muse-history-plots { grid-template-columns: minmax(0,1fr); } }
+
+.practice-calendar { display: grid; gap: 16px; }
+.practice-calendar > h2, .practice-calendar > p { margin: 0; }
+.practice-calendar fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 16px; min-width: 0; }
+.practice-calendar legend { margin-bottom: 12px; font-weight: 600; }
+.practice-calendar-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr)); gap: 8px; }
+.practice-calendar-days label { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px; border: 1px solid var(--color-border); border-radius: 8px; font-size: .85rem; }
+.practice-calendar-days input { width: 18px; height: 18px; flex-shrink: 0; }
+.practice-calendar-target { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.practice-calendar-target select { min-height: 48px; min-width: 80px; }
+.practice-calendar-summary { font-size: 1.1rem; font-weight: 650; }

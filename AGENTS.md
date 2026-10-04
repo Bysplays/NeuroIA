@@ -817,3 +817,14 @@ instrument themselves. `saveEvidence.ts` validates/deduplicates these events and
 reconciles them with archived results in the paginated evaluation export. Failed
 transport does not prove a lost result. Preserve the stopped-account guard and
 ordinary pending-storage fallback. Publish compatible rules before enabling.
+
+`PracticeCalendar.tsx`, `practiceSchedule.ts`, `practiceScheduleArchive.ts` and
+`practiceScheduleService.ts` own prospective personal calendars, their fixed-timezone
+elapsed-day adherence calculation and full paginated export. The Worker owns immutable
+revisions/current configuration/idempotency receipts; client writes are denied.
+The UI uses the proposal evidence flag, while calendar mutations require the separate
+server `PROPOSAL_SCHEDULE_ENABLED` flag. Both remain off in production. See
+`docs/PROPOSAL.md` for numerator/denominator definitions and independent pilot gates.
+Run `vendor/cloudflare/practiceSchedule.test.mjs` with other Worker checks. Billing
+transport now accepts an optional cancellation signal and rejects cross-account
+responses; preserve those guards when sharing it with calendar requests.

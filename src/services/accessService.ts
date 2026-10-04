@@ -21,13 +21,19 @@ export interface AccountAccess {
 }
 const billingUrl = import.meta.env.VITE_BILLING_API_URL?.replace(/\/$/, '');
 export const billingEnabled = Boolean(billingUrl) && import.meta.env.VITE_STRIPE_ENABLED === 'true';
-export async function billingRequest<T = { url: string }>(path: string, body?: object): Promise<T> {
+export async function billingRequest<T = { url: string }>(path: string, body?: object, signal?:AbortSignal): Promise<T> {
   if (!billingUrl || !auth.currentUser) throw new Error('billing-unavailable');
+  const account=auth.currentUser;
+  const token=await account.getIdToken();
+  signal?.throwIfAborted();
+  if(auth.currentUser?.uid!==account.uid)throw new DOMException('Account changed','AbortError');
   const response = await fetch(`${billingUrl}${path}`, {
-    method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
+    method: 'POST', signal: AbortSignal.any([AbortSignal.timeout(15000),...(signal?[signal]:[])]), headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
   const result = await response.json();
+  signal?.throwIfAborted();
+  if(auth.currentUser?.uid!==account.uid)throw new DOMException('Account changed','AbortError');
   if (!response.ok) throw Object.assign(new Error(result.error || 'No hemos podido gestionar el pago.'), { code: 'billing/request-failed' });
   return result;
 }

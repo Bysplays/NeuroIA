@@ -1,3 +1,4 @@
+import {practiceScheduleStatus,updatePracticeSchedule} from './practiceSchedule.mjs';
 import { readReportEvidence } from './reportEvidence.mjs';
 import { trialOffer, startTrial, deletionEligibility, requestDeletion, processDeletion } from './accountLifecycle.mjs';
 import { aiStatus, generateAnalysis, dailyRecommendations } from './ai.mjs';
@@ -526,7 +527,7 @@ export function createHandler(deps = {}) {
         await webhook(JSON.parse(body), env, db, stripe);
         return reply({ received: true });
       }
-      if (!['/checkout','/portal','/cancel-checkout','/status','/access','/trial','/account/deletion-status','/account/delete', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat', '/ai/status', '/ai/analyze', '/ai/recommendations', '/ai/report-evidence'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
+      if (!['/checkout','/portal','/cancel-checkout','/status','/access','/trial','/account/deletion-status','/account/delete', '/professional/status', '/professional/checkout', '/professional/cancel-checkout', '/professional/portal', '/redeem-seat', '/leave-seat', '/ai/status', '/ai/analyze', '/ai/recommendations', '/ai/report-evidence', '/practice/schedule/status', '/practice/schedule'].includes(path)) return reply({ error: 'Ruta no encontrada.' }, 404);
       const token = request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1];
       if (!token) fail(401, 'Inicia sesión para continuar.');
       const uid = await (deps.verifyUser || verifyUser)(token, env.FIREBASE_PROJECT_ID);
@@ -550,6 +551,12 @@ export function createHandler(deps = {}) {
       }
       const deleting = await db.runTransaction(tx => tx.get(`accountDeletions/${uid}`), 4, true);
       if (deleting) fail(409, 'La cuenta se está eliminando.');
+      if(path==='/practice/schedule/status')return reply(await practiceScheduleStatus(uid,env,db));
+      if(path==='/practice/schedule'){
+        const body=await request.text();if(body.length>2048)fail(413,'Solicitud demasiado grande.');
+        let input;try{input=JSON.parse(body);}catch{fail(400,'Solicitud no válida.');}
+        return reply(await updatePracticeSchedule(uid,input,env,db,confirmedAccess));
+      }
       if (path === '/ai/status') return reply(aiStatus(env));
       if (path === '/ai/report-evidence') {
         const body=await request.text();
@@ -594,6 +601,7 @@ export function createHandler(deps = {}) {
       }
       return reply({ ok: true });
     } catch (error) {
+      if(new URL(request.url).pathname.startsWith('/practice/'))return reply({error:error.status?error.message:'No hemos podido consultar o guardar el calendario.'},error.status||500);
       if (new URL(request.url).pathname.startsWith('/ai/')) return reply({ error: error.status ? error.message : 'No hemos podido preparar el análisis. Inténtalo de nuevo.' }, error.status || 500);
       return reply({ error: error instanceof HttpError || (error.status >= 400 && error.status < 500) || error.status === 503 ? error.message : (new URL(request.url).pathname.startsWith('/account/') ? 'No hemos podido gestionar tu cuenta. Inténtalo de nuevo.' : 'No hemos podido gestionar el pago. Inténtalo de nuevo.') }, error.status || 500);
     }

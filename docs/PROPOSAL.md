@@ -77,7 +77,7 @@ The new rules have not been deployed; never claim production event collection.
 | Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded end-of-exercise decisions and persistent application audit behind a separate flag | Real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance and visible response metrics; distinguish speed from measured response latency |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
-| Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; adherence denominator and pilot KPI aggregation with an independent attempt register remain |
+| Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
 | Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | End-to-end latency acceptance, completed report evaluation and documented pilot protocol; a local actor benchmark exists, but hardware and real-user evidence cannot be completed by code alone |
 
 Memory acceptance targets remain unproven: adaptive latency <1 s, correctly
@@ -165,7 +165,7 @@ close report acceptance. Independent human review and measured pilot outcomes re
 pending. Server report-attempt telemetry is now implemented behind `PROPOSAL_REPORT_EVIDENCE`;
 client PDF phases now persist through the ordinary outbox. Client/server correlation and complete paginated lifecycle export now preserve
 invalid, unfinished, ambiguous and unlinked coverage. Save-attempt outcomes now use the same durable outbox and are reconciled with the
-result archive. Adherence denominators and independent pilot acceptance remain open.
+result archive. Prospective adherence calendars and denominators are now implemented; independent pilot acceptance remains open.
 
 ## Result-save observations
 
@@ -185,3 +185,89 @@ counts. Export replaces attempt/result IDs with ordinals and omits wall timestam
 and free-text errors. Raw events follow ordinary account deletion and owner/active
 professional activity permissions. These are client observations, not server
 attestations or an independent denominator for the >95% pilot registration KPI.
+
+## Prospective practice calendar and adherence
+
+`PracticeCalendar` adds an optional personal calendar to Actividad → Resumen under
+the frontend evidence flag. The caller chooses weekdays and 1–8 completed exercises
+per planned day. This is a personal practice plan, not a professional prescription;
+linked professionals have read-only access. No schedule is inferred from streaks,
+prior usage, prescribed steps or the memory's estimated baseline.
+
+The server flag `PROPOSAL_SCHEDULE_ENABLED=true` enables changes. Authenticated
+`/practice/schedule` accepts an operation ID, expected base revision, fixed timezone,
+weekday bitmask (Sunday is bit 0) and daily exercise target. The Worker chooses the
+next local calendar day as `effectiveFrom`; clients cannot backdate or choose it.
+Zero weekday mask pauses prospectively. Revision checks reject concurrent stale
+edits; permanent operation receipts make retries after a lost response idempotent.
+Once chosen, the calendar timezone stays fixed so edits cannot reclassify past days.
+Multiple edits with the same future effective date retain every revision and use
+the latest revision from that date. Account deletion locks apply to transactions.
+
+Flat immutable revisions live in `users/{uid}/scheduleRevisions/{revision}`;
+`practiceSchedule/current` is the server-owned current configuration and
+`scheduleOperations/{operationId}` holds receipts. Clients cannot write any of
+these paths. Owners and active linked professionals can read revisions/current;
+receipts are server-only. Recursive account deletion covers them. The status endpoint
+returns the server clock and enable flag. Both server/frontend flags stay disabled
+in production until the compatible Worker and rules are published.
+
+Definition `planned-days-completed-exercises-v1` counts fully elapsed local planned
+days on which the chosen target was met, divided by all fully elapsed planned days.
+Today is excluded. Extra exercises on one day never compensate another missed day.
+Count unique archived completions from active games, including free/daily/assigned
+play; exclude placement/practice, invalid records and retired games. Legacy date-only
+records retain their recorded day. UTC instants use the fixed calendar timezone,
+including daylight-saving transitions. Missing/conflicting revisions or results,
+partial coverage, and a zero denominator produce no percentage. An archive interval
+longer than 3,660 days requires explicit narrowing rather than silent truncation.
+
+The UI and separate JSON export read every revision/result page and recheck permission.
+They include definition version, denominator, day-level outcomes and all revision
+metadata, with no names, account IDs or result IDs. Calendar dates remain necessary
+measurement data and are not a claim of legal anonymity. Activity display filters
+do not alter this whole-calendar denominator. Late synchronization can update a past
+day's observed completion count without changing that day's intended target.
+
+This is an engineering definition requiring protocol approval before comparing the
+memory's estimated 35–40% baseline to the >60% target. A personal schedule percentage
+is not clinical adherence or evidence of efficacy. Cohort evaluation and an independent
+pilot register remain required; no real-user KPI is claimed from fixtures.
+
+## Remaining code deliverables after the calendar review
+
+The original PDF's section 1.2.8 promises continuous adaptation and EEG-derived
+fatigue/inattention, not merely a learned algorithm. Current observations are
+collected during play, but the policy changes the next game's default only after
+completion. Closing that difference requires an agreed task-boundary specification
+and implementation/acceptance at those boundaries, or an explicitly revised project
+scope. Do not change answer keys or targets in the middle of a response.
+
+The remaining engineering work is:
+
+- Add a reproducible end-to-end latency trace and acceptance runner covering input
+  acquisition, feature preparation, policy decision and effective UI application.
+  The existing actor-only benchmark cannot establish the memory's <1 s target.
+- Surface measured response latency, incorrect attempts and help usage with valid
+  coverage in professional analytics/reports. Existing duration/questions charts
+  must remain labelled speed, not measured response latency. Complete per-game
+  touch/keyboard acceptance of the recording paths.
+- Add an independent pilot-session register and cohort aggregation with versioned
+  definitions, exclusions, evidence provenance and a final validation artifact.
+  Per-account exports and result-save receipts alone do not establish the >95%
+  registration denominator or population adherence.
+- Resolve report factuality/scope failures found in live evaluation and complete
+  the hash-bound review workflow. Spanish activity summaries do not automatically
+  satisfy the memory's proposed neuropsychological technical report; approved
+  professional content and evaluation criteria are required, without invented
+  diagnoses or unvalidated EEG interpretation.
+- After scientific protocol approval, implement any required EEG calibration and
+  validated fatigue/inattention mapping, and retrain/evaluate adaptation on suitable
+  real observations. Four electrode channels and spectral bands are implemented;
+  cognitive-state inference is not.
+- Publish compatible Worker/rules and enable the proposal flags only after their
+  acceptance gates. Code on this branch is not evidence of production availability.
+
+Real hardware recordings, reviewer measurements, comparison against manual report
+preparation and a real-user/professional pilot are separate evidence deliverables.
+Code and synthetic fixtures cannot close TRL 7, efficacy or the numerical pilot KPIs.
