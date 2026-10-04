@@ -82,6 +82,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   calibration, scientific reward approval and pilot evaluation remain mandatory.
 - [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
+  Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
+  review forms and paired preparation/unit aggregation are implemented. Independent
+  signal comparison and actor benchmark exist; actual reviewer results, end-to-end
+  timings and real pilot evidence remain open.
 - [ ] Complete real-user and hardware pilot evidence and scientific interpretation
   review; do not close from synthetic tests or source inspection.
 

@@ -29,3 +29,10 @@ test('section names and unfilled placeholders from rejected live output remain i
   const insights = buildActivityInsights([], undefined, filters);
   assert.equal(validAiNarrative({ ...basicNarrative(insights), summary: 'RELLENAR: síntesis' }, insights), false);
 });
+
+test('report prompt narrows broad absence claims instead of accepting excessive evidence', () => {
+  const insights = buildActivityInsights([], undefined, filters);
+  assert.match(activityMessages(insights, 'report')[0].content, /evidence nunca puede contener más de tres IDs/);
+  const evidence = insights.facts.filter(f => f.id.startsWith('game:')).map(f => f.id);
+  assert.equal(validAiNarrative({...basicNarrative(insights), observations:[{text:'El resto de juegos no aparece en la selección.',evidence}]},insights),false);
+});

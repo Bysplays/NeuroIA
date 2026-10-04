@@ -73,12 +73,12 @@ The new rules have not been deployed; never claim production event collection.
 | Requirement | Current code | Remaining implementation |
 | --- | --- | --- |
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
-| Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Report factuality/usefulness evaluation and measurable automation/preparation-time outcomes; generation alone does not prove those KPIs |
+| Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
 | Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded end-of-exercise decisions and persistent application audit behind a separate flag | Real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance and visible response metrics; distinguish speed from measured response latency |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Save/report outcome telemetry, adherence denominator and pilot KPI aggregation with an independent attempt register |
-| Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | End-to-end latency acceptance, report evaluation tooling and documented pilot protocol; a local actor benchmark exists, but hardware and real-user evidence cannot be completed by code alone |
+| Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | End-to-end latency acceptance, completed report evaluation and documented pilot protocol; a local actor benchmark exists, but hardware and real-user evidence cannot be completed by code alone |
 
 Memory acceptance targets remain unproven: adaptive latency <1 s, correctly
 registered sessions >95%, synthesis automation >70%, adherence >60%, report
@@ -144,3 +144,22 @@ manual level changes and professional locks hold the level. At transaction time,
 a changed stored base level or assignment prevents application. The result archive
 records the model, full observation, logits, chosen action, bounds, inference time
 and application outcome (`applied`, `stale`, `blocked`); retries use existing receipts.
+
+## Report evaluation evidence
+
+The versioned ten-case suite in `scripts/evaluation/` runs through the production
+Worker generation function using an isolated synthetic source and either a fixture
+or the configured provider. It checkpoints rejected provider replies, exact sources,
+model/prompt provenance and generation duration. Review forms bind to each record's
+hash; KPI aggregation reports actual paired-duration and synthesis-unit coverage,
+leaving absent measurements null. See the OpenRouter guide for commands.
+
+The live v4 prompt runs exposed excessive evidence arrays (seven IDs for a broad
+absence claim). The v5 prompt narrows that instruction without relaxing validation.
+A subsequent live run returned nine schema-valid reports and correctly rejected the
+empty case before a provider call; generation took approximately 3.6–5.9 seconds.
+This excludes PDF/rendering, professional preparation and ordinary backend access.
+Inspection still found broad claims citing only three games in two outputs. The
+evaluator flags these for explicit factuality/scope review; schema success does not
+close report acceptance. Independent human review and measured pilot outcomes remain
+pending. Runtime KPI telemetry and adherence denominators are separate open work.

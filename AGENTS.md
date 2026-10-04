@@ -785,3 +785,8 @@ loads and validates a complete result-linked evidence session with cancellation.
 `museBaseline.ts` shares five-window baseline calculations between live feedback,
 archived feedback and policy observations. Live baselines are connection-scoped;
 archive/policy baselines use game active time. Keep these meanings distinct.
+
+Report evaluation tooling lives in `scripts/evaluation/`: versioned synthetic cases,
+offline-by-default provider runner and hash-bound review/KPI aggregation. See
+`vendor/openrouter/README.md` for offline/live commands and measurement definitions.
+Do not present mock generation timings or schema checks as factuality or pilot evidence.

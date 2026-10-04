@@ -126,3 +126,43 @@ for nested profile/history and archived results. Existing Firestore rules deny
 client reads/writes to the server-only quota path; no new client authorization rule
 is needed. Recursive account deletion covers that subcollection. Reports are
 downloaded only, so no additional database archive/retention schema is introduced.
+
+## Reproducible report evaluation
+
+`node --experimental-strip-types scripts/evaluation/reports.mjs --output /tmp/neuroia-reports-run`
+runs ten versioned synthetic cases through the production generation function with
+an offline provider fixture. It covers empty/partial history, sparse evidence,
+same-level speed, slower accurate performance, mixed levels, professional assignments,
+unknown hints, date-only records and retired/invalid games. It does not access Firebase.
+The output directory must be new; each result is checkpointed before the next case.
+The empty case must reject before calling the provider.
+
+Add `--live` before `--output` only for an explicit provider run. It uses the local
+OpenRouter configuration, sends synthetic aggregates only, makes up to nine provider
+calls without retry/fallback and can consume provider quota/credits. Neither fixture
+success nor live schema success constitutes factuality or user acceptance.
+
+Outputs include exact narrative/source snapshots, bounded provider replies (including
+rejected drafts for diagnosis), model/prompt provenance, generation
+time, a case-set hash, and a Spanish per-case rubric in `reviews.json`. Review every
+summary, observation and recommendation against its exact facts and candidate actions.
+Use a pseudonymous reviewer code; do not enter names or participant information.
+Mark each criterion, factuality, Spanish clarity, usefulness and scope explicitly.
+Record preparation durations only from observed, comparable manual/assisted workflows;
+include reading, correction and finalization. Record synthesis units using a definition
+agreed before evaluation, counting units accepted without editing against all required
+units. Leave unavailable measurements null, never infer them from download time.
+
+After review, run:
+
+```sh
+node --experimental-strip-types scripts/evaluation/reports.mjs --review /tmp/neuroia-reports-run/records.json /tmp/neuroia-reports-run/reviews.json /tmp/neuroia-reports-reviewed.json
+```
+
+Reviews are bound to the exact record hash; stale, unknown or duplicate reviews fail.
+The summary exposes reviewed-case, paired-timing and synthesis-unit coverage. Reduction
+uses `1 - sum(assisted) / sum(manual)` over complete pairs; automation uses accepted
+units / total units over measured cases. Targets retain strict `<600 seconds` and
+`>70%`, and inclusive `>=50%` reduction. Passing these on synthetic cases does not
+prove pilot KPIs, report usefulness in the target population, or TRL 7. This tooling
+is separate from still-pending durable runtime report/save telemetry and adherence.
