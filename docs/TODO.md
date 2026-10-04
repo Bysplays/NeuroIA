@@ -90,8 +90,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   Round events now preserve decisions and replay observations during archive
   validation, including next-round start evidence. Naming, word completion and
   categorization now apply changes on Continue with fixed round totals, mixed-level
-  completion and protected repeat/manual/professional flows. The other five game
-  integrations and mixed-level history presentation remain open. The mixed-level result contract now
+  completion and protected repeat/manual/professional flows. Search now adopts the
+  next board config on Continue; motor targets adopt the next size after a hit,
+  preserving counts and positions. The two memory games, tracking integration and
+  mixed-level history presentation remain open. The mixed-level result contract now
   omits a false single level, applies the final recommendation transactionally
   against the original profile level and reconciles its archive trace; its rules
   are not deployed. Real
@@ -119,7 +121,7 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   prompt/shared validator rejects the observed unsupported collective game claims
   and revalidates daily caches; this does not replace factuality review. Independent
   signal comparison and actor benchmark exist. Browser pipeline measurements now
-  cover input through local React commit/paint opportunity at three widths and
+  cover input through next-target config, local React commit/paint opportunity at three widths and
   throttled CPU; the emulator suite separately traces queue synchronization and
   confirmed result/profile reads. Physical-device end-to-end timings, actual
   reviewer results and real pilot evidence remain open.

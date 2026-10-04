@@ -22,13 +22,15 @@ are recorded in DESIGN-CONCEPTS.md. Reference patterns, not their branded assets
 
 The proposal's separately enabled learned-adaptation trial changes levels between
 questions in naming, word completion and categorization, only when Continue starts
-the next question. Current stimuli, answer keys and touch targets stay unchanged
+the next question. Search adopts its next config on Continue into a new board; motor
+targets adopt size changes only after the current target is hit, keeping their
+planned count and positions. Current stimuli, answer keys and touch targets stay unchanged
 through the response and feedback. Regenerate only unplayed questions and keep the
 initial round count. The footer shows the active level; mixed completion shows the
 played level range, never a single achieved level. New question options must not
 inherit the previous answer's animated highlight. Repeat returns to the explicitly
 selected starting level and holds it, as do manual and professional levels.
-Other games still change only the next-entry default after completion. LLM
+The two memory games and tracking still change only the next-entry default after completion. LLM
 recommendations remain optional suggestions; they are not the learned controller.
 The simulation-trained controller stays disabled in production pending PROPOSAL.md.
 

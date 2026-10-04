@@ -74,7 +74,7 @@ The new rules have not been deployed; never claim production event collection.
 | --- | --- | --- |
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
-| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded question-boundary decisions in naming/completion/categorization, end-of-exercise decisions in the other games and persistent application audit behind a separate flag | Connect the remaining five games to their task boundaries, finish mixed-level history presentation, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
+| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded boundary decisions in naming/completion/categorization/search/targets, end-of-exercise decisions in memory/tracking and persistent application audit behind a separate flag | Connect the remaining three games to their task boundaries, finish mixed-level history presentation, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance; Gráficas and a separate whole-archive PDF appendix expose validated game/level response metrics separately from speed |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
@@ -241,8 +241,9 @@ pilot register remain required; no real-user KPI is claimed from fixtures.
 The original PDF's section 1.2.8 promises continuous adaptation and EEG-derived
 fatigue/inattention, not merely a learned algorithm. Current observations are
 collected during play. Naming, word completion and categorization now apply the
-policy between questions; the other five games still change only the next-entry
-default after completion. Complete their defined boundaries and acceptance paths. Do not change answer keys or targets in the middle of a response.
+policy between questions; search adopts new boards and motor targets new sizes
+at their boundaries. Memory and tracking still change only the next-entry default
+after completion. Complete their defined boundaries and acceptance paths. Do not change answer keys or targets in the middle of a response.
 
 The remaining engineering work is:
 
@@ -332,21 +333,20 @@ supplies registration/adherence aggregation only; it does not replace those gate
 
 ## Adaptation latency verification scopes
 
-`tests/interface/adaptation-latency.spec.mjs` runs five real motor-target input
-completions at each of 390/820/1280 px, plus five at 820 px with Chromium CPU
-throttling ×4. A capture listener timestamps the final click before game handling;
-a mutation observer timestamps the React-committed next default level, then two
-animation frames bracket a paint opportunity. Each sample verifies the actual actor
-choice, observation and resulting level. The test writes versioned JSON under
-`/tmp/neuroia-adaptation-pipeline-{width}-{throttle}.json` and attaches it to the
-Playwright result. It requires every measured frontend sample below one second.
+`tests/interface/adaptation-latency.spec.mjs` measures five motor-target transitions
+at each of 390/820/1280 px, plus five at 820 px with Chromium CPU throttling ×4.
+After two correct hits, a capture listener timestamps the third click before game
+handling; a mutation observer timestamps the new active level, then two animation
+frames bracket a paint opportunity. Each sample checks the actual actor decision,
+new level and target width in the committed DOM. Version-2 JSON artifacts live at
+`/tmp/neuroia-adaptation-round-pipeline-{width}-{throttle}.json` and attach to the
+Playwright result. Every measured frontend sample must be below one second.
 
-This covers game handling, observation preparation, inference, the production
-progress reducer and React commit in the isolated browser fixture. It does not
-measure BLE acquisition, cloud confirmation, a physical display timestamp or the
-user's delay before entering another game. The next default changes; the completed
-board and explicitly chosen Repeat level do not. Do not relabel a paint opportunity
-as proof that a new board has already been displayed.
+This covers input handling, observation preparation, inference and actual next-target
+configuration/React commit in an isolated browser. It does not measure BLE input,
+cloud confirmation or physical display timing. A paint opportunity is not a
+hardware display timestamp. Unlike the earlier default-level benchmark, these
+samples apply during the same game; the cloud default updates at completion.
 
 The Firestore suite also contains `adaptive response pipeline`, which uses the
 real ProgressSync evidence/result/save queue and real emulator transactions. Its
@@ -448,8 +448,14 @@ starting level with adaptation held; any manual level interaction also holds it,
 even if the player returns to the original number before starting. Assigned and
 non-normal runs remain protected. Completion shows the actual played level range.
 
-Search, memory sequence, memory pairs, motor targets and tracking still need their
-boundary handlers connected and verified. In particular, pair totals must count
+Search now adopts its next board on Continue; motor targets adopt a new size only
+after a hit. Search regenerates that board; targets preserve their preselected
+positions and fixed total while updating unplayed target sizes. Browser acceptance
+covers completed mixed-level traces, missed-input stability, target growth/shrink
+containment and professional protection at the same three widths.
+
+Memory sequence, memory pairs and tracking still need their boundary handlers
+connected and verified. In particular, pair totals must count
 actual boards rather than final-level pairs × rounds. Their existing end-of-exercise
 behavior remains until each integration is ready. No production flag is enabled. Recording readiness gates input mount, and response
 opportunities register in layout effects so fast keyboard actions cannot precede
@@ -475,7 +481,7 @@ allocation to level-specific previews or unobserved intervals is invented.
 
 Tests include a 2 → 3 → 2 attempt with different timings, an intentionally different
 result-level field, duplicate archive pages, separate UI/PDF blocks and one unique
-session count. The three question games use this accounting. Ordinary activity speed/level
+session count. The three question games, search and motor targets use this accounting. Ordinary activity speed/level
 charts still need rendered mixed-level presentation; they do not assign a single
 level to these attempts.
 
@@ -491,7 +497,7 @@ links. Invalid chains contribute no metrics. Exports use ordinal round numbers.
 Tracking is flushed before inference with `prepareRoundDecision`; batches obey both
 the eight-event and 24,000-character limits. Unit coverage includes partial tracking
 windows and an emulator case checks durable retries and archive reconstruction.
-GameSession calls these APIs through liveRoundSession in the three question games;
+GameSession calls these APIs through liveRoundSession in the three question games, search and motor targets;
 the remaining game integrations are open. A recorded local decision is not proof
 of a server-confirmed profile adjustment.
 
@@ -514,6 +520,6 @@ chain; mismatches do not count as correctly registered results. Firestore accept
 the new bounded field with a required evidence link and rejects simultaneous old
 and new adaptation payloads. Publish these rules before enabling game integration.
 The contract is tested in the reducer and demo emulator and created by the three
-question games at their actual boundaries. Browser checks cover completion, repeat,
+question games, search and motor targets at their actual boundaries. Browser checks cover completion, repeat,
 manual/professional protection, fixed totals and trace/result reconciliation at
 390, 820 and 1280 px; the remaining game integrations are still open.

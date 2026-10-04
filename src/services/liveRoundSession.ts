@@ -4,7 +4,7 @@ import {encodeRoundResult} from './roundResult.ts';
 import type {GameMode} from './difficulty.ts';
 
 /** Games opt in only when their next-content handlers use the returned config. */
-export const LIVE_ROUND_GAMES=new Set(['language-naming','word-completion','categorization']);
+export const LIVE_ROUND_GAMES=new Set(['language-naming','word-completion','categorization','visual-scanning','motor-target']);
 export function createLiveRoundSession(options:{id:string;exerciseId:string;level:number;baseLevel:number;mode:GameMode;locked:boolean;manual:boolean;activeNow:()=>number;sink:(chunk:EvidenceChunk)=>void}) {
  const controller=createRoundAdaptation({exerciseId:options.exerciseId,level:options.level,mode:options.mode,locked:options.locked,manualLevel:options.manual});
  let started=false,closed=false,index=0,finished:{id:string;encoded:string}|undefined;

@@ -127,7 +127,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, nextRound, config } = useGameSession();
   const [initialRound] = useState(() => createRound(config));
   const [currentTarget, setCurrentTarget] = useState<SymbolDef>(initialRound.target);
   const [items, setItems] = useState<GridItem[]>(initialRound.items);
@@ -142,8 +142,8 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const responseEvidence = useResponseEvidence(`board-${completedTargets}`, !isCompleted);
 
-  const initRound = () => {
-    const next = createRound(config);
+  const initRound = (nextConfig = config) => {
+    const next = createRound(nextConfig);
     setCurrentTarget(next.target);
     setItems(next.items);
     setTotalTargets(next.total);
@@ -237,7 +237,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
 
   return (
     <ExerciseWrapper
-      nextAction={<button className="touch-btn touch-btn-primary game-next-action" style={{ visibility: foundCount >= totalTargets ? 'visible' : 'hidden' }} disabled={foundCount < totalTargets} onClick={() => { setCompletedTargets(value => value + totalTargets); initRound(); }}>Continuar</button>}
+      nextAction={<button className="touch-btn touch-btn-primary game-next-action" style={{ visibility: foundCount >= totalTargets ? 'visible' : 'hidden' }} disabled={foundCount < totalTargets} onClick={() => { setCompletedTargets(value => value + totalTargets); initRound(nextRound?.() ?? config); }}>Continuar</button>}
       completedStages={completedRounds}
       exerciseId="visual-scanning"
       title={
@@ -258,7 +258,7 @@ export const VisualScanningGame: React.FC<VisualScanningGameProps> = ({
     >
       <div className="scanning-game-container">
         {/* Cuadrícula de búsqueda táctil (4x4) ocupando el espacio completo sin scroll */}
-        <div className="scanning-grid" style={{ gridTemplateColumns: `repeat(${config.scanCols}, minmax(0, 1fr))`, '--scan-rows': config.scanRows } as React.CSSProperties}>
+        <div key={completedTargets} className="scanning-grid" style={{ gridTemplateColumns: `repeat(${config.scanCols}, minmax(0, 1fr))`, '--scan-rows': config.scanRows } as React.CSSProperties}>
           {items.map(item => (
             <button
               key={item.id}

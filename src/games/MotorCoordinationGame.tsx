@@ -32,7 +32,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, progressScope, lockedLevel } = useGameSession();
+  const { clock, nextRound, config, progressScope, lockedLevel } = useGameSession();
   const totalTargets = config.targets;
   const targetSize = config.targetSize; // Diana ampliada para máxima accesibilidad y visibilidad
 
@@ -95,6 +95,10 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     setAccuracySum(newSum);
 
     if (targetIdx + 1 < targets.length) {
+      const nextConfig=nextRound?.();
+      if(nextConfig&&nextConfig.targetSize!==currentTarget.size){
+        setTargets(targets.map((target,index)=>index>targetIdx?{...target,size:nextConfig.targetSize}:target));
+      }
       setTargetIdx(prev => prev + 1);
     } else {
       const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
