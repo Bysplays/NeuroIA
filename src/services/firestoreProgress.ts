@@ -1,6 +1,6 @@
 import { doc, getDocFromServer, onSnapshot, runTransaction, serverTimestamp, type Firestore, type DocumentSnapshot } from 'firebase/firestore';
 import { ProgressSnapshotOrder } from './progressSnapshot.ts';
-import { applyProgressOperation, patientProgress, type ProgressData, type ProgressOperation } from './progressData.ts';
+import { reduceProgressOperation, patientProgress, type ProgressData, type ProgressOperation } from './progressData.ts';
 
 export function firestoreProgress(uid: string, db: Firestore) {
   const ref = doc(db, 'users', uid, 'progress', 'main');
@@ -37,10 +37,28 @@ export function firestoreProgress(uid: string, db: Firestore) {
         if (!current.exists()) throw new Error('missing-progress');
         const before = current.data().data as ProgressData;
         if (applied.exists()) return before;
-        const data = applyProgressOperation(before, operation);
+        const reduction = reduceProgressOperation(before, operation);
+        const data = reduction.data;
+        if(operation.kind==='save-evidence'){
+          tx.set(doc(db,'users',uid,'saveEvents',encodeURIComponent(operation.id)),{...operation.event,receivedAt:serverTimestamp()});
+          tx.set(receipt,{kind:operation.kind,createdAt:serverTimestamp()});
+          return data;
+        }
+        if(operation.kind==='report'){
+          tx.set(doc(db,'users',uid,'reportEvents',encodeURIComponent(operation.id)),{...operation.event,receivedAt:serverTimestamp()});
+          tx.set(receipt,{kind:operation.kind,createdAt:serverTimestamp()});
+          return data;
+        }
+        if (operation.kind === 'evidence') {
+          tx.set(doc(db, 'users', uid, 'evidence', encodeURIComponent(operation.id)), {
+            ...clean(operation.chunk), receivedAt: serverTimestamp(),
+          });
+          tx.set(receipt, { kind: operation.kind, createdAt: serverTimestamp() });
+          return data;
+        }
         tx.set(ref, { schemaVersion: 1, data: clean(data), updatedAt: serverTimestamp() });
         tx.set(receipt, { kind: operation.kind, createdAt: serverTimestamp() });
-        if (operation.kind === 'result') tx.set(doc(db, 'users', uid, 'results', encodeURIComponent(operation.result.id)), clean(operation.result));
+        if (operation.kind === 'result') tx.set(doc(db, 'users', uid, 'results', encodeURIComponent(operation.result.id)), clean(reduction.result ?? operation.result));
         return data;
       }); } catch (error) {
         // Concurrent devices may commit the same receipt before a rules check sees

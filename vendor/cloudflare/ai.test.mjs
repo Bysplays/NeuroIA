@@ -191,3 +191,102 @@ test('daily cache with an older catalog version is replaced before serving it', 
   const result=await dailyRecommendations('player', dailyInput, env, db, confirmedAccess, undefined, async(...args)=>{calls++;return provider(...args)});
   assert.equal(calls,1);assert.equal(result.insights.version,'activity-v2');
 });
+
+const evidenceEnv={...env,PROPOSAL_REPORT_EVIDENCE:'true'};
+const reportRows=db=>[...db.documents].filter(([path])=>path.includes('/reportAttempts/')).map(([,row])=>row);
+const runEvidence=(db,fetcher=provider,signal)=>generateAnalysis('player',input,evidenceEnv,db,confirmedAccess,signal,fetcher);
+test('report telemetry records durable start before provider and generated outcome without drafts or subject identity',async()=>{
+  const db=store();
+  const result=await runEvidence(db,async(...args)=>{
+    assert.equal(reportRows(db).length,1);assert.equal(reportRows(db)[0].status,'started');return provider(...args);
+  });
+  const row=reportRows(db)[0];
+  assert.equal(row.status,'generated');assert.equal(row.stage,'complete');assert.equal(row.httpStatus,200);
+  assert.equal(row.snapshotHash,result.provenance.snapshotHash);assert.ok(row.durationMs>=0);
+  assert.doesNotMatch(JSON.stringify(row),/PRIVATE|player|test-secret|summary|recommendations/);
+});
+test('failed and empty reports are retained with stages while recommendations are outside this denominator',async()=>{
+  const empty=store();empty.readActivity=async()=>({history:[],partial:false});
+  await assert.rejects(runEvidence(empty),{status:422});
+  assert.equal(reportRows(empty)[0].stage,'source');assert.equal(reportRows(empty)[0].status,'failed');
+  const malformed=store();await assert.rejects(runEvidence(malformed,async()=>Response.json({choices:[]})),{status:502});
+  assert.equal(reportRows(malformed)[0].stage,'validation');
+  const limited=store();await assert.rejects(runEvidence(limited,async()=>new Response('',{status:429})),{status:429});
+  assert.equal(reportRows(limited)[0].stage,'provider');
+  const db=store();await generateAnalysis('player',{...input,mode:'recommendations'},evidenceEnv,db,confirmedAccess,undefined,provider);
+  assert.equal(reportRows(db).length,0);
+});
+test('unauthorized requests never create report records and concurrent quota failures retain separate attempts',async()=>{
+  const db=store();await assert.rejects(generateAnalysis('other',input,evidenceEnv,db,confirmedAccess),{status:403});
+  assert.equal(reportRows(db).length,0);
+  const outcomes=await Promise.allSettled([runEvidence(db),runEvidence(db)]);
+  assert.equal(outcomes.filter(row=>row.status==='fulfilled').length,1);
+  assert.equal(reportRows(db).length,2);
+  assert.equal(reportRows(db).filter(row=>row.status==='generated').length,1);
+  assert.equal(reportRows(db).find(row=>row.status==='failed').stage,'quota');
+});
+test('failed start prevents provider work; failed final persistence leaves an explicitly unknown start',async()=>{
+  const unavailable=store();const original=unavailable.runTransaction.bind(unavailable);
+  unavailable.runTransaction=callback=>original(tx=>callback({...tx,set(path,value){if(path.includes('/reportAttempts/'))throw Error('storage-down');tx.set(path,value);}}));
+  await assert.rejects(runEvidence(unavailable,()=>assert.fail('provider must not run')),{status:503});
+  assert.equal(reportRows(unavailable).length,0);
+  const final=store();const transaction=final.runTransaction.bind(final);
+  final.runTransaction=callback=>transaction(tx=>callback({...tx,set(path,value){if(path.includes('/reportAttempts/')&&value.status!=='started')throw Error('storage-down');tx.set(path,value);}}));
+  await assert.rejects(runEvidence(final),{status:503});assert.equal(reportRows(final)[0].status,'started');
+});
+test('report terminal writes respect deletion and preserve cancellation as a distinct outcome',async()=>{
+  const deleting=store();await assert.rejects(runEvidence(deleting,async(...args)=>{
+    deleting.documents.set('accountDeletions/player',{phase:'tree'});
+    for(const key of deleting.documents.keys())if(key.includes('/reportAttempts/'))deleting.documents.delete(key);
+    return provider(...args);
+  }),{status:409});assert.equal(reportRows(deleting).length,0);
+  const db=store(),controller=new AbortController();
+  await assert.rejects(runEvidence(db,async(...args)=>{const result=await provider(...args);controller.abort();return result;},controller.signal),{name:'AbortError'});
+  assert.equal(reportRows(db)[0].status,'cancelled');
+});
+test('own report evidence endpoint paginates, projects fields and rejects target selectors',async()=>{
+  const db=store();let cursor;
+  db.list=async(path,next)=>{assert.equal(path,'users/player/reportAttempts');cursor=next;return {documents:[{version:1,status:'started',startedAt:123,model:'fixture',clientAttemptId:'client-link',path:'users/player/reportAttempts/11111111-1111-4111-8111-111111111111',targetUid:'private-person',draft:'private-draft'},{version:5}],nextPageToken:'next'};};
+  const handler=createHandler({database:()=>db,verifyUser:async()=> 'player'});
+  const request=body=>new Request('https://worker/ai/report-evidence',{method:'POST',headers:{Authorization:'Bearer fixture',Origin:env.APP_URL},body:JSON.stringify(body)});
+  const response=await handler(request({cursor:'page'}),env);assert.equal(response.status,200);
+  const data=await response.json();assert.equal(cursor,'page');assert.equal(data.nextCursor,'next');assert.equal(data.records.length,2);assert.equal(data.records[0].attemptId,'11111111-1111-4111-8111-111111111111');assert.equal(data.records[0].clientAttemptId,'client-link');
+  assert.deepEqual(data.records[1],{invalid:true});assert.doesNotMatch(JSON.stringify(data),/private/);
+  assert.equal((await handler(request({targetUid:'victim'}),env)).status,400);
+  db.list=async()=>{db.documents.set('accountDeletions/player',{phase:'tree'});return {documents:[]};};
+  assert.equal((await handler(request({}),env)).status,409);
+});
+
+test('client report correlation is explicit, bounded, report-only and absent from provider prompts',async()=>{
+  const db=store();
+  await generateAnalysis('player',{...input,clientAttemptId:'CLIENT-ATTEMPT'},evidenceEnv,db,confirmedAccess,undefined,async(url,init)=>{
+    assert.doesNotMatch(init.body,/CLIENT-ATTEMPT/);return provider(url,init);
+  });
+  assert.equal(reportRows(db)[0].clientAttemptId,'CLIENT-ATTEMPT');
+  for(const patch of [{clientAttemptId:'../bad'},{clientAttemptId:''},{clientAttemptId:'x'.repeat(129)},{clientAttemptId:'valid',mode:'recommendations'}]){
+    await assert.rejects(generateAnalysis('player',{...input,...patch},evidenceEnv,store(),confirmedAccess),{status:400});
+  }
+});
+
+test('unsupported collective claims are rejected before release and recorded as validation failures',async()=>{
+ const db=store();
+ await assert.rejects(generateAnalysis('player',input,{...env,PROPOSAL_REPORT_EVIDENCE:'true'},db,confirmedAccess,undefined,async(_url,init)=>{
+  const body=JSON.parse(init.body),insights=JSON.parse(body.messages[1].content.split('\n')[1]);
+  const narrative={...basicNarrative(insights),observations:[{text:'El resto de los juegos no aparecen en esta selección; eso no indica que nunca los hayas jugado.',evidence:['game:language-naming','game:word-completion','game:memory-path']}]};
+  return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(narrative)}}]});
+ }),{status:502});
+ const record=[...db.documents.entries()].find(([path])=>path.includes('/reportAttempts/'))?.[1];
+ assert.equal(record.status,'failed');assert.equal(record.stage,'validation');
+});
+
+test('daily cache is revalidated for prompt version and observation scope before release',async()=>{
+ for(const corrupt of ['prompt','scope','json']){
+  const db=store();await dailyRecommendations('player',dailyInput,env,db,confirmedAccess,undefined,provider);
+  const path='users/player/aiRecommendations/player',cached=db.documents.get(path),analysis=JSON.parse(cached.analysis);
+  if(corrupt==='prompt')analysis.provenance.promptVersion='old-prompt';
+  if(corrupt==='scope')analysis.narrative.observations=[{text:'El resto de juegos no aparece en esta selección.',evidence:['game:language-naming']}];
+  db.documents.set(path,{...cached,analysis:corrupt==='json'?'invalid-json':JSON.stringify(analysis)});db.documents.delete('users/player/aiUsage/daily');
+  let calls=0;const result=await dailyRecommendations('player',dailyInput,env,db,confirmedAccess,undefined,async(...args)=>{calls++;return provider(...args)});
+  assert.equal(calls,1);assert.deepEqual(result.narrative.observations,[]);
+ }
+});

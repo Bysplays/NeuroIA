@@ -1,4 +1,5 @@
 import { eegService } from '../services/eegService';
+import {LiveMuseChannels} from './MuseChannels';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { readEegPoints, type EegRecording } from '../services/eegData';
 
@@ -22,7 +23,7 @@ export function EegLive({ recording, ppg, eegMean, ppgMean, recordable = true }:
   const state = useSyncExternalStore(eegService.subscribe, eegService.getSnapshot);
   if (state.status !== 'connected' && !recording && !ppg) return null;
   return <aside className="eeg-live" aria-label="EEG y PPG en directo">
-    <SignalStrip name="EEG" recording={recording} mean={eegMean} current={state.status === 'connected' && state.value !== null && now - state.receivedAt <= 3000}/>
+    {state.channels || state.adapter==='muse2-webbluetooth-v1' ? <LiveMuseChannels compact/> : <SignalStrip name="EEG" recording={recording} mean={eegMean} current={state.status === 'connected' && state.value !== null && now - state.receivedAt <= 3000}/>}
     <SignalStrip name="PPG" recording={ppg} mean={ppgMean} current={state.status === 'connected' && state.ppgValue !== null && now - state.ppgReceivedAt <= 3000}/>
     <span className="soft-label">{state.status !== 'connected' ? 'Diadema desconectada' : state.recording && recordable ? 'Se guardarán con la partida' : 'Solo en directo'}</span>
   </aside>;

@@ -74,9 +74,10 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/ExerciseIllustration.tsx` | Eight decorative SVG compositions for game introductions; not playable stimuli |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/PlacementPreferences.tsx` and `src/services/placementPreferences.ts` | Two-step interests/functional movement choices and thematic assessment selection; see `docs/PLACEMENT.md` |
-| `src/components/GameSession.tsx` | Pre-game instructions, help and active-time clock provider |
+| `src/components/GameSession.tsx` | Pre-game instructions, help, active-time clock and opt-in task-boundary adaptation |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
 | `src/services/gameSession.ts` | Shared session context and `useGameSession` hook, separate from component exports |
+| `src/services/sessionRecording.ts` and `liveRoundSession.ts` | Recording readiness and opt-in task-boundary adaptation lifecycle |
 | `src/services/memorySequence.ts` | Memory-round sequence generation, called only on round start |
 | `src/components/FittedGameArea.tsx` | Centers the board and action together; scales the board while keeping action touch size, title, progress and navigation intact |
 | `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and repeat |
@@ -102,6 +103,14 @@ Navigation currently uses React state, not a routing library. Do not introduce a
 router or change persistence solely to implement a visual adjustment.
 
 ### Stylesheet ownership
+
+`src/services/viewport.ts` measures a panel's document offset and expresses its
+remaining height with CSS `100dvh`, matching the document root. Avoid mixing
+fixed JavaScript viewport heights with dynamic CSS heights.
+`Dashboard` observes the Header navigation slot to reserve its actual height,
+including enlarged labels and the bottom safe area. Interface fixtures
+include the real app/main shell; check page overflow as well as board bounds
+after resizing and returning home, while preserving scroll for long content.
 
 `src/main.tsx` imports styles in this order:
 
@@ -138,6 +147,13 @@ available. `npm run build` runs TypeScript and the production build.
 `npm run lint` runs Oxlint.
 
 ### GitHub Pages
+
+The optional local production frontend uses `docker/Dockerfile` and
+`docker/compose.yml`: run `docker compose -f docker/compose.yml up --build -d`
+from the repository root. Node 22 builds static assets and Nginx serves them on
+localhost:5173; Firebase and the Worker stay external. `.dockerignore` allowlists
+build inputs. Pass only public Vite settings as build arguments, never secrets.
+See `docs/DEPLOYMENT.md` for configuration and shutdown.
 
 The target production URL is `https://neuroia.es/`; Vite development remains on
 `http://localhost:5173/`. See `docs/DEPLOYMENT.md` for DNS, Firebase authorization,
@@ -189,6 +205,40 @@ Do not commit test screenshots, browser logs, generated build output, or tempora
 files. Commit the application assets actually used by the UI.
 
 ## Data and interaction contracts
+
+On `propuesta`, `sessionEvidence.ts` defines versioned active-clock response and
+four-channel feature chunks. The `evidence` ProgressSync operation uses the same
+durable queue/receipt protocol and archives immutable bounded chunks under
+`users/{uid}/evidence/{encodedOperationId}`; it never grows `progress/main` or
+increments completed-exercise totals. Rules bound the JSON envelope; readers
+must use `readEvidenceChunk` and treat values as self-reported. New rules require
+emulator verification and separate publication before enabling collection.
+`VITE_PROPOSAL_EVIDENCE=true` enables the GameSession provider; leave it unset
+until those rules are published. Response hooks cover all eight games; memory
+previews suspend the response opportunity, pair selections precede correctness,
+and tracking records active contact windows. Result links use optional
+`evidenceSessionId`. Fresh four-channel snapshots are archived only while recording,
+at most once per active second.
+`evidenceSummary.ts` validates contiguous session events across chunks before
+exposing metrics; invalid logs and unfinished attempts never count as completions.
+`adaptationObservation.ts` derives bounded recent response/contact observations and
+independent baseline-relative spectral features. `adaptivePolicy.ts` runs the
+versioned PPO actor exported from `scripts/adaptation/train.py`; its current model
+is trained on simulation and has not passed real-user acceptance. A separate
+`VITE_PROPOSAL_ADAPTATION=true` flag (also requiring evidence collection) enables
+question-boundary decisions for naming, word completion and categorization,
+board-boundary decisions for search, target-boundary decisions for motor targets,
+sequence/board-boundary decisions for memory, and contact-release decisions for tracking. `difficulty.ts` applies verified decisions only against
+the same current base level and excludes professional assignments. The reducer
+returns the normalized result as well as bounded progress so the immutable archive
+retains application outcome even when an old result falls outside the latest 60.
+Never replace the model silently or present simulated evaluation as pilot evidence;
+reproduction, independent parity and activation gates are in docs/PROPOSAL.md.
+`evidenceArchive.ts` paginates evidence/results from the server with cancellation;
+`evidenceExport.ts` omits account/session/result IDs, wall timestamps and free text.
+`EvidenceExportButton` exposes the complete evaluation download from Historial
+only behind the proposal flag. Page failures never download a partial export;
+pagination is not an atomic snapshot and the file discloses that limit.
 
 Firestore is authoritative for signed-in progress. `users/{uid}/progress/main`
 contains the profile and latest 60 results; `users/{uid}/results/{resultId}` retains
@@ -403,6 +453,14 @@ profile creation/import and is never updated by the settings input.
 
 ## Account activity statistics
 
+The `propuesta` branch implements the full memory-alignment workstreams in
+`docs/PROPOSAL.md`, tracked in `docs/TODO.md`. Do not report them complete from
+synthetic tests. `museFeatures.ts` preserves independent TP9/AF7/AF8/TP10 RMS and
+one-second spectral powers; `EegService.channels` is connection-scoped and currently
+transient. The legacy aggregate recording remains compatible. Run
+`scripts/verify_muse_features.py` with NumPy/SciPy for an independent synthetic
+numerical comparison; real physiological interpretation remains a separate gate.
+
 `ActivityStatistics` is embedded in the player dashboard’s Actividad tab, with Resumen (area radar and labelled current-level radar), Gráficas (accuracy, speed and recorded levels), Historial, Filtros and Logros rendering `AchievementShowcase`. `ActivityLineChart` shares focusable series, emphasis and a noninteractive active-series chip across all three time charts; `LevelStatistics` owns the current-level summary. Primary `TabletTabs` navigation uses a portal into Header’s fixed bottom navigation slot; the panels retain their existing React state and ARIA relationships. Header has no separate statistics button. Professional activity keeps its standalone back navigation. Activity surfaces use
 the shared `data-style` attribute and palette tokens; no separate theme state.
 `activityStats.ts` deduplicates results and computes local-day per-exercise means.
@@ -424,7 +482,8 @@ No new writes, authorization rules or progress storage are introduced.
 ## Game difficulty and placement
 
 `difficulty.ts` owns version-1 per-game rows, placement scoring and bounded adaptation.
-`GameSession` freezes the selected level at start and exposes config in session context.
+`GameSession` freezes the selected starting level and exposes config in session context.
+The opt-in live-round games adopt new configs only through explicit `nextRound` calls.
 `GameExercise` dispatches the same eight implementations for ordinary and placement play.
 `PlacementOnboarding` gates only player Workspace after access/cloud load. It runs
 unscored assessment stages, using durable `placement` operations in ProgressSync for each finished game ladder.
@@ -447,7 +506,7 @@ verify both measured and skipped transitions with delayed profile delivery.
 New exercise results carry numeric level/configVersion and optional hint usage.
 Adaptation consumes three eligible results at the current recommended level, capped
 at one level change in 1–10. Manual different-level play cannot change recommendations.
-Tracking remains manual because its input methods are not comparable; actual pointer
+Outside the separately gated proposal trial, tracking remains manual because its input methods are not comparable; actual pointer
 contact is checked against the moving circle on every frame. Preserve historical
 results and legacy domain levels. Run difficulty/progress tests and the real demo
 Firestore adapter/rules suite together when changing these contracts. Publish rules
@@ -708,7 +767,9 @@ Classification excludes multi-context objects without removing them from naming.
 
 GameSession restarts completed games in place, preserving its selected level even
 if the saved profile adapts. It resets its clock and recordings; game restart handlers
-reset board state. Ordinary focus changes never require confirmation. Hidden tabs,
+reset board state. Live-round games instead remount on the new run to reset all
+question state against the original selected config; do not call their stale restart
+handler with the final round config. Ordinary focus changes never require confirmation. Hidden tabs,
 help, settings, Muse and access suspension pause the clock; visibility and confirmed
 access resume automatically without a second action. There are no pause/resume
 controls in ordinary or assigned games. Focus events never trigger recovery. Motor tracking captures pointer
@@ -724,3 +785,164 @@ fixed code constants in vendor/openrouter/prompts.mjs, not env options. Never pu
 only; it is not a CI test. Test local configuration preservation with
 `node --experimental-strip-types --test vendor/openrouter/local-config.test.mjs vendor/openrouter/prompts.test.mjs`. Env setup does not deploy
 or activate the remote Worker. See vendor/openrouter/README.md for bindings.
+
+`MuseChannels.tsx` renders independent live electrode features; `MuseHistory.tsx`
+loads and validates a complete result-linked evidence session with cancellation.
+`museBaseline.ts` shares five-window baseline calculations between live feedback,
+archived feedback and policy observations. Live baselines are connection-scoped;
+archive/policy baselines use game active time. Keep these meanings distinct.
+
+Report evaluation tooling lives in `scripts/evaluation/`: versioned synthetic cases,
+offline-by-default provider runner and hash-bound review/KPI aggregation. See
+`vendor/openrouter/README.md` for offline/live commands and measurement definitions.
+Do not present mock generation timings or schema checks as factuality or pilot evidence.
+
+`vendor/cloudflare/reportEvidence.mjs` owns the optional server report-attempt ledger
+and caller-only paginated read endpoint. `PROPOSAL_REPORT_EVIDENCE` defaults off.
+Generated means a server-validated narrative, never a confirmed PDF download or
+human-approved report. Client Firestore access is denied; deletion locks guard
+writes and every page. See `vendor/cloudflare/README.md` for measurement boundaries.
+
+`CloudProgress` now owns the gated `SessionEvidenceContext` provider for both
+workspaces. `reportLifecycle.ts` records client PDF phases via `ProgressOperation`
+kind `report`, the existing durable outbox, immutable `reportEvents` and permanent
+receipts. Metadata belongs to the caller, not the report subject; never put patient
+identity or report text in it. Publish compatible rules before enabling collection.
+
+`reportEvidenceExport.ts` validates report event chains and correlates exact client
+request IDs with unique server attempts. `reportEvidenceArchive.ts` reads all client
+and server pages before releasing an export. `ReportEvidenceExportButton` uses the
+shared `EvidenceDownload` controls; identity and deletion guards remain enforced.
+The export belongs to the caller, never a selected participant. Preserve malformed,
+unlinked and ambiguous coverage; do not match by wall-clock proximity.
+
+With the proposal evidence flag enabled, `ProgressSync` records result commit
+attempts through `save-evidence` operations and immutable `saveEvents`. The same
+outbox preserves starts and terminal observations; metadata writes never recursively
+instrument themselves. `saveEvidence.ts` validates/deduplicates these events and
+reconciles them with archived results in the paginated evaluation export. Failed
+transport does not prove a lost result. Preserve the stopped-account guard and
+ordinary pending-storage fallback. Publish compatible rules before enabling.
+
+`PracticeCalendar.tsx`, `practiceSchedule.ts`, `practiceScheduleArchive.ts` and
+`practiceScheduleService.ts` own prospective personal calendars, their fixed-timezone
+elapsed-day adherence calculation and full paginated export. The Worker owns immutable
+revisions/current configuration/idempotency receipts; client writes are denied.
+The UI uses the proposal evidence flag, while calendar mutations require the separate
+server `PROPOSAL_SCHEDULE_ENABLED` flag. Both remain off in production. See
+`docs/PROPOSAL.md` for numerator/denominator definitions and independent pilot gates.
+Run `vendor/cloudflare/practiceSchedule.test.mjs` with other Worker checks. Billing
+transport now accepts an optional cancellation signal and rejects cross-account
+responses; preserve those guards when sharing it with calendar requests.
+
+Proposal response analytics use `ResponseMetrics.tsx` and `responseMetrics.ts` in
+Actividad → Gráficas behind `VITE_PROPOSAL_EVIDENCE`. The explicit load reuses the
+complete validated evidence archive and excludes unlinked, invalid, incomplete and
+non-normal attempts. Group by game/level, weight latency by response counts, and
+keep tracking contact duration separate. This whole-archive view ignores activity
+filters and never replaces the existing duration/questions speed metric. Cancel
+on unmount and reject late responses after authenticated account changes.
+
+When the proposal evidence context is present, report generation loads
+`reportResponses.ts` before creating the PDF. The optional measured-response appendix
+uses the same complete archive/reducer as Gráficas, verifies caller identity, respects
+cancellation and fails the download on archive errors. It is a whole-archive appendix,
+not filtered activity or LLM input; its copy must disclose that scope. Existing reports
+without the evidence context retain the ordinary PDF path.
+
+Pilot registration/adherence reconciliation lives in `scripts/evaluation/pilot.mjs`.
+Use the empty `--template` workflow in docs/PROPOSAL.md and observed records only for
+real pilot review. `npm test` covers strict KPI boundaries, missing participants,
+export hashes, duplicate links and calendar-denominator reconstruction. Outputs use
+exclusive creation; codes are pseudonymous, not necessarily anonymous. This CLI
+cannot attest observer declarations, infer ambiguous identity-free export matches,
+or replace scientific, hardware, report and end-to-end latency acceptance.
+
+Adaptation performance checks separate browser input/local-state/paint-opportunity
+measurements (`tests/interface/adaptation-latency.spec.mjs`) from emulator queue/
+server-confirmation measurements (`adaptive response pipeline` in Firestore tests).
+Their versioned JSON traces live in /tmp and must not be committed. Do not add their
+timings together or label either physical-device end-to-end acceptance. For filtered
+Firestore runs, verify the named test and trace rather than only exit status. The
+verified Node 26 focused command pairs `--test-isolation=none` with
+`--test-force-exit`; see docs/PROPOSAL.md. Force-exit alone skipped the selected test
+locally. Do not substitute this focused run for the combined rules/REST suite.
+
+AI observation scope is checked by `validObservationScope` inside the shared
+`validAiNarrative`: no collective game claims or repeated fact references, and each
+named active game needs its own game/recent/speed evidence. These checks do not prove
+semantic factuality. Daily recommendation cache reuse also requires the current
+prompt version and current narrative validation; failures use existing generation
+quotas, never a stale rejected cache. Keep prompt, validator, evaluation regressions
+and vendor/openrouter/README.md aligned when changing this contract.
+
+Response-evidence browser verification includes `tests/interface/evidence.spec.mjs`
+and `evidence-inputs.spec.mjs`. The latter runs all eight games with keyboard and
+emulated touch, checks help pause exclusion and validates reconstructed event links;
+it also checks full naming/word-completion/categorization rounds, result linkage and
+repeat isolation. This is not coverage of every level or physical tablet input.
+
+`roundAdaptation.ts` is the pure boundary controller. `liveRoundSession.ts` composes
+it with the recorder and compact result metadata. GameSession enables it for
+all eight games only when both proposal
+flags are active. Continue adopts `nextRound()` configs for questions/search boards;
+a target hit adopts its next size without changing planned positions/count.
+Memory Continue adopts the next config only after a completed sequence/board;
+replay stays in the same round. Pair totals sum completed deck sizes, not the final
+level’s pair count times the board count. Tracking flushes the sampled old-level interval on release and adopts speed/size together,
+clamping the complete target into the arena. Capture loss, pointerup and blur share an
+idempotent gesture release; completion prevents further boundary callbacks. The original
+contact goal stays fixed. After 99 release transitions the 100th round holds its config
+and continues recording until completion, preserving the bounded result contract. Decisions must not mutate
+an active board. `beginLevel` resets only
+performance observation windows, preserving the independent session EEG baseline.
+Keep the distinction between local next-round application and server-confirmed
+profile writes. See docs/PROPOSAL.md for mixed-level accounting/audit prerequisites.
+
+Evidence reconstruction exposes `levelMeasurements` by actual stimulus level.
+ResponseMetrics/PDF use these groups, with `includedSessions` counting distinct
+attempts rather than summing per-level row counts. Export `level` remains the initial
+level for compatibility. Reject tracking windows spanning a level boundary rather
+than estimating contact allocation; round integration must flush them first.
+
+Round evidence uses explicit `round-start`/`round-decision` events. Call
+`prepareRoundDecision` before inference to flush partial tracking windows; persisted
+actor observations are replayed during reconstruction. Local decision application
+remains `pending`; export `nextStarted` only proves that a subsequent round began,
+not a cloud profile update. These APIs are connected through liveRoundSession for the eight games.
+
+`levelStatistics.ts` validates compact round metadata on a copy before exposing
+played levels; malformed metadata does not fall back to a legacy single level.
+History and ExerciseAnalytics show ranges/ordered changes. The shared line chart
+supports min/max bars at the recorded result date; the point is the last played
+level and its labelled mean includes only constant-level sessions. Do not infer
+round durations or plot future recommendations as played levels.
+
+`roundResult.ts` owns compact mixed-level result metadata (`roundAdaptation`),
+separate from legacy single-decision `adaptation`. The reducer normalizes the
+single-level field, protects concurrent profile changes and records the transaction
+outcome. Full intermediate actor observations remain in evidence events. Export
+checks the compact trace against those events before counting registration. The
+new result field needs the updated Firestore rules before game integration is enabled.
+
+`sessionRecording.ts` exposes recording readiness through an external-store snapshot
+consumed by GameSession.
+Mount game input only after start/round-start have entered the recording queue;
+`useResponseEvidence` registers committed stimuli in a layout effect. A passive
+registration effect can miss a fast keyboard response between commits. Keep this
+ordering on initial start and repeat, including games without live adaptation.
+
+
+The Worker REST integration test in `vendor/cloudflare/firestore.test.mjs` also
+checks proposal-data erasure using a recorder-generated four-channel feature archive
+larger than one REST page. Preserve interruption recovery, the write lock, delayed
+Auth removal and cross-account preservation assertions when changing deletion.
+Run only against `demo-neuroia`; synthetic fixtures never belong in production.
+
+
+`scripts/evaluation/pilot-package.mjs` combines raw cohort, report review and physical
+latency evidence against a prospective protocol roster. It reuses the existing pilot
+and report evaluators, requires complete observed coverage and record/context hashes,
+and never issues scientific or TRL acceptance. Its CLI refuses existing outputs and
+writes private 0600 artifacts. See docs/PROPOSAL.md for the input contract; focused
+coverage lives in `tests/pilotPackage.test.ts` and runs in `npm test`.

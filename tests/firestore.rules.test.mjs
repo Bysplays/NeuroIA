@@ -1,11 +1,18 @@
+import {encodeRoundResult,readRoundResult} from '../src/services/roundResult.ts';
+import {loadPracticeAdherence} from '../src/services/practiceScheduleArchive.ts';
+import {loadReportEvidenceExport} from '../src/services/reportEvidenceArchive.ts';
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import {ProgressSync} from '../src/services/progressSync.ts';
+import {createSessionEvidence} from '../src/services/sessionEvidence.ts';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { firestoreProgress } from '../src/services/firestoreProgress.ts';
 import { getInitialProfile } from '../src/services/storageService.ts';
 import { patientProgress } from '../src/services/progressData.ts';
+import { loadEvidencePage, loadEvidenceExport, loadSessionEvidence } from '../src/services/evidenceArchive.ts';
+import { decideAdaptation } from '../src/services/adaptivePolicy.ts';
 
 let env;
 before(async () => {
@@ -15,6 +22,66 @@ before(async () => {
 after(async () => { await env?.cleanup(); });
 const fresh = () => patientProgress({ profile: getInitialProfile(), history: [] });
 const op = id => ({ id: `result:${id}`, kind: 'result', result: { id, exerciseId: 'visual-scanning', domain: 'attention', date: '2026-09-16T12:00:00.000Z', durationSeconds: 60, accuracy: 100, score: 10, correctAnswers: 1, totalQuestions: 1, feedbackMessage: '' } });
+
+test('proposal learned decisions persist with results and retries do not apply another level change',async()=>{
+  const uid='learned-policy';const db=env.authenticatedContext(uid).firestore();const backend=firestoreProgress(uid,db);
+  await backend.initialize(fresh());
+  await env.withSecurityRulesDisabled(async context=>{
+    await updateDoc(doc(context.firestore(),`users/${uid}/progress/main`),{'data.profile.gameLevels':{'visual-scanning':{level:5,evidence:[]}}});
+  });
+  const vector=Array(40).fill(0);vector[0]=1;vector[8]=4/9;vector[9]=1;vector[13]=1;
+  const decision=decideAdaptation({vector,level:5,eligible:true},{locked:false,mode:'normal',baseLevel:5});
+  assert.equal(decision.action,-1);
+  const operation=op('learned-result');Object.assign(operation.result,{level:5,configVersion:1,adaptation:JSON.stringify(decision)});
+  await backend.commit(operation);await backend.commit(operation);
+  assert.equal((await backend.load()).profile.gameLevels['visual-scanning'].level,4);
+  assert.equal((await backend.load()).profile.totalSessions,1);
+  assert.deepEqual(JSON.parse((await getDoc(doc(db,`users/${uid}/results/learned-result`))).data().adaptation),{...decision,application:'applied'});
+  await assertFails(setDoc(doc(db,`users/${uid}/results/oversized-policy`),{...operation.result,adaptation:'x'.repeat(12001)}));
+});
+
+test('proposal evidence export paginates beyond 200 documents and enforces isolation and cancellation', async () => {
+  const uid='evidence-export';
+  await env.withSecurityRulesDisabled(async context => {
+    const db=context.firestore();
+    await Promise.all(Array.from({length:201},(_,i)=>setDoc(doc(db,`users/${uid}/evidence/chunk-${String(i).padStart(3,'0')}`),{
+      version:1,sessionId:`session-${i}`,exerciseId:'language-naming',firstSequence:0,count:1,
+      events:JSON.stringify([{kind:'start',level:1,configVersion:1,mode:'normal',locked:false,sequence:0,activeMs:0,at:'2026-10-04T12:00:00.000Z'}]),
+      receivedAt:serverTimestamp(),
+    })));
+    await Promise.all(Array.from({length:201},(_,i)=>setDoc(doc(db,`users/${uid}/saveEvents/save-${i}`),{version:1,attemptId:`save-${i}`,resultId:`result-${i}`,mode:'normal',status:'started',elapsedMs:0,at:'2026-10-04T12:00:00.000Z',errorCategory:'none',receivedAt:serverTimestamp()})));
+  });
+  const db=env.authenticatedContext(uid).firestore();
+  const first=await loadEvidencePage(db,uid);
+  assert.equal(first.records.length,200);assert.equal(first.more,true);
+  const second=await loadEvidencePage(db,uid,{cursor:first.cursor});
+  assert.equal(second.records.length,1);assert.equal(second.more,false);
+  assert.equal((await loadEvidencePage(db,uid,{sessionId:'session-17'})).records.length,1);
+  const session=await loadSessionEvidence(db,uid,'session-17',new AbortController().signal);
+  assert.equal(session.status,'unfinished');assert.equal(session.sessionId,'session-17');
+  const exported=await loadEvidenceExport(db,uid,new AbortController().signal);
+  assert.equal(exported.coverage.documents,201);assert.equal(exported.coverage.complete,true);
+  assert.equal(exported.counts.unfinished,201);assert.equal(exported.counts.completed,0);
+  assert.equal(exported.saves.coverage.documents,201);assert.equal(exported.saves.counts.unfinished,201);
+  await assertFails(loadEvidencePage(env.authenticatedContext('stranger-export').firestore(),uid));
+  const controller=new AbortController();controller.abort();
+  await assert.rejects(loadEvidenceExport(db,uid,controller.signal),{name:'AbortError'});
+});
+
+test('proposal result links round-trip and malformed evidence identities are denied', async () => {
+  const uid = 'proposal-result-link';
+  const db = env.authenticatedContext(uid).firestore();
+  const backend = firestoreProgress(uid, db);
+  await backend.initialize(fresh());
+  const operation = op('linked-result');
+  operation.result.evidenceSessionId = '0-attempt-123';
+  await backend.commit(operation);
+  assert.equal((await backend.load()).history[0].evidenceSessionId, '0-attempt-123');
+  assert.equal((await getDoc(doc(db, `users/${uid}/results/linked-result`))).data().evidenceSessionId, '0-attempt-123');
+  for (const value of ['', 'invalid/path', 123, 'x'.repeat(129)]) {
+    await assertFails(setDoc(doc(db, `users/${uid}/results/invalid-link`), {...operation.result, evidenceSessionId:value}));
+  }
+});
 
 test('password accounts must verify email before progress, trials, invitations or professional entry', async () => {
   const uid = 'email-account';
@@ -70,7 +137,7 @@ test('roles, clinical data, result edits/deletes and receipt forgery formats are
 });
 
 test('AI usage and daily recommendations are server-only even for the account owner', async () => {
-  for (const path of ['users/quota-owner/aiUsage/daily', 'users/quota-owner/aiRecommendations/player']) {
+  for (const path of ['users/quota-owner/aiUsage/daily', 'users/quota-owner/aiRecommendations/player', 'users/quota-owner/reportAttempts/attempt']) {
     await env.withSecurityRulesDisabled(async context => {
       await setDoc(doc(context.firestore(), path), { day: '2026-09-30', analysis: 'private-cache' });
     });
@@ -229,9 +296,13 @@ test('professional analytics are read-only, scoped to reciprocal active seats an
     await setDoc(doc(db, seatPath), { status: 'active', expiresAt: until, occupantUid: patient });
     await setDoc(doc(db, accessPath), { kind: 'invitation', professionalId: professional, seatId, expiresAt: until });
     await setDoc(doc(db, linkPath), { patientId: patient, seatId });
+    await setDoc(doc(db, `users/${patient}/evidence/linked-chunk`), { version:1, sessionId:'linked-attempt', exerciseId:'language-naming', firstSequence:0, count:1, events:'[]', receivedAt:serverTimestamp() });
   });
   const progress = doc(owner, `users/${patient}/progress/main`);
   await assertSucceeds(getDoc(progress));
+  const evidence = doc(owner, `users/${patient}/evidence/linked-chunk`);
+  await assertSucceeds(getDoc(evidence));
+  await assertFails(updateDoc(evidence, {events:'[]'}));
   await assertSucceeds(getDoc(doc(owner, `users/${patient}/results/linked-result`)));
   await assertFails(getDoc(doc(owner, `users/${patient}/operations/result%3Alinked-result`)));
   await assertFails(getDoc(doc(owner, accessPath)));
@@ -242,8 +313,10 @@ test('professional analytics are read-only, scoped to reciprocal active seats an
   await assertFails(deleteDoc(doc(personDb, linkPath)));
   await env.withSecurityRulesDisabled(async context => { await updateDoc(doc(context.firestore(), seatPath), { expiresAt: 1 }); });
   await assertFails(getDoc(progress));
+  await assertFails(getDoc(evidence));
   await env.withSecurityRulesDisabled(async context => { await updateDoc(doc(context.firestore(), seatPath), { expiresAt: until }); await deleteDoc(doc(context.firestore(), linkPath)); });
   await assertFails(getDoc(progress));
+  await assertFails(getDoc(evidence));
   await assertSucceeds(getDoc(doc(personDb, `users/${patient}/progress/main`)));
 });
 
@@ -561,4 +634,184 @@ test('reassessment can replace all eight legacy level entries in one durable ope
       'data.profile.gameLevels.motor-tracking.evidence': evidence, updatedAt:serverTimestamp(),
     }));
   }
+});
+
+test('proposal evidence archives are durable, immutable, idempotent and isolated from profile totals', async () => {
+  const uid='proposal-evidence'; const db=env.authenticatedContext(uid).firestore();
+  const backend=firestoreProgress(uid,db); await backend.initialize(fresh());
+  const before=await backend.load();
+  const chunk={version:1,sessionId:'attempt-1',exerciseId:'language-naming',firstSequence:0,count:1,
+    events:JSON.stringify([{sequence:0,activeMs:0,at:'2026-10-04T12:00:00.000Z',kind:'start',level:1,configVersion:1,mode:'normal',locked:false}])};
+  const operation={id:'evidence:attempt-1:0',kind:'evidence',chunk};
+  await assertSucceeds(backend.commit(operation));
+  await assertSucceeds(backend.commit(operation));
+  assert.deepEqual(await backend.load(),before);
+  const path=`users/${uid}/evidence/${encodeURIComponent(operation.id)}`;
+  const stored=await assertSucceeds(getDoc(doc(db,path)));
+  assert.equal(stored.data().events,chunk.events);assert.ok(stored.data().receivedAt);
+  await assertFails(updateDoc(doc(db,path),{events:'[]'}));
+  await assertFails(deleteDoc(doc(db,path)));
+  const stranger=env.authenticatedContext('evidence-stranger').firestore();
+  await assertFails(getDoc(doc(stranger,path)));
+  await assertFails(setDoc(doc(stranger,`users/${uid}/evidence/forged`),{...chunk,receivedAt:serverTimestamp()}));
+  await assertFails(setDoc(doc(db,`users/${uid}/evidence/oversize`),{...chunk,events:'x'.repeat(24001),receivedAt:serverTimestamp()}));
+  await assertFails(setDoc(doc(db,`users/${uid}/evidence/fake-time`),{...chunk,receivedAt:new Date(0)}));
+  await assert.rejects(backend.commit({...operation,id:'evidence:attempt-1:8',chunk:{...chunk,firstSequence:8,events:'[]'}}),/invalid-evidence/);
+});
+
+test('report lifecycle uses immutable owner-only archives and idempotent outbox receipts without changing progress',async()=>{
+  const uid='report-events',db=env.authenticatedContext(uid).firestore(),backend=firestoreProgress(uid,db);
+  const before=await backend.initialize(fresh());
+  const event={version:1,attemptId:'fixture',sequence:0,phase:'started',source:'ai',elapsedMs:0,at:'2026-10-04T12:00:00.000Z'};
+  const operation={id:'report:fixture:0',kind:'report',event};
+  assert.deepEqual(await backend.commit(operation),before);assert.deepEqual(await backend.commit(operation),before);
+  const path=`users/${uid}/reportEvents/${encodeURIComponent(operation.id)}`;
+  assert.equal((await getDoc(doc(db,path))).data().phase,'started');
+  await assertFails(updateDoc(doc(db,path),{phase:'download-requested'}));
+  await assertFails(deleteDoc(doc(db,path)));
+  await assertFails(getDoc(doc(env.authenticatedContext('other').firestore(),path)));
+  await assertFails(setDoc(doc(db,`users/${uid}/reportEvents/bad`),{...event,draft:'not allowed',receivedAt:serverTimestamp()}));
+  await assert.rejects(backend.commit({...operation,id:'wrong'}),/invalid-report-operation/);
+});
+
+test('report export reads beyond 200 events, follows server cursors and refuses partial failures',async()=>{
+  const uid='report-export-pages',db=env.authenticatedContext(uid).firestore();
+  await env.withSecurityRulesDisabled(async context=>{
+    await Promise.all(Array.from({length:201},(_,i)=>setDoc(doc(context.firestore(),`users/${uid}/reportEvents/${i}`),{version:1,attemptId:`attempt-${i}`,sequence:0,phase:'started',source:'ai',elapsedMs:0,at:'2026-10-04T12:00:00.000Z',receivedAt:serverTimestamp()})));
+  });
+  const cursors=[];
+  const page=async cursor=>{cursors.push(cursor);return {records:[],nextCursor:cursor?null:'next'};};
+  const result=await loadReportEvidenceExport(db,uid,page,new AbortController().signal);
+  assert.equal(result.coverage.clientDocuments,201);assert.equal(result.counts.unfinished,201);
+  assert.deepEqual(cursors,[undefined,'next',undefined]);
+  await assert.rejects(loadReportEvidenceExport(db,uid,async cursor=>{if(cursor)throw Error('page-failed');return {records:[],nextCursor:'next'};},new AbortController().signal),/page-failed/);
+  await assert.rejects(loadReportEvidenceExport(db,uid,async()=>({records:[],nextCursor:'loop'}),new AbortController().signal),/stalled-server-pagination/);
+  const cancelled=new AbortController();cancelled.abort();await assert.rejects(loadReportEvidenceExport(db,uid,page,cancelled.signal),{name:'AbortError'});
+  await assert.rejects(loadReportEvidenceExport(env.authenticatedContext('unrelated-report').firestore(),uid,page,new AbortController().signal));
+});
+
+test('save observations are immutable, receipt-idempotent and exported with result reconciliation',async()=>{
+  const uid='save-observations',db=env.authenticatedContext(uid).firestore(),backend=firestoreProgress(uid,db);
+  await backend.initialize(fresh());await backend.commit(op('save-result'));
+  const start={version:1,attemptId:'save-attempt',resultId:'save-result',mode:'normal',status:'started',elapsedMs:0,at:'2026-10-04T12:00:00.000Z',errorCategory:'none'};
+  for(const event of [start,{...start,status:'failed',elapsedMs:25,errorCategory:'network'}]){
+    const operation={id:`save:${event.attemptId}:${event.status}`,kind:'save-evidence',event};
+    await backend.commit(operation);await backend.commit(operation);
+  }
+  const archive=await loadEvidenceExport(db,uid,new AbortController().signal);
+  assert.equal(archive.saves.coverage.documents,2);assert.equal(archive.saves.counts.failed,1);
+  assert.equal(archive.saves.counts.distinctNormalResultsArchived,1);assert.equal((await backend.load()).profile.totalSessions,1);
+  const path=`users/${uid}/saveEvents/${encodeURIComponent('save:save-attempt:started')}`;
+  await assertFails(updateDoc(doc(db,path),{status:'acknowledged'}));await assertFails(deleteDoc(doc(db,path)));
+  await assertFails(getDoc(doc(env.authenticatedContext('save-stranger').firestore(),path)));
+  await assertFails(setDoc(doc(db,`users/${uid}/saveEvents/leak`),{...start,errorMessage:'private',receivedAt:serverTimestamp()}));
+});
+
+test('practice calendars are server-owned, immutable to clients and paginated without losing revisions',async()=>{
+  const uid='calendar-owner',db=env.authenticatedContext(uid).firestore();
+  const revision={version:1,revision:1,timeZone:'Europe/Madrid',createdAt:Date.parse('2026-01-01T12:00:00Z'),effectiveFrom:'2026-01-02',daysMask:127,dailyExercises:1};
+  await env.withSecurityRulesDisabled(async context=>{
+    await Promise.all(Array.from({length:201},(_,i)=>setDoc(doc(context.firestore(),`users/${uid}/scheduleRevisions/${String(i+1).padStart(10,'0')}`),{...revision,revision:i+1,createdAt:revision.createdAt+i})));
+  });
+  const path=`users/${uid}/scheduleRevisions/0000000001`;
+  await assertSucceeds(getDoc(doc(db,path)));await assertFails(updateDoc(doc(db,path),{daysMask:0}));await assertFails(deleteDoc(doc(db,path)));
+  await assertFails(setDoc(doc(db,`users/${uid}/practiceSchedule/current`),revision));
+  await assertFails(getDoc(doc(env.authenticatedContext('calendar-stranger').firestore(),path)));
+  const data=await loadPracticeAdherence(db,uid,Date.parse('2026-01-05T12:00:00Z'),new AbortController().signal);
+  assert.equal(data.revisions.length,201);assert.equal(data.adherence.plannedDays,3);assert.equal(data.adherence.ratio,0);
+  await env.withSecurityRulesDisabled(async context=>{
+    const admin=context.firestore(),until=Date.now()+60000;
+    await setDoc(doc(admin,'professionals/calendar-professional'),{ownerUid:'calendar-professional',active:true});
+    await setDoc(doc(admin,`users/${uid}/access/main`),{kind:'invitation',professionalId:'calendar-professional',seatId:'seat',expiresAt:until});
+    await setDoc(doc(admin,'professionals/calendar-professional/seats/seat'),{status:'active',occupantUid:uid,expiresAt:until});
+    await setDoc(doc(admin,`professionals/calendar-professional/patients/${uid}`),{patientId:uid,seatId:'seat'});
+  });
+  const professional=env.authenticatedContext('calendar-professional').firestore();
+  await assertSucceeds(getDoc(doc(professional,path)));await assertFails(updateDoc(doc(professional,path),{daysMask:0}));
+
+});
+
+test('adaptive response pipeline measures real queued emulator persistence separately from actor time',async()=>{
+  const samples=[];
+  for(let index=0;index<3;index++){
+    const uid=`latency-policy-${index}`,id=`latency-result-${index}`;
+    const db=env.authenticatedContext(uid).firestore(),backend=firestoreProgress(uid,db);
+    await backend.initialize(fresh());
+    await env.withSecurityRulesDisabled(async context=>updateDoc(doc(context.firestore(),`users/${uid}/progress/main`),{'data.profile.gameLevels':{'visual-scanning':{level:5,evidence:[]}}}));
+    const initial=await backend.load();let queue=[];let activeMs=0;let localAt;
+    let resolveSaved,rejectSaved;
+    const saved=new Promise((resolve,reject)=>{resolveSaved=resolve;rejectSaved=reject;});
+    const sync=new ProgressSync(initial,[],backend,next=>queue=structuredClone(next),(data,status,error)=>{
+      if(error)rejectSaved(error);
+      if(data.history.some(row=>row.id===id)){
+        if(localAt===undefined)localAt=performance.now();
+        if(status==='saved')resolveSaved(performance.now());
+      }
+    },{recordSaves:true});
+    try{
+      const recorder=createSessionEvidence({sessionId:`latency-session-${index}`,exerciseId:'visual-scanning',activeNow:()=>activeMs,sink:chunk=>sync.enqueue({id:`evidence:${chunk.sessionId}:${chunk.firstSequence}`,kind:'evidence',chunk})});
+      recorder.start(5,'normal',false);
+      for(let response=0;response<2;response++){recorder.present(`q${response}`,5);activeMs+=1000;recorder.respond(false);}
+      recorder.present('q2',5);activeMs+=1000;
+      const start=performance.now();recorder.respond(false);
+      const decision=decideAdaptation(recorder.observation(),{locked:false,mode:'normal',baseLevel:5});
+      const decidedAt=performance.now();recorder.finish(id);
+      const operation=op(id);Object.assign(operation.result,{level:5,configVersion:1,correctAnswers:0,totalQuestions:3,accuracy:0,durationSeconds:3,evidenceSessionId:recorder.id,adaptation:JSON.stringify(decision)});
+      sync.enqueue(operation);
+      const savedAt=await saved;
+      const archived=(await getDoc(doc(db,`users/${uid}/results/${id}`))).data();
+      const confirmed=await backend.load();
+      assert.equal(JSON.parse(archived.adaptation).application,'applied');
+      assert.equal(confirmed.profile.gameLevels['visual-scanning'].level,decision.nextLevel);
+      assert.equal(queue.length,0);
+      samples.push({model:decision.model,responseToDecisionMs:decidedAt-start,actorMs:decision.inferenceMs,responseToLocalStateMs:localAt-start,responseToSyncedMs:savedAt-start,responseToVerifiedReadMs:performance.now()-start,level:decision.nextLevel});
+    }finally{sync.stop();}
+  }
+  await writeFile('/tmp/neuroia-adaptation-emulator-latency.json',JSON.stringify({version:1,generatedAt:new Date().toISOString(),node:process.version,scope:'Synthetic final response -> observation -> actor -> real ProgressSync evidence/save queue -> Firestore emulator transactions -> verified archive/profile reads. Excludes physical input, BLE, React paint and production network.',samples,allSyncedUnderOneSecond:samples.every(row=>row.responseToSyncedMs<1000),hardwareAcceptance:false},null,2));
+  // Persist the measured outcome even if the environment misses the performance
+  // target. Correctness must pass independently; emulator timing is not release acceptance.
+  assert.equal(samples.length,3);
+});
+
+
+test('round transition audit survives durable retries and archive reconstruction', async () => {
+  const uid='round-transition-audit', db=env.authenticatedContext(uid).firestore();
+  const backend=firestoreProgress(uid,db);await backend.initialize(fresh());
+  let now=0;const chunks=[];
+  const recorder=createSessionEvidence({sessionId:'round-audit',exerciseId:'visual-scanning',activeNow:()=>now,sink:chunk=>chunks.push(chunk)});
+  recorder.start(5,'normal',false);recorder.roundStart('first',5);
+  for(let i=0;i<3;i++){recorder.present(`q${i}`,5);now+=1000;recorder.respond(false);}
+  const decision=decideAdaptation(recorder.prepareRoundDecision(),{locked:false,mode:'normal',baseLevel:5});
+  recorder.roundDecision('first','search-board',decision);
+  recorder.roundStart('second',decision.nextLevel);recorder.present('last',decision.nextLevel);now+=1000;recorder.respond(true);
+  recorder.roundDecision('second','search-board',decideAdaptation(recorder.prepareRoundDecision(),{locked:false,mode:'normal',baseLevel:decision.nextLevel}));
+  recorder.finish('round-result');
+  for(const chunk of chunks){const operation={id:`evidence:round-audit:${chunk.firstSequence}`,kind:'evidence',chunk};await backend.commit(operation);await backend.commit(operation);}
+  const operation=op('round-result');Object.assign(operation.result,{evidenceSessionId:'round-audit',correctAnswers:1,totalQuestions:4,accuracy:25});
+  await backend.commit(operation);await backend.commit(operation);
+  const exported=await loadEvidenceExport(db,uid,new AbortController().signal);
+  assert.equal(exported.counts.completed,1);assert.equal(exported.attempts[0].rounds.length,2);
+  assert.equal(exported.attempts[0].rounds[0].decision.nextLevel,decision.nextLevel);
+  assert.equal(exported.attempts[0].rounds[0].nextStarted,true);assert.equal(exported.attempts[0].rounds[1].nextStarted,false);
+  assert.equal((await backend.load()).profile.totalSessions,1);
+});
+
+
+test('mixed round result commits its final level atomically and preserves the retry audit',async()=>{
+  const uid='mixed-round-result',db=env.authenticatedContext(uid).firestore(),backend=firestoreProgress(uid,db);
+  const initial=fresh();initial.profile.gameLevels={'visual-scanning':{level:5,evidence:[]}};
+  await backend.initialize(initial);
+  await env.withSecurityRulesDisabled(async context=>{await updateDoc(doc(context.firestore(),`users/${uid}/progress/main`),{'data.profile.gameLevels':{'visual-scanning':{level:5,evidence:[]}}});});
+  const vector=Array(40).fill(0);vector[0]=1;vector[8]=4/9;vector[9]=1;vector[13]=1;
+  const first=decideAdaptation({vector,level:5,eligible:true},{locked:false,mode:'normal',baseLevel:5});
+  const finalVector=Array(40).fill(0);finalVector[0]=1;finalVector[8]=(first.nextLevel-1)/9;
+  const final=decideAdaptation({vector:finalVector,level:first.nextLevel,eligible:false},{locked:false,mode:'normal',baseLevel:first.nextLevel});
+  const operation=op('mixed-result');Object.assign(operation.result,{level:5,configVersion:1,evidenceSessionId:'mixed-trace',roundAdaptation:encodeRoundResult([
+    {round:'first',boundary:'search-board',decision:first,nextStarted:true},{round:'last',boundary:'search-board',decision:final,nextStarted:false}],5)});
+  await backend.commit(operation);await backend.commit(operation);
+  const saved=(await getDoc(doc(db,`users/${uid}/results/mixed-result`))).data();
+  assert.equal(saved.level,undefined);assert.equal(readRoundResult(saved.roundAdaptation).application,'applied');
+  const profile=(await backend.load()).profile;assert.equal(profile.totalSessions,1);assert.equal(profile.gameLevels['visual-scanning'].level,first.nextLevel);
+  await assertFails(setDoc(doc(db,`users/${uid}/results/oversized-round`),{...saved,roundAdaptation:'x'.repeat(14001)}));
+  await assertFails(setDoc(doc(db,`users/${uid}/results/dual-round`),{...saved,adaptation:JSON.stringify(first)}));
 });

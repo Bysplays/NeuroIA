@@ -47,6 +47,10 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
 }) => {
   const session = useGameSession();
   const { finish } = session;
+  const playedLevels=session.rounds?.levels()??[];
+  const minimumLevel=playedLevels.length?Math.min(...playedLevels):result?.level;
+  const maximumLevel=playedLevels.length?Math.max(...playedLevels):result?.level;
+  const resultLevelLabel=minimumLevel===maximumLevel?`Nivel ${minimumLevel}`:`Niveles ${minimumLevel}–${maximumLevel}`;
   const stages = exerciseStages(exerciseId, session.config, !session.progressScope && !planProgress && !session.lockedLevel);
   const bar = sessionProgress(isCompleted ? stages : completedStages, stages, session.progressScope);
   useLayoutEffect(() => { finish(isCompleted); }, [isCompleted, finish]);
@@ -70,7 +74,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
               <span className="result-complete-mark" aria-hidden="true"><Check size={30}/></span>
               <p className="result-eyebrow">{planProgress ? `Actividad ${planProgress.current} de ${planProgress.total}` : 'Tu práctica de hoy'}</p>
               <h1 id="result-title">{planProgress?.isLast ? 'Sesión completada' : 'Actividad completada'}</h1>
-              <p className="result-message">{getExerciseById(exerciseId)?.title}{result.level ? ` · Nivel ${result.level}` : ''}</p>
+              <p className="result-message">{getExerciseById(exerciseId)?.title}{minimumLevel ? ` · ${resultLevelLabel}` : ''}</p>
             </div>
 
             <dl className="result-summary">
@@ -94,7 +98,7 @@ export const ExerciseWrapper: React.FC<ExerciseWrapperProps> = ({
               </button>
               {!session.lockedLevel && <div className="result-secondary-actions">
                 <button className="touch-btn touch-btn-secondary result-repeat" onClick={() => { soundService.playTap(); session.restart();
-                  onRestart(); }}>
+                  if(!session.rounds)onRestart(); }}>
                   <RotateCcw size={18} aria-hidden="true" /> Repetir
                 </button>
               </div>}

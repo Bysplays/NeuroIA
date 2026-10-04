@@ -57,6 +57,87 @@ of a production deployment. Keep project guidance in English and UI copy in Span
 
 ## Current remaining scope
 
+### Proposal branch — full memory alignment
+
+The owner authorized implementation on `propuesta` of all five review gaps.
+[PROPOSAL.md](PROPOSAL.md) defines the original scope and completion evidence.
+This supersedes suggestion-only scope for this branch, not the deployed release.
+
+- [ ] Preserve four EEG channels and spectral/quality features end to end, including
+  live/history views, compatible persistence, authorization and deletion.
+  Four-channel live/history views, independent baseline feedback and paginated
+  retrieval are implemented. Hardware calibration, retention policy and deployed deletion acceptance
+  remain; archive rules are not deployed. The demo REST test now proves paginated
+  EEG archive deletion, interrupted-job recovery, deletion write locks and preservation
+  of another account’s feature data.
+- [ ] Complete response-level timing and explicit outcomes across all eight games.
+  Gated hooks now cover all eight games, including memory preview exclusion,
+  hints, card selections and continuous tracking windows. Cross-chunk validation
+  rejects gaps and conflicting retries. Server pagination and a JSON evaluation
+  export are implemented. Gráficas now shows validated per-game/per-level response
+  times, errors, help and continuous contact with explicit coverage. The PDF includes
+  a separate whole-archive appendix calculated locally, with pagination and failure
+  handling. The eight-game keyboard/emulated-touch matrix now checks help pause
+  exclusion and valid stimulus linkage; naming/completion/categorization completion
+  checks also reconcile every round with the saved result. Full successful paths
+  across all games/levels and physical-device acceptance remain. Publish archive/result-link rules before enabling
+  `VITE_PROPOSAL_EVIDENCE`.
+- [ ] Implement and integrate a learned adaptive policy, training/export provenance,
+  bounded decisions, EEG-optional operation and professional-level protection.
+  PPO simulation training, deterministic browser inference, bounded result-boundary
+  integration and application audit are implemented behind a separate flag. A tested
+  between-round transition controller now preserves active configs and resets
+  performance comparisons on level changes. Response reconstruction, Gráficas and
+  the PDF now separate measured stimulus levels without inflating session counts.
+  Round events now preserve decisions and replay observations during archive
+  validation, including next-round start evidence. Naming, word completion and
+  categorization now apply changes on Continue with fixed round totals, mixed-level
+  completion and protected repeat/manual/professional flows. Search now adopts the
+  next board config on Continue; motor targets adopt the next size after a hit,
+  preserving counts and positions. Memory sequences and pairs now adopt new configs
+  on Continue, preserving replay contents and counting actual completed deck sizes.
+  Tracking now adopts size/speed on contact release with a fixed contact goal and
+  bounded round audit. History/detail and the general level chart now show the played range and ordered
+  changes; the chart point represents the last played level, never a recommendation. The mixed-level result contract now
+  omits a false single level, applies the final recommendation transactionally
+  against the original profile level and reconciles its archive trace; its rules
+  are not deployed. Real
+  calibration, scientific reward approval and pilot evaluation remain mandatory.
+- [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
+  Server report attempts now persist start/generated/failure/cancellation outcomes
+  and monotonic timings, with own-account paginated retrieval and deletion locks.
+  The separate server flag defaults off. Client PDF events now cover start, AI
+  readiness, PDF readiness, download request, failure and cancellation using the
+  owner-scoped progress outbox in both workspaces. Publish compatible report-event
+  rules before enabling the frontend evidence flag. Exact request-ID correlation
+  and a separate caller-owned report export now audit all client/server pages,
+  conflicts and missing links without exporting identities or drafts. Result-save
+  start/acknowledgment/failure events now survive retries, export all pages and
+  reconcile against archived results without inflating completed-session totals.
+  Prospective, server-versioned personal calendars now supply a fixed-timezone
+  elapsed-day adherence denominator, with read-only professional views and complete
+  exports. An independent observer-register CLI now reconciles exact hashed exports
+  and aggregates cohort registration/adherence without silently dropping missing
+  participants or planned days. The consolidated pilot-package CLI now combines raw cohort/report/latency
+  inputs against a prospective case/trial roster, suppressing incomplete metrics and
+  binding reviews to their records and context. Protocol approval, real pilot
+  observations and independent acceptance remain open; fixture percentages do not establish the memory’s targets.
+- [ ] Add report evaluation, independent signal checks and latency benchmarks.
+  Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
+  review forms and paired preparation/unit aggregation are implemented. The shared
+  validator rejects unsupported collective claims and revalidates daily caches.
+  The v9 prompt preassigns source-bound observation slots and separates factual
+  summaries from actions. Its live run accepted three reports before provider 429
+  responses prevented six cases; final live acceptance and factuality review remain
+  open. The v8 all-nonempty schema pass does not establish acceptance of v9. Independent
+  signal comparison and actor benchmark exist. Browser pipeline measurements now
+  cover input through next-target config, local React commit/paint opportunity at three widths and
+  throttled CPU; the emulator suite separately traces queue synchronization and
+  confirmed result/profile reads. Physical-device end-to-end timings, actual
+  reviewer results and real pilot evidence remain open.
+- [ ] Complete real-user and hardware pilot evidence and scientific interpretation
+  review; do not close from synthetic tests or source inspection.
+
 - [x] Prepare three independent clinical-blue, tablet-first concepts using Mobbin
   references from Kit, Ahead and Brilliant. The review board is at
   `/design/concepts/`; see [DESIGN-CONCEPTS.md](DESIGN-CONCEPTS.md).

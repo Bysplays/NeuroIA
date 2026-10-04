@@ -22,14 +22,15 @@ async function request<T>(path: string, body: object, signal: AbortSignal): Prom
   } finally { unsubscribe(); }
 }
 export const activityAi = {
+  reportEvidence(signal:AbortSignal,cursor?:string){return request<{version:1;records:unknown[];nextCursor:string|null}>('/ai/report-evidence',cursor?{cursor}:{},signal);},
   async dailyRecommendations(targetUid: string, timeZone: string, signal: AbortSignal) {
     const result = await request<AiAnalysis>('/ai/recommendations', { targetUid, timeZone, consent: 'activity-summary-v1' }, signal);
     if (!result.insights || !result.provenance || !validAiNarrative(result.narrative, result.insights)) throw Error('No hemos podido comprobar las recomendaciones de hoy.');
     return result;
   },
   status(signal: AbortSignal) { return request<{ available: boolean; model?: string }>('/ai/status', {}, signal); },
-  async generate(targetUid: string, filters: InsightFilters, mode: 'recommendations' | 'report', signal: AbortSignal) {
-    const result = await request<AiAnalysis>('/ai/analyze', { targetUid, filters, mode, consent: 'activity-summary-v1' }, signal);
+  async generate(targetUid: string, filters: InsightFilters, mode: 'recommendations' | 'report', signal: AbortSignal, clientAttemptId?:string) {
+    const result = await request<AiAnalysis>('/ai/analyze', { targetUid, filters, mode, consent: 'activity-summary-v1', ...(clientAttemptId?{clientAttemptId}:{}) }, signal);
     if (!result.insights || !result.provenance || !validAiNarrative(result.narrative, result.insights)) throw Error('No hemos podido comprobar la respuesta de IA.');
     return result;
   },

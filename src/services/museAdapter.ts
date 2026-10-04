@@ -73,7 +73,8 @@ export function createMuseAdapter(getBluetooth: () => MuseBluetooth | undefined 
           const service = await device.gatt.getPrimaryService(MUSE_SERVICE); check();
           const control = await service.getCharacteristic(uuid('0001')); check();
           await control.startNotifications(); check();
-          const processor = createMuseSignal((value, quality) => { if (!stopped) events.sample(value, quality); });
+          const processor = createMuseSignal((value, quality) => { if (!stopped) events.sample(value, quality); },
+            frame => { if (!stopped) events.channels?.(frame); });
           for (let channel = 0; channel < 4; channel++) {
             const characteristic = await service.getCharacteristic(uuid(`000${channel + 3}`)); check();
             listen(characteristic, 'characteristicvaluechanged', () => {

@@ -1,0 +1,12 @@
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        VITE_BILLING_API_URL: ${VITE_BILLING_API_URL:-https://neuroia-billing.kikefontanlorenzo.workers.dev}
+        VITE_STRIPE_ENABLED: ${VITE_STRIPE_ENABLED:-true}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-ceoaberto-neuroia.firebaseapp.com}
+    ports:
+      - "127.0.0.1:5173:80"
+    restart: unless-stopped

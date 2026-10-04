@@ -1,4 +1,5 @@
 import type { EegMetric } from './eegData.ts';
+import { museFeatureFrame, type MuseFeatureFrame } from './museFeatures.ts';
 
 export const MUSE_AMPLITUDE: EegMetric = {
   id: 'muse2-ac-rms-v1', label: 'Amplitud EEG', unit: 'µV', min: 0, max: 1000,
@@ -17,15 +18,15 @@ export function decodeMusePacket(data: DataView): { index: number; samples: numb
 }
 
 /** One second of aligned four-channel AC RMS. This is amplitude, not attention. */
-export function createMuseSignal(emit: (value: number, quality: 'good' | 'poor') => void) {
+export function createMuseSignal(emit: (value: number, quality: 'good' | 'poor') => void, emitChannels?: (frame: MuseFeatureFrame) => void) {
   const pending = new Map<number, (number[] | undefined)[]>();
   let windows: number[][] = [[], [], [], []];
   let previous: number | undefined;
   let lastAt = 0;
-  const gap = () => { windows = [[], [], [], []]; emit(0, 'poor'); };
+  const gap = () => { windows = [[], [], [], []]; emit(0, 'poor'); emitChannels?.(museFeatureFrame(previous ?? 0, [])); };
   return {
     push(channel: number, data: DataView, now: number) {
-      if (channel < 0 || channel > 3) return;
+      if (!Number.isInteger(channel) || channel < 0 || channel > 3) return;
       const packet = decodeMusePacket(data);
       if (!packet) { pending.clear(); previous = undefined; gap(); return; }
       if (lastAt && now - lastAt > 500) { pending.clear(); previous = undefined; gap(); }
@@ -44,14 +45,15 @@ export function createMuseSignal(emit: (value: number, quality: 'good' | 'poor')
       previous = packet.index;
       frame.forEach((samples, i) => windows[i].push(...samples!));
       if (windows[0].length < 256) return;
-      const variances = windows.map(samples => {
-        const window = samples.splice(0, 256);
+      const samplesByChannel = windows.map(samples => samples.splice(0, 256));
+      emitChannels?.(museFeatureFrame(packet.index, samplesByChannel));
+      const variances = samplesByChannel.map(window => {
         if (window.some(v => Math.abs(v) >= 999)) return NaN; // ADC clipping.
         const mean = window.reduce((sum, v) => sum + v, 0) / window.length;
         return window.reduce((sum, v) => sum + (v - mean) ** 2, 0) / window.length;
       });
       // A flat or clipped channel invalidates the window; this is not a contact classifier.
-      if (variances.some(v => !Number.isFinite(v) || v === 0)) { gap(); return; }
+      if (variances.some(v => !Number.isFinite(v) || v === 0)) { windows = [[], [], [], []]; emit(0, 'poor'); return; }
       emit(Math.sqrt(variances.reduce((sum, v) => sum + v, 0) / 4), 'good');
     },
   };

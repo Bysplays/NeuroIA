@@ -119,7 +119,9 @@ test('target progression is solo only; repetition keeps selected level and start
   }
 });
 test('tracking contact follows dragging from outside to inside and back',async({page})=>{
-  await page.clock.install();
+  const time=new Date('2026-10-04T12:00:00Z');
+  await page.clock.install({time});
+  await page.clock.pauseAt(time);
   await launch(page,'motor-tracking');
   const arena=await page.locator('.motor-tracking-arena').boundingBox();
   const target=page.locator('.tracking-target');

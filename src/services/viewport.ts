@@ -18,7 +18,7 @@ export function useViewportPanel<T extends HTMLElement>() {
     if (!element) return;
     const measure = () => {
       const top = element.getBoundingClientRect().top + window.scrollY;
-      element.style.setProperty('--panel-height', `${Math.max(240, window.innerHeight - top)}px`);
+      element.style.setProperty('--panel-height', `max(0px, calc(100dvh - ${top}px))`);
     };
     measure();
     const observer = new ResizeObserver(measure);

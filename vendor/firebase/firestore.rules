@@ -159,8 +159,60 @@ service cloud.firestore {
       allow get: if owns(uid);
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['kind', 'createdAt'])
-        && request.resource.data.kind in ['result', 'settings', 'placement']
+        && request.resource.data.kind in ['result', 'settings', 'placement', 'evidence', 'report', 'save-evidence']
         && request.resource.data.createdAt == request.time;
+    }
+    // Prospective schedule revisions are written only by the authenticated Worker.
+    match /users/{uid}/scheduleRevisions/{revisionId} {
+      allow read: if owns(uid) || linkedProfessional(uid);
+    }
+    match /users/{uid}/practiceSchedule/current {
+      allow read: if owns(uid) || linkedProfessional(uid);
+    }
+    // Result-save transport observations; immutable and separate from activity totals.
+    match /users/{uid}/saveEvents/{eventId} {
+      allow read: if owns(uid) || linkedProfessional(uid);
+      allow create: if owns(uid)
+        && request.resource.data.keys().hasOnly(['version','attemptId','resultId','mode','status','elapsedMs','at','errorCategory','receivedAt'])
+        && request.resource.data.version == 1
+        && request.resource.data.attemptId is string && request.resource.data.attemptId.matches('[a-zA-Z0-9_-]{1,128}')
+        && request.resource.data.resultId is string && request.resource.data.resultId.size() > 0 && request.resource.data.resultId.size() <= 512
+        && request.resource.data.mode in ['normal','practice']
+        && request.resource.data.status in ['started','acknowledged','failed']
+        && request.resource.data.elapsedMs is int && request.resource.data.elapsedMs >= 0
+        && request.resource.data.at is string && request.resource.data.at.size() == 24
+        && request.resource.data.errorCategory in ['none','network','permission','other']
+        && (request.resource.data.status == 'started' ? request.resource.data.elapsedMs == 0 && request.resource.data.errorCategory == 'none' : request.resource.data.status == 'acknowledged' ? request.resource.data.errorCategory == 'none' : request.resource.data.errorCategory != 'none')
+        && request.resource.data.receivedAt == request.time;
+    }
+    // Caller-owned operational metadata, never the participant's report content.
+    match /users/{uid}/reportEvents/{eventId} {
+      allow read: if owns(uid);
+      allow create: if owns(uid)
+        && request.resource.data.keys().hasOnly(['version','attemptId','sequence','phase','source','elapsedMs','at','receivedAt'])
+        && request.resource.data.version == 1
+        && request.resource.data.attemptId is string && request.resource.data.attemptId.matches('[a-zA-Z0-9_-]{1,128}')
+        && request.resource.data.sequence is int && request.resource.data.sequence >= 0 && request.resource.data.sequence <= 4
+        && request.resource.data.phase in ['started','ai-ready','pdf-ready','download-requested','failed','cancelled']
+        && request.resource.data.source in ['ai','template']
+        && request.resource.data.elapsedMs is int && request.resource.data.elapsedMs >= 0 && request.resource.data.elapsedMs <= 86400000
+        && request.resource.data.at is string && request.resource.data.at.size() == 24
+        && (request.resource.data.sequence == 0 ? request.resource.data.phase == 'started' && request.resource.data.elapsedMs == 0 : request.resource.data.phase != 'started')
+        && request.resource.data.receivedAt == request.time;
+    }
+    // Immutable bounded event chunks; client evidence is self-reported, not a clinical attestation.
+    // Readers must validate the JSON payload and never treat unknown events as completion.
+    match /users/{uid}/evidence/{chunkId} {
+      allow read: if owns(uid) || linkedProfessional(uid);
+      allow create: if owns(uid)
+        && request.resource.data.keys().hasOnly(['version', 'sessionId', 'exerciseId', 'firstSequence', 'count', 'events', 'receivedAt'])
+        && request.resource.data.version == 1
+        && request.resource.data.sessionId is string && request.resource.data.sessionId.matches('[a-zA-Z0-9:_-]{1,128}')
+        && request.resource.data.exerciseId in ['visual-scanning', 'language-naming', 'word-completion', 'memory-path', 'memory-pairs', 'categorization', 'motor-target', 'motor-tracking']
+        && request.resource.data.firstSequence is int && request.resource.data.firstSequence >= 0
+        && request.resource.data.count is int && request.resource.data.count >= 1 && request.resource.data.count <= 8
+        && request.resource.data.events is string && request.resource.data.events.size() > 0 && request.resource.data.events.size() <= 24000
+        && request.resource.data.receivedAt == request.time;
     }
     // Bounded JSON series is decoded/validated by the reader; no raw EEG payloads.
     function validEeg(value) {
@@ -177,7 +229,10 @@ service cloud.firestore {
     function validExerciseResult(value) {
       return value.keys().hasOnly(['id', 'exerciseId', 'domain', 'date',
           'durationSeconds', 'accuracy', 'score', 'correctAnswers', 'totalQuestions',
-          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice', 'assignmentId', 'assignmentStep', 'assignmentOwnerId', 'assignmentSeatId', 'eeg', 'ppg'])
+          'difficulty', 'feedbackMessage', 'notes', 'mistakesList', 'level', 'configVersion', 'hintsUsed', 'practice', 'assignmentId', 'assignmentStep', 'assignmentOwnerId', 'assignmentSeatId', 'eeg', 'ppg', 'evidenceSessionId', 'adaptation', 'roundAdaptation'])
+        && (!('roundAdaptation' in value) || (value.roundAdaptation is string && value.roundAdaptation.size() > 0 && value.roundAdaptation.size() <= 14000 && !('adaptation' in value) && ('evidenceSessionId' in value)))
+        && (!('adaptation' in value) || (value.adaptation is string && value.adaptation.size() > 0 && value.adaptation.size() <= 12000))
+        && (!('evidenceSessionId' in value) || (value.evidenceSessionId is string && value.evidenceSessionId.matches('[a-zA-Z0-9:_-]{1,128}')))
         && (!('eeg' in value) || validEeg(value.eeg))
         && (!('ppg' in value) || validEeg(value.ppg))
         && validAssignmentMetadata(value)

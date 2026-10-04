@@ -20,6 +20,74 @@ are recorded in DESIGN-CONCEPTS.md. Reference patterns, not their branded assets
 
 ## Color, type and surfaces
 
+The proposal's separately enabled learned-adaptation trial changes levels between
+questions in naming, word completion and categorization, only when Continue starts
+the next question. Search adopts its next config on Continue into a new board; motor
+targets adopt size changes only after the current target is hit, keeping their
+planned count and positions. Current stimuli, answer keys and touch targets stay unchanged
+through the response and feedback. Regenerate only unplayed questions and keep the
+initial round count. The footer shows the active level; mixed completion shows the
+played level range, never a single achieved level. New question options must not
+inherit the previous answer's animated highlight. Repeat returns to the explicitly
+selected starting level and holds it, as do manual and professional levels.
+Memory sequences and pairs adopt the next config only on Continue after a completed
+round; preview/replay keeps the current sequence or deck intact. Preserve three solo
+boards/sequences and existing grouped-mode counts. Pair results sum the actual
+completed board sizes, counting replayed work as attempts rather than extra boards.
+Tracking adopts size and speed changes on contact release (including blur or capture loss),
+clamps the resized target into the arena immediately and preserves its initial contact goal.
+Repeated release notifications do not create extra rounds. LLM
+recommendations remain optional suggestions; they are not the learned controller.
+The simulation-trained controller stays disabled in production pending PROPOSAL.md.
+
+When proposal evidence collection is enabled, Historial includes a quiet
+“Exportar datos de evaluación” action below its ordinary history controls.
+Explain that it exports all saved evaluation records independently of filters,
+omitting account identifiers and free text. Disable it while preparing data,
+show recoverable errors inline, and use the shared confirmation dialog with focus
+returned to the action after download. Leaving the view cancels preparation.
+
+When proposal evidence is enabled, the activity assistant also offers “Exportar
+registro de informes”. Place it below the AI explanation using the shared quiet
+export control and confirmation dialog. Explain that it concerns reports requested
+by the current account, not the selected participant's game history. Disable the
+action while loading, show retryable errors inline, cancel when leaving and restore
+focus after confirmation. Export coverage explicitly distinguishes requested downloads
+from reviewed reports; do not introduce a visual completion claim for pilot KPIs.
+
+When proposal evidence is enabled, Gráficas includes an explicitly loaded
+“Respuestas medidas” card for owners and linked professionals. Group only completed,
+validated, result-linked normal sessions by game and recorded stimulus level; state that it uses the
+whole archive independently of activity filters. Show response-weighted mean time,
+incorrect attempts, active-opportunity help openings and separate prior selections.
+Ordinary history labels each result with its played level or range. Its detail shows
+ordered changes without inventing per-level duration. In the Niveles chart, one point
+per exercise marks the last played level and a capped vertical bar spans its minimum
+and maximum; use the known completion date, not synthetic round timestamps. The
+historical mean explicitly includes only constant-level sessions. A recommendation
+for future play must never appear as a played level. Invalid metadata displays
+“Nivel no registrado” and supplies no chart point.
+A mixed-level session can appear in multiple game/level blocks, while the total
+counts it only once; label the row count “Partidas con este nivel”. Never use the
+last or initial level to label all responses from that session. Continuous tracking
+shows duration-weighted contact without invented response latency.
+Reports include these local measurements as a separate appendix after scope, explicitly
+covering the whole archive independently of report filters. Use square metric cells,
+centered labels/values and keep each game/level block together across pages. An archive
+read failure prevents download instead of silently omitting the requested appendix.
+Use responsive definition lists, explicit excluded/malformed coverage and retryable
+errors. Do not label these task measurements clinical reaction time.
+
+The proposal calendar appears as a separate Resumen card before AI suggestions.
+Use native weekday checkboxes with full Spanish day names, a labelled 1–8 exercise
+selector and quiet Save/Pause actions. Do not imply a professional prescription.
+Explain next-day effectiveness and show fulfilled/planned elapsed days together;
+never display a percentage for an unknown or zero denominator. Owner editing and
+linked-professional read-only copy must differ. Keep timezone and latest effective
+date visible. Natural analytics scrolling and responsive checkbox rows accommodate
+small screens and enlarged text. Calendar export reuses the shared evidence download
+and focus-return confirmation; it is independent of activity display filters.
+
 The persisted `pageStyle: default` now means **Calma**; `cozy` remains the compatible
 **Papel** alternative. Keep the existing profile settings, independent contrast modes
 and hide-companions preference. Do not reset a user's appearance to introduce a design.
@@ -79,6 +147,14 @@ The game-object recipe below remains authoritative. Preserve answer keys, object
 identities, full silhouettes and atlas mappings during all interface work.
 
 ## Navigation and home
+
+The document root and fitted game panels use the dynamic viewport height, so
+browser toolbar changes do not leave a taller, empty page behind the board.
+Home measures the floating navigation height (including wrapped, enlarged labels)
+and reserves only that height, a small content gap and the
+bottom safe area. Standard tablet layouts should fit without page scrolling;
+phones, enlarged text and long activity/report content retain natural scrolling.
+Do not hide overflow on the whole document to conceal sizing problems.
 
 The player workspace has persistent **bottom navigation**: Hoy, Juegos, optionally
 Para ti, Actividad and Mi cuenta. Reuse `TabletTabs`, its ARIA relationships and
@@ -615,6 +691,15 @@ shared compact preferences modal. The account name field and contrasting Save
 action form one joined row. The clock is a noninteractive outlined chip matching
 the transparent utility controls. Opening settings pauses placement in place;
 closing settings resumes it without a separate rest screen or Retomar action.
+
+Muse displays TP9, AF7, AF8 and TP10 independently in a compact game strip.
+The connection dialog expands each electrode into quality, RMS and five band
+powers with baseline-relative changes. Use two columns on larger screens and one
+on phones; keep scrolling inside the shared dialog. Missing or stale data uses
+an em dash and explicit status, never a fabricated zero. History offers a native
+sample slider and four labelled RMS charts, with disclosed independent scales
+and 60-sample windows. Explain connection versus game baselines and never label
+these measurements attention, fatigue or relaxation.
 
 The Muse modal places the EEG/PPG explanation beneath its title and introduction,
 without a Tus partidas heading. It retains Bluetooth connection controls. It does not show a recording toggle, analytics-sharing

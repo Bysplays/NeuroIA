@@ -12,7 +12,7 @@ test('activity summary, shared chart emphasis and separate filters', async ({ pa
   await page.getByRole('tab', { name: 'Gráficas', exact: true }).click();
   const charts = page.locator('.activity-line-chart');
   await expect(charts).toHaveCount(3);
-  await expect(charts.last().locator('.stats-average')).toHaveText('Media histórica global: 6');
+  await expect(charts.last().locator('.stats-average')).toHaveText('Media histórica de partidas con nivel constante: 6');
   for (const chart of await charts.all()) {
     const line = chart.locator('.stats-chart-series').first();
     const other = chart.locator('.stats-chart-series').nth(1);

@@ -124,5 +124,73 @@ npm run test:interface -- tests/interface/activity-ai.spec.mjs tests/interface/a
 The combined Firestore command in CONTRIBUTING also covers the real REST adapter
 for nested profile/history and archived results. Existing Firestore rules deny
 client reads/writes to the server-only quota path; no new client authorization rule
-is needed. Recursive account deletion covers that subcollection. Reports are
-downloaded only, so no additional database archive/retention schema is introduced.
+is needed. Recursive account deletion covers that subcollection. Report content remains download-only. The optional proposal report-attempt ledger
+stores server operational metadata without drafts; see the Worker guide for its
+flag, pagination, authorization and deletion contract.
+
+## Reproducible report evaluation
+
+`node --experimental-strip-types scripts/evaluation/reports.mjs --output /tmp/neuroia-reports-run`
+runs ten versioned synthetic cases through the production generation function with
+an offline provider fixture. It covers empty/partial history, sparse evidence,
+same-level speed, slower accurate performance, mixed levels, professional assignments,
+unknown hints, date-only records and retired/invalid games. It does not access Firebase.
+The output directory must be new; each result is checkpointed before the next case.
+The empty case must reject before calling the provider.
+
+Add `--live` before `--output` only for an explicit provider run. It uses the local
+OpenRouter configuration, sends synthetic aggregates only, makes up to nine provider
+calls without retry/fallback and can consume provider quota/credits. Neither fixture
+success nor live schema success constitutes factuality or user acceptance.
+
+Outputs include exact narrative/source snapshots, bounded provider replies (including
+rejected drafts for diagnosis), model/prompt provenance, generation
+time, a case-set hash, and a Spanish per-case rubric in `reviews.json`. Review every
+summary, observation and recommendation against its exact facts and candidate actions.
+Use a pseudonymous reviewer code; do not enter names or participant information.
+Mark each criterion, factuality, Spanish clarity, usefulness and scope explicitly.
+Record preparation durations only from observed, comparable manual/assisted workflows;
+include reading, correction and finalization. Record synthesis units using a definition
+agreed before evaluation, counting units accepted without editing against all required
+units. Leave unavailable measurements null, never infer them from download time.
+
+After review, run:
+
+```sh
+node --experimental-strip-types scripts/evaluation/reports.mjs --review /tmp/neuroia-reports-run/records.json /tmp/neuroia-reports-run/reviews.json /tmp/neuroia-reports-reviewed.json
+```
+
+Reviews are bound to the exact record hash; stale, unknown or duplicate reviews fail.
+The summary exposes reviewed-case, paired-timing and synthesis-unit coverage. Reduction
+uses `1 - sum(assisted) / sum(manual)` over complete pairs; automation uses accepted
+units / total units over measured cases. Targets retain strict `<600 seconds` and
+`>70%`, and inclusive `>=50%` reduction. Passing these on synthetic cases does not
+prove pilot KPIs, report usefulness in the target population, or TRL 7. This tooling
+is separate from the implemented runtime report/save telemetry and adherence calendar.
+The pilot reconciliation CLI in docs/PROPOSAL.md consolidates registration/adherence;
+real reviewer measurements and final pilot acceptance remain open.
+
+## Observation scope validation
+
+The shared browser/Worker validator rejects
+collective game observations (for example, “el resto de juegos”), duplicate fact
+references and a named game without its own `game:`, `recent:` or `speed:` evidence.
+The three-reference limit remains unchanged. Generic optional variety wording in
+the summary is not itself a collective factual observation.
+Prompt `neuroia-es-activity-v9` additionally prepares one-source observation slots,
+prioritizing comparable measurements and recorded games without filling the report
+with absent-game observations. It preserves the full source facts for synthesis. These lexical/scope
+checks are conservative, not a semantic truth verifier: numerical correctness,
+causality, trends, uncited summary text and usefulness still need human review.
+
+Daily cached recommendations now require the current prompt version and must pass
+current narrative validation before release. Stale, malformed or newly rejected
+cache entries trigger the ordinary generation path, preserving existing quotas and
+authorization checks. A quota/provider failure never releases rejected cached text.
+The evaluation summary version is `report-evaluation-v2`; archived broad claims remain
+flagged for review even when the new validator now rejects them. Existing record
+hashes remain tied to the original outputs; do not rewrite historical provider replies.
+
+The summary describes recorded activity only; actions belong in recommendations.
+The teaching summary contains no invitation to a challenge that could be copied
+into a case without a corresponding candidate.

@@ -1,3 +1,7 @@
+import {createSessionEvidence} from '../../src/services/sessionEvidence.ts';
+import {museFeatureFrame} from '../../src/services/museFeatures.ts';
+import {updatePracticeSchedule} from './practiceSchedule.mjs';
+import {withReportEvidence,readReportEvidence} from './reportEvidence.mjs';
 import { startTrial, requestDeletion, processDeletion } from './accountLifecycle.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -26,6 +30,19 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  await put(`users/${aiUid}/results/archive`,{id:'archived',date:'2026-09-20T12:00:00Z',exerciseId:'memory-pairs'});
  const source=await db.readActivity(aiUid);
  assert.deepEqual(source.history.map(r=>r.id),['imported','archived']);assert.equal(source.levels['memory-pairs'].level,4);assert.equal(source.tapsOnly,true);assert.equal(source.partial,true);
+
+ const reportEnv={PROPOSAL_REPORT_EVIDENCE:'true',OPENROUTER_MODEL:'fixture/model'};
+ await withReportEvidence(aiUid,'report',reportEnv,db,undefined,async context=>{context.stage='complete';return {provenance:{promptVersion:'fixture-v1',snapshotHash:'a'.repeat(64)}};});
+ await Promise.all(Array.from({length:27},()=>put(`users/${aiUid}/reportAttempts/${crypto.randomUUID()}`,{version:1,status:'started',startedAt:123,model:'fixture/model'})));
+ const reportFirst=await readReportEvidence(aiUid,{},db);
+ assert.equal(reportFirst.records.length,25);assert.ok(reportFirst.nextCursor);
+ const reportSecond=await readReportEvidence(aiUid,{cursor:reportFirst.nextCursor},db);
+ const reportRows=[...reportFirst.records,...reportSecond.records];
+ assert.equal(reportRows.length,28);assert.equal(reportSecond.nextCursor,null);
+ assert.equal(new Set(reportRows.map(row=>row.attemptId)).size,28);
+ assert.equal(reportRows.filter(row=>row.status==='generated').length,1);
+ assert.equal(reportRows.filter(row=>row.invalid).length,0);
+ await db.erase(reportRows.map(row=>`users/${aiUid}/reportAttempts/${row.attemptId}`));
  await db.erase([`users/${aiUid}/progress/main`,`users/${aiUid}/results/archive`]);
  await db.transaction(uid,(access,billing,patch)=>{assert.deepEqual(access,{});assert.deepEqual(billing,{});patch(0,{kind:'trial',trialStartedAt:123});patch(1,{attempt:'original',count:0});});
  await Promise.all(Array.from({length:2},()=>db.transaction(uid,async(_a,b,patch)=>{await new Promise(r=>setTimeout(r,50));patch(1,{count:b.count+1});})));
@@ -56,6 +73,15 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  assert.equal(afterLeave[0].occupantUid, null); assert.equal(afterLeave[1].kind, 'revoked'); assert.equal(afterLeave[2], null);
  await assert.rejects(redeemSeat(people[1], { code }, db));
 
+ const scheduleUid='calendar-rest-'+Date.now();
+ const scheduleInput={operationId:'first',baseRevision:0,timeZone:'Europe/Madrid',daysMask:42,dailyExercises:3};
+ await updatePracticeSchedule(scheduleUid,scheduleInput,{PROPOSAL_SCHEDULE_ENABLED:'true'},db,async()=>({active:true}));
+ const schedule=await db.runTransaction(tx=>tx.get(`users/${scheduleUid}/scheduleRevisions/0000000001`));
+ assert.equal(schedule.daysMask,42);assert.equal(schedule.dailyExercises,3);
+ assert.deepEqual(await updatePracticeSchedule(scheduleUid,scheduleInput,{PROPOSAL_SCHEDULE_ENABLED:'true'},db,async()=>({active:true})),{revision:1,replayed:true});
+ await db.runTransaction(async tx=>tx.set(`accountDeletions/${scheduleUid}`,{phase:'tree'},false));
+ await assert.rejects(updatePracticeSchedule(scheduleUid,{...scheduleInput,operationId:'blocked',baseRevision:1},{PROPOSAL_SCHEDULE_ENABLED:'true'},db,async()=>({active:true})),{status:409});
+ await db.erase([`accountDeletions/${scheduleUid}`,`users/${scheduleUid}/scheduleRevisions/0000000001`,`users/${scheduleUid}/scheduleOperations/first`,`users/${scheduleUid}/practiceSchedule/current`]);
  const lifecycleEnv={TRIAL_IDENTITY_SECRET:'demo-lifecycle-secret-32-characters-minimum'};
  const deletedUid='delete-rest-'+Date.now();
  const email=deletedUid+'@example.test';
@@ -64,21 +90,63 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
  await db.runTransaction(async tx=>{
    tx.set(`users/${deletedUid}/results/a`,{value:'private'},false);
    tx.set(`users/${deletedUid}/operations/a`,{value:'receipt'},false);
+   tx.set(`users/${deletedUid}/reportAttempts/a`,{version:1,status:'started'},false);
+   tx.set(`users/${deletedUid}/saveEvents/a`,{version:1,status:'started'},false);
+   tx.set(`users/${deletedUid}/scheduleRevisions/a`,{version:1,revision:1},false);
    tx.set(`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`,{patientId:deletedUid},false);
  });
+ // A real recorder-generated four-channel archive spanning REST pages (25 docs).
+ const eegChunks=[];let activeMs=0;
+ const recorder=createSessionEvidence({sessionId:'deletion-eeg',exerciseId:'motor-tracking',activeNow:()=>activeMs,sink:chunk=>eegChunks.push(chunk)});
+ const frame=museFeatureFrame(0,Array.from({length:4},(_,channel)=>Array.from({length:256},(_,i)=>(channel+1)*10*Math.sin(2*Math.PI*(channel+4)*i/256))));
+ recorder.start(5,'normal',false);
+ for(let i=0;i<240;i++){activeMs+=1000;recorder.eeg({...frame,sequence:i});}
+ recorder.finish('eeg-result');assert.ok(eegChunks.length>25);
+ const evidencePaths=eegChunks.map((_,i)=>`users/${deletedUid}/evidence/${String(i).padStart(4,'0')}`);
+ for(let i=0;i<eegChunks.length;i++)await put(evidencePaths[i],eegChunks[i]);
+ const reportEventPath=`users/${deletedUid}/reportEvents/client`;
+ const schedulePaths=['practiceSchedule/current','scheduleOperations/write'].map(path=>`users/${deletedUid}/${path}`);
+ await put(reportEventPath,{version:1,phase:'download-requested'});
+ for(const path of schedulePaths)await put(path,{version:1});
+ const otherEvidence=`users/keep-${deletedUid}/evidence/unchanged`;
+ await put(otherEvidence,eegChunks[0]);
+ const firstEvidencePage=await db.list(`users/${deletedUid}/evidence`);
+ assert.equal(firstEvidencePage.documents.length,25);assert.ok(firstEvidencePage.nextPageToken);
+ assert.equal((await db.list(`users/${deletedUid}/evidence`,firstEvidencePage.nextPageToken)).documents.length,eegChunks.length-25);
  assert.ok(await db.nextDeletion() === undefined);
  await requestDeletion(deletedUid,{email,authTime:Date.now()/1000},{confirmation:'ELIMINAR MI CUENTA'},lifecycleEnv,db,async()=>{throw Error('unexpected Stripe');});
  assert.equal(await db.nextDeletion(),deletedUid);
  await assert.rejects(db.runTransaction(async tx=>{await tx.get(`users/${deletedUid}/results/a`);tx.set(`users/${deletedUid}/results/new`,{bad:true});}),{status:409});
- const deleted=[];
- for(let i=0;i<60;i++) {
-   await processDeletion(deletedUid,db,async(action,id)=>deleted.push([action,id]),()=> 'NIA-ABCD-23');
+ const deleted=[];let interrupted=false,retried=false;
+ const erase=db.erase.bind(db);
+ const flakyDb={...db,async erase(paths){
+   if(!interrupted&&paths.some(path=>path.startsWith(`users/${deletedUid}/evidence/`))){
+     interrupted=true;throw Error('synthetic-deletion-interruption');
+   }
+   return erase(paths);
+ }};
+ await assert.rejects(db.runTransaction(async tx=>{
+   await tx.get(evidencePaths[0]);tx.set(`users/${deletedUid}/evidence/late`,eegChunks[0],false);
+ }),{status:409});
+ for(let i=0;i<100;i++) {
+   try{await processDeletion(deletedUid,flakyDb,async(action,id)=>deleted.push([action,id]),()=> 'NIA-ABCD-23');}
+   catch(error){
+     assert.equal(error.message,'synthetic-deletion-interruption');assert.equal(retried,false);retried=true;
+     const locked=await db.runTransaction(tx=>tx.get(`accountDeletions/${deletedUid}`),4,true);
+     assert.equal(locked.phase,'tree');assert.equal(locked.leaseUntil,0);assert.deepEqual(deleted,[]);
+   }
    const job=await db.runTransaction(tx=>tx.get(`accountDeletions/${deletedUid}`),4,true);
    if(job.phase==='done') break;
  }
+ assert.equal(interrupted,true);assert.equal(retried,true);
  assert.deepEqual(deleted,[['delete',deletedUid]]);
- const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
- assert.deepEqual(remaining,[null,null,null,null]);
+ const erasedEvidence=await db.runTransaction(tx=>tx.getMany([...evidencePaths,reportEventPath,...schedulePaths]),4,true);
+ assert.ok(erasedEvidence.every(value=>value===null));
+ assert.equal((await db.list(`users/${deletedUid}/evidence`)).documents.length,0);
+ assert.deepEqual(await db.runTransaction(tx=>tx.get(otherEvidence)),eegChunks[0]);
+ await db.erase([otherEvidence]);
+ const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`users/${deletedUid}/reportAttempts/a`,`users/${deletedUid}/saveEvents/a`,`users/${deletedUid}/scheduleRevisions/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
+ assert.deepEqual(remaining,[null,null,null,null,null,null,null]);
  await startTrial('recreated-'+deletedUid,email,lifecycleEnv,db);
  const resumedTrial=await db.runTransaction(tx=>tx.get(`users/recreated-${deletedUid}/access/main`));
  assert.equal(resumedTrial.kind,'trial');

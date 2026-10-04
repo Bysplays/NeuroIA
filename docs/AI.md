@@ -171,3 +171,37 @@ synthetic reference cases on the real endpoint, set account-level cost/privacy
 controls, complete the provider/privacy review, deploy and verify real authorized
 player/professional flows. Record costs, latency and factuality. The generation action,
 routing settings and automated tests alone do not close those release checks.
+
+## Proposal client report lifecycle
+
+With `VITE_PROPOSAL_EVIDENCE=true`, `ActivityAssistant` records start, AI readiness
+(where applicable), PDF readiness, browser download request, failure and explicit
+cancellation. Leaving the report view cancels the current attempt; a late async
+result cannot create a download. Durations use monotonic wall time, distinct from
+game active time and professional preparation time. No draft, participant identity,
+filter, title or free-text failure message enters these records.
+
+`CloudProgress` provides the evidence sink for both player and professional
+workspaces. The existing account outbox archives immutable events in the caller's
+`users/{uid}/reportEvents/{operationId}`, with permanent receipts and server receive
+timestamps. Repeated sends do not add events or modify activity totals. Rules allow
+only the owner to read; linked professionals cannot read another caller's operational
+ledger. Publish compatible rules before enabling the flag; it remains off by default.
+
+An abrupt tab exit or closed account session can leave an unfinished attempt. The
+browser only confirms a download request, never successful disk storage. Local-storage
+failure retains the ordinary in-memory/pending-save behavior. The browser sends a random `clientAttemptId` only for an instrumented report; the
+server stores it alongside its independent attempt ID, never in provider prompts.
+Correlation requires that exact ID and a single nonconflicting server attempt.
+Older, missing or repeated links remain absent or ambiguous, never joined by dates.
+
+The gated “Exportar registro de informes” action downloads all synchronized records
+requested by the current caller, including reports about linked participants. It
+does not export report text or participant identity and is distinct from exporting
+a participant’s game evidence. The browser loads every 200-event client page and
+every server cursor, rechecks permissions and cancels on account/view changes.
+Any page failure prevents download. Output uses fresh ordinal attempt references,
+omits account/attempt IDs and wall dates, preserves model/prompt metadata and reports
+invalid, unfinished, ambiguous and unlinked coverage. Client download requests and
+server-correlated AI downloads are separate counts; neither establishes human review,
+synthesis automation or a confirmed file on disk. Professional review remains open.

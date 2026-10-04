@@ -32,3 +32,6 @@ dist-ssr
 # Cloudflare local secrets and build cache
 .dev.vars*
 .wrangler/
+
+# Reproducible policy training intermediates (curated inference artifact is tracked)
+vendor/adaptation/generated/

@@ -1,4 +1,7 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import {ReportEvidenceExportButton} from './ReportEvidenceExportButton';
+import {SessionEvidenceContext} from '../services/sessionEvidenceContext';
+import {createReportLifecycle} from '../services/reportLifecycle';
+import { useContext, useEffect, useId, useRef, useState } from 'react';
 import { ChartNoAxesColumnIncreasing, ChevronDown, FileText, CircleCheck, Lightbulb, Sparkles } from 'lucide-react';
 import { ModalFrame } from './ModalFrame';
 import { WellnessGlyph } from './WellnessGlyph';
@@ -19,6 +22,7 @@ function Evidence({ insights, ids }: { insights: ActivityInsights; ids: string[]
 
 export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad' }: { uid: string; insights: ActivityInsights; subjectLabel?: string }) {
   const id = useId();
+  const evidence=useContext(SessionEvidenceContext);
   const reportButton = useRef<HTMLButtonElement>(null);
   const closeDownloadNotice = () => {
     setNotice('');
@@ -30,7 +34,7 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
   const [busy, setBusy] = useState<'recommendations' | 'report' | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const requests = useRef({ controller: null as AbortController | null, version: 0 });
+  const requests = useRef({ lifecycle:null as ReturnType<typeof createReportLifecycle>|null, controller: null as AbortController | null, version: 0 });
   useEffect(() => {
     const controller = new AbortController(); const pending = requests.current;
     void activityAi.status(controller.signal).then(status => {
@@ -46,9 +50,10 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
         }
       }
     }).catch(() => { if (!controller.signal.aborted) setStatusChecked(true); });
-    return () => { controller.abort(); pending.controller?.abort(); pending.version++; };
+    return () => { controller.abort(); pending.lifecycle?.emit('cancelled'); pending.lifecycle=null; pending.controller?.abort(); pending.version++; };
   }, [uid, insights.filters.timeZone]);
   const cancel = () => {
+    requests.current.lifecycle?.emit('cancelled'); requests.current.lifecycle=null;
     requests.current.controller?.abort(); requests.current.controller = null; requests.current.version++;
     setBusy(null); setError('');
   };
@@ -59,21 +64,33 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
     const controller = new AbortController(); requests.current.controller = controller;
     const requestId = ++requests.current.version;
     setBusy('report'); setError(''); setNotice('');
+    let clientAttemptId:string|undefined;
+    let lifecycle:ReturnType<typeof createReportLifecycle>|null=null;
     try {
+      if(evidence){
+        clientAttemptId=crypto.randomUUID();
+        lifecycle=createReportLifecycle({attemptId:clientAttemptId,source:available?'ai':'template',sink:event=>evidence.enqueue({id:`report:${event.attemptId}:${event.sequence}`,kind:'report',event})});
+        requests.current.lifecycle=lifecycle;
+      }
       // Reports use the current selected activity; recommendations use their daily snapshot.
-      const result = available ? await activityAi.generate(uid, insights.filters, 'report', controller.signal) : undefined;
+      const result = available ? await activityAi.generate(uid, insights.filters, 'report', controller.signal, clientAttemptId) : undefined;
       if (controller.signal.aborted || requests.current.version !== requestId) return;
+      if(result)lifecycle?.emit('ai-ready');
       const { createActivityReportPdf, downloadActivityReport } = await import('../services/activityReportPdf');
       controller.signal.throwIfAborted();
       const data = result?.insights ?? insights;
       const text = reportNarrative(result?.narrative ?? basicNarrative(insights), data);
-      const pdf = await createActivityReportPdf({ insights: data, text, reference: subjectLabel, provenance: result?.provenance }, controller.signal);
+      const responses = evidence ? await (await import('../services/reportResponses')).loadReportResponses(uid, controller.signal) : undefined;
+      controller.signal.throwIfAborted();
+      const pdf = await createActivityReportPdf({ insights: data, text, reference: subjectLabel, provenance: result?.provenance, responses }, controller.signal);
       if (controller.signal.aborted || requests.current.version !== requestId) return;
-      downloadActivityReport(pdf); setNotice('Informe PDF descargado');
+      lifecycle?.emit('pdf-ready');
+      downloadActivityReport(pdf); lifecycle?.emit('download-requested'); setNotice('Informe PDF descargado');
     } catch (failure) {
+      lifecycle?.emit(controller.signal.aborted?'cancelled':'failed');
       if (requests.current.version === requestId && !controller.signal.aborted) setError(failure instanceof Error ? failure.message : 'No hemos podido generar el contenido. Vuelve a intentarlo.');
     } finally {
-      if (requests.current.version === requestId) { requests.current.controller = null; setBusy(null); }
+      if (requests.current.version === requestId) { requests.current.controller = null; requests.current.lifecycle=null; setBusy(null); }
     }
   };
   return <section className="stats-card activity-assistant" aria-labelledby={`${id}-title`} data-selectable="true">
@@ -112,6 +129,7 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
     <details className="activity-assistant-limits"><summary>Sobre la IA<ChevronDown size={16} aria-hidden="true"/></summary>
       <p>La IA analiza un resumen de tu actividad —juegos, frecuencia, precisión, velocidad y niveles— para proponerte ideas de práctica y generar informes. Las recomendaciones se actualizan la primera vez que abres este resumen cada día y se conservan hasta la siguiente actualización. Para ello, enviamos datos agregados a servidores externos, sin nombres, correos ni identificadores de cuenta. Tú decides qué sugerencias seguir; los niveles y las propuestas profesionales no se modifican.</p>
     </details>
+    {evidence && <ReportEvidenceExportButton/>}
     {error && <p role="alert">{error}</p>}
     <p className="activity-assistant-status" role="status">{busy === 'recommendations' ? 'Preparando tus recomendaciones del día…' : ''}</p>
     {notice && <ModalFrame labelledBy={`${id}-download-title`} onClose={closeDownloadNotice}>

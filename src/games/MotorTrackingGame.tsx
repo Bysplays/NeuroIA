@@ -26,7 +26,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, config, evidence, nextRound } = useGameSession();
   const REQUIRED_CONTACT_SECONDS = config.contactSeconds;
   const TARGET_SIZE = config.targetSize;
   const pointer = useRef<{ x: number; y: number } | null>(null);
@@ -43,6 +43,8 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
 
   const startTimeRef = useRef<number>(clock.now());
   const isTouchingRef = useRef(false);
+  const completedRef = useRef(false);
+  const previousFrame = useRef(clock.performanceNow());
 
   // Iniciar / reiniciar juego
   const initGame = () => {
@@ -50,6 +52,7 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     setVelocity({ vx: config.trackingSpeed, vy: config.trackingSpeed * 0.8 });
     setIsHoveringOrTouching(false);
     setContactTime(0);
+    completedRef.current = false;
     setIsCompleted(false);
     setResult(null);
     startTimeRef.current = clock.now();
@@ -66,11 +69,38 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     soundService.playTap();
   };
 
+  const containTarget = (position: {x:number;y:number}, size:number) => {
+    const arena = arenaRef.current?.getBoundingClientRect();
+    const scale = arena && arenaRef.current?.offsetWidth ? arena.width / arenaRef.current.offsetWidth : 1;
+    const marginX = Math.min(50, Math.max(14, (size / 2 + 8) * scale / (arena?.width || 600) * 100));
+    const marginY = Math.min(50, Math.max(14, (size / 2 + 8) * scale / (arena?.height || 400) * 100));
+    return {x:Math.max(marginX,Math.min(100-marginX,position.x)),y:Math.max(marginY,Math.min(100-marginY,position.y))};
+  };
+
   const handlePointerUp = () => {
+    const wasHeld = isTouchingRef.current || keyboard.current;
+    // Close the sampled interval at the old level before recording its decision.
+    const now = clock.performanceNow();
+    const elapsed = Math.max(0,now-previousFrame.current);
+    if (wasHeld && !completedRef.current) {
+      evidence?.track(elapsed,isHoveringOrTouching);
+      previousFrame.current = now;
+      if (isHoveringOrTouching) setContactTime(contactTime+elapsed/1000);
+    }
     pointer.current = null;
     keyboard.current = false;
     isTouchingRef.current = false;
     setIsHoveringOrTouching(false);
+    // Capture loss follows pointerup: only the first release closes this gesture.
+    if (wasHeld && !completedRef.current && isHoveringOrTouching && contactTime+elapsed/1000 >= REQUIRED_CONTACT_SECONDS) {
+      handleCompleteGame();
+      return;
+    }
+    if (wasHeld && !completedRef.current && nextRound) {
+      const next = nextRound();
+      setTargetPos(containTarget(targetPos,next.targetSize));
+      setVelocity({vx:Math.sign(velocity.vx)*next.trackingSpeed,vy:Math.sign(velocity.vy)*next.trackingSpeed*0.8});
+    }
   };
 
   const handlePointerMoveArena = (e: React.PointerEvent) => {
@@ -80,7 +110,9 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
   };
 
   const handleCompleteGame = () => {
-    if (isCompleted) return;
+    if (completedRef.current) return;
+    completedRef.current = true;
+    keyboard.current = false;
     setIsCompleted(true);
     isTouchingRef.current = false;
     setIsHoveringOrTouching(false);
@@ -134,17 +166,16 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
     const arena = arenaRef.current?.getBoundingClientRect();
     const scale = arena && arenaRef.current?.offsetWidth ? arena.width / arenaRef.current.offsetWidth : 1;
     const renderedTargetSize = TARGET_SIZE * scale;
-    const marginX = Math.min(50, Math.max(14, (renderedTargetSize / 2 + 8 * scale) / (arena?.width || 600) * 100));
-    const marginY = Math.min(50, Math.max(14, (renderedTargetSize / 2 + 8 * scale) / (arena?.height || 400) * 100));
-    if (newX < marginX) { newX = marginX; newVx = Math.abs(newVx); }
-    else if (newX > 100 - marginX) { newX = 100 - marginX; newVx = -Math.abs(newVx); }
-    if (newY < marginY) { newY = marginY; newVy = Math.abs(newVy); }
-    else if (newY > 100 - marginY) { newY = 100 - marginY; newVy = -Math.abs(newVy); }
+    const contained = containTarget({x:newX,y:newY},TARGET_SIZE);
+    if (contained.x !== newX) newVx = contained.x > newX ? Math.abs(newVx) : -Math.abs(newVx);
+    if (contained.y !== newY) newVy = contained.y > newY ? Math.abs(newVy) : -Math.abs(newVy);
+    newX = contained.x; newY = contained.y;
     setTargetPos({ x: newX, y: newY });
     setVelocity({ vx: newVx, vy: newVy });
     const point = pointer.current;
     const contact = keyboard.current || (!!arena && !!point && isTouchingRef.current
       && Math.hypot(point.x - (arena.left + newX / 100 * arena.width), point.y - (arena.top + newY / 100 * arena.height)) <= renderedTargetSize / 2);
+    evidence?.track(deltaMs, contact);
     setIsHoveringOrTouching(contact);
     if (contact) {
       const next = contactTime + deltaMs / 1000;
@@ -159,11 +190,11 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
 
   useEffect(() => {
     if (isCompleted) return;
-    let previous = clock.performanceNow();
+    previousFrame.current = clock.performanceNow();
     let frame: number;
     const tick = (timestamp: number) => {
-      const delta = timestamp - previous;
-      previous = timestamp;
+      const delta = timestamp - previousFrame.current;
+      previousFrame.current = timestamp;
       if (advanceFrame(delta)) frame = clock.requestAnimationFrame(tick);
     };
     frame = clock.requestAnimationFrame(tick);
@@ -217,8 +248,8 @@ export const MotorTrackingGame: React.FC<MotorTrackingGameProps> = ({
             type="button"
             aria-label="Mantén pulsado para acompañar al personaje; con teclado, mantén Espacio"
             onKeyDown={event => { if (event.code === 'Space' || event.code === 'Enter') { event.preventDefault(); keyboard.current = true; } }}
-            onKeyUp={handlePointerUp}
-            onBlur={() => { keyboard.current = false; }}
+            onKeyUp={event => { if (event.code === 'Space' || event.code === 'Enter') handlePointerUp(); }}
+            onBlur={handlePointerUp}
             className={`tracking-target ${isHoveringOrTouching ? 'target-contacted' : ''}`}
             style={{
               left: `${targetPos.x}%`,

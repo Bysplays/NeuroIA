@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { useGameSession } from '../services/gameSession';
 import { PaperTarget } from '../components/PaperTarget';
 import React, { useState } from 'react';
@@ -31,7 +32,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, progressScope, lockedLevel } = useGameSession();
+  const { clock, nextRound, config, progressScope, lockedLevel } = useGameSession();
   const totalTargets = config.targets;
   const targetSize = config.targetSize; // Diana ampliada para máxima accesibilidad y visibilidad
 
@@ -53,6 +54,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
   const [targets, setTargets] = useState<TargetPosition[]>(() => generateRandomTargets(totalTargets, targetSize));
   const [targetIdx, setTargetIdx] = useState(0);
+  const responseEvidence = useResponseEvidence(`target-${targetIdx}`);
   const [touches, setTouches] = useState<{ x: number; y: number; id: number }[]>([]);
   const [accuracySum, setAccuracySum] = useState(0);
   const [misses, setMisses] = useState(0);
@@ -83,6 +85,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     e.stopPropagation();
     if (isCompleted) return;
 
+    responseEvidence.respond(true);
     soundService.playSuccess();
 
     const newTouch = { x: currentTarget.x, y: currentTarget.y, id: targetIdx };
@@ -92,6 +95,10 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
     setAccuracySum(newSum);
 
     if (targetIdx + 1 < targets.length) {
+      const nextConfig=nextRound?.();
+      if(nextConfig&&nextConfig.targetSize!==currentTarget.size){
+        setTargets(targets.map((target,index)=>index>targetIdx?{...target,size:nextConfig.targetSize}:target));
+      }
       setTargetIdx(prev => prev + 1);
     } else {
       const elapsedSeconds = Math.max(15, Math.round((clock.now() - startTime) / 1000));
@@ -124,6 +131,7 @@ export const MotorCoordinationGame: React.FC<MotorCoordinationGameProps> = ({
 
   const handleArenaClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isCompleted) return;
+    responseEvidence.respond(false, false);
     const bounds = event.currentTarget.getBoundingClientRect();
     setMissPoints(points => [...points, {
       x: Math.max(0, Math.min(100, (event.clientX - bounds.left) / bounds.width * 100)),

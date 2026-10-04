@@ -1,3 +1,4 @@
+import { useResponseEvidence } from '../services/sessionEvidenceContext';
 import { selectPool, namingChoices } from '../services/gameObjectPool';
 import type { GameConfig } from '../services/difficulty';
 import { useGameSession } from '../services/gameSession';
@@ -40,10 +41,11 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, nextRound, config } = useGameSession();
   // Preguntas seleccionadas al azar para esta sesión
   const [sessionQuestions, setSessionQuestions] = useState<VocabularyItem[]>(() => createQuestions(config));
   const [currentIdx, setCurrentIdx] = useState(0);
+  const responseEvidence = useResponseEvidence(`question-${currentIdx}`);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -76,6 +78,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
 
     setSelectedOption(option);
     const correct = option === currentQ.word;
+    responseEvidence.respond(correct);
 
     if (correct) {
       soundService.playSuccess();
@@ -100,6 +103,11 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
   const handleNext = () => {
     soundService.playTap();
     if (currentIdx + 1 < sessionQuestions.length) {
+      const nextConfig=nextRound?.();
+      if(nextConfig&&nextConfig.level!==config.level){
+        const remaining=createQuestions(nextConfig).slice(0,sessionQuestions.length-currentIdx-1);
+        setSessionQuestions([...sessionQuestions.slice(0,currentIdx+1),...remaining]);
+      }
       setCurrentIdx(prev => prev + 1);
       setSelectedOption(null);
     } else {
@@ -167,7 +175,7 @@ export const LanguageNamingGame: React.FC<LanguageNamingGameProps> = ({
           </div>
 
           {/* Opciones de respuesta centradas verticalmente en la pantalla */}
-          <div className="naming-options-grid">
+          <div key={currentIdx} className="naming-options-grid">
             {currentOptions.map((option, idx) => {
               const isOptionSelected = selectedOption === option;
               let optionClass = 'naming-option-btn';

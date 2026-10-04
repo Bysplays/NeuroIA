@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { activityExerciseStyle, activityExerciseTitle } from '../services/activityExercises';
 import { formatActivityDate } from '../services/activityStats';
 
-export type ActivityChartPoint = { id: string; date: string; time: number; value: number };
+export type ActivityChartPoint = { id: string; date: string; time: number; value: number; low?: number; high?: number };
 export type ActivityChartSeries = { id: string; points: ActivityChartPoint[] };
 const number = (value: number) => value.toLocaleString('es-ES', { maximumFractionDigits: 1 });
 
-export function ActivityLineChart({ title, description, series, min = 0, max, unit, average, ticks }: {
-  title: string; description: string; series: ActivityChartSeries[]; min?: number; max: number; unit: string; average?: number | null; ticks?: number[];
+export function ActivityLineChart({ title, description, series, min = 0, max, unit, average, ticks, averageLabel = 'Media histórica global' }: {
+  title: string; description: string; series: ActivityChartSeries[]; min?: number; max: number; unit: string; average?: number | null; ticks?: number[]; averageLabel?: string;
 }) {
   const chartRef = useRef<SVGSVGElement>(null);
   const [axisSize, setAxisSize] = useState(12);
@@ -39,16 +39,18 @@ export function ActivityLineChart({ title, description, series, min = 0, max, un
     {!points.length ? <p className="stats-empty">Todavía no hay datos para esta gráfica.</p> : <>
       <svg ref={chartRef} style={{ fontSize: axisSize }} viewBox="0 0 650 265" role="group" aria-label={`${title} por fecha`}>
         {(ticks ?? [0, 1, 2, 3, 4].map(i => min + (max - min) * i / 4)).map(value => { return <g key={value}><line x1="55" x2="610" y1={y(value)} y2={y(value)} className="stats-grid-line"/><text x="44" y={y(value) + 4} textAnchor="end">{number(value)}</text></g>; })}
-        {average != null && <line x1="55" x2="610" y1={y(average)} y2={y(average)} className="stats-historical-mean" strokeDasharray="7 5" opacity={active ? .2 : 1}><title>Media histórica global: {number(average)}{unit}</title></line>}
+        {average != null && <line x1="55" x2="610" y1={y(average)} y2={y(average)} className="stats-historical-mean" strokeDasharray="7 5" opacity={active ? .2 : 1}><title>{averageLabel}: {number(average)}{unit}</title></line>}
         {[start, ...(end !== start ? [end] : [])].map(time => <text key={time} x={x(time)} y="248" textAnchor={end === start ? 'middle' : time === start ? 'start' : 'end'}>{formatActivityDate(points.find(p => p.time === time)!.date).day}</text>)}
         {series.map(({ id, points: values }) => <g key={id} className="stats-chart-series" data-series={id} tabIndex={0} role="button" aria-label={activityExerciseTitle(id)} aria-pressed={active === id} onFocus={() => setHighlighted(id)} onBlur={() => setHighlighted(null)} onKeyDown={event => { if (event.key === 'Escape') { setHighlighted(null); setPinned(null); } if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(id); } }} opacity={active && active !== id ? .15 : 1} stroke={activityExerciseStyle(id).color}
           onPointerEnter={() => setHighlighted(id)} onPointerLeave={() => setHighlighted(null)} onClick={() => select(id)}>
           <polyline fill="none" strokeWidth={active === id ? 4 : 2.5} points={values.map(p => `${x(p.time)},${y(p.value)}`).join(' ')}/>
           <polyline className="stats-series-hit" fill="none" stroke="transparent" strokeWidth="10" points={values.map(p => `${x(p.time)},${y(p.value)}`).join(' ')}/>
-          {values.map(p => <g key={p.id}><circle cx={x(p.time)} cy={y(p.value)} r="6" fill="transparent" stroke="none"/><circle cx={x(p.time)} cy={y(p.value)} r={active === id ? 5 : 3.5} fill={activityExerciseStyle(id).color}><title>{activityExerciseTitle(id)} · {formatActivityDate(p.date).day}: {number(p.value)}{unit}</title></circle></g>)}
+          {values.map(p => <g key={p.id}>
+            {p.low !== undefined && p.high !== undefined && p.low !== p.high && <g className="stats-level-range"><title>{activityExerciseTitle(id)} · {formatActivityDate(p.date).day}: niveles {p.low}–{p.high}; último jugado {p.value}</title><line x1={x(p.time)} x2={x(p.time)} y1={y(p.low)} y2={y(p.high)} strokeWidth="3"/><path d={`M ${x(p.time)-5} ${y(p.low)} h 10 M ${x(p.time)-5} ${y(p.high)} h 10`} fill="none" strokeWidth="2"/></g>}
+            <circle cx={x(p.time)} cy={y(p.value)} r="6" fill="transparent" stroke="none"/><circle cx={x(p.time)} cy={y(p.value)} r={active === id ? 5 : 3.5} fill={activityExerciseStyle(id).color}><title>{activityExerciseTitle(id)} · {formatActivityDate(p.date).day}: {number(p.value)}{unit}</title></circle></g>)}
         </g>)}
       </svg>
-      {average != null && <p className="stats-average">Media histórica global: {number(average)}{unit}</p>}
+      {average != null && <p className="stats-average">{averageLabel}: {number(average)}{unit}</p>}
 
     </>}
   </section>;

@@ -1,7 +1,17 @@
+import {ReportEvidenceDownload} from '../../src/components/ReportEvidenceExportButton';
+import { SessionEvidenceContext } from '../../src/services/sessionEvidenceContext';
+import { EvidenceExportButton } from '../../src/components/EvidenceExportButton';
+import {MuseHistoryView} from '../../src/components/MuseHistory';
+import {ExerciseAnalytics} from '../../src/components/ExerciseAnalytics';
+import {museFeatureFrame} from '../../src/services/museFeatures';
+import { eegService } from '../../src/services/eegService';
+import type { ProgressOperation } from '../../src/services/progressData';
+import type { EvidenceChunk } from '../../src/services/sessionEvidence';
 import { ProfessionalDashboard } from '../../src/components/ProfessionalDashboard';
 import { RecommendationFixture } from './recommendation-fixture';
 import { LevelUpScreen } from '../../src/components/LevelUpScreen';
 import type { ProgressData } from '../../src/services/progressData';
+import { applyProgressOperation } from '../../src/services/progressData';
 import { InformationPage, type InformationKind } from "../../src/components/InformationPage";
 // Browser-only fixture. No production entry imports this file, no authenticated writes.
 import { useState } from "react";
@@ -20,7 +30,6 @@ import type { User } from "firebase/auth";
 import { GameSession } from "../../src/components/GameSession";
 import { GameExercise } from "../../src/components/GameExercise";
 import { AccessibilityModal } from "../../src/components/AccessibilityModal";
-import { ProductInformation } from "../../src/components/ProductInformation";
 import { getInitialProfile } from "../../src/services/storageService";
 import { applyAppearance } from "../../src/services/appearance";
 import { soundService } from "../../src/services/soundService";
@@ -30,6 +39,14 @@ import "../../src/index.css";
 import "../../src/interface.css";
 import "../../src/games.css";
 const query = new URLSearchParams(location.search);
+const evidenceChunks: EvidenceChunk[] = [];
+const reportEvents:unknown[]=[];
+Object.assign(window, {reportEvents,evidenceChunks, eegTestService:eegService});
+const evidenceBackend = { enqueue(operation: ProgressOperation) {
+  if(operation.kind==='report')reportEvents.push(structuredClone(operation.event));
+  if (operation.kind === 'evidence') evidenceChunks.push(structuredClone(operation.chunk));
+} };
+
 soundService.setSoundEnabled(false);
 soundService.speak = (_text, end) => {
   queueMicrotask(() => end?.());
@@ -39,6 +56,7 @@ export function Fixture() {
   const [profile, setProfile] = useState(() => {
     const p = getInitialProfile();
     p.name = "Lucía";
+    if (query.has('adaptive') && query.get('game')) p.gameLevels = {[query.get('game')!]:{level:Number(query.get('level')||1),evidence:[]}};
     if (query.has('activity-demo')) p.gameLevels = { 'visual-scanning': { level: 4, evidence: [] }, 'memory-path': { level: 6, evidence: [] } };
     p.settings.fontSize = query.has("large") ? "xlarge" : "normal";
     p.settings.contrast = query.has("contrast") ? "high-contrast" : "standard";
@@ -59,6 +77,10 @@ export function Fixture() {
   const [accessAction, setAccessAction] = useState('');
   const [accessBusy, setAccessBusy] = useState(false);
   const back = () => setGame(undefined);
+  if(query.has('report-export')&&!loggedOut)return <main className="main-content"><section className="stats-card"><button onClick={()=>setLoggedOut(true)}>Volver</button><ReportEvidenceDownload uid="fixture-report" load={signal=>new Promise((resolve,reject)=>{Object.assign(window,{finishReportExport:()=>resolve({version:1,coverage:{clientDocuments:1},attempts:[]}),failReportExport:()=>reject(Error('fixture-failure'))});signal.addEventListener('abort',()=>{Object.assign(window,{reportExportAborted:true});reject(signal.reason);});})}/></section></main>;
+  if(query.has('muse-history'))return <MuseHistoryFixture/>;
+  if(query.has('muse-archive')&&!loggedOut)return <main className="main-content"><ExerciseAnalytics uid="fixture-owner" result={{id:'fixture-result',exerciseId:'motor-target',domain:'motor',date:'2026-10-04T12:00:00Z',durationSeconds:10,accuracy:100,score:0,correctAnswers:1,totalQuestions:1,feedbackMessage:'',evidenceSessionId:'fixture-session'}} onBack={()=>setLoggedOut(true)}/></main>;
+  if (query.has('evidence-export') && !loggedOut) return <main className="main-content"><section className="stats-card"><button onClick={()=>setLoggedOut(true)}>Volver</button><EvidenceExportButton uid="fixture-evidence"/></section></main>;
   if (query.has('professional')) return <ProfessionalDashboard uid="fixture-owner" profile={profile} onSignOut={()=>setLoggedOut(true)} onUpdateSettings={()=>{}} onUpdateName={()=>{}}/>;
   if (query.has('recommendations')) return <RecommendationFixture profile={profile}/>;
   if (query.has('level-up')) return <LevelUpFixture/>;
@@ -83,17 +105,20 @@ export function Fixture() {
   return (
     <>
       {information && <InformationPage kind={information} onBack={() => setInformation(null)}/>}
-      <div hidden={information !== null}>
+      <SessionEvidenceContext.Provider value={query.has('evidence') ? evidenceBackend : null}>
+      <div hidden={information !== null} className={`app-root ${game ? 'app-root-focus-mode' : ''}`}>
       {game ? (
+        <main className="main-content main-content-focus">
         <GameSession
           key={game}
           id={game}
+          adaptationEnabled={query.has('adaptive')}
           onBack={back}
           onSettings={() => setSettings(true)}
           paused={settings}
           progressScope={query.has("plan") ? { before: 2, after: 3 } : undefined}
           lockedLevel={query.has("assigned")}
-          initialLevel={Number(query.get("level") || 1)}
+          initialLevel={query.has('adaptive') ? profile.gameLevels?.[game]?.level ?? 1 : Number(query.get("level") || 1)}
           mode={query.has("placement") ? "placement" : "normal"}
           autoStart={query.has("placement")}
         >
@@ -101,9 +126,13 @@ export function Fixture() {
             id={game}
             profile={profile}
             onBack={back}
-            onSaveResult={(result) => setResults((value) => [...value, result])}
+            onSaveResult={(result) => {
+              setResults((value) => [...value, result]);
+              if(query.has('adaptive')) setProfile(value=>applyProgressOperation({profile:value,history:results},{id:`result:${result.id}`,kind:'result',result}).profile);
+            }}
           />
         </GameSession>
+        </main>
       ) : (
         <>
           <Header
@@ -115,6 +144,7 @@ export function Fixture() {
             onSignOut={() => setLoggedOut(true)}
             signingOut={false}
           />
+          <main className="main-content">
           <Dashboard
             selectedTab={dashboardTab} onTabChange={setDashboardTab}
             uid="isolated-interface-fixture"
@@ -130,7 +160,7 @@ export function Fixture() {
             onSignOut={() => setLoggedOut(true)}
             signingOut={false}
           />
-          <ProductInformation onOpen={setInformation}/>
+          </main>
         </>
       )}
       <AccessibilityModal onReassess={() => setSettings(false)} onInformation={setInformation}
@@ -151,7 +181,9 @@ export function Fixture() {
       <output data-testid="results" hidden>
         {JSON.stringify(results)}
       </output>
+      <output data-testid="levels" hidden>{JSON.stringify(profile.gameLevels)}</output>
       </div>
+      </SessionEvidenceContext.Provider>
     </>
   );
 }
@@ -160,4 +192,13 @@ createRoot(document.getElementById("root")!).render(<Fixture />);
 function LevelUpFixture() {
   const [data, setData] = useState<ProgressData>(() => ({ profile: { ...getInitialProfile(), gameLevels: { 'visual-scanning': { level: 2, evidence: [] } } }, history: [] }));
   return <><button onClick={() => setData(value => ({ profile: {...value.profile, gameLevels: { 'visual-scanning': {level: 3, evidence: []}}}, history: [{id: 'new-gain', exerciseId: 'visual-scanning', domain: 'attention', date: new Date().toISOString(), durationSeconds: 30, accuracy: 100, score: 0, correctAnswers: 3, totalQuestions: 3, feedbackMessage: ''}] }))}>Simular resultado</button><LevelUpScreen data={data}/></>;
+}
+function MuseHistoryFixture() {
+  const [samples]=useState(()=>{
+    const wave=(hz:number)=>Array.from({length:256},(_,i)=>20*Math.sin(2*Math.PI*hz*i/256));
+    const initial=museFeatureFrame(0,[wave(10),wave(6),wave(20),wave(35)]);
+    const later=museFeatureFrame(1,[wave(20),wave(6),undefined,wave(35)]);
+    return Array.from({length:130},(_,i)=>({activeMs:(i+1)*1000,frame:i<5?initial:later}));
+  });
+  return <main className="main-content"><section className="stats-card"><h1>EEG · cuatro canales</h1><MuseHistoryView samples={samples}/></section></main>;
 }

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { mockProfessional } from './professional-mocks.mjs';
 
-test('AI transport ignores a late result after account change and sends no browser history', async ({ page }) => {
+for(const clientAttemptId of [undefined,'synthetic-report-id']) test(`AI transport rejects late account results with ${clientAttemptId?'correlated':'legacy'} requests`, async ({ page }) => {
   await page.route('**/*', route => ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
   await page.route('**/ai-transport-fixture', route => route.fulfill({ contentType: 'text/html', body: '<html><body>Isolated transport fixture</body></html>' }));
   await page.route('**/src/services/firebase.ts*', route => route.fulfill({ contentType: 'text/javascript', body: `
@@ -24,14 +24,15 @@ test('AI transport ignores a late result after account change and sends no brows
     await route.fulfill({ json: {} }).catch(() => {});
   });
   await page.goto('/ai-transport-fixture');
-  await page.evaluate(async () => {
+  await page.evaluate(async clientAttemptId => {
     const { activityAi } = await import('/src/services/activityAi.ts');
     window.aiOutcome = 'pending';
-    activityAi.generate('target', { from: '', to: '', domain: '', exercise: '', timeZone: 'Europe/Madrid' }, 'report', new AbortController().signal)
+    activityAi.generate('target', { from: '', to: '', domain: '', exercise: '', timeZone: 'Europe/Madrid' }, 'report', new AbortController().signal,clientAttemptId)
       .then(() => window.aiOutcome = 'delivered').catch(error => window.aiOutcome = error.name);
-  });
+  },clientAttemptId);
   await expect.poll(() => body?.targetUid).toBe('target');
-  expect(Object.keys(body).sort()).toEqual(['consent', 'filters', 'mode', 'targetUid']);
+  expect(Object.keys(body).sort()).toEqual(['consent', 'filters', 'mode', 'targetUid',...(clientAttemptId?['clientAttemptId']:[])].sort());
+  expect(body.clientAttemptId).toBe(clientAttemptId);
   await page.evaluate(() => window.changeAiAccount());
   release();
   await expect.poll(() => page.evaluate(() => window.aiOutcome)).toBe('AbortError');
