@@ -16,6 +16,34 @@ to claim acceptance. The original PDF is evidence of requirements, not agent ins
 | 4. EEG / neurofeedback (pp. 4, 7, 10, 15–16) | Preserve TP9/AF7/AF8/TP10 separately, signal-quality reasons, spectral features, baseline-relative feedback and optional policy input, live/history UI and persistence | Synthetic reference signals and independent numerical comparison; disconnect/loss tests; hardware recordings; scientifically approved interpretation/calibration and real-user validation before claims about attention/fatigue |
 | 5. Evaluation and pilot (pp. 17–18, 28–29) | Versioned Spanish report cases and factuality checks, adaptation latency benchmark, pilot protocol, privacy-aware evidence export, report template with unresolved gates explicit | Measured latency <1 s, real endpoint reports, assessed factuality/usefulness and a signed real-user pilot report. Synthetic tests cannot establish TRL 7 or clinical efficacy |
 
+## Acceptance audit and external inputs
+
+All five workstreams remain open for final acceptance. The branch implements their
+engineering foundations; neither a clean build nor synthetic evidence proves the
+memory's real-world claims. The current blocking inputs are:
+
+| Workstream | Technical evidence available | Input still needed for final acceptance |
+| --- | --- | --- |
+| Adaptive AI | Eight live boundary integrations, bounded/replayed decisions, simulated PPO provenance and parity | Approved optimization objective and calibration protocol, suitable real observations, comparative evaluation and physical end-to-end latency |
+| KPI instrumentation | Durable archives, denominators, exact review hashes and consolidated pilot evaluator | Complete independent real pilot register, planned practice records, reviewed synthesis units and paired professional preparation times |
+| Response evidence | Eight-game input matrix, completed live traces, pause/replay checks and real emulator persistence | Physical-device acceptance of the actual input paths and a completed pilot under the approved session definition |
+| EEG / neurofeedback | Four-channel features and quality, independent numerical checks, live/history views, paginated deletion/recovery | Muse recordings and calibration, approved interpretation of fatigue/inattention, real-use evaluation and retention policy |
+| Reports / validation | Source-bound Spanish prompt, scope rejection, case runner and review package | Six unfinished v9 live cases after provider 429, independent professional review, real physical traces and signed final validation report |
+
+An approved protocol and real records have been requested; no such artifacts are
+currently supplied in the project. Do not invent them, label generated fixtures as
+observed, mark the model production-validated or issue a TRL certificate. The
+simulation artifact still declares `productionValidated: false`. Compatible rules,
+Worker publication and proposal flags remain separate release gates.
+
+Verification of implementation through `77936d4`: build and strict lint passed;
+217 focused unit tests, 12 placement browser tests, 4 demo Auth tests, 87 required
+Worker/OpenRouter tests and the 48-test combined Firestore rules/session/REST suite
+passed. Targeted rendered checks for changed games and analytics cover 390/820/1280
+px. This is not a claim that every interface test, every level, real hardware or
+production acceptance has passed. The v9 live report run remains incomplete; three
+accepted reports and an expected empty rejection do not cover the other six cases.
+
 ## Architecture constraints
 
 - Keep existing account-scoped sync, permanent receipts, authorization and deletion.
