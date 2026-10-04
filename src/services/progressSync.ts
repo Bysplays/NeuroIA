@@ -1,3 +1,4 @@
+import {validSaveEvent,saveErrorCategory,type SaveEvent} from './saveEvidence.ts';
 import type { AccessibilitySettings } from '../types/index.ts';
 import { applyProgressOperation, type ProgressData, type ProgressOperation } from './progressData.ts';
 
@@ -16,6 +17,7 @@ export class ProgressSync {
   // Keep locally edited fields stable for this session while cloud progress updates.
   private localSettings: Partial<AccessibilitySettings> = {};
   private localName: string | undefined;
+  private recordSaves = false;
   private stopped = false;
   private running = false;
   private online = true;
@@ -29,7 +31,9 @@ export class ProgressSync {
     backend: ProgressBackend,
     persist: (queue: ProgressOperation[]) => void,
     changed: (data: ProgressData, status: SyncStatus, error?: unknown) => void,
+    options: {recordSaves?:boolean} = {},
   ) {
+    this.recordSaves=options.recordSaves===true;
     this.backend = backend;
     this.persist = persist;
     this.changed = changed;
@@ -84,7 +88,17 @@ export class ProgressSync {
       while (this.queue.length && !this.stopped && this.online) {
         this.changed(this.data, 'saving');
         const operation = this.queue[0];
-        const remote = await this.backend.commit(operation);
+        const started=performance.now();
+        const attempt:SaveEvent|null=this.recordSaves&&operation.kind==='result'&&operation.result.id.length<=512
+          ? {version:1,attemptId:crypto.randomUUID(),resultId:operation.result.id,mode:operation.result.practice?'practice':'normal',status:'started',elapsedMs:0,at:new Date().toISOString(),errorCategory:'none'}:null;
+        if(attempt)this.appendSaveEvidence(attempt);
+        let remote:ProgressData;
+        try{remote=await this.backend.commit(operation);}
+        catch(error){
+          if(attempt)this.appendSaveEvidence({...attempt,status:'failed',elapsedMs:Math.round(performance.now()-started),at:new Date().toISOString(),errorCategory:saveErrorCategory(error)});
+          throw error;
+        }
+        if(attempt)this.appendSaveEvidence({...attempt,status:'acknowledged',elapsedMs:Math.round(performance.now()-started),at:new Date().toISOString()});
         if (this.stopped) return;
         const remaining = this.queue.slice(1);
         this.persist(remaining);
@@ -104,6 +118,11 @@ export class ProgressSync {
       this.running = false;
       if (succeeded && this.queue.length && !this.stopped) void this.retry();
     }
+  }
+  private appendSaveEvidence(event:SaveEvent) {
+    if(this.stopped||!validSaveEvent(event))return;
+    this.queue=[...this.queue,{id:`save:${event.attemptId}:${event.status}`,kind:'save-evidence',event}];
+    try{this.persist(this.queue);}catch{/* Same in-memory fallback as ordinary pending progress. */}
   }
   private withLocalSettings(data: ProgressData): ProgressData {
     return {

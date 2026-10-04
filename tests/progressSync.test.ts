@@ -189,3 +189,32 @@ test('placement evidence survives offline restart and conflicting device trials 
   assert.equal(stored.length, 0);
   resumed.stop();
 });
+
+test('save telemetry survives failure/reload, distinguishes receipts and never recursively records its own writes',async()=>{
+  const remote=backend();remote.offline(true);let stored:ProgressOperation[]=[];
+  const first=new ProgressSync(initial(),[],remote.api,queue=>{stored=structuredClone(queue);},()=>{},{recordSaves:true});
+  first.enqueue(result('tracked'));await settle();
+  const events=stored.filter(op=>op.kind==='save-evidence').map(op=>op.event);
+  assert.deepEqual(events.map(event=>event.status),['started','failed']);
+  assert.equal(events[0].attemptId,events[1].attemptId);first.stop();
+  remote.offline(false);const sent:ProgressOperation[]=[];
+  const next=new ProgressSync(remote.data(),stored,{...remote.api,commit:async op=>{sent.push(op);return remote.api.commit(op);}},queue=>{stored=structuredClone(queue);},()=>{},{recordSaves:true});
+  await next.retry();
+  assert.equal(remote.data().profile.totalSessions,1);assert.equal(stored.length,0);
+  assert.deepEqual(sent.filter(op=>op.kind==='save-evidence').map(op=>op.event.status),['started','failed','started','acknowledged']);
+  assert.equal(sent.length,5);next.stop();
+});
+test('late result completion after account shutdown leaves its prior save attempt unfinished',async()=>{
+  const remote=backend();let resolve:(data:ProgressData)=>void=()=>{};let stored:ProgressOperation[]=[];
+  const sync=new ProgressSync(initial(),[],{...remote.api,commit:()=>new Promise(done=>{resolve=done;})},queue=>{stored=structuredClone(queue);},()=>{},{recordSaves:true});
+  sync.enqueue(result('late'));await settle();sync.stop();resolve(initial());await settle();
+  assert.deepEqual(stored.filter(op=>op.kind==='save-evidence').map(op=>op.event.status),['started']);
+});
+test('a lost result acknowledgment is retried idempotently and retains both transport observations',async()=>{
+  const remote=backend();let lost=true;const sent:ProgressOperation[]=[];
+  const api={...remote.api,commit:async(op:ProgressOperation)=>{sent.push(op);const data=await remote.api.commit(op);if(op.kind==='result'&&lost){lost=false;throw Object.assign(Error('lost-ack'),{code:'unavailable'});}return data;}};
+  const sync=new ProgressSync(initial(),[],api,()=>{},()=>{},{recordSaves:true});sync.enqueue(result('lost'));await settle();
+  assert.equal(remote.data().profile.totalSessions,1);await sync.retry();
+  assert.equal(remote.data().profile.totalSessions,1);
+  assert.deepEqual(sent.filter(op=>op.kind==='save-evidence').map(op=>op.event.status),['started','failed','started','acknowledged']);sync.stop();
+});

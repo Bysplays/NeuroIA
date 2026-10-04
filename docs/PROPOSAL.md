@@ -77,7 +77,7 @@ The new rules have not been deployed; never claim production event collection.
 | Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded end-of-exercise decisions and persistent application audit behind a separate flag | Real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance and visible response metrics; distinguish speed from measured response latency |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
-| Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save outcomes, adherence denominator and pilot KPI aggregation with an independent attempt register remain |
+| Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; adherence denominator and pilot KPI aggregation with an independent attempt register remain |
 | Validation and TRL 7 (pp. 17–18, 28–29) | Unit/browser/emulator checks; independent numerical EEG comparison | End-to-end latency acceptance, completed report evaluation and documented pilot protocol; a local actor benchmark exists, but hardware and real-user evidence cannot be completed by code alone |
 
 Memory acceptance targets remain unproven: adaptive latency <1 s, correctly
@@ -164,5 +164,24 @@ evaluator flags these for explicit factuality/scope review; schema success does 
 close report acceptance. Independent human review and measured pilot outcomes remain
 pending. Server report-attempt telemetry is now implemented behind `PROPOSAL_REPORT_EVIDENCE`;
 client PDF phases now persist through the ordinary outbox. Client/server correlation and complete paginated lifecycle export now preserve
-invalid, unfinished, ambiguous and unlinked coverage. Save outcomes and adherence
-denominators remain separate open work.
+invalid, unfinished, ambiguous and unlinked coverage. Save-attempt outcomes now use the same durable outbox and are reconciled with the
+result archive. Adherence denominators and independent pilot acceptance remain open.
+
+## Result-save observations
+
+`ProgressSync` optionally records each result commit invocation, including its
+monotonic elapsed time and coarse failure category. Starts are persisted before
+sending, and acknowledgment/failure records use the same outbox and permanent
+receipts. Metadata writes never instrument themselves. A stopped account session
+cannot append a late terminal event into the next session. This counts adapter
+commit attempts, including any internal SDK retries, not new completed exercises.
+The browser flag remains off until compatible `saveEvents`/receipt rules deploy.
+
+The complete evaluation export loads all save-event pages and reconciles unique
+result references against archived results. It distinguishes failed transport,
+acknowledged adapter calls, unfinished attempts and contradictory evidence. A failed
+response can coexist with an archived result; retries do not inflate distinct-result
+counts. Export replaces attempt/result IDs with ordinals and omits wall timestamps
+and free-text errors. Raw events follow ordinary account deletion and owner/active
+professional activity permissions. These are client observations, not server
+attestations or an independent denominator for the >95% pilot registration KPI.

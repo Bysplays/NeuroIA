@@ -79,6 +79,7 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
    tx.set(`users/${deletedUid}/results/a`,{value:'private'},false);
    tx.set(`users/${deletedUid}/operations/a`,{value:'receipt'},false);
    tx.set(`users/${deletedUid}/reportAttempts/a`,{version:1,status:'started'},false);
+   tx.set(`users/${deletedUid}/saveEvents/a`,{version:1,status:'started'},false);
    tx.set(`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`,{patientId:deletedUid},false);
  });
  assert.ok(await db.nextDeletion() === undefined);
@@ -92,8 +93,8 @@ test('real REST transactions retry conflicts and preserve unrelated document fie
    if(job.phase==='done') break;
  }
  assert.deepEqual(deleted,[['delete',deletedUid]]);
- const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`users/${deletedUid}/reportAttempts/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
- assert.deepEqual(remaining,[null,null,null,null,null]);
+ const remaining=await db.runTransaction(tx=>tx.getMany([`users/${deletedUid}/access/main`,`users/${deletedUid}/results/a`,`users/${deletedUid}/operations/a`,`users/${deletedUid}/reportAttempts/a`,`users/${deletedUid}/saveEvents/a`,`professionals/old/seats/missing/participants/${deletedUid}/sessions/a`]),4,true);
+ assert.deepEqual(remaining,[null,null,null,null,null,null]);
  await startTrial('recreated-'+deletedUid,email,lifecycleEnv,db);
  const resumedTrial=await db.runTransaction(tx=>tx.get(`users/recreated-${deletedUid}/access/main`));
  assert.equal(resumedTrial.kind,'trial');

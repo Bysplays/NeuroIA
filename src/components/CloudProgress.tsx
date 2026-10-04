@@ -46,7 +46,7 @@ export function CloudProgress({ user, onSignOut, children }: {
           if (!active || !StorageService.isAccount(user.uid)) return;
           StorageService.cacheProgress(next);
           setView({ stage: 'ready', data: next, sync: session, status, message: error ? syncError(error) : undefined });
-        });
+        }, {recordSaves:import.meta.env.VITE_PROPOSAL_EVIDENCE==='true'});
       if (!navigator.onLine) session.setOnline(false);
       session.start();
     };

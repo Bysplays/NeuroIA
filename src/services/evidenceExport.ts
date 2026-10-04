@@ -1,3 +1,4 @@
+import {summarizeSaveEvidence} from './saveEvidence.ts';
 import { summarizeEvidence } from './evidenceSummary.ts';
 import type { EvidenceChunk } from './sessionEvidence.ts';
 import type { ExerciseResult } from '../types/index.ts';
@@ -7,7 +8,7 @@ import { readAdaptationDecision } from './adaptivePolicy.ts';
  * references deliberately omit UID, session/result IDs, wall timestamps, free
  * text, mistakes, notes and raw EEG. Counts describe only the loaded archive.
  */
-export function buildEvidenceExport(chunks: EvidenceChunk[], results: ExerciseResult[], complete: boolean) {
+export function buildEvidenceExport(chunks: EvidenceChunk[], results: ExerciseResult[], complete: boolean, saveEvents:unknown[]=[]) {
   const groups = new Map<string,EvidenceChunk[]>();
   let malformedDocuments = 0;
   for (const chunk of chunks) {
@@ -38,7 +39,7 @@ export function buildEvidenceExport(chunks: EvidenceChunk[], results: ExerciseRe
   });
   const completed=attempts.filter(attempt=>attempt.status==='completed');
   const normalCompleted=completed.filter(attempt=>attempt.mode==='normal');
-  return {version:1,coverage:{complete,documents:chunks.length,malformedDocuments,attempts:attempts.length},attempts,
+  return {version:1,saves:summarizeSaveEvidence(saveEvents,results),coverage:{complete,documents:chunks.length,malformedDocuments,attempts:attempts.length},attempts,
     counts:{completed:completed.length,normalCompleted:normalCompleted.length,registeredNormalCompleted:normalCompleted.filter(attempt=>attempt.resultSaved).length,
       abandoned:attempts.filter(attempt=>attempt.status==='abandoned').length,
       unfinished:attempts.filter(attempt=>attempt.status==='unfinished').length,

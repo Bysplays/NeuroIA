@@ -809,3 +809,11 @@ and server pages before releasing an export. `ReportEvidenceExportButton` uses t
 shared `EvidenceDownload` controls; identity and deletion guards remain enforced.
 The export belongs to the caller, never a selected participant. Preserve malformed,
 unlinked and ambiguous coverage; do not match by wall-clock proximity.
+
+With the proposal evidence flag enabled, `ProgressSync` records result commit
+attempts through `save-evidence` operations and immutable `saveEvents`. The same
+outbox preserves starts and terminal observations; metadata writes never recursively
+instrument themselves. `saveEvidence.ts` validates/deduplicates these events and
+reconciles them with archived results in the paginated evaluation export. Failed
+transport does not prove a lost result. Preserve the stopped-account guard and
+ordinary pending-storage fallback. Publish compatible rules before enabling.

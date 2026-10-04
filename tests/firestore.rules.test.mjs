@@ -45,6 +45,7 @@ test('proposal evidence export paginates beyond 200 documents and enforces isola
       events:JSON.stringify([{kind:'start',level:1,configVersion:1,mode:'normal',locked:false,sequence:0,activeMs:0,at:'2026-10-04T12:00:00.000Z'}]),
       receivedAt:serverTimestamp(),
     })));
+    await Promise.all(Array.from({length:201},(_,i)=>setDoc(doc(db,`users/${uid}/saveEvents/save-${i}`),{version:1,attemptId:`save-${i}`,resultId:`result-${i}`,mode:'normal',status:'started',elapsedMs:0,at:'2026-10-04T12:00:00.000Z',errorCategory:'none',receivedAt:serverTimestamp()})));
   });
   const db=env.authenticatedContext(uid).firestore();
   const first=await loadEvidencePage(db,uid);
@@ -57,6 +58,7 @@ test('proposal evidence export paginates beyond 200 documents and enforces isola
   const exported=await loadEvidenceExport(db,uid,new AbortController().signal);
   assert.equal(exported.coverage.documents,201);assert.equal(exported.coverage.complete,true);
   assert.equal(exported.counts.unfinished,201);assert.equal(exported.counts.completed,0);
+  assert.equal(exported.saves.coverage.documents,201);assert.equal(exported.saves.counts.unfinished,201);
   await assertFails(loadEvidencePage(env.authenticatedContext('stranger-export').firestore(),uid));
   const controller=new AbortController();controller.abort();
   await assert.rejects(loadEvidenceExport(db,uid,controller.signal),{name:'AbortError'});
@@ -682,4 +684,21 @@ test('report export reads beyond 200 events, follows server cursors and refuses 
   await assert.rejects(loadReportEvidenceExport(db,uid,async()=>({records:[],nextCursor:'loop'}),new AbortController().signal),/stalled-server-pagination/);
   const cancelled=new AbortController();cancelled.abort();await assert.rejects(loadReportEvidenceExport(db,uid,page,cancelled.signal),{name:'AbortError'});
   await assert.rejects(loadReportEvidenceExport(env.authenticatedContext('unrelated-report').firestore(),uid,page,new AbortController().signal));
+});
+
+test('save observations are immutable, receipt-idempotent and exported with result reconciliation',async()=>{
+  const uid='save-observations',db=env.authenticatedContext(uid).firestore(),backend=firestoreProgress(uid,db);
+  await backend.initialize(fresh());await backend.commit(op('save-result'));
+  const start={version:1,attemptId:'save-attempt',resultId:'save-result',mode:'normal',status:'started',elapsedMs:0,at:'2026-10-04T12:00:00.000Z',errorCategory:'none'};
+  for(const event of [start,{...start,status:'failed',elapsedMs:25,errorCategory:'network'}]){
+    const operation={id:`save:${event.attemptId}:${event.status}`,kind:'save-evidence',event};
+    await backend.commit(operation);await backend.commit(operation);
+  }
+  const archive=await loadEvidenceExport(db,uid,new AbortController().signal);
+  assert.equal(archive.saves.coverage.documents,2);assert.equal(archive.saves.counts.failed,1);
+  assert.equal(archive.saves.counts.distinctNormalResultsArchived,1);assert.equal((await backend.load()).profile.totalSessions,1);
+  const path=`users/${uid}/saveEvents/${encodeURIComponent('save:save-attempt:started')}`;
+  await assertFails(updateDoc(doc(db,path),{status:'acknowledged'}));await assertFails(deleteDoc(doc(db,path)));
+  await assertFails(getDoc(doc(env.authenticatedContext('save-stranger').firestore(),path)));
+  await assertFails(setDoc(doc(db,`users/${uid}/saveEvents/leak`),{...start,errorMessage:'private',receivedAt:serverTimestamp()}));
 });

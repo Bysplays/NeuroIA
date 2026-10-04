@@ -61,8 +61,17 @@ export async function loadEvidenceExport(db: Firestore, uid: string, signal: Abo
     if (!next || next===cursor) throw Error('result-pagination-stalled');
     cursor=next;
   }
+  const saveEvents:unknown[]=[];cursor=undefined;
+  while(true){
+    signal.throwIfAborted();
+    const snapshot:QuerySnapshot=await getDocsFromServer(query(collection(db,'users',uid,'saveEvents'),orderBy(documentId()),...(cursor?[startAfter(cursor)]:[]),limit(200)));
+    signal.throwIfAborted();
+    saveEvents.push(...snapshot.docs.map(doc=>{const {receivedAt:_,...event}=doc.data();return event;}));
+    if(snapshot.size<200)break;
+    const next=snapshot.docs.at(-1)!.id;if(next===cursor)throw Error('save-event-pagination-stalled');cursor=next;
+  }
   // Recheck current read permission after pagination, immediately before release.
   await loadEvidencePage(db,uid,{signal});
   signal.throwIfAborted();
-  return buildEvidenceExport(chunks,results,true);
+  return buildEvidenceExport(chunks,results,true,saveEvents);
 }

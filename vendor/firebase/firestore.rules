@@ -159,8 +159,24 @@ service cloud.firestore {
       allow get: if owns(uid);
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['kind', 'createdAt'])
-        && request.resource.data.kind in ['result', 'settings', 'placement', 'evidence', 'report']
+        && request.resource.data.kind in ['result', 'settings', 'placement', 'evidence', 'report', 'save-evidence']
         && request.resource.data.createdAt == request.time;
+    }
+    // Result-save transport observations; immutable and separate from activity totals.
+    match /users/{uid}/saveEvents/{eventId} {
+      allow read: if owns(uid) || linkedProfessional(uid);
+      allow create: if owns(uid)
+        && request.resource.data.keys().hasOnly(['version','attemptId','resultId','mode','status','elapsedMs','at','errorCategory','receivedAt'])
+        && request.resource.data.version == 1
+        && request.resource.data.attemptId is string && request.resource.data.attemptId.matches('[a-zA-Z0-9_-]{1,128}')
+        && request.resource.data.resultId is string && request.resource.data.resultId.size() > 0 && request.resource.data.resultId.size() <= 512
+        && request.resource.data.mode in ['normal','practice']
+        && request.resource.data.status in ['started','acknowledged','failed']
+        && request.resource.data.elapsedMs is int && request.resource.data.elapsedMs >= 0
+        && request.resource.data.at is string && request.resource.data.at.size() == 24
+        && request.resource.data.errorCategory in ['none','network','permission','other']
+        && (request.resource.data.status == 'started' ? request.resource.data.elapsedMs == 0 && request.resource.data.errorCategory == 'none' : request.resource.data.status == 'acknowledged' ? request.resource.data.errorCategory == 'none' : request.resource.data.errorCategory != 'none')
+        && request.resource.data.receivedAt == request.time;
     }
     // Caller-owned operational metadata, never the participant's report content.
     match /users/{uid}/reportEvents/{eventId} {

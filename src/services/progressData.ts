@@ -1,3 +1,4 @@
+import {validSaveEvent,type SaveEvent} from './saveEvidence.ts';
 import {validReportEvent,type ReportEvent} from './reportLifecycle.ts';
 import { placementExercises, validPlacementPreferences, type PlacementPreferences } from './placementPreferences.ts';
 import { readEvidenceChunk, type EvidenceChunk } from './sessionEvidence.ts';
@@ -8,6 +9,7 @@ import type { AccessibilitySettings, ExerciseResult, UserProfile } from '../type
 
 export interface ProgressData { profile: UserProfile; history: ExerciseResult[] }
 export type ProgressOperation =
+  | {id:string;kind:'save-evidence';event:SaveEvent}
   | {id:string;kind:'report';event:ReportEvent}
   | { id: string; kind: 'evidence'; chunk: EvidenceChunk }
   | { id: string; kind: 'placement'; trials: Partial<Record<ExerciseId, PlacementTrial>>; preferences?: PlacementPreferences }
@@ -25,6 +27,10 @@ export function applyProgressOperation(data: ProgressData, operation: ProgressOp
 export function reduceProgressOperation(data: ProgressData, operation: ProgressOperation): { data: ProgressData; result?: ExerciseResult } {
   const next = structuredClone(data);
   const profile = next.profile;
+  if(operation.kind==='save-evidence'){
+    if(!validSaveEvent(operation.event)||operation.id!==`save:${operation.event.attemptId}:${operation.event.status}`)throw Error('invalid-save-evidence');
+    return {data:next};
+  }
   if(operation.kind==='report'){
     if(!validReportEvent(operation.event) || operation.id!==`report:${operation.event.attemptId}:${operation.event.sequence}`)throw Error('invalid-report-operation');
     return {data:next};
