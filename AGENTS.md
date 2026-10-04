@@ -74,9 +74,10 @@ while Markdown links are relative to the document. Keep links current when movin
 | `src/components/ExerciseIllustration.tsx` | Eight decorative SVG compositions for game introductions; not playable stimuli |
 | `src/components/HeaderIllustration.tsx` | Typed decorative scene selection for game/menu headers and results |
 | `src/components/PlacementPreferences.tsx` and `src/services/placementPreferences.ts` | Two-step interests/functional movement choices and thematic assessment selection; see `docs/PLACEMENT.md` |
-| `src/components/GameSession.tsx` | Pre-game instructions, help and active-time clock provider |
+| `src/components/GameSession.tsx` | Pre-game instructions, help, active-time clock and opt-in question-boundary adaptation |
 | `src/services/gameClock.ts` | Pausable timers and animation frames |
 | `src/services/gameSession.ts` | Shared session context and `useGameSession` hook, separate from component exports |
+| `src/services/sessionRecording.ts` and `liveRoundSession.ts` | Recording readiness and opt-in question-boundary adaptation lifecycle |
 | `src/services/memorySequence.ts` | Memory-round sequence generation, called only on round start |
 | `src/components/FittedGameArea.tsx` | Centers the board and action together; scales the board while keeping action touch size, title, progress and navigation intact |
 | `src/components/ExerciseWrapper.tsx` | Task clues, completion, results and repeat |
@@ -225,7 +226,8 @@ independent baseline-relative spectral features. `adaptivePolicy.ts` runs the
 versioned PPO actor exported from `scripts/adaptation/train.py`; its current model
 is trained on simulation and has not passed real-user acceptance. A separate
 `VITE_PROPOSAL_ADAPTATION=true` flag (also requiring evidence collection) enables
-end-of-exercise decisions. `difficulty.ts` applies verified decisions only against
+question-boundary decisions for naming, word completion and categorization, and
+end-of-exercise decisions for the other games. `difficulty.ts` applies verified decisions only against
 the same current base level and excludes professional assignments. The reducer
 returns the normalized result as well as bounded progress so the immutable archive
 retains application outcome even when an old result falls outside the latest 60.
@@ -479,7 +481,8 @@ No new writes, authorization rules or progress storage are introduced.
 ## Game difficulty and placement
 
 `difficulty.ts` owns version-1 per-game rows, placement scoring and bounded adaptation.
-`GameSession` freezes the selected level at start and exposes config in session context.
+`GameSession` freezes the selected starting level and exposes config in session context.
+The opt-in live-round games adopt new configs only through explicit `nextRound` calls.
 `GameExercise` dispatches the same eight implementations for ordinary and placement play.
 `PlacementOnboarding` gates only player Workspace after access/cloud load. It runs
 unscored assessment stages, using durable `placement` operations in ProgressSync for each finished game ladder.
@@ -763,7 +766,9 @@ Classification excludes multi-context objects without removing them from naming.
 
 GameSession restarts completed games in place, preserving its selected level even
 if the saved profile adapts. It resets its clock and recordings; game restart handlers
-reset board state. Ordinary focus changes never require confirmation. Hidden tabs,
+reset board state. Live-round games instead remount on the new run to reset all
+question state against the original selected config; do not call their stale restart
+handler with the final round config. Ordinary focus changes never require confirmation. Hidden tabs,
 help, settings, Muse and access suspension pause the clock; visibility and confirmed
 access resume automatically without a second action. There are no pause/resume
 controls in ordinary or assigned games. Focus events never trigger recovery. Motor tracking captures pointer
@@ -876,9 +881,12 @@ emulated touch, checks help pause exclusion and validates reconstructed event li
 it also checks full naming/word-completion/categorization rounds, result linkage and
 repeat isolation. This is not coverage of every level or physical tablet input.
 
-`roundAdaptation.ts` is a tested pure controller for pending between-round policy
-integration, not yet wired into GameSession. Reuse it when adding explicit round
-boundaries; its decision must not mutate an active board. `beginLevel` resets only
+`roundAdaptation.ts` is the pure boundary controller. `liveRoundSession.ts` composes
+it with the recorder and compact result metadata. GameSession enables it for naming,
+word completion and categorization only when both proposal flags are active. Their
+Continue handlers adopt `nextRound()` configs and regenerate only unplayed content.
+The remaining five games still await boundary integration. Decisions must not mutate
+an active board. `beginLevel` resets only
 performance observation windows, preserving the independent session EEG baseline.
 Keep the distinction between local next-round application and server-confirmed
 profile writes. See docs/PROPOSAL.md for mixed-level accounting/audit prerequisites.
@@ -893,7 +901,7 @@ Round evidence uses explicit `round-start`/`round-decision` events. Call
 `prepareRoundDecision` before inference to flush partial tracking windows; persisted
 actor observations are replayed during reconstruction. Local decision application
 remains `pending`; export `nextStarted` only proves that a subsequent round began,
-not a cloud profile update. These recorder APIs await GameSession integration.
+not a cloud profile update. These APIs are connected through liveRoundSession for the three question games.
 
 `roundResult.ts` owns compact mixed-level result metadata (`roundAdaptation`),
 separate from legacy single-decision `adaptation`. The reducer normalizes the
@@ -901,3 +909,10 @@ single-level field, protects concurrent profile changes and records the transact
 outcome. Full intermediate actor observations remain in evidence events. Export
 checks the compact trace against those events before counting registration. The
 new result field needs the updated Firestore rules before game integration is enabled.
+
+`sessionRecording.ts` exposes recording readiness through an external-store snapshot
+consumed by GameSession.
+Mount game input only after start/round-start have entered the recording queue;
+`useResponseEvidence` registers committed stimuli in a layout effect. A passive
+registration effect can miss a fast keyboard response between commits. Keep this
+ordering on initial start and repeat, including games without live adaptation.

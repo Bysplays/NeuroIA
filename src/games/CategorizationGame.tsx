@@ -54,7 +54,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config, assistanceTarget } = useGameSession();
+  const { clock, nextRound, config, assistanceTarget } = useGameSession();
   const [sessionItems, setSessionItems] = useState<ItemToClassify[]>(() => createItems(config));
   const [currentIdx, setCurrentIdx] = useState(0);
   const responseEvidence = useResponseEvidence(`question-${currentIdx}`);
@@ -111,6 +111,11 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
   const handleNext = () => {
     soundService.playTap();
     if (currentIdx + 1 < sessionItems.length) {
+      const nextConfig=nextRound?.();
+      if(nextConfig&&nextConfig.level!==config.level){
+        const remaining=createItems(nextConfig).slice(0,sessionItems.length-currentIdx-1);
+        setSessionItems([...sessionItems.slice(0,currentIdx+1),...remaining]);
+      }
       setCurrentIdx(prev => prev + 1);
       setSelectedCategory(null);
     } else {
@@ -184,7 +189,7 @@ export const CategorizationGame: React.FC<CategorizationGameProps> = ({
             </div>
           </div>
 
-          <div className="category-bins-grid" style={{ gridTemplateColumns: `repeat(${currentItem.categories.length}, minmax(0, 1fr))` }}>
+          <div key={currentIdx} className="category-bins-grid" style={{ gridTemplateColumns: `repeat(${currentItem.categories.length}, minmax(0, 1fr))` }}>
             {currentItem.categories.map(cat => {
               const isSelected = selectedCategory === cat.id;
               const isThisCorrect = cat.id === currentItem.correctCategoryId;

@@ -1,5 +1,5 @@
+import {createSessionRecording} from '../services/sessionRecording';
 import { SessionEvidenceContext } from '../services/sessionEvidenceContext';
-import { createSessionEvidence } from '../services/sessionEvidence';
 import { decideAdaptation } from '../services/adaptivePolicy';
 import { ModalFrame } from './ModalFrame';
 import { useAccessSuspended } from '../services/accountAccessContext';
@@ -14,7 +14,7 @@ import { useViewportPanel } from '../services/viewport';
 import { gameConfig, type GameMode } from '../services/difficulty';
 import { SessionContext } from '../services/gameSession';
 import { ExerciseIllustration } from './ExerciseIllustration';
-import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useContext, useEffect, useLayoutEffect, useSyncExternalStore, useMemo, useRef, useState, type ReactNode, Fragment } from 'react';
 import { Minus, Plus, CircleHelp, Clock, Settings2, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { createGameClock } from '../services/gameClock';
 import { getExerciseById, getExercisesForDomain } from '../services/exerciseCatalog';
@@ -36,7 +36,8 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
   const [eeg, setEeg] = useState<EegRecording>();
   const [level, setLevel] = useState(initialLevel);
   const [baseLevel] = useState(initialLevel);
-  const config = gameConfig(level, mode);
+  const [manualLevel,setManualLevel] = useState(false);
+  const [,setRoundRevision] = useState(0);
   const [clock] = useState(createGameClock);
   const [started, setStarted] = useState(autoStart);
   const [help, setHelp] = useState(!autoStart);
@@ -51,14 +52,22 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
   }, []);
   const [run, setRun] = useState(0);
   const evidenceBackend = useContext(SessionEvidenceContext);
-  const evidence = useMemo(() => evidenceBackend ? createSessionEvidence({
-    sessionId: `${run}-${crypto.randomUUID()}`, exerciseId: id, activeNow: clock.performanceNow,
-    sink: chunk => evidenceBackend.enqueue({id:`evidence:${chunk.sessionId}:${chunk.firstSequence}`,kind:'evidence',chunk}),
-  }) : undefined, [evidenceBackend, id, clock, run]);
-  useLayoutEffect(() => { if (started) evidence?.start(config.level, mode, lockedLevel); }, [evidence, started, config.level, mode, lockedLevel]);
+  const recording=useMemo(()=>createSessionRecording({
+    id:`${run}-${crypto.randomUUID()}`,exerciseId:id,level,baseLevel,mode,locked:lockedLevel,
+    manual:manualLevel||run>0||level!==baseLevel,activeNow:clock.performanceNow,
+    enabled:!!evidenceBackend,adaptive:adaptationEnabled,
+    sink:chunk=>evidenceBackend?.enqueue({id:`evidence:${chunk.sessionId}:${chunk.firstSequence}`,kind:'evidence',chunk}),
+  }), [evidenceBackend,id,clock,run,adaptationEnabled,level,baseLevel,mode,lockedLevel,manualLevel]);
+  const {evidence,rounds}=recording;
+  const recordingReady=useSyncExternalStore(recording.subscribeReady,recording.isReady);
+  const config=rounds?.config()??gameConfig(level,mode);
+  const nextRound=rounds ? ()=>{const next=rounds.next();setRoundRevision(value=>value+1);return next;} : undefined;
+  // Mount response opportunities only after the recorder has queued its start
+  // events. Child layout effects can then register input before browser events.
+  useLayoutEffect(() => {if(started)recording.start();}, [recording,started]);
   const leave = () => { evidence?.abandon('back'); onBack(); };
   const recordHelp = () => { evidence?.hint(); evidence?.flush(); };
-  const adaptation = () => adaptationEnabled && evidence
+  const adaptation = () => adaptationEnabled && evidence && !rounds
     ? JSON.stringify(decideAdaptation(evidence.observation(),{locked:lockedLevel,mode,baseLevel})) : undefined;
 
   const [seconds, setSeconds] = useState(0);
@@ -120,7 +129,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
     }, 1000);
     return () => clock.clearInterval(timer);
   }, [clock, recorder, savedRecorder, ppgRecorder, savedPpgRecorder, started, run, evidence]);
-  return <SessionContext.Provider value={{ config, evidence, adaptation, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { evidence?.abandon('leave'); recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setRun(value => value + 1); setStarted(true); finish(false); setHelp(false); setSeconds(0); } }}>
+  return <SessionContext.Provider value={{ config, evidence, rounds, nextRound, adaptation, progressScope, eegResult: () => mode === 'normal' ? savedRecorder.snapshot() : undefined, ppgResult: () => mode === 'normal' ? savedPpgRecorder.snapshot() : undefined, assistanceTarget, clock, finish, lockedLevel, nextReady, restart: () => { evidence?.abandon('leave'); recorder.reset(); savedRecorder.reset(); ppgRecorder.reset(); savedPpgRecorder.reset(); setEeg(undefined); setPpg(undefined); clock.reset(); setRun(value => value + 1); setStarted(true); finish(false); setHelp(false); setSeconds(0); } }}>
     <div className={`game-session${started ? ' game-session-viewport' : ''}`} data-exercise={id} ref={panel}>
     {help && !started && <section className="placement-screen game-instruction-screen" aria-labelledby="game-instruction-title">
       <div className="placement-toolbar"><Brand/><div className="viewport-session-tools"><EegButton onOpenChange={setEegOpen}/><SoundToggle/>{onSettings && <button className="header-icon-btn" aria-label="Ajustes" onClick={onSettings}><Settings2 size={20}/></button>}<FullscreenButton/></div></div>
@@ -134,9 +143,9 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
         </div>
         <div className="placement-actions">
         {!started && mode === 'normal' && !lockedLevel ? <div className="instruction-level-control" role="group" aria-label="Dificultad del juego">
-          <button type="button" aria-label="Bajar nivel" disabled={level <= 1} onClick={() => setLevel(value => Math.max(1, value - 1))}><Minus size={16}/></button>
+          <button type="button" aria-label="Bajar nivel" disabled={level <= 1} onClick={() => {setManualLevel(true);setLevel(value => Math.max(1, value - 1));}}><Minus size={16}/></button>
           <span aria-live="polite">Nivel {level}</span>
-          <button type="button" aria-label="Subir nivel" disabled={level >= 10} onClick={() => setLevel(value => Math.min(10, value + 1))}><Plus size={16}/></button>
+          <button type="button" aria-label="Subir nivel" disabled={level >= 10} onClick={() => {setManualLevel(true);setLevel(value => Math.min(10, value + 1));}}><Plus size={16}/></button>
         </div> : mode !== 'placement' ? <span className="soft-label">Nivel {level}</span> : null}
         <button className="touch-btn touch-btn-primary" onClick={() => { soundService.stopSpeaking(); setStarted(true); setHelp(false); }}>{started ? 'Continuar jugando' : 'Empezar a jugar'}</button></div>
         </div>
@@ -151,7 +160,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
       </header>}
 
       {!completed && <EegLive recording={eeg} ppg={ppg} eegMean={recorder.mean()} ppgMean={ppgRecorder.mean()} recordable={mode === 'normal'}/>}
-      {children}
+      <Fragment key={rounds ? run : 'fixed'}>{recordingReady ? children : null}</Fragment>
       {!completed && <footer className="viewport-session-footer">
         <button className="entry-toolbar-action" onClick={leave}><ArrowLeft size={18} aria-hidden="true"/>Volver</button>
         <div className="viewport-assistance-row">
@@ -160,7 +169,7 @@ export function GameSession({ id, step, progressScope, onBack, children, initial
           <button ref={helpButton} className="game-help-button" onClick={() => { recordHelp(); setHelp(true); }} aria-label="Mostrar instrucciones"><CircleHelp size={24}/></button>
         </div>
         <div className="viewport-navigation-row">
-          {mode !== 'placement' && <span className="soft-label">Nivel {level}</span>}
+          {mode !== 'placement' && <span className="soft-label">Nivel {config.level}</span>}
           {onSkip && <button className="entry-toolbar-action" onClick={() => { evidence?.abandon('skip'); onSkip(); }}>Omitir<ArrowRight size={18} aria-hidden="true"/></button>}
         </div>
       </footer>}

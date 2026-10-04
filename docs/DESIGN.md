@@ -20,13 +20,17 @@ are recorded in DESIGN-CONCEPTS.md. Reference patterns, not their branded assets
 
 ## Color, type and surfaces
 
-The proposal's separately enabled learned-adaptation trial changes the suggested
-default only after a completed exercise, for a new entry to that game. Never
-change the current board, answer keys or touch targets mid-response. Repeat keeps
-the explicitly chosen level, and professional proposals retain their assigned
-levels. LLM recommendations remain optional suggestions; they are not the learned
-controller. The current controller is simulation-trained and stays disabled for
-production pending the validation gates in PROPOSAL.md.
+The proposal's separately enabled learned-adaptation trial changes levels between
+questions in naming, word completion and categorization, only when Continue starts
+the next question. Current stimuli, answer keys and touch targets stay unchanged
+through the response and feedback. Regenerate only unplayed questions and keep the
+initial round count. The footer shows the active level; mixed completion shows the
+played level range, never a single achieved level. New question options must not
+inherit the previous answer's animated highlight. Repeat returns to the explicitly
+selected starting level and holds it, as do manual and professional levels.
+Other games still change only the next-entry default after completion. LLM
+recommendations remain optional suggestions; they are not the learned controller.
+The simulation-trained controller stays disabled in production pending PROPOSAL.md.
 
 When proposal evidence collection is enabled, Historial includes a quiet
 “Exportar datos de evaluación” action below its ordinary history controls.

@@ -94,6 +94,7 @@ type Payload = EvidenceEvent extends infer T ? T extends EvidenceEvent ? Omit<T,
 export function createSessionEvidence(options: {
   sessionId: string; exerciseId: string; activeNow: () => number; wallNow?: () => Date;
   sink: (chunk: EvidenceChunk) => void;
+  onEvent?: (event: EvidenceEvent) => void;
 }) {
   if (!identifier(options.sessionId) || !identifier(options.exerciseId)) throw Error('invalid-evidence-identity');
   const wallNow = options.wallNow ?? (() => new Date());
@@ -119,7 +120,7 @@ export function createSessionEvidence(options: {
     const event = { ...payload, sequence: next, activeMs: now(), at: wallNow().toISOString() } as EvidenceEvent;
     // Fail at creation, never silently discard a malformed event during export.
     if (!readEvidenceChunk({version:1,sessionId:options.sessionId,exerciseId:options.exerciseId,firstSequence:next,count:1,events:JSON.stringify([event])}).length) throw Error('invalid-session-evidence');
-    pending.push(event); next++; observation.add(event);
+    pending.push(event); next++; observation.add(event); options.onEvent?.(event);
   };
   const flushTracking = () => {
     if (Math.round(trackingMs) > 0) {

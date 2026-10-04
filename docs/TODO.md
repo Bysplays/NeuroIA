@@ -88,8 +88,10 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
   performance comparisons on level changes. Response reconstruction, Gráficas and
   the PDF now separate measured stimulus levels without inflating session counts.
   Round events now preserve decisions and replay observations during archive
-  validation, including next-round start evidence. Game integration and mixed-level
-  result/history presentation remain open. The mixed-level result contract now
+  validation, including next-round start evidence. Naming, word completion and
+  categorization now apply changes on Continue with fixed round totals, mixed-level
+  completion and protected repeat/manual/professional flows. The other five game
+  integrations and mixed-level history presentation remain open. The mixed-level result contract now
   omits a false single level, applies the final recommendation transactionally
   against the original profile level and reconciles its archive trace; its rules
   are not deployed. Real

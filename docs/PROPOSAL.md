@@ -74,7 +74,7 @@ The new rules have not been deployed; never claim production event collection.
 | --- | --- | --- |
 | Web exercises, accounts and professional follow-up | Eight exercises, placement, durable progress, linked read-only professional activity and assigned sessions | Acceptance on physical devices and real-user workflow validation |
 | Structured-data LLM reports (pp. 10–11) | Authenticated server retrieval, OpenRouter prompts/schema validation, Spanish PDF export and recommendations | Versioned synthetic report cases and hash-bound Spanish review tooling are implemented; live provider review and real automation/preparation-time measurements remain |
-| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded end-of-exercise decisions and persistent application audit behind a separate flag | Connect the tested between-round controller to all games, reconcile mixed-level results/history, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
+| Learned dynamic adaptation (p. 10) | Reproducible PPO simulation training, exported browser actor with PyTorch parity, measured-response/optional EEG inputs, bounded question-boundary decisions in naming/completion/categorization, end-of-exercise decisions in the other games and persistent application audit behind a separate flag | Connect the remaining five games to their task boundaries, finish mixed-level history presentation, then real-data calibration, approved objective and pilot evaluation; simulation results do not establish efficacy |
 | Response latency and incremental errors (p. 10) | Gated active-time input collection in eight games, memory hints, tracking windows, cross-chunk validation and paginated JSON export; activity speed remains duration/questions | Broader keyboard/touch acceptance; Gráficas and a separate whole-archive PDF appendix expose validated game/level response metrics separately from speed |
 | EEG attention/fatigue and neurofeedback (pp. 4, 7, 10, 15–16) | Independent TP9/AF7/AF8/TP10 spectra and quality, live/history views, baseline-relative feedback, gated persistence and optional policy inputs | Hardware calibration, scientifically validated interpretation and retention/deletion acceptance |
 | Operational KPI verification (pp. 27–28) | Durable idempotent result saves, event archive and deduplicated export with completed/linked/abandoned/unfinished/invalid counts | Server report-attempt telemetry and own-account paginated retrieval are implemented behind a disabled flag. Client PDF lifecycle now uses durable owner-scoped events; save-attempt outcomes and archive reconciliation are implemented; prospective adherence calendars and per-account aggregation are implemented; independent pilot registration and cohort acceptance remain |
@@ -240,10 +240,9 @@ pilot register remain required; no real-user KPI is claimed from fixtures.
 
 The original PDF's section 1.2.8 promises continuous adaptation and EEG-derived
 fatigue/inattention, not merely a learned algorithm. Current observations are
-collected during play, but the policy changes the next game's default only after
-completion. Closing that difference requires an agreed task-boundary specification
-and implementation/acceptance at those boundaries, or an explicitly revised project
-scope. Do not change answer keys or targets in the middle of a response.
+collected during play. Naming, word completion and categorization now apply the
+policy between questions; the other five games still change only the next-entry
+default after completion. Complete their defined boundaries and acceptance paths. Do not change answer keys or targets in the middle of a response.
 
 The remaining engineering work is:
 
@@ -439,13 +438,22 @@ observations from different task difficulties are not silently compared. EEG
 baseline calibration remains session-scoped and is not reset into a fictional new
 baseline merely because the task level changed.
 
-This controller is tested but **not yet connected to GameSession or the games**.
-The existing flag still adapts only after exercise completion. Remaining integration
-must regenerate only the next round's content, preserve current stimuli/touch areas,
-record each level segment and transition, and reconcile mixed-level result metrics
-and persistent audit validation. In particular, pair counts cannot be calculated as
-final-level pairs × rounds once levels vary. Do not enable or describe mid-session
-adaptation as shipped until those contracts and rendered input paths are verified.
+`liveRoundSession.ts` now connects the controller to GameSession and the three
+question games (naming, word completion, categorization). Continue closes the current
+round, records its decision, begins the next round and returns the immutable next
+config. Their handlers regenerate only remaining questions on a level change, with
+the initial total fixed. Finalization records the last decision before the finish
+event and emits the compact mixed-level result. Repeat remounts at the selected
+starting level with adaptation held; any manual level interaction also holds it,
+even if the player returns to the original number before starting. Assigned and
+non-normal runs remain protected. Completion shows the actual played level range.
+
+Search, memory sequence, memory pairs, motor targets and tracking still need their
+boundary handlers connected and verified. In particular, pair totals must count
+actual boards rather than final-level pairs × rounds. Their existing end-of-exercise
+behavior remains until each integration is ready. No production flag is enabled. Recording readiness gates input mount, and response
+opportunities register in layout effects so fast keyboard actions cannot precede
+their stimulus event. This ordering also applies to the other recorded games.
 
 ## Mixed-level measurement accounting
 
@@ -467,9 +475,9 @@ allocation to level-specific previews or unobserved intervals is invented.
 
 Tests include a 2 → 3 → 2 attempt with different timings, an intentionally different
 result-level field, duplicate archive pages, separate UI/PDF blocks and one unique
-session count. This prepares accounting for the controller; it does not yet connect
-live round transitions or change ordinary activity speed/level charts. Those charts
-still need rendered mixed-level presentation; persistence now has the contract below, awaiting game integration.
+session count. The three question games use this accounting. Ordinary activity speed/level
+charts still need rendered mixed-level presentation; they do not assign a single
+level to these attempts.
 
 
 ## Durable round decision audit
@@ -483,8 +491,8 @@ links. Invalid chains contribute no metrics. Exports use ordinal round numbers.
 Tracking is flushed before inference with `prepareRoundDecision`; batches obey both
 the eight-event and 24,000-character limits. Unit coverage includes partial tracking
 windows and an emulator case checks durable retries and archive reconstruction.
-These APIs are not yet called by GameSession: live integration and the final mixed-
-level result/profile contract remain open. A recorded local decision is not proof
+GameSession calls these APIs through liveRoundSession in the three question games;
+the remaining game integrations are open. A recorded local decision is not proof
 of a server-confirmed profile adjustment.
 
 
@@ -505,5 +513,7 @@ reconcile all played levels and the final decision with the reconstructed event
 chain; mismatches do not count as correctly registered results. Firestore accepts
 the new bounded field with a required evidence link and rejects simultaneous old
 and new adaptation payloads. Publish these rules before enabling game integration.
-The contract is tested in the reducer and demo emulator; GameSession and game
-handlers still need to create these traces at actual task boundaries.
+The contract is tested in the reducer and demo emulator and created by the three
+question games at their actual boundaries. Browser checks cover completion, repeat,
+manual/professional protection, fixed totals and trace/result reconciliation at
+390, 820 and 1280 px; the remaining game integrations are still open.

@@ -44,7 +44,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   planProgress,
   onNextPlanExercise,
 }) => {
-  const { clock, config } = useGameSession();
+  const { clock, nextRound, config } = useGameSession();
   const [sessionItems, setSessionItems] = useState<CompletionItem[]>(() => createWords(config));
   const [currentIdx, setCurrentIdx] = useState(0);
   const responseEvidence = useResponseEvidence(`question-${currentIdx}`);
@@ -137,6 +137,11 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
   const handleNext = () => {
     soundService.playTap();
     if (currentIdx + 1 < sessionItems.length) {
+      const nextConfig=nextRound?.();
+      if(nextConfig&&nextConfig.level!==config.level){
+        const remaining=createWords(nextConfig).slice(0,sessionItems.length-currentIdx-1);
+        setSessionItems([...sessionItems.slice(0,currentIdx+1),...remaining]);
+      }
       setCurrentIdx(prev => prev + 1);
       setSelectedLetter(null);
       setIsCorrect(null);
@@ -207,7 +212,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
           </div>
 
           {/* 2. Palabra a completar (justo debajo de la imagen, más compacta y diferenciada) */}
-          <div className="word-letter-slots">
+          <div key={`word-${currentIdx}`} className="word-letter-slots">
             {currentItem.word.split('').map((letter, idx) => {
               const isMissing = idx === currentItem.missingIndex;
               let slotClass = 'letter-slot';
@@ -253,7 +258,7 @@ export const WordCompletionGame: React.FC<WordCompletionGameProps> = ({
             })}
           </div>
 
-          <div className="letter-options-grid">
+          <div key={`choices-${currentIdx}`} className="letter-options-grid">
             {letterOptions.map((letter, idx) => {
               const isSelected = selectedLetter === letter;
               let btnClass = 'letter-option-btn';
