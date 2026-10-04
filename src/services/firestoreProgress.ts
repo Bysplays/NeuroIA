@@ -39,6 +39,11 @@ export function firestoreProgress(uid: string, db: Firestore) {
         if (applied.exists()) return before;
         const reduction = reduceProgressOperation(before, operation);
         const data = reduction.data;
+        if(operation.kind==='report'){
+          tx.set(doc(db,'users',uid,'reportEvents',encodeURIComponent(operation.id)),{...operation.event,receivedAt:serverTimestamp()});
+          tx.set(receipt,{kind:operation.kind,createdAt:serverTimestamp()});
+          return data;
+        }
         if (operation.kind === 'evidence') {
           tx.set(doc(db, 'users', uid, 'evidence', encodeURIComponent(operation.id)), {
             ...clean(operation.chunk), receivedAt: serverTimestamp(),

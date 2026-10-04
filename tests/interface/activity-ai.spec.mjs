@@ -18,7 +18,7 @@ async function mockAi(page, behavior = 'success') {
     }};
     export function downloadActivityReport(text){const url=URL.createObjectURL(new Blob([text],{type:'text/plain'}));const a=document.createElement('a');a.href=url;a.download='informe.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
   ` }));
-  await page.goto('/tests/interface/index.html?activity-demo');
+  await page.goto('/tests/interface/index.html?activity-demo&evidence');
   await page.getByRole('tab', { name: 'Actividad', exact: true }).click();
 }
 
@@ -44,9 +44,11 @@ for (const width of [390, 820, 1280]) test(`direct AI report and recommendations
   const file = await download;
   expect((await fs.readFile(await file.path())).subarray(0, 5).toString()).toBe('%PDF-');
   await file.saveAs(`/tmp/neuroia-informe-${width}.pdf`);
+  expect(await page.evaluate(()=>window.reportEvents.map(e=>e.phase))).toEqual(['started','ai-ready','pdf-ready','download-requested']);
   const popup = page.getByRole('dialog', {name:'Informe PDF descargado'});
   await expect(popup).toBeVisible();
-  await popup.screenshot({path:`/tmp/neuroia-download-popup-${width}.png`});
+  await expect.poll(()=>popup.evaluate(el=>el.getBoundingClientRect().height)).toBeGreaterThan(100);
+  await popup.screenshot({animations:'disabled',path:`/tmp/neuroia-download-popup-${width}.png`});
   await page.keyboard.press('Escape');
   await expect(popup).toHaveCount(0);
   await expect(card.getByRole('button', {name:'Generar informe'})).toBeFocused();
@@ -79,17 +81,19 @@ test('pending report shows progress and cancellation prevents late downloads', a
   expect(await page.evaluate(() => window.aiCalls.at(-1).filters.from)).toBe('2026-09-20');
   await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
   expect(downloads).toBe(0);
+  expect(await page.evaluate(()=>window.reportEvents.map(e=>e.phase))).toEqual(['started','cancelled','started','cancelled']);
 });
 
 test('large text and high contrast allow a direct basic PDF when AI is unavailable', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mockAi(page, 'unavailable');
-  await page.goto('/tests/interface/index.html?activity-demo&large&contrast');
+  await page.goto('/tests/interface/index.html?activity-demo&evidence&large&contrast');
   await page.getByRole('tab', { name: 'Actividad', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Personalizar con IA' })).toHaveCount(0);
   await page.locator('.activity-assistant').screenshot({ path: '/tmp/neuroia-recommendations-accessible.png' });
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Generar informe' }).click(); await download;
+  expect(await page.evaluate(()=>window.reportEvents.map(e=>e.phase))).toEqual(['started','pdf-ready','download-requested']);
   await page.getByRole('dialog').getByRole('button', {name:'Entendido'}).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
@@ -99,6 +103,7 @@ test('PDF generation recovers from a missing font', async ({ page }) => {
   await page.route('**/fonts/manrope/Manrope-Regular.ttf', route => route.fulfill({ status: 503, body: 'Unavailable' }));
   await page.getByRole('button', { name: 'Generar informe' }).click();
   await expect(page.getByRole('alert')).toContainText('tipografía');
+  expect(await page.evaluate(()=>window.reportEvents.map(e=>e.phase))).toEqual(['started','failed']);
   await page.unroute('**/fonts/manrope/Manrope-Regular.ttf');
   const downloaded = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Generar informe' }).click(); await downloaded;
@@ -117,4 +122,16 @@ test('vector report supports complete levels and long text across pages', async 
     downloadActivityReport(await createActivityReportPdf({insights,text,reference:'Ana María · Ejemplo ficticio'},new AbortController().signal));
   });
   await (await downloaded).saveAs('/tmp/neuroia-informe-largo.pdf');
+});
+
+test('leaving a pending report records cancellation and blocks its late PDF',async({page})=>{
+  await mockAi(page,'slow');
+  await page.getByRole('button',{name:'Generar informe'}).click();
+  await expect(page.getByRole('button',{name:'Generando…'})).toBeVisible();
+  await page.getByRole('tab',{name:'Historial',exact:true}).click();
+  expect(await page.evaluate(()=>window.reportEvents.map(e=>e.phase))).toEqual(['started','cancelled']);
+  let downloads=0;page.on('download',()=>downloads++);
+  await page.evaluate(()=>window.finishAi());
+  await expect.poll(()=>page.evaluate(()=>window.aiWasAborted)).toBe(true);
+  expect(downloads).toBe(0);
 });

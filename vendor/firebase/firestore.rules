@@ -159,8 +159,23 @@ service cloud.firestore {
       allow get: if owns(uid);
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['kind', 'createdAt'])
-        && request.resource.data.kind in ['result', 'settings', 'placement', 'evidence']
+        && request.resource.data.kind in ['result', 'settings', 'placement', 'evidence', 'report']
         && request.resource.data.createdAt == request.time;
+    }
+    // Caller-owned operational metadata, never the participant's report content.
+    match /users/{uid}/reportEvents/{eventId} {
+      allow read: if owns(uid);
+      allow create: if owns(uid)
+        && request.resource.data.keys().hasOnly(['version','attemptId','sequence','phase','source','elapsedMs','at','receivedAt'])
+        && request.resource.data.version == 1
+        && request.resource.data.attemptId is string && request.resource.data.attemptId.matches('[a-zA-Z0-9_-]{1,128}')
+        && request.resource.data.sequence is int && request.resource.data.sequence >= 0 && request.resource.data.sequence <= 4
+        && request.resource.data.phase in ['started','ai-ready','pdf-ready','download-requested','failed','cancelled']
+        && request.resource.data.source in ['ai','template']
+        && request.resource.data.elapsedMs is int && request.resource.data.elapsedMs >= 0 && request.resource.data.elapsedMs <= 86400000
+        && request.resource.data.at is string && request.resource.data.at.size() == 24
+        && (request.resource.data.sequence == 0 ? request.resource.data.phase == 'started' && request.resource.data.elapsedMs == 0 : request.resource.data.phase != 'started')
+        && request.resource.data.receivedAt == request.time;
     }
     // Immutable bounded event chunks; client evidence is self-reported, not a clinical attestation.
     // Readers must validate the JSON payload and never treat unknown events as completion.

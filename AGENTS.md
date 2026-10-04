@@ -796,3 +796,9 @@ and caller-only paginated read endpoint. `PROPOSAL_REPORT_EVIDENCE` defaults off
 Generated means a server-validated narrative, never a confirmed PDF download or
 human-approved report. Client Firestore access is denied; deletion locks guard
 writes and every page. See `vendor/cloudflare/README.md` for measurement boundaries.
+
+`CloudProgress` now owns the gated `SessionEvidenceContext` provider for both
+workspaces. `reportLifecycle.ts` records client PDF phases via `ProgressOperation`
+kind `report`, the existing durable outbox, immutable `reportEvents` and permanent
+receipts. Metadata belongs to the caller, not the report subject; never put patient
+identity or report text in it. Publish compatible rules before enabling collection.

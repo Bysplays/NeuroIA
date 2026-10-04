@@ -1,4 +1,6 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import {SessionEvidenceContext} from '../services/sessionEvidenceContext';
+import {createReportLifecycle} from '../services/reportLifecycle';
+import { useContext, useEffect, useId, useRef, useState } from 'react';
 import { ChartNoAxesColumnIncreasing, ChevronDown, FileText, CircleCheck, Lightbulb, Sparkles } from 'lucide-react';
 import { ModalFrame } from './ModalFrame';
 import { WellnessGlyph } from './WellnessGlyph';
@@ -19,6 +21,7 @@ function Evidence({ insights, ids }: { insights: ActivityInsights; ids: string[]
 
 export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad' }: { uid: string; insights: ActivityInsights; subjectLabel?: string }) {
   const id = useId();
+  const evidence=useContext(SessionEvidenceContext);
   const reportButton = useRef<HTMLButtonElement>(null);
   const closeDownloadNotice = () => {
     setNotice('');
@@ -30,7 +33,7 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
   const [busy, setBusy] = useState<'recommendations' | 'report' | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const requests = useRef({ controller: null as AbortController | null, version: 0 });
+  const requests = useRef({ lifecycle:null as ReturnType<typeof createReportLifecycle>|null, controller: null as AbortController | null, version: 0 });
   useEffect(() => {
     const controller = new AbortController(); const pending = requests.current;
     void activityAi.status(controller.signal).then(status => {
@@ -46,9 +49,10 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
         }
       }
     }).catch(() => { if (!controller.signal.aborted) setStatusChecked(true); });
-    return () => { controller.abort(); pending.controller?.abort(); pending.version++; };
+    return () => { controller.abort(); pending.lifecycle?.emit('cancelled'); pending.lifecycle=null; pending.controller?.abort(); pending.version++; };
   }, [uid, insights.filters.timeZone]);
   const cancel = () => {
+    requests.current.lifecycle?.emit('cancelled'); requests.current.lifecycle=null;
     requests.current.controller?.abort(); requests.current.controller = null; requests.current.version++;
     setBusy(null); setError('');
   };
@@ -59,21 +63,29 @@ export function ActivityAssistant({ uid, insights, subjectLabel = 'Mi actividad'
     const controller = new AbortController(); requests.current.controller = controller;
     const requestId = ++requests.current.version;
     setBusy('report'); setError(''); setNotice('');
+    let lifecycle:ReturnType<typeof createReportLifecycle>|null=null;
     try {
+      if(evidence){
+        lifecycle=createReportLifecycle({attemptId:crypto.randomUUID(),source:available?'ai':'template',sink:event=>evidence.enqueue({id:`report:${event.attemptId}:${event.sequence}`,kind:'report',event})});
+        requests.current.lifecycle=lifecycle;
+      }
       // Reports use the current selected activity; recommendations use their daily snapshot.
       const result = available ? await activityAi.generate(uid, insights.filters, 'report', controller.signal) : undefined;
       if (controller.signal.aborted || requests.current.version !== requestId) return;
+      if(result)lifecycle?.emit('ai-ready');
       const { createActivityReportPdf, downloadActivityReport } = await import('../services/activityReportPdf');
       controller.signal.throwIfAborted();
       const data = result?.insights ?? insights;
       const text = reportNarrative(result?.narrative ?? basicNarrative(insights), data);
       const pdf = await createActivityReportPdf({ insights: data, text, reference: subjectLabel, provenance: result?.provenance }, controller.signal);
       if (controller.signal.aborted || requests.current.version !== requestId) return;
-      downloadActivityReport(pdf); setNotice('Informe PDF descargado');
+      lifecycle?.emit('pdf-ready');
+      downloadActivityReport(pdf); lifecycle?.emit('download-requested'); setNotice('Informe PDF descargado');
     } catch (failure) {
+      lifecycle?.emit(controller.signal.aborted?'cancelled':'failed');
       if (requests.current.version === requestId && !controller.signal.aborted) setError(failure instanceof Error ? failure.message : 'No hemos podido generar el contenido. Vuelve a intentarlo.');
     } finally {
-      if (requests.current.version === requestId) { requests.current.controller = null; setBusy(null); }
+      if (requests.current.version === requestId) { requests.current.controller = null; requests.current.lifecycle=null; setBusy(null); }
     }
   };
   return <section className="stats-card activity-assistant" aria-labelledby={`${id}-title`} data-selectable="true">

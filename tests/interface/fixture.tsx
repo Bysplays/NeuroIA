@@ -39,8 +39,10 @@ import "../../src/interface.css";
 import "../../src/games.css";
 const query = new URLSearchParams(location.search);
 const evidenceChunks: EvidenceChunk[] = [];
-Object.assign(window, {evidenceChunks, eegTestService:eegService});
+const reportEvents:unknown[]=[];
+Object.assign(window, {reportEvents,evidenceChunks, eegTestService:eegService});
 const evidenceBackend = { enqueue(operation: ProgressOperation) {
+  if(operation.kind==='report')reportEvents.push(structuredClone(operation.event));
   if (operation.kind === 'evidence') evidenceChunks.push(structuredClone(operation.chunk));
 } };
 

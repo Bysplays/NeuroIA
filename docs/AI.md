@@ -171,3 +171,26 @@ synthetic reference cases on the real endpoint, set account-level cost/privacy
 controls, complete the provider/privacy review, deploy and verify real authorized
 player/professional flows. Record costs, latency and factuality. The generation action,
 routing settings and automated tests alone do not close those release checks.
+
+## Proposal client report lifecycle
+
+With `VITE_PROPOSAL_EVIDENCE=true`, `ActivityAssistant` records start, AI readiness
+(where applicable), PDF readiness, browser download request, failure and explicit
+cancellation. Leaving the report view cancels the current attempt; a late async
+result cannot create a download. Durations use monotonic wall time, distinct from
+game active time and professional preparation time. No draft, participant identity,
+filter, title or free-text failure message enters these records.
+
+`CloudProgress` provides the evidence sink for both player and professional
+workspaces. The existing account outbox archives immutable events in the caller's
+`users/{uid}/reportEvents/{operationId}`, with permanent receipts and server receive
+timestamps. Repeated sends do not add events or modify activity totals. Rules allow
+only the owner to read; linked professionals cannot read another caller's operational
+ledger. Publish compatible rules before enabling the flag; it remains off by default.
+
+An abrupt tab exit or closed account session can leave an unfinished attempt. The
+browser only confirms a download request, never successful disk storage. Local-storage
+failure retains the ordinary in-memory/pending-save behavior. These events and the
+server report-attempt ledger have distinct attempt identifiers and must not be joined
+by guessing timestamps. Correlated export/aggregation and measurement of professional
+review remain open work; neither ledger alone establishes synthesis automation.

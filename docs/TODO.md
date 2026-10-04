@@ -83,8 +83,11 @@ This supersedes suggestion-only scope for this branch, not the deployed release.
 - [ ] Add durable KPI telemetry, adherence schedules/denominators and audited exports.
   Server report attempts now persist start/generated/failure/cancellation outcomes
   and monotonic timings, with own-account paginated retrieval and deletion locks.
-  The separate server flag defaults off. Client PDF/save outcomes, adherence
-  schedules and an independent pilot denominator remain open.
+  The separate server flag defaults off. Client PDF events now cover start, AI
+  readiness, PDF readiness, download request, failure and cancellation using the
+  owner-scoped progress outbox in both workspaces. Publish compatible report-event
+  rules before enabling the frontend evidence flag. Lifecycle export/aggregation,
+  save outcomes, adherence schedules and an independent pilot denominator remain open.
 - [ ] Add report evaluation, independent signal checks and latency benchmarks.
   Ten versioned synthetic report cases, offline/live runner, hash-bound Spanish
   review forms and paired preparation/unit aggregation are implemented. Independent

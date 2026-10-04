@@ -651,3 +651,18 @@ test('proposal evidence archives are durable, immutable, idempotent and isolated
   await assertFails(setDoc(doc(db,`users/${uid}/evidence/fake-time`),{...chunk,receivedAt:new Date(0)}));
   await assert.rejects(backend.commit({...operation,id:'evidence:attempt-1:8',chunk:{...chunk,firstSequence:8,events:'[]'}}),/invalid-evidence/);
 });
+
+test('report lifecycle uses immutable owner-only archives and idempotent outbox receipts without changing progress',async()=>{
+  const uid='report-events',db=env.authenticatedContext(uid).firestore(),backend=firestoreProgress(uid,db);
+  const before=await backend.initialize(fresh());
+  const event={version:1,attemptId:'fixture',sequence:0,phase:'started',source:'ai',elapsedMs:0,at:'2026-10-04T12:00:00.000Z'};
+  const operation={id:'report:fixture:0',kind:'report',event};
+  assert.deepEqual(await backend.commit(operation),before);assert.deepEqual(await backend.commit(operation),before);
+  const path=`users/${uid}/reportEvents/${encodeURIComponent(operation.id)}`;
+  assert.equal((await getDoc(doc(db,path))).data().phase,'started');
+  await assertFails(updateDoc(doc(db,path),{phase:'download-requested'}));
+  await assertFails(deleteDoc(doc(db,path)));
+  await assertFails(getDoc(doc(env.authenticatedContext('other').firestore(),path)));
+  await assertFails(setDoc(doc(db,`users/${uid}/reportEvents/bad`),{...event,draft:'not allowed',receivedAt:serverTimestamp()}));
+  await assert.rejects(backend.commit({...operation,id:'wrong'}),/invalid-report-operation/);
+});

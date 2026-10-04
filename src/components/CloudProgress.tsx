@@ -1,3 +1,4 @@
+import {SessionEvidenceContext} from '../services/sessionEvidenceContext';
 import { ProgressSaveNotice } from './ProgressSaveNotice';
 import { ConnectionRecovery } from './ConnectionRecovery';
 import { AppLoading } from './AppLoading';
@@ -91,7 +92,9 @@ export function CloudProgress({ user, onSignOut, children }: {
 
   return <>
     <ProgressSaveNotice status={view.status ?? 'saved'} onRetry={() => view.sync!.retry()}/>
-    {children(view.sync, view.data)}
+    <SessionEvidenceContext.Provider value={import.meta.env.VITE_PROPOSAL_EVIDENCE === 'true' ? view.sync : null}>
+      {children(view.sync, view.data)}
+    </SessionEvidenceContext.Provider>
   </>;
 }
 
